@@ -11,7 +11,8 @@ export function useGameLogic(
   state: GameState,
   setState: (state: GameState) => void,
   onWin?: () => void,
-  onLose?: () => void
+  onLose?: () => void,
+  onRunTimerExpired?: () => void
 ) {
   const config = getConfig();
   
@@ -50,7 +51,20 @@ export function useGameLogic(
       config,
       (timeRemaining) => {
         // Use functional update to avoid stale closure
-        setState(prevState => ({ ...prevState, timeRemaining }));
+        setState(prevState => {
+          // Check if run timer has expired for beat-the-clock mode
+          if (prevState.gameMode === 'beat-the-clock' && prevState.runStartTime && onRunTimerExpired) {
+            const runTimeElapsed = Math.floor((Date.now() - prevState.runStartTime) / 1000);
+            const runTimeRemaining = prevState.runDuration - runTimeElapsed;
+            if (runTimeRemaining <= 0) {
+              // Run timer expired, trigger end of run
+              setTimeout(() => {
+                if (onRunTimerExpired) onRunTimerExpired();
+              }, 0);
+            }
+          }
+          return { ...prevState, timeRemaining };
+        });
       },
       () => {
         // Use functional update to get current state
@@ -66,7 +80,7 @@ export function useGameLogic(
       () => pausedRef.current // Pass function to check current paused state
     );
     setState(newState);
-  }, [state, setState, config, onLose]);
+  }, [state, setState, config, onLose, onRunTimerExpired]);
 
   // Pause game
   const pause = useCallback(() => {

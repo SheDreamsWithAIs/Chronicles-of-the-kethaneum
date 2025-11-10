@@ -7,8 +7,9 @@ import { GameStatsModal } from '@/components/GameStatsModal';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
 import { useGameLogic } from '@/hooks/useGameLogic';
+import { useGameModeHandlers } from '@/hooks/useGameModeHandlers';
+import { usePuzzleLoading } from '@/hooks/usePuzzleLoading';
 import { startBeatTheClockRun, endBeatTheClockRun } from '@/lib/game/logic';
-import { recordPuzzleStats, incrementTotalWords } from '@/lib/game/stats';
 import { getConfig } from '@/lib/core/config';
 import type { Cell } from '@/lib/game/state';
 import styles from './puzzle.module.css';
@@ -22,75 +23,38 @@ export default function PuzzleScreen() {
   const [statsModalIsWin, setStatsModalIsWin] = useState(false);
   const [puzzleStartTime, setPuzzleStartTime] = useState<number | null>(null);
   
-  const handleWin = useCallback(() => {
-    const timeTaken = puzzleStartTime ? Math.floor((Date.now() - puzzleStartTime) / 1000) : 0;
-    const wordsFound = state.wordList.filter(w => w.found).length;
-    const totalWords = state.wordList.length;
-    
-    if (state.gameMode === 'puzzle-only') {
-      // Update session stats
-      const updatedStats = recordPuzzleStats(
-        state.currentPuzzleIndex || 0,
-        timeTaken,
-        wordsFound,
-        totalWords,
-        state.sessionStats
-      );
-      
-      // Increment total words found
-      const finalStats = incrementTotalWords(updatedStats, wordsFound);
-      
-      setState({
-        ...state,
-        sessionStats: finalStats,
-      });
-      
-      setStatsModalIsWin(true);
-      setShowStatsModal(true);
-    } else if (state.gameMode === 'beat-the-clock') {
-      // Record stats and check if run should continue
-      const updatedStats = recordPuzzleStats(
-        state.currentPuzzleIndex || 0,
-        timeTaken,
-        wordsFound,
-        totalWords,
-        state.sessionStats
-      );
-      
-      setState({
-        ...state,
-        sessionStats: updatedStats,
-      });
-      
-      // Check if run time is still remaining
-      if (state.runStartTime && state.timeRemaining > 0) {
-        // Load next puzzle
-        loadBeatTheClock();
-      } else {
-        // Run ended, show stats modal
-        setStatsModalIsWin(true);
-        setShowStatsModal(true);
-      }
-    } else {
-      // Story Mode: Continue to next puzzle (existing flow)
-      // TODO: Navigate to next story puzzle
-    }
-  }, [state, setState, puzzleStartTime, loadBeatTheClock]);
+  // Use mode-specific handlers hook
+  const { handleWin, handleLose, handleRunTimerExpired } = useGameModeHandlers({
+    state,
+    setState,
+    puzzleStartTime,
+    loadBeatTheClock,
+    setPuzzleStartTime,
+    setStatsModalIsWin,
+    setShowStatsModal,
+  });
   
-  const handleLose = useCallback(() => {
-    if (state.gameMode === 'puzzle-only' || state.gameMode === 'beat-the-clock') {
-      setStatsModalIsWin(false);
-      setShowStatsModal(true);
-    } else {
-      // Story Mode: Handle lose (existing flow)
-    }
-  }, [state.gameMode]);
+  // Use puzzle loading hook
+  const { loadPuzzleForMode } = usePuzzleLoading({
+    state,
+    setState,
+    isReady,
+    loadAll,
+    loadBeatTheClock,
+    loadRandom,
+    restorePuzzleOnly,
+    loadSequential,
+    initialize,
+    setPuzzleStartTime,
+    router,
+  });
   
   const { checkWord, start, pause, resume } = useGameLogic(
     state,
     setState,
     handleWin,
-    handleLose
+    handleLose,
+    handleRunTimerExpired
   );
 
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
@@ -106,142 +70,10 @@ export default function PuzzleScreen() {
 
   // Load puzzle if not already loaded
   useEffect(() => {
-    // Don't try to load until state restoration is complete
-    if (!isReady) return;
-    
     if (!state.grid || state.grid.length === 0) {
-      const loadPuzzle = async () => {
-        // Wait a moment to ensure state restoration from localStorage has completed
-        await new Promise(resolve => setTimeout(resolve, 50));
-        
-        // Preserve current genre/book before any operations that might clear them
-        const savedGenre = state.currentGenre;
-        const savedBook = state.currentBook;
-        const savedPuzzleIndex = state.currentPuzzleIndex;
-        const savedStoryPart = state.currentStoryPart;
-        
-        // Ensure puzzles are loaded first
-        if (!state.puzzles || Object.keys(state.puzzles).length === 0) {
-          await loadAll();
-          // Wait for state to update after loadAll
-          await new Promise(resolve => setTimeout(resolve, 50));
-        }
-        
-        // Use saved values as fallback if state was cleared during loadAll
-        // Check state first, then fall back to saved values
-        const genreToLoad = (state.currentGenre && state.currentGenre.trim() !== '') 
-          ? state.currentGenre 
-          : (savedGenre && savedGenre.trim() !== '' ? savedGenre : null);
-        const bookToLoad = (state.currentBook && state.currentBook.trim() !== '') 
-          ? state.currentBook 
-          : (savedBook && savedBook.trim() !== '' ? savedBook : null);
-        const puzzleIndex = (state.currentPuzzleIndex !== undefined && state.currentPuzzleIndex >= 0) 
-          ? state.currentPuzzleIndex 
-          : (savedPuzzleIndex !== undefined && savedPuzzleIndex >= 0 ? savedPuzzleIndex : undefined);
-        
-        // Handle different game modes
-        if (state.gameMode === 'beat-the-clock') {
-                 // Beat the Clock: Load random puzzle from beatTheClockPuzzles.json
-                 if (!state.runStartTime) {
-                   // Initialize run timer on first puzzle
-                   const runState = startBeatTheClockRun(state);
-                   setState(runState);
-                 }
-                 const success = await loadBeatTheClock();
-                 if (!success) {
-                   console.warn('Failed to load Beat the Clock puzzle');
-                 } else {
-                   setPuzzleStartTime(Date.now());
-                 }
-        } else if (state.gameMode === 'puzzle-only') {
-          // Puzzle Only: Restore current puzzle on refresh, or load random puzzle
-          if (!state.puzzles || Object.keys(state.puzzles).length === 0) {
-            await loadAll();
-            await new Promise(resolve => setTimeout(resolve, 50));
-          }
-          
-          // Check if we have a saved puzzle to restore (on refresh)
-          if (genreToLoad && puzzleIndex !== undefined && puzzleIndex >= 0 && 
-              state.puzzles && state.puzzles[genreToLoad] && 
-              state.puzzles[genreToLoad][puzzleIndex]) {
-            // Restore the exact puzzle we were on
-            const success = restorePuzzleOnly(genreToLoad, puzzleIndex);
-            if (success) {
-              setPuzzleStartTime(Date.now());
-              return;
-            }
-          }
-          
-          // No saved puzzle or restore failed - load a new random puzzle
-          const success = loadRandom();
-          if (success) {
-            setPuzzleStartTime(Date.now());
-          }
-        } else {
-          // Story Mode: Restore exact puzzle if possible
-          if (genreToLoad && puzzleIndex !== undefined && puzzleIndex >= 0 && 
-              state.puzzles && state.puzzles[genreToLoad] && 
-              state.puzzles[genreToLoad][puzzleIndex]) {
-            // Restore the exact puzzle we were on
-            const puzzleToRestore = state.puzzles[genreToLoad][puzzleIndex];
-            
-            // Verify it matches the saved book and story part
-            if ((!bookToLoad || puzzleToRestore.book === bookToLoad) &&
-                (state.currentStoryPart === undefined || puzzleToRestore.storyPart === state.currentStoryPart)) {
-              // Initialize the puzzle - it will preserve currentGenre and currentPuzzleIndex from state
-              // But we need to ensure they're set before calling initialize
-              setState(prevState => ({
-                ...prevState,
-                currentGenre: genreToLoad,
-                currentPuzzleIndex: puzzleIndex,
-                currentBook: puzzleToRestore.book,
-                currentStoryPart: puzzleToRestore.storyPart !== undefined ? puzzleToRestore.storyPart : 0
-              }));
-              
-              // Wait for state update, then initialize
-              await new Promise(resolve => setTimeout(resolve, 0));
-              
-              const success = initialize(puzzleToRestore);
-              if (success) {
-                return;
-              }
-            }
-          }
-          
-          // Story Mode: Use existing sequential loading
-          // Fallback to sequential loading if exact restore failed
-                 if (!genreToLoad) {
-                   console.warn('No genre specified, redirecting to library');
-                   router.push('/library');
-                   return;
-                 }
-
-                 if (!state.puzzles || !state.puzzles[genreToLoad]) {
-                   console.warn(`Genre "${genreToLoad}" not found in puzzles. Available:`, Object.keys(state.puzzles || {}));
-                   router.push('/library');
-                   return;
-                 }
-
-                 // Ensure genre is set in state before calling loadSequential
-                 if (state.currentGenre !== genreToLoad) {
-                   setState(prevState => ({
-                     ...prevState,
-                     currentGenre: genreToLoad
-                   }));
-                   await new Promise(resolve => setTimeout(resolve, 0));
-                 }
-
-                 const success = loadSequential(genreToLoad, bookToLoad);
-                 if (!success) {
-                   console.warn('Failed to load puzzle, redirecting to library');
-                   router.push('/library');
-                 }
-               }
-      };
-      
-      loadPuzzle();
+      loadPuzzleForMode();
     }
-  }, [isReady, state.currentGenre, state.currentPuzzleIndex]); // Re-run when ready, genre, or puzzle index changes
+  }, [isReady, state.currentGenre, state.currentPuzzleIndex, state.grid?.length, loadPuzzleForMode]); // Re-run when ready, genre, puzzle index, or grid changes
 
   // Start timer when puzzle is loaded
   useEffect(() => {
