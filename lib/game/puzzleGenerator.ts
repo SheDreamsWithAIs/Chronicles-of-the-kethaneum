@@ -337,7 +337,7 @@ export function initializePuzzle(
     startCell: null,
     currentCell: null,
     timeRemaining: config.timeLimit,
-    paused: true,
+    paused: false,
     gameOver: false,
     // Preserve genre and puzzle index - they should already be set by the caller
     // currentGenre: state.currentGenre, // Already preserved by spread

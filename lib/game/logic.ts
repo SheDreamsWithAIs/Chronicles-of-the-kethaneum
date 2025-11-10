@@ -198,7 +198,8 @@ export function startTimer(
   state: GameState,
   config: Config,
   onTick?: (timeRemaining: number) => void,
-  onTimeUp?: () => void
+  onTimeUp?: () => void,
+  isPaused?: () => boolean
 ): { newState: GameState; timer: NodeJS.Timeout | null } {
   // Clear any existing timer
   if (state.timer) {
@@ -227,7 +228,9 @@ export function startTimer(
 
   // Set up new timer
   const timer = setInterval(() => {
-    if (state.paused) return;
+    // Check paused state - use provided function if available, otherwise fall back to captured state
+    const paused = isPaused ? isPaused() : state.paused;
+    if (paused) return;
 
     timeRemaining--;
 
@@ -297,9 +300,15 @@ export function resumeGame(state: GameState): GameState {
  * Pause the game
  */
 export function pauseGame(state: GameState): GameState {
+  // Clear the timer immediately when pausing
+  if (state.timer) {
+    clearInterval(state.timer);
+  }
+  
   return {
     ...state,
     paused: true,
+    timer: null,
   };
 }
 

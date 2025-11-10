@@ -2,7 +2,7 @@
  * React hook for managing game logic
  */
 
-import { useCallback } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import type { GameState, Cell } from '@/lib/game/state';
 import { checkForWord, markWordAsFound, checkWinCondition, endGame, startTimer, pauseGame, resumeGame } from '@/lib/game/logic';
 import { getConfig } from '@/lib/core/config';
@@ -14,6 +14,14 @@ export function useGameLogic(
   onLose?: () => void
 ) {
   const config = getConfig();
+  
+  // Use ref to track paused state so timer can access current value
+  const pausedRef = useRef(state.paused);
+  
+  // Update ref when paused state changes
+  useEffect(() => {
+    pausedRef.current = state.paused;
+  }, [state.paused]);
 
   // Check for word in selection
   const checkWord = useCallback((selectedCells: Cell[]) => {
@@ -41,13 +49,21 @@ export function useGameLogic(
       state,
       config,
       (timeRemaining) => {
-        setState({ ...state, timeRemaining });
+        // Use functional update to avoid stale closure
+        setState(prevState => ({ ...prevState, timeRemaining }));
       },
       () => {
-        const loseResult = endGame(state, false);
-        setState(loseResult.newState);
-        if (onLose) onLose();
-      }
+        // Use functional update to get current state
+        setState(prevState => {
+          const loseResult = endGame(prevState, false);
+          return loseResult.newState;
+        });
+        // Call onLose after state update
+        setTimeout(() => {
+          if (onLose) onLose();
+        }, 0);
+      },
+      () => pausedRef.current // Pass function to check current paused state
     );
     setState(newState);
   }, [state, setState, config, onLose]);

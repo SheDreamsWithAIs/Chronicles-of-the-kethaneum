@@ -120,8 +120,6 @@ export default function PuzzleScreen() {
         const savedPuzzleIndex = state.currentPuzzleIndex;
         const savedStoryPart = state.currentStoryPart;
         
-        console.log('Loading puzzle - saved values:', { savedGenre, savedBook, savedPuzzleIndex });
-        
         // Ensure puzzles are loaded first
         if (!state.puzzles || Object.keys(state.puzzles).length === 0) {
           await loadAll();
@@ -140,8 +138,6 @@ export default function PuzzleScreen() {
         const puzzleIndex = (state.currentPuzzleIndex !== undefined && state.currentPuzzleIndex >= 0) 
           ? state.currentPuzzleIndex 
           : (savedPuzzleIndex !== undefined && savedPuzzleIndex >= 0 ? savedPuzzleIndex : undefined);
-        
-        console.log('After loadAll - genreToLoad:', genreToLoad, 'state.currentGenre:', state.currentGenre);
         
         // Handle different game modes
         if (state.gameMode === 'beat-the-clock') {
@@ -252,7 +248,7 @@ export default function PuzzleScreen() {
     if (state.grid && state.grid.length > 0 && !state.timer && !state.paused && !state.gameOver && state.timeRemaining > 0) {
       start();
     }
-  }, [state.grid?.length, state.timer, state.paused, state.gameOver]); // Only depend on grid length, not the whole grid
+  }, [state.grid?.length, state.timer, state.paused, state.gameOver, state.timeRemaining, start]); // Include start in dependencies
 
   // Get current puzzle data
   const gridData = state.grid || [];
@@ -595,15 +591,15 @@ export default function PuzzleScreen() {
     return classes;
   }, [selectedCells, foundWordCells]);
 
-  const handlePause = () => {
+  const handlePause = useCallback(() => {
+    pause(); // Stop timer immediately first
     setIsPaused(true);
-    pause();
-  };
+  }, [pause]);
 
-  const handleResume = () => {
+  const handleResume = useCallback(() => {
     setIsPaused(false);
     resume();
-  };
+  }, [resume]);
 
   const handleBackToBookOfPassage = () => {
     router.push('/book-of-passage');
@@ -669,7 +665,11 @@ export default function PuzzleScreen() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setIsPaused(prev => !prev);
+        if (isPaused) {
+          handleResume();
+        } else {
+          handlePause();
+        }
       }
     };
 
@@ -677,7 +677,7 @@ export default function PuzzleScreen() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []); // Empty dependency array - this effect should only run once on mount
+  }, [isPaused, handlePause, handleResume]); // Include dependencies for pause/resume handlers
 
   return (
     <div className={styles.puzzleContainer}>
