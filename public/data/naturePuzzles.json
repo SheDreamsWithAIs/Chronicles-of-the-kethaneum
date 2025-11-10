@@ -1,0 +1,43 @@
+[
+  {
+    "title": "Fruits of the Orchard - Part 1",
+    "book": "Fruits of the Orchard",
+    "storyPart": 0,
+    "genre": "nature",
+    "words": ["apple", "banana", "cherry", "date", "elderberry"],
+    "storyExcerpt": "In the magical garden, there grew fruits of all kinds. The most prized were the sweet red apples, bright yellow bananas, and ruby-colored cherries. Some travelers even came from far away to taste the exotic dates and rare elderberries that thrived in the corner by the old stone wall."
+  },
+  
+  {
+    "title": "Fruits of the Orchard - Part 2",
+    "book": "Fruits of the Orchard",
+    "storyPart": 1,
+    "genre": "nature",
+    "words": ["orange", "pear", "fig", "grape", "kiwi"],
+    "storyExcerpt": "As the seasons changed, new fruits appeared in the garden. Golden oranges hung like lanterns in the trees, while pears grew plump and juicy. Wild figs dotted the hillside, grapes cascaded from the arbor, and exotic kiwis nestled among the vines, each with its own unique flavor and story to tell."
+  },
+  {
+    "title": "Fruits of the Orchard - Part 3",
+    "book": "Fruits of the Orchard",
+    "storyPart": 2,
+    "genre": "nature",
+    "words": ["mango", "papaya", "guava", "lychee", "passion"],
+    "storyExcerpt": "The garden held a secret section, hidden beyond the old stone wall, where tropical fruits flourished through ancient magic. Sweet mangoes and ripe papayas hung heavy from their branches. Guava trees released their fragrance into the warm air, while lychees and passion fruits revealed their treasures to those who knew where to look."
+  },
+  {
+    "title": "Fruits of the Orchard - Part 4",
+    "book": "Fruits of the Orchard",
+    "storyPart": 3,
+    "genre": "nature",
+    "words": ["peach", "plum", "apricot", "nectarine", "melon"],
+    "storyExcerpt": "As threats to the garden emerged, the guardian trees produced their most exquisite fruits. Peaches with flesh like sunset clouds, plums dark as twilight, and sweet apricots glowed with inner light. Nectarines and melons swelled with protective juices, their flavors intensified by the garden's ancient magic preparing for the final confrontation."
+  },
+  {
+    "title": "Fruits of the Orchard - Part 5",
+    "book": "Fruits of the Orchard",
+    "storyPart": 4,
+    "genre": "nature",
+    "words": ["pomegranate", "persimmon", "quince", "berry", "citrus"],
+    "storyExcerpt": "Balance returned to the magical garden at last. The ancient pomegranate tree, symbol of rebirth, produced hundreds of jewel-like seeds. Golden persimmons and fragrant quinces ripened in the autumn light. Every berry bush flourished, and the citrus grove filled the air with sweet-sharp scents, promising that the garden's cycle would continue unbroken for generations to come."
+  }
+]

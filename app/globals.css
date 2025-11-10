@@ -1,0 +1,248 @@
+@import "tailwindcss";
+
+/* Design Tokens */
+:root {
+  --primary-dark: #3a1143;
+  --primary-medium: #4a3870;
+  --primary-light: #794d8e;
+  --primary-lighter: #9a7ecc;
+  --neutral-dark: #2c2240;
+  --neutral-medium: #3a2e51;
+  --warm-light: #f4efe7;
+  --warm-medium: #e9d8d0;
+  --warm-dark: #dcd0c0;
+  --accent-main: #E6A817;
+  --accent-light: #F7C956;
+  --accent-dark: #C48A0F;
+  --text-light: #f0ebe3;
+  --text-medium: #e9d8d0;
+  --book-purple: #d9ccdf;
+  --book-purple-dark: #cbb8d1;
+  --transition-fast: 0.2s;
+  --transition-medium: 0.5s;
+  --transition-slow: 1s;
+  --elevation-low: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --elevation-medium: 0 4px 8px rgba(0, 0, 0, 0.15);
+  --elevation-high: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-crimson: var(--font-crimson);
+  --font-dancing: var(--font-dancing);
+  --font-cinzel: var(--font-cinzel);
+}
+
+body {
+  background: var(--primary-dark);
+  color: var(--text-light);
+  font-family: var(--font-crimson), serif;
+}
+
+/* Cosmic Background Styles */
+.cosmic-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -2;
+}
+
+.cosmic-background.bg-title {
+  background: linear-gradient(135deg, var(--primary-light) 10%, var(--primary-dark) 66%);
+}
+
+.cosmic-background.bg-backstory {
+  background: linear-gradient(135deg, var(--primary-medium) 0%, var(--primary-dark) 70%, #1a0520 100%);
+}
+
+.cosmic-background.bg-book {
+  background: linear-gradient(135deg, var(--primary-medium) 0%, var(--primary-dark) 80%, #150418 100%);
+}
+
+.cosmic-background.bg-library {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #1a0520 50%, #0f0218 100%);
+}
+
+.cosmic-background.bg-puzzle {
+  background: linear-gradient(135deg, #2a0832 0%, #0f0218 40%, #0a0112 100%);
+}
+
+.cosmic-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 70%, rgba(230, 168, 23, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 70% 30%, rgba(121, 77, 142, 0.2) 0%, transparent 50%),
+              radial-gradient(circle at 20% 20%, rgba(74, 56, 112, 0.15) 0%, transparent 40%);
+  animation: backgroundFlow 20s ease-in-out infinite;
+}
+
+@keyframes backgroundFlow {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-10px, -15px) rotate(1deg); }
+  66% { transform: translate(10px, -10px) rotate(-1deg); }
+}
+
+.stars {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  contain: layout style paint;
+  transform: translateZ(0); /* Force GPU acceleration */
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: starTwinkle linear infinite;
+  will-change: opacity, transform;
+  contain: layout style paint;
+}
+
+.star.small {
+  width: 1px;
+  height: 1px;
+  opacity: 0.6;
+}
+
+.star.medium {
+  width: 2px;
+  height: 2px;
+  opacity: 0.8;
+}
+
+.star.large {
+  width: 3px;
+  height: 3px;
+  opacity: 0.9;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+}
+
+@keyframes starTwinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+.cosmic-particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.cosmic-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--accent-main);
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: particleFloat linear infinite;
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(100vh) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-100px) translateX(50px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Button Styles */
+.game-button {
+  width: 100%;
+  padding: 15px 30px;
+  font-family: var(--font-cinzel), serif;
+  font-size: 18px;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--transition-fast) ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--elevation-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.game-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.game-button:hover::before {
+  left: 100%;
+}
+
+.game-button.primary {
+  background: linear-gradient(135deg, var(--primary-light), var(--primary-medium));
+  color: white;
+  border: 2px solid var(--accent-main);
+}
+
+.game-button.primary:hover {
+  background: linear-gradient(135deg, var(--accent-main), var(--accent-dark));
+  transform: translateY(-2px);
+  box-shadow: var(--elevation-high);
+  border-color: var(--accent-light);
+  color: var(--primary-dark);
+}
+
+.game-button.secondary {
+  background: linear-gradient(135deg, var(--primary-lighter), var(--primary-light));
+  color: white;
+  border: 1px solid var(--primary-light);
+}
+
+.game-button.secondary:hover {
+  background: linear-gradient(135deg, var(--primary-light), var(--primary-medium));
+  transform: translateY(-1px);
+  box-shadow: var(--elevation-medium);
+}
+
+.game-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: var(--elevation-low) !important;
+}
+
+.game-button.disabled:hover {
+  transform: none;
+}
+
+.game-button.disabled::before {
+  display: none;
+}

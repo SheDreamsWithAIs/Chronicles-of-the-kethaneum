@@ -1,0 +1,214 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.panelContent {
+  background: linear-gradient(135deg, #4a3870 0%, #3a1143 100%);
+  border: 2px solid rgba(230, 168, 23, 0.4);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 800px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+              0 0 40px rgba(230, 168, 23, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.panelTitle {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  color: #E6A817;
+  text-align: center;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.warning {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.warning p {
+  margin: 0;
+  color: #ffc107;
+  font-size: 0.9rem;
+}
+
+.modeContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin: 1rem 0;
+}
+
+.modeCard {
+  position: relative;
+  background: linear-gradient(135deg, rgba(121, 77, 142, 0.6) 0%, rgba(74, 56, 112, 0.8) 100%);
+  border: 2px solid rgba(230, 168, 23, 0.4);
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.modeCard:hover {
+  border-color: rgba(230, 168, 23, 0.7);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(230, 168, 23, 0.3);
+}
+
+.modeCard.selected {
+  border-color: #E6A817;
+  box-shadow: 0 0 20px rgba(230, 168, 23, 0.5);
+}
+
+.cardGlow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(230, 168, 23, 0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.modeCard.selected .cardGlow {
+  opacity: 1;
+}
+
+.cardContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+
+.cardContent h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.25rem;
+  color: #E6A817;
+  margin: 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.cardContent p {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9rem;
+  color: #e9d8d0;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.cancelButton,
+.confirmButton {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  padding: 0.75rem 2rem;
+  border: 2px solid rgba(230, 168, 23, 0.4);
+  border-radius: 8px;
+  background: linear-gradient(135deg, #4a3870 0%, #3a1143 100%);
+  color: #E6A817;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.cancelButton:hover {
+  border-color: rgba(230, 168, 23, 0.7);
+  background: linear-gradient(135deg, #3a1143 0%, #4a3870 100%);
+  box-shadow: 0 4px 8px rgba(230, 168, 23, 0.3);
+}
+
+.confirmButton {
+  background: linear-gradient(135deg, rgba(230, 168, 23, 0.2) 0%, rgba(196, 138, 15, 0.2) 100%);
+  border-color: #E6A817;
+}
+
+.confirmButton:hover:not(.disabled) {
+  background: linear-gradient(135deg, rgba(230, 168, 23, 0.3) 0%, rgba(196, 138, 15, 0.3) 100%);
+  box-shadow: 0 0 15px rgba(230, 168, 23, 0.4);
+}
+
+.confirmButton.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Custom scrollbar */
+.panelContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+.panelContent::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.panelContent::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(230, 168, 23, 0.4), rgba(196, 138, 15, 0.4));
+  border-radius: 4px;
+}
+
+.panelContent::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(230, 168, 23, 0.6), rgba(196, 138, 15, 0.6));
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .panelContent {
+    padding: 1.5rem;
+    width: 95%;
+  }
+
+  .panelTitle {
+    font-size: 1.5rem;
+  }
+
+  .modeContainer {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+
+  .buttonContainer {
+    flex-direction: column;
+  }
+
+  .cancelButton,
+  .confirmButton {
+    width: 100%;
+  }
+}
+

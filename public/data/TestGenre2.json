@@ -1,0 +1,10 @@
+[
+  {
+    "title": "Testing Genres - Part 1",
+    "book": "Testing Genres",
+    "storyPart": 0,
+    "genre": "Test 2",
+    "words": ["apple", "banana", "cherry", "date", "elderberry", "orange", "pear", "fig", "grape", "kiwi"],
+    "storyExcerpt": "In the magical garden, there grew fruits of all kinds. The most prized were the sweet red apples, bright yellow bananas, and ruby-colored cherries. Some travelers even came from far away to taste the exotic dates and rare elderberries that thrived in the corner by the old stone wall."
+  }
+]

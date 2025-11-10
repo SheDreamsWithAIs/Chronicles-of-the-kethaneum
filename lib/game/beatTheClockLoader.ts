@@ -1,0 +1,91 @@
+/**
+ * Puzzle loader for Beat the Clock Mode
+ * Loads random puzzles from beatTheClockPuzzles.json
+ */
+
+import type { GameState, PuzzleData } from './state';
+import { initializePuzzle } from './puzzleGenerator';
+import type { Config } from '../core/config';
+
+/**
+ * Load a random puzzle for Beat the Clock Mode
+ * Loads from beatTheClockPuzzles.json if not already loaded, then selects random puzzle
+ */
+export async function loadBeatTheClockPuzzle(
+  state: GameState,
+  config: Config
+): Promise<{ success: boolean; newState: GameState }> {
+  try {
+    // Load Beat the Clock puzzles if not already loaded
+    if (!state.puzzles || !state.puzzles['Beat the Clock'] || state.puzzles['Beat the Clock'].length === 0) {
+      const response = await fetch('/data/beatTheClockPuzzles.json');
+      if (!response.ok) {
+        throw new Error('Failed to load Beat the Clock puzzles');
+      }
+      const puzzleData: PuzzleData[] = await response.json();
+      
+      // Add genre field to puzzles
+      const puzzlesWithGenre = puzzleData.map(p => ({
+        ...p,
+        genre: 'Beat the Clock',
+      }));
+      
+      const newState: GameState = {
+        ...state,
+        puzzles: {
+          ...state.puzzles,
+          'Beat the Clock': puzzlesWithGenre,
+        },
+      };
+      
+      // Select random puzzle
+      const randomIndex = Math.floor(Math.random() * puzzlesWithGenre.length);
+      const puzzleToLoad = puzzlesWithGenre[randomIndex];
+      
+      // Update state
+      const updatedState: GameState = {
+        ...newState,
+        currentGenre: 'Beat the Clock',
+        currentPuzzleIndex: randomIndex,
+        currentBook: puzzleToLoad.book,
+        currentStoryPart: puzzleToLoad.storyPart || 0,
+      };
+      
+      // Initialize the puzzle
+      const initResult = initializePuzzle(puzzleToLoad, config, updatedState);
+      
+      if (!initResult.success) {
+        throw new Error('Puzzle initialization failed');
+      }
+      
+      return { success: true, newState: initResult.newState };
+    } else {
+      // Puzzles already loaded, select random one
+      const puzzles = state.puzzles['Beat the Clock'];
+      const randomIndex = Math.floor(Math.random() * puzzles.length);
+      const puzzleToLoad = puzzles[randomIndex];
+      
+      // Update state
+      const updatedState: GameState = {
+        ...state,
+        currentGenre: 'Beat the Clock',
+        currentPuzzleIndex: randomIndex,
+        currentBook: puzzleToLoad.book,
+        currentStoryPart: puzzleToLoad.storyPart || 0,
+      };
+      
+      // Initialize the puzzle
+      const initResult = initializePuzzle(puzzleToLoad, config, updatedState);
+      
+      if (!initResult.success) {
+        throw new Error('Puzzle initialization failed');
+      }
+      
+      return { success: true, newState: initResult.newState };
+    }
+  } catch (error) {
+    console.error('Error loading Beat the Clock puzzle:', error);
+    return { success: false, newState: state };
+  }
+}
+

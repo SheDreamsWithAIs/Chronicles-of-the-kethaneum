@@ -1,0 +1,73 @@
+[
+  {
+    "title": "Quick Challenge 1",
+    "book": "Speed Run",
+    "words": ["cat", "dog", "hat", "log", "map"],
+    "storyPart": 0,
+    "storyExcerpt": ""
+  },
+  {
+    "title": "Quick Challenge 2",
+    "book": "Speed Run",
+    "words": ["sun", "moon", "star", "sky", "sea"],
+    "storyPart": 0,
+    "storyExcerpt": ""
+  },
+  {
+    "title": "Quick Challenge 3",
+    "book": "Speed Run",
+    "words": ["red", "blue", "green", "yellow", "black"],
+    "storyPart": 0,
+    "storyExcerpt": ""
+  },
+  {
+    "title": "Quick Challenge 4",
+    "book": "Speed Run",
+    "words": ["book", "page", "word", "text", "read"],
+    "storyPart": 0,
+    "storyExcerpt": ""
+  },
+  {
+    "title": "Quick Challenge 5",
+    "book": "Speed Run",
+    "words": ["fire", "water", "earth", "wind", "light"],
+    "storyPart": 0,
+    "storyExcerpt": ""
+  },
+  {
+    "title": "Quick Challenge 6",
+    "book": "Speed Run",
+    "words": ["time", "hour", "minute", "second", "clock"],
+    "storyPart": 0,
+    "storyExcerpt": ""
+  },
+  {
+    "title": "Quick Challenge 7",
+    "book": "Speed Run",
+    "words": ["tree", "leaf", "branch", "root", "bark"],
+    "storyPart": 0,
+    "storyExcerpt": ""
+  },
+  {
+    "title": "Quick Challenge 8",
+    "book": "Speed Run",
+    "words": ["bird", "wing", "feather", "nest", "egg"],
+    "storyPart": 0,
+    "storyExcerpt": ""
+  },
+  {
+    "title": "Quick Challenge 9",
+    "book": "Speed Run",
+    "words": ["fish", "scale", "fin", "gill", "water"],
+    "storyPart": 0,
+    "storyExcerpt": ""
+  },
+  {
+    "title": "Quick Challenge 10",
+    "book": "Speed Run",
+    "words": ["rock", "stone", "pebble", "boulder", "mountain"],
+    "storyPart": 0,
+    "storyExcerpt": ""
+  }
+]
+
