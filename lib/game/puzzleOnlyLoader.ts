@@ -16,6 +16,11 @@ export function loadRandomPuzzle(
   config: Config
 ): { success: boolean; newState: GameState } {
   try {
+    // Clear any existing timer before loading new puzzle
+    if (state.timer) {
+      clearInterval(state.timer);
+    }
+    
     const allGenres = Object.keys(state.puzzles || {});
     if (allGenres.length === 0) {
       throw new Error('No puzzles loaded');
@@ -39,6 +44,8 @@ export function loadRandomPuzzle(
       currentPuzzleIndex: randomIndex,
       currentBook: puzzleToLoad.book,
       currentStoryPart: puzzleToLoad.storyPart || 0,
+      // Reset gameOver so new puzzle can start
+      gameOver: false,
     };
     
     // Initialize the puzzle
@@ -64,6 +71,10 @@ export function restorePuzzleOnlyPuzzle(
   state: GameState,
   config: Config
 ): { success: boolean; newState: GameState } {
+  // Clear any existing timer before loading puzzle
+  if (state.timer) {
+    clearInterval(state.timer);
+  }
   try {
     if (!state.puzzles || !state.puzzles[genre] || !state.puzzles[genre][puzzleIndex]) {
       throw new Error(`Puzzle not found: genre="${genre}", index=${puzzleIndex}`);
@@ -78,6 +89,8 @@ export function restorePuzzleOnlyPuzzle(
       currentPuzzleIndex: puzzleIndex,
       currentBook: puzzleToRestore.book,
       currentStoryPart: puzzleToRestore.storyPart !== undefined ? puzzleToRestore.storyPart : 0,
+      // Reset gameOver so puzzle can start
+      gameOver: false,
     };
     
     // Initialize the puzzle

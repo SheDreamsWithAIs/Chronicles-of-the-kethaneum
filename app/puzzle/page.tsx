@@ -9,6 +9,7 @@ import { usePuzzle } from '@/hooks/usePuzzle';
 import { useGameLogic } from '@/hooks/useGameLogic';
 import { useGameModeHandlers } from '@/hooks/useGameModeHandlers';
 import { usePuzzleLoading } from '@/hooks/usePuzzleLoading';
+import { useStoryTimer, usePuzzleOnlyTimer, useBeatTheClockTimer } from '@/hooks/useTimer';
 import { startBeatTheClockRun, endBeatTheClockRun } from '@/lib/game/logic';
 import { getConfig } from '@/lib/core/config';
 import type { Cell } from '@/lib/game/state';
@@ -24,17 +25,11 @@ export default function PuzzleScreen() {
   const [puzzleStartTime, setPuzzleStartTime] = useState<number | null>(null);
   // Track if we're transitioning between puzzles to prevent timer restart
   const isTransitioningRef = useRef(false);
-  // Ref to store clearTimerRef function (needed for loadBeatTheClockWithTransition)
-  const clearTimerRefRef = useRef<(() => void) | null>(null);
   
   // Wrapper for loadBeatTheClock that sets transition flag
   const loadBeatTheClockWithTransition = useCallback(async () => {
     isTransitioningRef.current = true;
     console.log('[puzzle.page] Setting transition flag - loading puzzle');
-    // Clear timer ref before loading to prevent stale callbacks
-    if (clearTimerRefRef.current) {
-      clearTimerRefRef.current();
-    }
     try {
       const result = await loadBeatTheClock();
       // Wait a tick for state to update before clearing flag
@@ -75,8 +70,8 @@ export default function PuzzleScreen() {
     router,
   });
   
-  // Get game logic functions (handlers are now available)
-  const { checkWord, start, pause, resume, clearTimerRef } = useGameLogic(
+  // Get game logic functions (word selection only - timer logic is separate)
+  const { checkWord } = useGameLogic(
     state,
     setState,
     handleWin,
@@ -85,10 +80,19 @@ export default function PuzzleScreen() {
     updateStateRef
   );
   
-  // Store clearTimerRef in ref so loadBeatTheClockWithTransition can use it
-  useEffect(() => {
-    clearTimerRefRef.current = clearTimerRef;
-  }, [clearTimerRef]);
+  // Get mode-specific timer hooks
+  const storyTimer = useStoryTimer(state, setState);
+  const puzzleOnlyTimer = usePuzzleOnlyTimer(state, setState, handleLose);
+  const beatTheClockTimer = useBeatTheClockTimer(state, setState, handleLose, handleRunTimerExpired);
+  
+  // Select appropriate timer based on game mode (memoized to prevent recreation)
+  const timer = useMemo(() => {
+    return state.gameMode === 'story' 
+      ? storyTimer 
+      : state.gameMode === 'puzzle-only' 
+      ? puzzleOnlyTimer 
+      : beatTheClockTimer;
+  }, [state.gameMode, storyTimer, puzzleOnlyTimer, beatTheClockTimer]);
 
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const [storyOpen, setStoryOpen] = useState(false);
@@ -116,15 +120,25 @@ export default function PuzzleScreen() {
       return;
     }
     
-    if (state.grid && state.grid.length > 0 && !state.timer && !state.paused && !state.gameOver && state.timeRemaining > 0) {
-      console.log('[puzzle.page] Starting timer - grid exists, no timer, not paused, not gameOver, timeRemaining:', state.timeRemaining);
-      start();
+    if (state.grid && state.grid.length > 0 && !state.timer && !state.paused && !state.gameOver) {
+      if (state.gameMode === 'story') {
+        // Story mode: initialize decorative timer
+        if (state.timeRemaining === undefined || state.timeRemaining === 0) {
+          timer.initialize();
+        }
+      } else {
+        // Puzzle-only and beat-the-clock: start countdown timer
+        if (state.timeRemaining > 0) {
+          console.log('[puzzle.page] Starting timer - grid exists, no timer, not paused, not gameOver, timeRemaining:', state.timeRemaining);
+          timer.start();
+        }
+      }
     } else {
       if (state.grid && state.grid.length > 0) {
         console.log('[puzzle.page] Timer not started - timer:', state.timer ? 'exists' : 'null', 'paused:', state.paused, 'gameOver:', state.gameOver, 'timeRemaining:', state.timeRemaining, 'transitioning:', isTransitioningRef.current);
       }
     }
-  }, [state.grid?.length, state.timer, state.paused, state.gameOver, state.timeRemaining, start]); // Include start in dependencies
+  }, [state.grid?.length, state.timer, state.paused, state.gameOver, state.gameMode, timer]);
 
   // Get current puzzle data
   const gridData = state.grid || [];
@@ -468,14 +482,14 @@ export default function PuzzleScreen() {
   }, [selectedCells, foundWordCells]);
 
   const handlePause = useCallback(() => {
-    pause(); // Stop timer immediately first
+    timer.pause(); // Stop timer immediately first
     setIsPaused(true);
-  }, [pause]);
+  }, [timer]);
 
   const handleResume = useCallback(() => {
     setIsPaused(false);
-    resume();
-  }, [resume]);
+    timer.resume();
+  }, [timer]);
 
   const handleBackToBookOfPassage = () => {
     router.push('/book-of-passage');
@@ -499,6 +513,8 @@ export default function PuzzleScreen() {
     console.log('[puzzle.page.handleNextPuzzle] Closing modal and loading next puzzle');
     setShowStatsModal(false);
     if (state.gameMode === 'puzzle-only') {
+      // Clear timer before loading new puzzle to prevent stale callbacks
+      timer.clear();
       // Load a completely new random puzzle from any genre
       if (!state.puzzles || Object.keys(state.puzzles).length === 0) {
         await loadAll();
@@ -509,8 +525,20 @@ export default function PuzzleScreen() {
       if (success) {
         setPuzzleStartTime(Date.now());
       }
+    } else if (state.gameMode === 'story') {
+      // Story mode: Load next sequential puzzle
+      timer.clear();
+      if (!state.puzzles || Object.keys(state.puzzles).length === 0) {
+        await loadAll();
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      
+      const success = loadSequential(state.currentGenre, state.currentBook);
+      if (success) {
+        setPuzzleStartTime(Date.now());
+      }
     }
-  }, [state.gameMode, state.puzzles, loadRandom, loadAll]);
+  }, [state.gameMode, state.puzzles, state.currentGenre, state.currentBook, loadRandom, loadAll, loadSequential, timer]);
 
   const handleRestartPuzzle = useCallback(() => {
     console.log('[puzzle.page.handleRestartPuzzle] Closing modal and restarting puzzle');
@@ -524,8 +552,8 @@ export default function PuzzleScreen() {
       gameOver: false,
     });
     setPuzzleStartTime(Date.now());
-    start();
-  }, [state, setState, config, start]);
+    timer.start();
+  }, [state, setState, config, timer]);
 
   const handleStartFreshRun = useCallback(async () => {
     console.log('[puzzle.page.handleStartFreshRun] Closing modal and starting fresh run');
@@ -800,10 +828,12 @@ export default function PuzzleScreen() {
         mode={state.gameMode}
         isWin={statsModalIsWin}
         sessionStats={state.sessionStats}
-        onNextPuzzle={state.gameMode === 'puzzle-only' ? handleNextPuzzle : undefined}
+        onNextPuzzle={(state.gameMode === 'puzzle-only' || state.gameMode === 'story') ? handleNextPuzzle : undefined}
         onRestartPuzzle={handleRestartPuzzle}
         onStartFreshRun={state.gameMode === 'beat-the-clock' ? handleStartFreshRun : undefined}
         onMainMenu={handleBackToMainMenu}
+        onBackToLibrary={state.gameMode === 'story' ? handleBackToLibrary : undefined}
+        onBackToBookOfPassage={state.gameMode === 'story' ? handleBackToBookOfPassage : undefined}
       />
     </div>
   );

@@ -28,7 +28,8 @@ const MODES: ModeInfo[] = [
   {
     id: 'puzzle-only',
     title: 'Puzzle Only Mode',
-    description: 'Complete puzzles one after another. Timer runs per puzzle.'
+    description: 'Complete puzzles one after another. Timer runs per puzzle. (Coming Soon)',
+    disabled: true
   },
   {
     id: 'beat-the-clock',

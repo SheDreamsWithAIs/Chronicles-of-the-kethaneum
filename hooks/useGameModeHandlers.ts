@@ -119,8 +119,10 @@ export function useGameModeHandlers({
         setShowStatsModal(true);
       }
     } else {
-      // Story Mode: Continue to next puzzle (existing flow)
-      // TODO: Navigate to next story puzzle
+      // Story Mode: Show win modal to let player choose when to continue
+      console.log('[useGameModeHandlers.handleWin] Story mode - showing win modal');
+      setStatsModalIsWin(true);
+      setShowStatsModal(true);
     }
   }, [state, setState, puzzleStartTime, loadBeatTheClock, setPuzzleStartTime, setStatsModalIsWin, setShowStatsModal]);
   
