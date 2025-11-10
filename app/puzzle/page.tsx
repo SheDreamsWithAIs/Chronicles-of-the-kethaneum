@@ -22,13 +22,39 @@ export default function PuzzleScreen() {
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [statsModalIsWin, setStatsModalIsWin] = useState(false);
   const [puzzleStartTime, setPuzzleStartTime] = useState<number | null>(null);
+  // Track if we're transitioning between puzzles to prevent timer restart
+  const isTransitioningRef = useRef(false);
+  // Ref to store clearTimerRef function (needed for loadBeatTheClockWithTransition)
+  const clearTimerRefRef = useRef<(() => void) | null>(null);
+  
+  // Wrapper for loadBeatTheClock that sets transition flag
+  const loadBeatTheClockWithTransition = useCallback(async () => {
+    isTransitioningRef.current = true;
+    console.log('[puzzle.page] Setting transition flag - loading puzzle');
+    // Clear timer ref before loading to prevent stale callbacks
+    if (clearTimerRefRef.current) {
+      clearTimerRefRef.current();
+    }
+    try {
+      const result = await loadBeatTheClock();
+      // Wait a tick for state to update before clearing flag
+      await new Promise(resolve => setTimeout(resolve, 0));
+      isTransitioningRef.current = false;
+      console.log('[puzzle.page] Clearing transition flag - puzzle loaded');
+      return result;
+    } catch (error) {
+      isTransitioningRef.current = false;
+      console.log('[puzzle.page] Clearing transition flag - error loading puzzle');
+      throw error;
+    }
+  }, [loadBeatTheClock]);
   
   // Use mode-specific handlers hook
-  const { handleWin, handleLose, handleRunTimerExpired } = useGameModeHandlers({
+  const { handleWin, handleLose, handleRunTimerExpired, updateStateRef } = useGameModeHandlers({
     state,
     setState,
     puzzleStartTime,
-    loadBeatTheClock,
+    loadBeatTheClock: loadBeatTheClockWithTransition,
     setPuzzleStartTime,
     setStatsModalIsWin,
     setShowStatsModal,
@@ -40,7 +66,7 @@ export default function PuzzleScreen() {
     setState,
     isReady,
     loadAll,
-    loadBeatTheClock,
+    loadBeatTheClock: loadBeatTheClockWithTransition,
     loadRandom,
     restorePuzzleOnly,
     loadSequential,
@@ -49,13 +75,20 @@ export default function PuzzleScreen() {
     router,
   });
   
-  const { checkWord, start, pause, resume } = useGameLogic(
+  // Get game logic functions (handlers are now available)
+  const { checkWord, start, pause, resume, clearTimerRef } = useGameLogic(
     state,
     setState,
     handleWin,
     handleLose,
-    handleRunTimerExpired
+    handleRunTimerExpired,
+    updateStateRef
   );
+  
+  // Store clearTimerRef in ref so loadBeatTheClockWithTransition can use it
+  useEffect(() => {
+    clearTimerRefRef.current = clearTimerRef;
+  }, [clearTimerRef]);
 
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const [storyOpen, setStoryOpen] = useState(false);
@@ -77,8 +110,19 @@ export default function PuzzleScreen() {
 
   // Start timer when puzzle is loaded
   useEffect(() => {
+    // Don't start timer if we're transitioning between puzzles
+    if (isTransitioningRef.current) {
+      console.log('[puzzle.page] Timer not started - transitioning between puzzles');
+      return;
+    }
+    
     if (state.grid && state.grid.length > 0 && !state.timer && !state.paused && !state.gameOver && state.timeRemaining > 0) {
+      console.log('[puzzle.page] Starting timer - grid exists, no timer, not paused, not gameOver, timeRemaining:', state.timeRemaining);
       start();
+    } else {
+      if (state.grid && state.grid.length > 0) {
+        console.log('[puzzle.page] Timer not started - timer:', state.timer ? 'exists' : 'null', 'paused:', state.paused, 'gameOver:', state.gameOver, 'timeRemaining:', state.timeRemaining, 'transitioning:', isTransitioningRef.current);
+      }
     }
   }, [state.grid?.length, state.timer, state.paused, state.gameOver, state.timeRemaining, start]); // Include start in dependencies
 
@@ -452,6 +496,7 @@ export default function PuzzleScreen() {
 
   // Stats modal handlers
   const handleNextPuzzle = useCallback(async () => {
+    console.log('[puzzle.page.handleNextPuzzle] Closing modal and loading next puzzle');
     setShowStatsModal(false);
     if (state.gameMode === 'puzzle-only') {
       // Load a completely new random puzzle from any genre
@@ -468,6 +513,7 @@ export default function PuzzleScreen() {
   }, [state.gameMode, state.puzzles, loadRandom, loadAll]);
 
   const handleRestartPuzzle = useCallback(() => {
+    console.log('[puzzle.page.handleRestartPuzzle] Closing modal and restarting puzzle');
     setShowStatsModal(false);
     // Reset puzzle state and reload current puzzle
     setState({
@@ -482,6 +528,7 @@ export default function PuzzleScreen() {
   }, [state, setState, config, start]);
 
   const handleStartFreshRun = useCallback(async () => {
+    console.log('[puzzle.page.handleStartFreshRun] Closing modal and starting fresh run');
     setShowStatsModal(false);
     // Reset run timer and load new puzzle
     const runState = startBeatTheClockRun(state);

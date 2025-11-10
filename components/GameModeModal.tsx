@@ -16,6 +16,7 @@ interface ModeInfo {
   id: GameMode;
   title: string;
   description: string;
+  disabled?: boolean;
 }
 
 const MODES: ModeInfo[] = [
@@ -32,7 +33,8 @@ const MODES: ModeInfo[] = [
   {
     id: 'beat-the-clock',
     title: 'Beat the Clock',
-    description: 'Race against time across multiple small puzzles. 5 minute runs.'
+    description: 'Race against time across multiple small puzzles. 5 minute runs. (Coming Soon)',
+    disabled: true
   }
 ];
 
@@ -72,13 +74,16 @@ export function GameModeModal({
           {MODES.map((mode) => (
             <div
               key={mode.id}
-              className={`${styles.modeCard} ${selectedMode === mode.id ? styles.selected : ''}`}
-              onClick={() => setSelectedMode(mode.id)}
+              className={`${styles.modeCard} ${selectedMode === mode.id ? styles.selected : ''} ${mode.disabled ? styles.disabled : ''}`}
+              onClick={() => !mode.disabled && setSelectedMode(mode.id)}
             >
               <div className={styles.cardGlow}></div>
               <div className={styles.cardContent}>
                 <h3>{mode.title}</h3>
                 <p>{mode.description}</p>
+                {mode.disabled && (
+                  <span className={styles.disabledBadge}>Coming Soon</span>
+                )}
               </div>
             </div>
           ))}

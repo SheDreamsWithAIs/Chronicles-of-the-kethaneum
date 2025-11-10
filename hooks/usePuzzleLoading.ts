@@ -72,10 +72,15 @@ export function usePuzzleLoading({
     // Handle different game modes
     if (state.gameMode === 'beat-the-clock') {
       // Beat the Clock: Load random puzzle from beatTheClockPuzzles.json
+      let stateToUse = state;
       if (!state.runStartTime) {
         // Initialize run timer on first puzzle
-        const runState = startBeatTheClockRun(state);
-        setState(runState);
+        // Create updated state with runStartTime
+        stateToUse = startBeatTheClockRun(state);
+        // Update state - this will trigger useEffect to update stateRef in usePuzzle
+        setState(stateToUse);
+        // Wait a tick to ensure stateRef is updated in usePuzzle hook
+        await new Promise(resolve => setTimeout(resolve, 0));
       }
       const success = await loadBeatTheClock();
       if (!success) {

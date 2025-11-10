@@ -3,7 +3,7 @@
  * Separates mode-specific logic from the main puzzle component
  */
 
-import { useCallback } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import type { GameState } from '@/lib/game/state';
 import { recordPuzzleStats, incrementTotalWords } from '@/lib/game/stats';
 
@@ -26,60 +26,95 @@ export function useGameModeHandlers({
   setStatsModalIsWin,
   setShowStatsModal,
 }: UseGameModeHandlersProps) {
+  // Use ref to track current state for callbacks
+  const stateRef = useRef(state);
+  
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+  
+  // Expose function to update stateRef synchronously (needed when state is updated synchronously)
+  const updateStateRef = useCallback((newState: GameState) => {
+    stateRef.current = newState;
+  }, []);
   
   const handleWin = useCallback(() => {
-    const timeTaken = puzzleStartTime ? Math.floor((Date.now() - puzzleStartTime) / 1000) : 0;
-    const wordsFound = state.wordList.filter(w => w.found).length;
-    const totalWords = state.wordList.length;
+    console.log('[useGameModeHandlers.handleWin] Win handler called');
     
-    if (state.gameMode === 'puzzle-only') {
+    // Use stateRef.current instead of state prop to get the latest state
+    // This is updated synchronously in checkWord before calling onWin
+    const currentState = stateRef.current;
+    
+    const timeTaken = puzzleStartTime ? Math.floor((Date.now() - puzzleStartTime) / 1000) : 0;
+    const wordsFound = currentState.wordList.filter((w: { found: boolean }) => w.found).length;
+    const totalWords = currentState.wordList.length;
+    
+    console.log('[useGameModeHandlers.handleWin] Current state - gameMode:', currentState.gameMode, 'runStartTime:', currentState.runStartTime, 'runDuration:', currentState.runDuration, 'gameOver:', currentState.gameOver, 'timer:', currentState.timer ? 'exists' : 'null');
+    
+    // If runStartTime is null but we're in beat-the-clock mode, log warning
+    if (currentState.gameMode === 'beat-the-clock' && !currentState.runStartTime) {
+      console.warn('[useGameModeHandlers.handleWin] runStartTime is null in beat-the-clock mode - this should not happen. State:', currentState);
+    }
+    
+    if (currentState.gameMode === 'puzzle-only') {
       // Update session stats
       const updatedStats = recordPuzzleStats(
-        state.currentPuzzleIndex || 0,
+        currentState.currentPuzzleIndex || 0,
         timeTaken,
         wordsFound,
         totalWords,
-        state.sessionStats
+        currentState.sessionStats
       );
       
       // Increment total words found
       const finalStats = incrementTotalWords(updatedStats, wordsFound);
       
       setState({
-        ...state,
+        ...currentState,
         sessionStats: finalStats,
       });
       
       setStatsModalIsWin(true);
       setShowStatsModal(true);
-    } else if (state.gameMode === 'beat-the-clock') {
+    } else if (currentState.gameMode === 'beat-the-clock') {
       // Record stats and check if run should continue
       const updatedStats = recordPuzzleStats(
-        state.currentPuzzleIndex || 0,
+        currentState.currentPuzzleIndex || 0,
         timeTaken,
         wordsFound,
         totalWords,
-        state.sessionStats
+        currentState.sessionStats
       );
       
+      // Calculate run time remaining (not puzzle time)
+      const runTimeElapsed = currentState.runStartTime 
+        ? Math.floor((Date.now() - currentState.runStartTime) / 1000)
+        : 0;
+      const runTimeRemaining = currentState.runDuration - runTimeElapsed;
+      
+      console.log('[useGameModeHandlers.handleWin] Beat-the-clock - runTimeElapsed:', runTimeElapsed, 'runTimeRemaining:', runTimeRemaining, 'runStartTime:', currentState.runStartTime, 'runDuration:', currentState.runDuration);
+      
+      // Update stats first
       setState({
-        ...state,
+        ...currentState,
         sessionStats: updatedStats,
       });
       
-      // Calculate run time remaining (not puzzle time)
-      const runTimeElapsed = state.runStartTime 
-        ? Math.floor((Date.now() - state.runStartTime) / 1000)
-        : 0;
-      const runTimeRemaining = state.runDuration - runTimeElapsed;
-      
       // Check if run time is still remaining
-      if (state.runStartTime && runTimeRemaining > 0) {
-        // Load next puzzle automatically - don't show modal
-        loadBeatTheClock();
-        setPuzzleStartTime(Date.now()); // Reset puzzle start time for next puzzle
+      // Note: gameOver won't be set for puzzle completion in beat-the-clock mode
+      // It's only set when the run timer expires
+      if (currentState.runStartTime && runTimeRemaining > 0) {
+        console.log('[useGameModeHandlers.handleWin] Run time remaining (' + runTimeRemaining + 's), loading next puzzle');
+        // Load next puzzle immediately
+        // Note: We need to set a flag to prevent timer restart during transition
+        // This will be handled by the parent component's isTransitioningRef
+        loadBeatTheClock().then(() => {
+          console.log('[useGameModeHandlers.handleWin] Next puzzle loaded, resetting puzzle start time');
+          setPuzzleStartTime(Date.now());
+        });
       } else {
-        // Run ended, show stats modal
+        console.log('[useGameModeHandlers.handleWin] Run time expired or no runStartTime, showing modal. runTimeRemaining:', runTimeRemaining);
+        // Run ended (time expired), show stats modal
         setStatsModalIsWin(true);
         setShowStatsModal(true);
       }
@@ -90,21 +125,27 @@ export function useGameModeHandlers({
   }, [state, setState, puzzleStartTime, loadBeatTheClock, setPuzzleStartTime, setStatsModalIsWin, setShowStatsModal]);
   
   const handleLose = useCallback(() => {
-    if (state.gameMode === 'puzzle-only') {
+    // Get current state - use the state prop directly to avoid stale ref issues
+    stateRef.current = state;
+    const currentState = state;
+    
+    if (currentState.gameMode === 'puzzle-only') {
       setStatsModalIsWin(false);
       setShowStatsModal(true);
-    } else if (state.gameMode === 'beat-the-clock') {
+    } else if (currentState.gameMode === 'beat-the-clock') {
       // Calculate run time remaining
-      const runTimeElapsed = state.runStartTime 
-        ? Math.floor((Date.now() - state.runStartTime) / 1000)
+      const runTimeElapsed = currentState.runStartTime 
+        ? Math.floor((Date.now() - currentState.runStartTime) / 1000)
         : 0;
-      const runTimeRemaining = state.runDuration - runTimeElapsed;
+      const runTimeRemaining = currentState.runDuration - runTimeElapsed;
       
       // Check if run time is still remaining
-      if (state.runStartTime && runTimeRemaining > 0) {
+      if (currentState.runStartTime && runTimeRemaining > 0) {
         // Puzzle timer ran out but run time remains - load next puzzle
-        loadBeatTheClock();
-        setPuzzleStartTime(Date.now()); // Reset puzzle start time for next puzzle
+        setTimeout(() => {
+          loadBeatTheClock();
+          setPuzzleStartTime(Date.now()); // Reset puzzle start time for next puzzle
+        }, 0);
       } else {
         // Run ended (either puzzle timer or run timer expired), show lose modal
         setStatsModalIsWin(false);
@@ -113,21 +154,31 @@ export function useGameModeHandlers({
     } else {
       // Story Mode: Handle lose (existing flow)
     }
-  }, [state.gameMode, state.runStartTime, state.runDuration, loadBeatTheClock, setPuzzleStartTime, setStatsModalIsWin, setShowStatsModal]);
+  }, [state, loadBeatTheClock, setPuzzleStartTime, setStatsModalIsWin, setShowStatsModal]);
   
   // Handle run timer expiration for beat-the-clock mode
   const handleRunTimerExpired = useCallback(() => {
-    if (state.gameMode === 'beat-the-clock') {
+    console.log('[useGameModeHandlers.handleRunTimerExpired] Run timer expired callback called');
+    
+    // Get current state - use the state prop directly to avoid stale ref issues
+    stateRef.current = state;
+    const currentState = state;
+    
+    console.log('[useGameModeHandlers.handleRunTimerExpired] Current state - gameMode:', currentState.gameMode, 'gameOver:', currentState.gameOver);
+    
+    if (currentState.gameMode === 'beat-the-clock') {
+      console.log('[useGameModeHandlers.handleRunTimerExpired] Showing win modal');
       // Run timer expired - show win modal with final stats
       setStatsModalIsWin(true);
       setShowStatsModal(true);
     }
-  }, [state.gameMode, setStatsModalIsWin, setShowStatsModal]);
+  }, [state, setStatsModalIsWin, setShowStatsModal]);
 
   return {
     handleWin,
     handleLose,
     handleRunTimerExpired,
+    updateStateRef,
   };
 }
 
