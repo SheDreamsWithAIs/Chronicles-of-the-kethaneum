@@ -198,7 +198,8 @@ export function startTimer(
   state: GameState,
   config: Config,
   onTick?: (timeRemaining: number) => void,
-  onTimeUp?: () => void
+  onTimeUp?: () => void,
+  isPaused?: () => boolean
 ): { newState: GameState; timer: NodeJS.Timeout | null } {
   // Clear any existing timer
   if (state.timer) {
@@ -227,7 +228,9 @@ export function startTimer(
 
   // Set up new timer
   const timer = setInterval(() => {
-    if (state.paused) return;
+    // Check paused state - use provided function if available, otherwise fall back to captured state
+    const paused = isPaused ? isPaused() : state.paused;
+    if (paused) return;
 
     timeRemaining--;
 
@@ -294,12 +297,40 @@ export function resumeGame(state: GameState): GameState {
 }
 
 /**
+ * Clear puzzle timer without ending the game
+ * Used for beat-the-clock mode when puzzle completes but run continues
+ */
+export function clearPuzzleTimer(state: GameState): GameState {
+  console.log('[clearPuzzleTimer] Clearing puzzle timer, gameMode:', state.gameMode, 'timer exists:', !!state.timer);
+  
+  // Stop the timer - store reference before clearing
+  const timerToClear = state.timer;
+  if (timerToClear) {
+    clearInterval(timerToClear);
+    console.log('[clearPuzzleTimer] Timer interval cleared');
+  }
+  
+  return {
+    ...state,
+    timer: null,
+    // Note: We do NOT set gameOver: true here
+    // This allows the run to continue in beat-the-clock mode
+  };
+}
+
+/**
  * Pause the game
  */
 export function pauseGame(state: GameState): GameState {
+  // Clear the timer immediately when pausing
+  if (state.timer) {
+    clearInterval(state.timer);
+  }
+  
   return {
     ...state,
     paused: true,
+    timer: null,
   };
 }
 

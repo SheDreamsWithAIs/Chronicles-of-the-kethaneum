@@ -15,6 +15,8 @@ interface GameStatsModalProps {
   onRestartPuzzle?: () => void;
   onStartFreshRun?: () => void;
   onMainMenu?: () => void;
+  onBackToLibrary?: () => void;
+  onBackToBookOfPassage?: () => void;
 }
 
 function formatTime(seconds: number): string {
@@ -32,6 +34,8 @@ export function GameStatsModal({
   onRestartPuzzle,
   onStartFreshRun,
   onMainMenu,
+  onBackToLibrary,
+  onBackToBookOfPassage,
 }: GameStatsModalProps) {
   const router = useRouter();
 
@@ -125,6 +129,31 @@ export function GameStatsModal({
               {!isWin && onRestartPuzzle && (
                 <button className={styles.secondaryButton} onClick={onRestartPuzzle}>
                   Restart Puzzle
+                </button>
+              )}
+            </>
+          )}
+
+          {mode === 'story' && (
+            <>
+              {isWin && onNextPuzzle && (
+                <button className={styles.primaryButton} onClick={onNextPuzzle}>
+                  Next Puzzle
+                </button>
+              )}
+              {!isWin && onRestartPuzzle && (
+                <button className={styles.primaryButton} onClick={onRestartPuzzle}>
+                  Restart Puzzle
+                </button>
+              )}
+              {onBackToBookOfPassage && (
+                <button className={styles.secondaryButton} onClick={onBackToBookOfPassage}>
+                  Back to Book of Passage
+                </button>
+              )}
+              {onBackToLibrary && (
+                <button className={styles.secondaryButton} onClick={onBackToLibrary}>
+                  Back to Library
                 </button>
               )}
             </>

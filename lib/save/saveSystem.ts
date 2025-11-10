@@ -51,10 +51,6 @@ export function saveGameProgress(state: GameState): void {
 
     // Save to localStorage
     localStorage.setItem('kethaneumProgress', JSON.stringify(progress));
-    console.log('Game progress saved successfully', { 
-      currentGenre: progress.currentGenre,
-      currentBook: progress.currentBook 
-    });
   } catch (error) {
     console.error('Error during saveGameProgress:', error);
     throw error;
@@ -74,11 +70,6 @@ export function loadGameProgress(): SavedProgress | null {
 
     // Parse the saved data
     const progress: SavedProgress = JSON.parse(savedProgress);
-    console.log('Loaded saved progress', { 
-      currentGenre: progress.currentGenre,
-      currentBook: progress.currentBook,
-      gameMode: progress.gameMode
-    });
     return progress;
   } catch (error) {
     console.error('Failed to load game progress:', error);
