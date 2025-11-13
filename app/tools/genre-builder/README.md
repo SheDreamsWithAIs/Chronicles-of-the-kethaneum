@@ -4,7 +4,7 @@ A Next.js-based tool for creating and editing genre files for the Chronicles of 
 
 ## Access
 
-Navigate to: `http://localhost:3000/tools/genre-builder`
+Navigate to: `http://localhost:3030/tools/genre-builder`
 
 ## Features
 
