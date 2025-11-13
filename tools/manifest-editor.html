@@ -192,6 +192,58 @@
             align-items: center;
         }
 
+        /* Manifest Editor Panel */
+        .manifest-editor {
+            background: #e7f3ff;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .manifest-editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .manifest-editor-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .manifest-files-list {
+            background: white;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .manifest-file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 6px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .manifest-file-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .manifest-empty {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-style: italic;
+        }
+
         /* Folder Grid */
         .folder-grid {
             display: grid;
@@ -263,6 +315,10 @@
             border-left: 4px solid #ffd93d;
         }
 
+        .file-item.in-manifest {
+            opacity: 0.6;
+        }
+
         .file-info {
             flex: 1;
         }
@@ -307,6 +363,11 @@
         .badge.generic {
             background: #fff3cd;
             color: #856404;
+        }
+
+        .badge.in-manifest {
+            background: #d4edda;
+            color: #155724;
         }
 
         .file-meta {
@@ -366,6 +427,15 @@
 
         .btn-success:hover {
             background: #218838;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
         }
 
         .btn-secondary {
@@ -573,6 +643,30 @@
 
                     <!-- Main Content -->
                     <div class="main-content">
+                        <!-- Manifest Editor Panel -->
+                        <div id="manifest-editor" class="manifest-editor" style="display: none;">
+                            <div class="manifest-editor-header">
+                                <div class="manifest-editor-title" id="manifest-editor-title">
+                                    📋 Editing: genreManifest.json
+                                </div>
+                                <div>
+                                    <button class="btn-success btn-small" onclick="saveManifest()">
+                                        💾 Save Manifest
+                                    </button>
+                                    <button class="btn-secondary btn-small" onclick="closeManifestEditor()">
+                                        ✖ Close
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="manifest-files-list">
+                                <div style="font-weight: 600; margin-bottom: 10px; color: #333;">Files in Manifest:</div>
+                                <div id="manifest-files">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Folders -->
                         <div class="section" id="folders-section" style="display: none;">
                             <h2 class="section-title">Folders</h2>
@@ -583,7 +677,10 @@
 
                         <!-- Files -->
                         <div class="section">
-                            <h2 class="section-title">Files</h2>
+                            <h2 class="section-title">
+                                Files
+                                <span id="file-count-badge" style="font-size: 0.7em; color: #666;"></span>
+                            </h2>
                             <ul id="file-list" class="file-list">
                                 <!-- Populated by JS -->
                             </ul>
@@ -669,6 +766,7 @@
         let currentPath = '';
         let currentData = { folders: [], files: [], manifests: [] };
         let selectedManifest = null;
+        let manifestData = null;
 
         // Initialize
         async function init() {
@@ -703,9 +801,162 @@
         async function refreshData() {
             showLoading();
             await loadData();
+
+            // Reload manifest if one is selected
+            if (selectedManifest) {
+                await loadManifest(selectedManifest.manifestType);
+            }
+
             renderUI();
             hideLoading();
             showSuccess('Refreshed!');
+        }
+
+        // Load a manifest
+        async function loadManifest(manifestType) {
+            try {
+                const response = await fetch(`${API_BASE}/manifest/${manifestType}?path=${encodeURIComponent(currentPath)}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                manifestData = result.manifest;
+                selectedManifest = { manifestType, path: currentPath };
+            } catch (error) {
+                console.error('Error loading manifest:', error);
+                throw error;
+            }
+        }
+
+        // Select a manifest for editing
+        async function selectManifest(manifestType) {
+            try {
+                await loadManifest(manifestType);
+                renderManifestEditor();
+                renderFiles(); // Re-render files to show which are in manifest
+            } catch (error) {
+                alert('Error loading manifest: ' + error.message);
+            }
+        }
+
+        // Close manifest editor
+        function closeManifestEditor() {
+            selectedManifest = null;
+            manifestData = null;
+            document.getElementById('manifest-editor').style.display = 'none';
+
+            // Remove active state from all manifest items
+            document.querySelectorAll('.manifest-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            renderFiles(); // Re-render files without manifest highlighting
+        }
+
+        // Save manifest
+        async function saveManifest() {
+            if (!selectedManifest || !manifestData) {
+                alert('No manifest selected');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/manifest/${selectedManifest.manifestType}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        manifest: manifestData,
+                        path: currentPath
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                showSuccess('Manifest saved successfully!');
+                await refreshData();
+            } catch (error) {
+                alert('Error saving manifest: ' + error.message);
+            }
+        }
+
+        // Add file to manifest
+        function addToManifest(filePath) {
+            if (!manifestData) return;
+
+            // Determine the manifest structure and add the file
+            if (Array.isArray(manifestData.files)) {
+                if (!manifestData.files.includes(filePath)) {
+                    manifestData.files.push(filePath);
+                }
+            } else if (Array.isArray(manifestData.genreFiles)) {
+                if (!manifestData.genreFiles.includes(filePath)) {
+                    manifestData.genreFiles.push(filePath);
+                }
+            } else {
+                // Generic object - look for array property
+                const arrayKey = Object.keys(manifestData).find(key => Array.isArray(manifestData[key]));
+                if (arrayKey) {
+                    if (!manifestData[arrayKey].includes(filePath)) {
+                        manifestData[arrayKey].push(filePath);
+                    }
+                } else {
+                    // No array found, create one
+                    manifestData.files = [filePath];
+                }
+            }
+
+            renderManifestEditor();
+            renderFiles();
+            showSuccess(`Added ${filePath.split('/').pop()} to manifest`);
+        }
+
+        // Remove file from manifest
+        function removeFromManifest(filePath) {
+            if (!manifestData) return;
+
+            // Find and remove from appropriate array
+            if (Array.isArray(manifestData.files)) {
+                const index = manifestData.files.indexOf(filePath);
+                if (index > -1) manifestData.files.splice(index, 1);
+            } else if (Array.isArray(manifestData.genreFiles)) {
+                const index = manifestData.genreFiles.indexOf(filePath);
+                if (index > -1) manifestData.genreFiles.splice(index, 1);
+            } else {
+                // Generic object - look for array property
+                const arrayKey = Object.keys(manifestData).find(key => Array.isArray(manifestData[key]));
+                if (arrayKey) {
+                    const index = manifestData[arrayKey].indexOf(filePath);
+                    if (index > -1) manifestData[arrayKey].splice(index, 1);
+                }
+            }
+
+            renderManifestEditor();
+            renderFiles();
+            showSuccess(`Removed ${filePath.split('/').pop()} from manifest`);
+        }
+
+        // Get files in manifest as array
+        function getManifestFiles() {
+            if (!manifestData) return [];
+
+            if (Array.isArray(manifestData.files)) return manifestData.files;
+            if (Array.isArray(manifestData.genreFiles)) return manifestData.genreFiles;
+
+            // Look for any array property
+            const arrayKey = Object.keys(manifestData).find(key => Array.isArray(manifestData[key]));
+            return arrayKey ? manifestData[arrayKey] : [];
+        }
+
+        // Check if file is in manifest
+        function isFileInManifest(filePath) {
+            const filesInManifest = getManifestFiles();
+            return filesInManifest.includes(filePath) || filesInManifest.includes('/' + filePath);
         }
 
         // Render UI
@@ -714,6 +965,9 @@
             renderManifestList();
             renderFolders();
             renderFiles();
+            if (selectedManifest) {
+                renderManifestEditor();
+            }
         }
 
         // Render breadcrumbs
@@ -749,8 +1003,9 @@
 
             let html = '';
             currentData.manifests.forEach(manifest => {
+                const isActive = selectedManifest && selectedManifest.manifestType === manifest.manifestType;
                 html += `
-                    <li class="manifest-item" onclick="selectManifest('${manifest.manifestType}')">
+                    <li class="manifest-item ${isActive ? 'active' : ''}" onclick="selectManifest('${manifest.manifestType}')">
                         <div class="manifest-name">${manifest.name}</div>
                         <div class="manifest-meta">${manifest.itemCount} items</div>
                     </li>
@@ -758,6 +1013,43 @@
             });
 
             list.innerHTML = html;
+        }
+
+        // Render manifest editor
+        function renderManifestEditor() {
+            if (!selectedManifest || !manifestData) {
+                document.getElementById('manifest-editor').style.display = 'none';
+                return;
+            }
+
+            const editor = document.getElementById('manifest-editor');
+            const title = document.getElementById('manifest-editor-title');
+            const filesDiv = document.getElementById('manifest-files');
+
+            editor.style.display = 'block';
+            title.textContent = `📋 Editing: ${selectedManifest.manifestType}Manifest.json`;
+
+            const filesInManifest = getManifestFiles();
+
+            if (filesInManifest.length === 0) {
+                filesDiv.innerHTML = '<div class="manifest-empty">No files in this manifest yet. Add files from the list below.</div>';
+                return;
+            }
+
+            let html = '';
+            filesInManifest.forEach(filePath => {
+                const fileName = filePath.split('/').pop();
+                html += `
+                    <div class="manifest-file-item">
+                        <span>${fileName}</span>
+                        <button class="btn-danger btn-small" onclick="removeFromManifest('${filePath}')">
+                            ➖ Remove
+                        </button>
+                    </div>
+                `;
+            });
+
+            filesDiv.innerHTML = html;
         }
 
         // Render folders
@@ -788,22 +1080,30 @@
         // Render files
         function renderFiles() {
             const list = document.getElementById('file-list');
+            const badge = document.getElementById('file-count-badge');
 
             if (currentData.files.length === 0) {
                 list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📄</div><p>No files in this folder</p></div>';
+                badge.textContent = '';
                 return;
             }
+
+            badge.textContent = `(${currentData.files.length} files)`;
 
             let html = '';
             currentData.files.forEach(file => {
                 const contentType = file.contentType || 'generic';
+                const inManifest = selectedManifest && isFileInManifest(file.path);
+                const filePath = currentPath ? `${currentPath}/${file.name}` : file.name;
+                const dataPath = `/data/${filePath}`;
 
                 html += `
-                    <li class="file-item ${contentType}">
+                    <li class="file-item ${contentType} ${inManifest ? 'in-manifest' : ''}">
                         <div class="file-info">
                             <div class="file-header">
                                 <span class="file-name">${file.name}</span>
                                 <span class="badge ${contentType}">${contentType}</span>
+                                ${inManifest ? '<span class="badge in-manifest">In Manifest</span>' : ''}
                             </div>
                             <div class="file-meta">
                                 ${file.itemCount !== undefined ? `Items: ${file.itemCount}` : ''}
@@ -815,9 +1115,15 @@
                             <button class="btn-primary btn-small" onclick="viewFile('${file.path}')">
                                 👁️ View
                             </button>
+                            ${selectedManifest && !file.isManifest ? (
+                                inManifest
+                                ? `<button class="btn-warning btn-small" onclick="removeFromManifest('${dataPath}')">➖ Remove from Manifest</button>`
+                                : `<button class="btn-success btn-small" onclick="addToManifest('${dataPath}')">➕ Add to Manifest</button>`
+                            ) : ''}
+                            ${!file.isManifest ? `
                             <button class="btn-danger btn-small" onclick="deleteFile('${file.path}', '${file.name}')">
                                 🗑️ Delete
-                            </button>
+                            </button>` : ''}
                         </div>
                     </li>
                 `;
@@ -829,6 +1135,8 @@
         // Navigate to path
         async function navigateTo(path) {
             currentPath = path;
+            selectedManifest = null;
+            manifestData = null;
             showLoading();
             await loadData();
             renderUI();
