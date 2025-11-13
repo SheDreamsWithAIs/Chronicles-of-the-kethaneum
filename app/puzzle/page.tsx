@@ -19,7 +19,7 @@ import styles from './puzzle.module.css';
 export default function PuzzleScreen() {
   const router = useRouter();
   const { state, setState, isReady } = useGameState();
-  const { loadSequential, loadAll, initialize, loadRandom, restorePuzzleOnly, loadBeatTheClock } = usePuzzle(state, setState);
+  const { loadSequential, loadAll, initialize, loadRandom, restorePuzzleOnly, loadBeatTheClock, loadWithSelection, markCompleted } = usePuzzle(state, setState);
   const config = getConfig();
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [statsModalIsWin, setStatsModalIsWin] = useState(false);
@@ -55,6 +55,7 @@ export default function PuzzleScreen() {
     setPuzzleStartTime,
     setStatsModalIsWin,
     setShowStatsModal,
+    markCompleted,
   });
   
   // Use puzzle loading hook
@@ -67,6 +68,7 @@ export default function PuzzleScreen() {
     loadRandom,
     restorePuzzleOnly,
     loadSequential,
+    loadWithSelection,
     initialize,
     setPuzzleStartTime,
     router,
@@ -535,29 +537,32 @@ export default function PuzzleScreen() {
         await loadAll();
         await new Promise(resolve => setTimeout(resolve, 50));
       }
-      
+
       const success = loadRandom();
       if (success) {
         setPuzzleStartTime(Date.now());
       }
     } else if (state.gameMode === 'story') {
-      // Story mode: Load next sequential puzzle
+      // Story mode: Load next puzzle using selection system with Kethaneum weaving
       timer.clear();
       if (!state.puzzles || Object.keys(state.puzzles).length === 0) {
         await loadAll();
         await new Promise(resolve => setTimeout(resolve, 50));
       }
 
-      // Don't pass current book - let loader select next book/puzzle
-      const { success, genreComplete } = loadSequential(state.currentGenre, null);
-      if (genreComplete) {
-        // All books in genre complete - show modal
-        setShowGenreCompletionModal(true);
-      } else if (success) {
+      const result = loadWithSelection();
+      if (result.success) {
         setPuzzleStartTime(Date.now());
+
+        // Show genre completion modal if genre is exhausted
+        if (result.message && result.message.includes('completed all puzzles')) {
+          setShowGenreCompletionModal(true);
+        }
+      } else {
+        console.warn('Failed to load next puzzle:', result.message);
       }
     }
-  }, [state.gameMode, state.puzzles, state.currentGenre, state.currentBook, loadRandom, loadAll, loadSequential, timer]);
+  }, [state.gameMode, state.puzzles, loadRandom, loadAll, loadWithSelection, timer]);
 
   const handleRestartPuzzle = useCallback(() => {
     console.log('[puzzle.page.handleRestartPuzzle] Closing modal and restarting puzzle');
