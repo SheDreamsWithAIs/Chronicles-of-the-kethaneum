@@ -1,8 +1,12 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chronicles of the Kethaneum
+
+A Next.js word-search puzzle game with story progression and multiple game modes.
 
 ## Getting Started
 
-First, run the development server:
+### Main Application
+
+First, install dependencies and run the development server:
 
 ```bash
 npm run dev
@@ -19,6 +23,33 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Development Tools
+
+This project includes development tools for managing game content. **These tools require a separate installation.**
+
+### Tools Setup
+
+```bash
+cd tools
+npm install
+npm start
+```
+
+The development server will start on [http://localhost:3030](http://localhost:3030)
+
+### Available Tools
+
+- **Manifest Editor**: Web-based GUI for managing puzzle data files
+  - View all puzzle files in the project
+  - Add/remove files from the game manifest
+  - Create new puzzle files with templates
+  - Delete puzzle files
+  - Preview puzzle contents
+
+See [tools/README.md](tools/README.md) for complete documentation.
+
+**Important:** Development tools should only be run locally and never deployed to production.
 
 ## Learn More
 
