@@ -502,6 +502,324 @@ export default function GamePage() {
 }
 ```
 
+## Playlist Management
+
+The audio system includes a powerful playlist feature for managing multiple music tracks that play sequentially, shuffle, or repeat. This is perfect for having different music for different game acts, contexts, or moods.
+
+### Playlist Modes
+
+- **SEQUENTIAL** - Play tracks in order, stop at the end
+- **SHUFFLE** - Play tracks in random order
+- **REPEAT_ONE** - Repeat the current track indefinitely
+- **REPEAT_ALL** - Loop through all tracks continuously
+
+### Creating a Playlist
+
+```typescript
+import { useAudio } from '@/hooks/useAudio';
+import { AudioCategory, PlaylistMode } from '@/lib/audio/audioManager';
+
+function MyComponent() {
+  const audio = useAudio();
+
+  useEffect(() => {
+    // Create a playlist for Act 2
+    audio.createPlaylist(
+      'act2',                    // Playlist ID
+      'Act 2: The Journey',      // Display name
+      [                          // Tracks
+        { id: 'track1', src: '/audio/music/act2/journey.mp3', title: 'Journey Begins' },
+        { id: 'track2', src: '/audio/music/act2/adventure.mp3', title: 'Adventure' },
+        { id: 'track3', src: '/audio/music/act2/discovery.mp3', title: 'Discovery' },
+      ],
+      AudioCategory.MUSIC,       // Category (optional, defaults to MUSIC)
+      PlaylistMode.SHUFFLE,      // Mode (optional, defaults to SEQUENTIAL)
+      true                       // Auto-advance (optional, defaults to true)
+    );
+  }, [audio]);
+}
+```
+
+### Playing a Playlist
+
+```typescript
+const playAct2Music = async () => {
+  // Load all tracks in the playlist
+  await audio.loadPlaylist('act2');
+
+  // Play starting from first track with 2-second fade-in
+  await audio.playPlaylist('act2', 0, 2000);
+};
+```
+
+### Playlist Controls
+
+```typescript
+// Next track
+await audio.nextTrack(1000);  // 1-second crossfade
+
+// Previous track
+await audio.previousTrack(1000);
+
+// Stop playlist
+await audio.stopPlaylist(1000);
+
+// Change playlist mode
+audio.setPlaylistMode('act2', PlaylistMode.SHUFFLE);
+
+// Get current playlist info
+const info = audio.getCurrentPlaylistInfo();
+if (info) {
+  console.log(`Playing: ${info.playlistName}`);
+  console.log(`Track ${info.currentTrack} of ${info.totalTracks}`);
+  console.log(`Current track: ${info.currentTrackTitle}`);
+  console.log(`Mode: ${info.mode}`);
+}
+```
+
+### Organizing Audio by Game Context
+
+Create a playlist configuration file to organize music by acts/contexts:
+
+```typescript
+// lib/audio/playlistConfig.ts
+export const ACT1_PLAYLIST = [
+  { id: 'act1-1', src: '/audio/music/act1/intro.mp3', title: 'Mysterious Beginning' },
+  { id: 'act1-2', src: '/audio/music/act1/discovery.mp3', title: 'First Discovery' },
+];
+
+export const ACT2_PLAYLIST = [
+  { id: 'act2-1', src: '/audio/music/act2/journey.mp3', title: 'Journey Begins' },
+  { id: 'act2-2', src: '/audio/music/act2/adventure.mp3', title: 'Adventure' },
+  { id: 'act2-3', src: '/audio/music/act2/challenge.mp3', title: 'Rising Challenge' },
+];
+
+export const ACT3_PLAYLIST = [
+  { id: 'act3-1', src: '/audio/music/act3/climax.mp3', title: 'Climax' },
+  { id: 'act3-2', src: '/audio/music/act3/resolution.mp3', title: 'Resolution' },
+];
+```
+
+### Switching Playlists Based on Game Progress
+
+```typescript
+import { useEffect } from 'react';
+import { useAudio } from '@/hooks/useAudio';
+import { ACT1_PLAYLIST, ACT2_PLAYLIST, ACT3_PLAYLIST } from '@/lib/audio/playlistConfig';
+
+function useGameMusic(currentAct: number) {
+  const audio = useAudio();
+
+  useEffect(() => {
+    const playActMusic = async () => {
+      const playlistId = `act${currentAct}`;
+      const playlists = {
+        act1: ACT1_PLAYLIST,
+        act2: ACT2_PLAYLIST,
+        act3: ACT3_PLAYLIST,
+      };
+
+      // Create playlist if not already created
+      if (!audio.getPlaylist(playlistId)) {
+        audio.createPlaylist(
+          playlistId,
+          `Act ${currentAct} Music`,
+          playlists[playlistId as keyof typeof playlists],
+          AudioCategory.MUSIC,
+          currentAct === 2 ? PlaylistMode.SHUFFLE : PlaylistMode.SEQUENTIAL,
+          true
+        );
+      }
+
+      // Load and play
+      await audio.loadPlaylist(playlistId);
+      await audio.playPlaylist(playlistId, 0, 3000); // 3-second crossfade
+    };
+
+    playActMusic();
+
+    return () => {
+      audio.stopPlaylist(1000);
+    };
+  }, [currentAct, audio]);
+}
+
+// Usage in component
+function GameScreen({ currentAct }: { currentAct: number }) {
+  useGameMusic(currentAct);
+
+  return <div>Game content...</div>;
+}
+```
+
+### Auto-Switching Based on Game State
+
+```typescript
+function useDynamicMusic(completedPuzzles: number, totalPuzzles: number) {
+  const audio = useAudio();
+
+  useEffect(() => {
+    const progress = completedPuzzles / totalPuzzles;
+    let playlistId: string;
+
+    // Auto-select playlist based on progress
+    if (progress < 0.33) {
+      playlistId = 'act1';
+    } else if (progress < 0.67) {
+      playlistId = 'act2';
+    } else {
+      playlistId = 'act3';
+    }
+
+    const switchPlaylist = async () => {
+      const currentInfo = audio.getCurrentPlaylistInfo();
+
+      // Only switch if different from current
+      if (currentInfo?.playlistId !== playlistId) {
+        await audio.loadPlaylist(playlistId);
+        await audio.playPlaylist(playlistId, 0, 2000);
+      }
+    };
+
+    switchPlaylist();
+  }, [completedPuzzles, totalPuzzles, audio]);
+}
+```
+
+### File Organization for Acts
+
+Organize your audio files in subfolders:
+
+```
+public/audio/music/
+├── act1/
+│   ├── mysterious-beginning.mp3
+│   ├── discovery.mp3
+│   └── cosmic-wonder.mp3
+├── act2/
+│   ├── journey-begins.mp3
+│   ├── exploring-realms.mp3
+│   └── rising-challenge.mp3
+├── act3/
+│   ├── mounting-tension.mp3
+│   ├── great-revelation.mp3
+│   └── epic-finale.mp3
+└── menu/
+    ├── main-theme.mp3
+    └── ambient-loop.mp3
+```
+
+### Full Example: Context-Aware Music System
+
+```typescript
+import { useEffect } from 'react';
+import { useAudio } from '@/hooks/useAudio';
+import { PlaylistMode, AudioCategory } from '@/lib/audio/audioManager';
+
+export function useContextualMusic(gameState: {
+  location: 'menu' | 'library' | 'puzzle' | 'story';
+  act?: number;
+}) {
+  const audio = useAudio();
+
+  useEffect(() => {
+    const initAndPlayMusic = async () => {
+      let playlistId: string;
+      let playlistTracks: any[];
+
+      // Determine which playlist to use
+      switch (gameState.location) {
+        case 'menu':
+          playlistId = 'menu';
+          playlistTracks = [
+            { id: 'menu-1', src: '/audio/music/menu/theme.mp3', title: 'Main Theme' }
+          ];
+          break;
+
+        case 'puzzle':
+          playlistId = 'puzzle';
+          playlistTracks = [
+            { id: 'puzzle-1', src: '/audio/music/puzzle/focus1.mp3', title: 'Focus' },
+            { id: 'puzzle-2', src: '/audio/music/puzzle/focus2.mp3', title: 'Concentration' }
+          ];
+          break;
+
+        case 'story':
+          playlistId = `act${gameState.act || 1}`;
+          playlistTracks = [
+            { id: `act${gameState.act}-1`, src: `/audio/music/act${gameState.act}/track1.mp3` }
+          ];
+          break;
+
+        default:
+          return;
+      }
+
+      // Create playlist if it doesn't exist
+      if (!audio.getPlaylist(playlistId)) {
+        audio.createPlaylist(
+          playlistId,
+          playlistId.toUpperCase(),
+          playlistTracks,
+          AudioCategory.MUSIC,
+          PlaylistMode.REPEAT_ALL,
+          true
+        );
+      }
+
+      // Switch to new playlist if needed
+      const currentInfo = audio.getCurrentPlaylistInfo();
+      if (currentInfo?.playlistId !== playlistId) {
+        await audio.loadPlaylist(playlistId);
+        await audio.playPlaylist(playlistId, 0, 2000);
+      }
+    };
+
+    initAndPlayMusic();
+  }, [gameState.location, gameState.act, audio]);
+}
+```
+
+### Playlist API Reference
+
+```typescript
+// Create a playlist
+audio.createPlaylist(
+  id: string,
+  name: string,
+  tracks: PlaylistTrack[],
+  category?: AudioCategory,
+  mode?: PlaylistMode,
+  autoAdvance?: boolean
+): void
+
+// Load playlist (preload all tracks)
+await audio.loadPlaylist(playlistId: string): Promise<void>
+
+// Play playlist
+await audio.playPlaylist(
+  playlistId: string,
+  startIndex?: number,
+  fadeDuration?: number
+): Promise<void>
+
+// Stop playlist
+await audio.stopPlaylist(fadeDuration?: number): Promise<void>
+
+// Navigate tracks
+await audio.nextTrack(fadeDuration?: number): Promise<void>
+await audio.previousTrack(fadeDuration?: number): Promise<void>
+
+// Playlist management
+audio.setPlaylistMode(playlistId: string, mode: PlaylistMode): void
+audio.getCurrentPlaylistInfo(): PlaylistInfo | null
+audio.getPlaylists(): Playlist[]
+audio.getPlaylist(playlistId: string): Playlist | undefined
+audio.removePlaylist(playlistId: string): void
+```
+
+See `lib/audio/playlistConfig.ts` and `lib/audio/playlistExample.tsx` for complete examples.
+
 ## Troubleshooting
 
 ### Audio Not Playing
@@ -530,11 +848,12 @@ Potential improvements to consider:
 - Audio sprite sheets for SFX
 - 3D positional audio
 - Audio ducking (lowering music when voice plays)
-- Playlist support for music
-- Dynamic music layers
+- Dynamic music layers (adaptive music)
 - Audio visualization
-- More advanced crossfade algorithms
-- Web Audio API effects (reverb, EQ, etc.)
+- More advanced crossfade algorithms (equal-power, logarithmic)
+- Web Audio API effects (reverb, EQ, compression, etc.)
+- Playlist transitions (crossfade between playlists)
+- Save/restore playlist position
 
 ## Support
 

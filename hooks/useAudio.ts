@@ -4,7 +4,14 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { audioManager, AudioCategory, AudioSettings } from '@/lib/audio/audioManager';
+import {
+  audioManager,
+  AudioCategory,
+  AudioSettings,
+  Playlist,
+  PlaylistTrack,
+  PlaylistMode
+} from '@/lib/audio/audioManager';
 
 export interface UseAudioReturn {
   // Playback controls
@@ -19,6 +26,26 @@ export interface UseAudioReturn {
 
   // Preloading
   preload: (id: string, src: string, category: AudioCategory, loop?: boolean) => Promise<void>;
+
+  // Playlist controls
+  createPlaylist: (
+    id: string,
+    name: string,
+    tracks: PlaylistTrack[],
+    category?: AudioCategory,
+    mode?: PlaylistMode,
+    autoAdvance?: boolean
+  ) => void;
+  loadPlaylist: (playlistId: string) => Promise<void>;
+  playPlaylist: (playlistId: string, startIndex?: number, fadeDuration?: number) => Promise<void>;
+  stopPlaylist: (fadeDuration?: number) => Promise<void>;
+  nextTrack: (fadeDuration?: number) => Promise<void>;
+  previousTrack: (fadeDuration?: number) => Promise<void>;
+  setPlaylistMode: (playlistId: string, mode: PlaylistMode) => void;
+  getCurrentPlaylistInfo: () => ReturnType<typeof audioManager.getCurrentPlaylistInfo>;
+  getPlaylists: () => Playlist[];
+  getPlaylist: (playlistId: string) => Playlist | undefined;
+  removePlaylist: (playlistId: string) => void;
 
   // Volume controls
   setVolume: (category: 'master' | AudioCategory, volume: number) => void;
@@ -130,6 +157,62 @@ export function useAudio(autoInitialize = true): UseAudioReturn {
     await audioManager.resumeAudioContext();
   }, []);
 
+  // Playlist controls
+  const createPlaylist = useCallback((
+    id: string,
+    name: string,
+    tracks: PlaylistTrack[],
+    category?: AudioCategory,
+    mode?: PlaylistMode,
+    autoAdvance?: boolean
+  ) => {
+    audioManager.createPlaylist(id, name, tracks, category, mode, autoAdvance);
+  }, []);
+
+  const loadPlaylist = useCallback(async (playlistId: string) => {
+    await audioManager.loadPlaylist(playlistId);
+  }, []);
+
+  const playPlaylist = useCallback(async (
+    playlistId: string,
+    startIndex?: number,
+    fadeDuration?: number
+  ) => {
+    await audioManager.playPlaylist(playlistId, startIndex, fadeDuration);
+  }, []);
+
+  const stopPlaylist = useCallback(async (fadeDuration?: number) => {
+    await audioManager.stopPlaylist(fadeDuration);
+  }, []);
+
+  const nextTrack = useCallback(async (fadeDuration?: number) => {
+    await audioManager.nextTrack(fadeDuration);
+  }, []);
+
+  const previousTrack = useCallback(async (fadeDuration?: number) => {
+    await audioManager.previousTrack(fadeDuration);
+  }, []);
+
+  const setPlaylistMode = useCallback((playlistId: string, mode: PlaylistMode) => {
+    audioManager.setPlaylistMode(playlistId, mode);
+  }, []);
+
+  const getCurrentPlaylistInfo = useCallback(() => {
+    return audioManager.getCurrentPlaylistInfo();
+  }, []);
+
+  const getPlaylists = useCallback(() => {
+    return audioManager.getPlaylists();
+  }, []);
+
+  const getPlaylist = useCallback((playlistId: string) => {
+    return audioManager.getPlaylist(playlistId);
+  }, []);
+
+  const removePlaylist = useCallback((playlistId: string) => {
+    audioManager.removePlaylist(playlistId);
+  }, []);
+
   return {
     playMusic,
     stopMusic,
@@ -140,6 +223,17 @@ export function useAudio(autoInitialize = true): UseAudioReturn {
     stop,
     stopAll,
     preload,
+    createPlaylist,
+    loadPlaylist,
+    playPlaylist,
+    stopPlaylist,
+    nextTrack,
+    previousTrack,
+    setPlaylistMode,
+    getCurrentPlaylistInfo,
+    getPlaylists,
+    getPlaylist,
+    removePlaylist,
     setVolume,
     getVolume,
     setMuted,

@@ -24,6 +24,28 @@ export interface AudioSettings {
   voiceMuted: boolean;
 }
 
+export enum PlaylistMode {
+  SEQUENTIAL = 'sequential',
+  SHUFFLE = 'shuffle',
+  REPEAT_ONE = 'repeat-one',
+  REPEAT_ALL = 'repeat-all',
+}
+
+export interface PlaylistTrack {
+  id: string;
+  src: string;
+  title?: string;
+}
+
+export interface Playlist {
+  id: string;
+  name: string;
+  tracks: PlaylistTrack[];
+  category: AudioCategory;
+  mode: PlaylistMode;
+  autoAdvance: boolean;
+}
+
 interface AudioTrack {
   audio: HTMLAudioElement;
   category: AudioCategory;
@@ -55,6 +77,12 @@ export class AudioManager {
   private currentAmbient: string | null = null;
   private initialized = false;
   private audioContext: AudioContext | null = null;
+
+  // Playlist management
+  private playlists: Map<string, Playlist> = new Map();
+  private currentPlaylist: string | null = null;
+  private currentTrackIndex = 0;
+  private shuffleHistory: number[] = [];
 
   private constructor() {
     // Private constructor for singleton pattern
@@ -352,6 +380,353 @@ export class AudioManager {
     if (this.audioContext && this.audioContext.state === 'suspended') {
       await this.audioContext.resume();
     }
+  }
+
+  // ========================================
+  // PLAYLIST MANAGEMENT
+  // ========================================
+
+  /**
+   * Create and register a playlist
+   */
+  public createPlaylist(
+    id: string,
+    name: string,
+    tracks: PlaylistTrack[],
+    category: AudioCategory = AudioCategory.MUSIC,
+    mode: PlaylistMode = PlaylistMode.SEQUENTIAL,
+    autoAdvance = true
+  ): void {
+    const playlist: Playlist = {
+      id,
+      name,
+      tracks,
+      category,
+      mode,
+      autoAdvance,
+    };
+
+    this.playlists.set(id, playlist);
+  }
+
+  /**
+   * Load (preload) all tracks in a playlist
+   */
+  public async loadPlaylist(playlistId: string): Promise<void> {
+    const playlist = this.playlists.get(playlistId);
+    if (!playlist) {
+      console.warn(`Playlist not found: ${playlistId}`);
+      return;
+    }
+
+    // Preload all tracks in the playlist
+    const promises = playlist.tracks.map(track =>
+      this.preload(track.id, track.src, playlist.category, false)
+    );
+
+    await Promise.all(promises);
+  }
+
+  /**
+   * Play a playlist starting from the first track (or specified index)
+   */
+  public async playPlaylist(
+    playlistId: string,
+    startIndex = 0,
+    fadeDuration = 1000
+  ): Promise<void> {
+    const playlist = this.playlists.get(playlistId);
+    if (!playlist) {
+      console.warn(`Playlist not found: ${playlistId}`);
+      return;
+    }
+
+    if (playlist.tracks.length === 0) {
+      console.warn(`Playlist is empty: ${playlistId}`);
+      return;
+    }
+
+    // Set as current playlist
+    this.currentPlaylist = playlistId;
+    this.currentTrackIndex = startIndex;
+
+    // Initialize shuffle if needed
+    if (playlist.mode === PlaylistMode.SHUFFLE) {
+      this.initializeShuffle(playlist.tracks.length);
+    }
+
+    // Play the first track
+    await this.playPlaylistTrack(fadeDuration);
+  }
+
+  /**
+   * Play next track in playlist
+   */
+  public async nextTrack(fadeDuration = 1000): Promise<void> {
+    if (!this.currentPlaylist) {
+      console.warn('No active playlist');
+      return;
+    }
+
+    const playlist = this.playlists.get(this.currentPlaylist);
+    if (!playlist) return;
+
+    const nextIndex = this.getNextTrackIndex(playlist);
+    if (nextIndex !== null) {
+      this.currentTrackIndex = nextIndex;
+      await this.playPlaylistTrack(fadeDuration);
+    } else {
+      // End of playlist
+      await this.stopMusic(fadeDuration);
+      this.currentPlaylist = null;
+    }
+  }
+
+  /**
+   * Play previous track in playlist
+   */
+  public async previousTrack(fadeDuration = 1000): Promise<void> {
+    if (!this.currentPlaylist) {
+      console.warn('No active playlist');
+      return;
+    }
+
+    const playlist = this.playlists.get(this.currentPlaylist);
+    if (!playlist) return;
+
+    const prevIndex = this.getPreviousTrackIndex(playlist);
+    if (prevIndex !== null) {
+      this.currentTrackIndex = prevIndex;
+      await this.playPlaylistTrack(fadeDuration);
+    }
+  }
+
+  /**
+   * Stop current playlist
+   */
+  public async stopPlaylist(fadeDuration = 1000): Promise<void> {
+    if (this.currentPlaylist) {
+      await this.stopMusic(fadeDuration);
+      this.currentPlaylist = null;
+      this.currentTrackIndex = 0;
+      this.shuffleHistory = [];
+    }
+  }
+
+  /**
+   * Set playlist mode (sequential, shuffle, repeat, etc.)
+   */
+  public setPlaylistMode(playlistId: string, mode: PlaylistMode): void {
+    const playlist = this.playlists.get(playlistId);
+    if (playlist) {
+      playlist.mode = mode;
+
+      // Reinitialize shuffle if switching to shuffle mode
+      if (mode === PlaylistMode.SHUFFLE && playlistId === this.currentPlaylist) {
+        this.initializeShuffle(playlist.tracks.length);
+      }
+    }
+  }
+
+  /**
+   * Get current playlist information
+   */
+  public getCurrentPlaylistInfo(): {
+    playlistId: string;
+    playlistName: string;
+    currentTrack: number;
+    totalTracks: number;
+    currentTrackTitle?: string;
+    mode: PlaylistMode;
+  } | null {
+    if (!this.currentPlaylist) return null;
+
+    const playlist = this.playlists.get(this.currentPlaylist);
+    if (!playlist) return null;
+
+    const currentTrack = playlist.tracks[this.currentTrackIndex];
+
+    return {
+      playlistId: playlist.id,
+      playlistName: playlist.name,
+      currentTrack: this.currentTrackIndex + 1,
+      totalTracks: playlist.tracks.length,
+      currentTrackTitle: currentTrack?.title,
+      mode: playlist.mode,
+    };
+  }
+
+  /**
+   * Get all registered playlists
+   */
+  public getPlaylists(): Playlist[] {
+    return Array.from(this.playlists.values());
+  }
+
+  /**
+   * Get a specific playlist
+   */
+  public getPlaylist(playlistId: string): Playlist | undefined {
+    return this.playlists.get(playlistId);
+  }
+
+  /**
+   * Remove a playlist
+   */
+  public removePlaylist(playlistId: string): void {
+    if (this.currentPlaylist === playlistId) {
+      this.stopPlaylist();
+    }
+    this.playlists.delete(playlistId);
+  }
+
+  // Private helper methods
+
+  /**
+   * Play the current track in the active playlist
+   */
+  private async playPlaylistTrack(fadeDuration: number): Promise<void> {
+    if (!this.currentPlaylist) return;
+
+    const playlist = this.playlists.get(this.currentPlaylist);
+    if (!playlist) return;
+
+    const track = playlist.tracks[this.currentTrackIndex];
+    if (!track) return;
+
+    // Stop current music
+    if (this.currentMusic) {
+      await this.stopMusic(fadeDuration);
+    }
+
+    // Play the track
+    const audioTrack = this.tracks.get(track.id);
+    if (!audioTrack) {
+      console.warn(`Track not loaded: ${track.id}`);
+      return;
+    }
+
+    this.currentMusic = track.id;
+    audioTrack.audio.volume = 0;
+
+    // Set up event listener for track end
+    if (playlist.autoAdvance) {
+      const handleTrackEnd = async () => {
+        audioTrack.audio.removeEventListener('ended', handleTrackEnd);
+
+        // Auto-advance to next track
+        if (playlist.mode === PlaylistMode.REPEAT_ONE) {
+          // Replay the same track
+          audioTrack.audio.currentTime = 0;
+          await audioTrack.audio.play();
+          audioTrack.audio.addEventListener('ended', handleTrackEnd);
+        } else {
+          // Move to next track
+          await this.nextTrack(fadeDuration);
+        }
+      };
+
+      audioTrack.audio.addEventListener('ended', handleTrackEnd);
+    }
+
+    try {
+      await audioTrack.audio.play();
+      await this.fadeIn(audioTrack.audio, fadeDuration);
+      this.updateVolume(audioTrack.audio, playlist.category);
+    } catch (e) {
+      console.error(`Failed to play track: ${track.id}`, e);
+    }
+  }
+
+  /**
+   * Get next track index based on playlist mode
+   */
+  private getNextTrackIndex(playlist: Playlist): number | null {
+    const totalTracks = playlist.tracks.length;
+
+    switch (playlist.mode) {
+      case PlaylistMode.SEQUENTIAL:
+        if (this.currentTrackIndex < totalTracks - 1) {
+          return this.currentTrackIndex + 1;
+        }
+        return null; // End of playlist
+
+      case PlaylistMode.REPEAT_ALL:
+        return (this.currentTrackIndex + 1) % totalTracks;
+
+      case PlaylistMode.REPEAT_ONE:
+        return this.currentTrackIndex; // Stay on same track
+
+      case PlaylistMode.SHUFFLE:
+        return this.getNextShuffleIndex(totalTracks);
+
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * Get previous track index
+   */
+  private getPreviousTrackIndex(playlist: Playlist): number | null {
+    const totalTracks = playlist.tracks.length;
+
+    switch (playlist.mode) {
+      case PlaylistMode.SHUFFLE:
+        return this.getPreviousShuffleIndex();
+
+      case PlaylistMode.REPEAT_ONE:
+        return this.currentTrackIndex;
+
+      default:
+        if (this.currentTrackIndex > 0) {
+          return this.currentTrackIndex - 1;
+        }
+        if (playlist.mode === PlaylistMode.REPEAT_ALL) {
+          return totalTracks - 1;
+        }
+        return null;
+    }
+  }
+
+  /**
+   * Initialize shuffle order
+   */
+  private initializeShuffle(totalTracks: number): void {
+    this.shuffleHistory = [this.currentTrackIndex];
+  }
+
+  /**
+   * Get next shuffle index
+   */
+  private getNextShuffleIndex(totalTracks: number): number | null {
+    if (this.shuffleHistory.length >= totalTracks) {
+      // All tracks played, reset shuffle
+      this.shuffleHistory = [];
+    }
+
+    // Get available tracks
+    const available = Array.from({ length: totalTracks }, (_, i) => i)
+      .filter(i => !this.shuffleHistory.includes(i));
+
+    if (available.length === 0) return null;
+
+    // Pick random track from available
+    const nextIndex = available[Math.floor(Math.random() * available.length)];
+    this.shuffleHistory.push(nextIndex);
+
+    return nextIndex;
+  }
+
+  /**
+   * Get previous shuffle index
+   */
+  private getPreviousShuffleIndex(): number | null {
+    if (this.shuffleHistory.length <= 1) return null;
+
+    // Remove current from history and return previous
+    this.shuffleHistory.pop();
+    return this.shuffleHistory[this.shuffleHistory.length - 1];
   }
 
   // Private helper methods
