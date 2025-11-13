@@ -214,11 +214,43 @@
             color: #667eea;
         }
 
-        .manifest-files-list {
+        .manifest-editor-panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 900px) {
+            .manifest-editor-panels {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .manifest-panel {
             background: white;
             border-radius: 6px;
             padding: 15px;
-            margin-bottom: 15px;
+        }
+
+        .manifest-panel-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .manifest-panel-count {
+            font-size: 0.85em;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .manifest-files-list {
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         .manifest-file-item {
@@ -230,11 +262,27 @@
             background: #f8f9fa;
             border-radius: 4px;
             font-family: 'Courier New', monospace;
-            font-size: 0.9em;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+
+        .manifest-file-item:hover {
+            background: #e9ecef;
         }
 
         .manifest-file-item:last-child {
             margin-bottom: 0;
+        }
+
+        .manifest-file-item.available {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            cursor: pointer;
+        }
+
+        .manifest-file-item.available:hover {
+            background: #f0f9ff;
+            border-color: #667eea;
         }
 
         .manifest-empty {
@@ -242,6 +290,27 @@
             padding: 20px;
             color: #999;
             font-style: italic;
+            font-size: 0.9em;
+        }
+
+        .file-type-icon {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .file-type-icon.puzzle {
+            background: #28a745;
+        }
+
+        .file-type-icon.character {
+            background: #ff6b6b;
+        }
+
+        .file-type-icon.generic {
+            background: #ffd93d;
         }
 
         /* Folder Grid */
@@ -659,10 +728,27 @@
                                 </div>
                             </div>
 
-                            <div class="manifest-files-list">
-                                <div style="font-weight: 600; margin-bottom: 10px; color: #333;">Files in Manifest:</div>
-                                <div id="manifest-files">
-                                    <!-- Populated by JS -->
+                            <div class="manifest-editor-panels">
+                                <!-- Left: Files in Manifest -->
+                                <div class="manifest-panel">
+                                    <div class="manifest-panel-title">
+                                        ✅ Files in Manifest
+                                        <span class="manifest-panel-count" id="in-manifest-count-label">0 files</span>
+                                    </div>
+                                    <div class="manifest-files-list" id="manifest-files-in">
+                                        <!-- Populated by JS -->
+                                    </div>
+                                </div>
+
+                                <!-- Right: Available to Add -->
+                                <div class="manifest-panel">
+                                    <div class="manifest-panel-title">
+                                        📁 Available to Add
+                                        <span class="manifest-panel-count" id="available-count-label">0 files</span>
+                                    </div>
+                                    <div class="manifest-files-list" id="manifest-files-available">
+                                        <!-- Populated by JS -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1024,32 +1110,70 @@
 
             const editor = document.getElementById('manifest-editor');
             const title = document.getElementById('manifest-editor-title');
-            const filesDiv = document.getElementById('manifest-files');
+            const filesInDiv = document.getElementById('manifest-files-in');
+            const filesAvailableDiv = document.getElementById('manifest-files-available');
+            const inCountLabel = document.getElementById('in-manifest-count-label');
+            const availableCountLabel = document.getElementById('available-count-label');
 
             editor.style.display = 'block';
             title.textContent = `📋 Editing: ${selectedManifest.manifestType}Manifest.json`;
 
             const filesInManifest = getManifestFiles();
 
-            if (filesInManifest.length === 0) {
-                filesDiv.innerHTML = '<div class="manifest-empty">No files in this manifest yet. Add files from the list below.</div>';
-                return;
-            }
-
-            let html = '';
-            filesInManifest.forEach(filePath => {
-                const fileName = filePath.split('/').pop();
-                html += `
-                    <div class="manifest-file-item">
-                        <span>${fileName}</span>
-                        <button class="btn-danger btn-small" onclick="removeFromManifest('${filePath}')">
-                            ➖ Remove
-                        </button>
-                    </div>
-                `;
+            // Get all files in current folder (excluding manifest files)
+            const availableFiles = currentData.files.filter(file => !file.isManifest);
+            const filesNotInManifest = availableFiles.filter(file => {
+                const filePath = currentPath ? `${currentPath}/${file.name}` : file.name;
+                const dataPath = `/data/${filePath}`;
+                return !isFileInManifest(file.path);
             });
 
-            filesDiv.innerHTML = html;
+            // Update counts
+            inCountLabel.textContent = `${filesInManifest.length} file${filesInManifest.length !== 1 ? 's' : ''}`;
+            availableCountLabel.textContent = `${filesNotInManifest.length} file${filesNotInManifest.length !== 1 ? 's' : ''}`;
+
+            // Render files in manifest
+            if (filesInManifest.length === 0) {
+                filesInDiv.innerHTML = '<div class="manifest-empty">No files yet.<br>Add from the right panel →</div>';
+            } else {
+                let html = '';
+                filesInManifest.forEach(filePath => {
+                    const fileName = filePath.split('/').pop();
+                    html += `
+                        <div class="manifest-file-item">
+                            <span><span class="file-type-icon generic"></span>${fileName}</span>
+                            <button class="btn-danger btn-small" onclick="removeFromManifest('${filePath}')">
+                                ➖
+                            </button>
+                        </div>
+                    `;
+                });
+                filesInDiv.innerHTML = html;
+            }
+
+            // Render available files
+            if (filesNotInManifest.length === 0) {
+                filesAvailableDiv.innerHTML = '<div class="manifest-empty">All files in this folder<br>are already in the manifest!</div>';
+            } else {
+                let html = '';
+                filesNotInManifest.forEach(file => {
+                    const filePath = currentPath ? `${currentPath}/${file.name}` : file.name;
+                    const dataPath = `/data/${filePath}`;
+                    const contentType = file.contentType || 'generic';
+
+                    html += `
+                        <div class="manifest-file-item available" onclick="addToManifest('${dataPath}')">
+                            <span>
+                                <span class="file-type-icon ${contentType}"></span>${file.name}
+                            </span>
+                            <button class="btn-success btn-small" onclick="addToManifest('${dataPath}'); event.stopPropagation();">
+                                ➕
+                            </button>
+                        </div>
+                    `;
+                });
+                filesAvailableDiv.innerHTML = html;
+            }
         }
 
         // Render folders
