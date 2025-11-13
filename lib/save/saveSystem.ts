@@ -18,6 +18,14 @@ export interface SavedProgress {
   currentStoryPart?: number;
   currentPuzzleIndex?: number;
   gameMode?: string;
+  // Puzzle selection system fields
+  selectedGenre?: string;
+  nextKethaneumIndex?: number;
+  puzzlesSinceLastKethaneum?: number;
+  nextKethaneumInterval?: number;
+  completedPuzzlesByGenre?: { [genre: string]: string[] }; // Arrays instead of Sets for JSON
+  kethaneumRevealed?: boolean;
+  genreExhausted?: boolean;
 }
 
 /**
@@ -34,6 +42,16 @@ export function saveGameProgress(state: GameState): void {
     // Always update completedBooks based on the actual set size
     const completedBooks = state.discoveredBooks.size;
 
+    // Convert completedPuzzlesByGenre Sets to Arrays for JSON serialization
+    const completedPuzzlesByGenre: { [genre: string]: string[] } = {};
+    if (state.completedPuzzlesByGenre) {
+      for (const genre in state.completedPuzzlesByGenre) {
+        if (state.completedPuzzlesByGenre[genre] instanceof Set) {
+          completedPuzzlesByGenre[genre] = Array.from(state.completedPuzzlesByGenre[genre]);
+        }
+      }
+    }
+
     // Create a clean progress object with only the data we need
     const progress: SavedProgress = {
       completedPuzzles: state.completedPuzzles,
@@ -47,7 +65,15 @@ export function saveGameProgress(state: GameState): void {
       currentBook: state.currentBook && state.currentBook.trim() !== '' ? state.currentBook : undefined,
       currentStoryPart: state.currentStoryPart !== undefined && state.currentStoryPart >= 0 ? state.currentStoryPart : undefined,
       currentPuzzleIndex: state.currentPuzzleIndex !== undefined && state.currentPuzzleIndex >= 0 ? state.currentPuzzleIndex : undefined,
-      gameMode: state.gameMode || undefined
+      gameMode: state.gameMode || undefined,
+      // Puzzle selection system fields
+      selectedGenre: state.selectedGenre && state.selectedGenre.trim() !== '' ? state.selectedGenre : undefined,
+      nextKethaneumIndex: state.nextKethaneumIndex !== undefined && state.nextKethaneumIndex >= 0 ? state.nextKethaneumIndex : undefined,
+      puzzlesSinceLastKethaneum: state.puzzlesSinceLastKethaneum !== undefined ? state.puzzlesSinceLastKethaneum : undefined,
+      nextKethaneumInterval: state.nextKethaneumInterval !== undefined ? state.nextKethaneumInterval : undefined,
+      completedPuzzlesByGenre: Object.keys(completedPuzzlesByGenre).length > 0 ? completedPuzzlesByGenre : undefined,
+      kethaneumRevealed: state.kethaneumRevealed || undefined,
+      genreExhausted: state.genreExhausted || undefined,
     };
 
     // Save to localStorage
