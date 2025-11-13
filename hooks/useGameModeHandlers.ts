@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useRef, useEffect } from 'react';
-import type { GameState } from '@/lib/game/state';
+import type { GameState, PuzzleData } from '@/lib/game/state';
 import { recordPuzzleStats, incrementTotalWords } from '@/lib/game/stats';
 
 interface UseGameModeHandlersProps {
@@ -15,6 +15,7 @@ interface UseGameModeHandlersProps {
   setPuzzleStartTime: (time: number) => void;
   setStatsModalIsWin: (isWin: boolean) => void;
   setShowStatsModal: (show: boolean) => void;
+  markCompleted?: (puzzle: PuzzleData) => void; // Optional callback to mark puzzle as completed
 }
 
 export function useGameModeHandlers({
@@ -25,6 +26,7 @@ export function useGameModeHandlers({
   setPuzzleStartTime,
   setStatsModalIsWin,
   setShowStatsModal,
+  markCompleted,
 }: UseGameModeHandlersProps) {
   // Use ref to track current state for callbacks
   const stateRef = useRef(state);
@@ -121,10 +123,19 @@ export function useGameModeHandlers({
     } else {
       // Story Mode: Show win modal to let player choose when to continue
       console.log('[useGameModeHandlers.handleWin] Story mode - showing win modal');
+
+      // Mark the puzzle as completed for the new selection system
+      if (markCompleted && currentState.currentGenre && currentState.puzzles[currentState.currentGenre]) {
+        const currentPuzzle = currentState.puzzles[currentState.currentGenre][currentState.currentPuzzleIndex];
+        if (currentPuzzle) {
+          markCompleted(currentPuzzle);
+        }
+      }
+
       setStatsModalIsWin(true);
       setShowStatsModal(true);
     }
-  }, [state, setState, puzzleStartTime, loadBeatTheClock, setPuzzleStartTime, setStatsModalIsWin, setShowStatsModal]);
+  }, [state, setState, puzzleStartTime, loadBeatTheClock, setPuzzleStartTime, setStatsModalIsWin, setShowStatsModal, markCompleted]);
   
   const handleLose = useCallback(() => {
     // Get current state - use the state prop directly to avoid stale ref issues

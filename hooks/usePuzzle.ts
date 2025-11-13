@@ -9,6 +9,7 @@ import { loadRandomPuzzle, restorePuzzleOnlyPuzzle } from '@/lib/game/puzzleOnly
 import { loadBeatTheClockPuzzle } from '@/lib/game/beatTheClockLoader';
 import { initializePuzzle } from '@/lib/game/puzzleGenerator';
 import { getConfig } from '@/lib/core/config';
+import { selectNextPuzzle, initializePuzzleSelection, markPuzzleCompleted } from '@/lib/game/puzzleSelector';
 
 export function usePuzzle(state: GameState, setState: (state: GameState) => void) {
   const config = getConfig();
@@ -110,6 +111,50 @@ export function usePuzzle(state: GameState, setState: (state: GameState) => void
     }
   }, [setState, config]);
 
+  // Load puzzle using the new selection system (with Kethaneum weaving)
+  const loadWithSelection = useCallback(() => {
+    try {
+      const currentState = stateRef.current;
+
+      // Initialize puzzle selection system if needed
+      const initializedState = initializePuzzleSelection(currentState);
+
+      // Select the next puzzle
+      const { puzzle, newState, isKethaneum, message } = selectNextPuzzle(initializedState);
+
+      if (!puzzle) {
+        console.error('No puzzle selected:', message);
+        return { success: false, message };
+      }
+
+      // Initialize the selected puzzle
+      const { success, newState: finalState } = initializePuzzle(puzzle, config, newState);
+
+      if (success) {
+        setState(finalState);
+        return { success: true, isKethaneum, message };
+      }
+
+      return { success: false, message: 'Failed to initialize puzzle' };
+    } catch (error) {
+      console.error('Error loading puzzle with selection:', error);
+      return { success: false, message: 'Error loading puzzle' };
+    }
+  }, [setState, config]);
+
+  // Mark the current puzzle as completed
+  const markCompleted = useCallback((puzzle: PuzzleData) => {
+    try {
+      const currentState = stateRef.current;
+      const newState = markPuzzleCompleted(currentState, puzzle);
+      setState(newState);
+      return true;
+    } catch (error) {
+      console.error('Error marking puzzle as completed:', error);
+      return false;
+    }
+  }, [setState]);
+
   return {
     loadAll,
     loadSequential,
@@ -117,6 +162,8 @@ export function usePuzzle(state: GameState, setState: (state: GameState) => void
     loadRandom,
     restorePuzzleOnly,
     loadBeatTheClock,
+    loadWithSelection,
+    markCompleted,
   };
 }
 
