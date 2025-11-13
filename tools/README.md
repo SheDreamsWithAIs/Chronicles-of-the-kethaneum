@@ -1,6 +1,6 @@
 # Chronicles of the Kethaneum - Development Tools
 
-This directory contains development tools to help manage the game project. These are **development-only tools** that should never be deployed to production or exposed to players.
+This directory contains development tools for managing game content. These are **development-only tools** that should never be deployed to production or exposed to players.
 
 ## Getting Started
 
@@ -21,134 +21,204 @@ npm start
 
 The server will start on `http://localhost:3030`
 
-## Manifest Editor
+## Manifest Manager
 
 **Access:** `http://localhost:3030` (when server is running)
 
-A powerful web-based GUI tool for managing puzzle data files and the manifest system.
+A modular content management system for organizing and managing game data files across multiple systems (puzzles, characters, items, etc.).
 
-### Features
+### Overview
 
-#### File Management
-- **View All Files**: Automatically scans and displays all JSON files in `/public/data/`
-- **File Status Indicators**:
-  - 🟢 Green = File is in the manifest and will be loaded by the game
-  - 🟡 Yellow = File exists but is not in the manifest
-  - 🔵 Blue = The manifest file itself
-- **Statistics Dashboard**: Shows total files, manifest status, and puzzle counts
+The Manifest Manager is designed to support a **modular game content architecture** that allows you to:
+- Organize content by system (puzzles, characters, items, etc.)
+- Create and manage manifest files for different game systems
+- Easily swap content between games
+- Navigate folder hierarchies
+- Maintain clean separation of concerns
 
-#### Manifest Operations
-- **Add to Manifest**: Click to add any file to the manifest with one click
-- **Remove from Manifest**: Remove files from the manifest
-- **Automatic Saving**: Changes are saved directly to `/public/data/genreManifest.json`
-- **View JSON**: Preview the raw manifest JSON
-- **Copy to Clipboard**: Copy manifest JSON for manual editing
+### Key Features
 
-#### Create New Files
-- **Create Puzzle Files**: Create new puzzle JSON files with a template structure
-- **Genre Setup**: Specify the genre name when creating files
-- **Automatic Template**: New files include a sample puzzle structure
+#### 📁 Folder Navigation
+- **Breadcrumb Navigation**: Click through folder paths with ease
+- **Visual Folder Cards**: Folders displayed as clickable cards
+- **Create New Folders**: Organize content by creating subdirectories
+- **Navigate Anywhere**: Browse through `/data/` and all subdirectories
 
-#### Delete Files
-- **Safe Deletion**: Permanently delete puzzle files with confirmation
-- **Automatic Cleanup**: Files are automatically removed from manifest when deleted
-- **Protection**: Cannot delete the manifest file itself
+#### 📋 Multiple Manifest Support
+- **Any Manifest Type**: Create `genreManifest.json`, `characterManifest.json`, `itemManifest.json`, etc.
+- **Folder-Specific**: Each folder can have its own set of manifests
+- **Sidebar Display**: Active manifests shown in the sidebar for quick access
+- **Automatic Detection**: Manifest files (ending in `Manifest.json`) are automatically recognized
 
-#### Preview Files
-- **Quick View**: See puzzle contents without opening files
-- **Metadata Display**: Shows genre, puzzle count, books, etc.
-- **Raw JSON View**: View the actual JSON structure
+#### 📄 File Management
+- **Content Type Detection**: Automatically identifies file types (puzzles, characters, generic)
+- **Color-Coded Display**: Different file types have distinct visual indicators
+  - 🟢 Green = Puzzle data
+  - 🔴 Red = Character data
+  - 🟡 Yellow = Generic/unknown data
+  - 🔵 Blue = Manifest files
+- **Quick Preview**: View file contents in a modal window
+- **Delete Files**: Remove files with confirmation
+- **Create Files**: New files with template structures based on content type
 
-### How to Use
+#### ⚙️ Content Types
 
-1. **Start the server** (see above)
+The tool supports multiple content types with appropriate templates:
 
-2. **Open the tool** in your web browser:
-   ```
-   http://localhost:3030
-   ```
-
-3. **Managing the Manifest:**
-   - All files in `/public/data/` are automatically detected
-   - Files highlighted in green are already in the manifest
-   - Click "Add to Manifest" on yellow files to include them
-   - Click "Remove from Manifest" to exclude files
-   - Changes save automatically to `genreManifest.json`
-
-4. **Creating New Puzzle Files:**
-   - Enter a filename (must end with `.json`)
-   - Enter the genre name
-   - Click "Create File"
-   - The file is created in `/public/data/` with a template puzzle
-   - Edit the file manually to add your puzzles
-
-5. **Deleting Files:**
-   - Click the "Delete File" button
-   - Confirm the deletion
-   - File is permanently removed from disk and manifest
-
-6. **Viewing Files:**
-   - Click "View" to see file contents in a modal
-   - Shows puzzle metadata and raw JSON
-
-### File Structure Requirements
-
-All puzzle files must follow this structure:
-
+**Puzzle Data:**
 ```json
 [
   {
-    "title": "Puzzle Title - Part 1",
-    "book": "Book Name",
+    "title": "Sample Puzzle - Part 1",
+    "book": "Sample Book",
     "storyPart": 0,
-    "genre": "Genre Name",
-    "words": ["word1", "word2", "word3"],
-    "storyExcerpt": "Story text here..."
+    "genre": "New Genre",
+    "words": ["sample", "words", "here"],
+    "storyExcerpt": "Story text..."
   }
 ]
 ```
 
-**Important:**
-- All puzzles in a file should have the same `genre` value
-- The `genre` field determines how the file appears in the game
-- `storyPart` is a 0-based index for story progression
+**Character Data:**
+```json
+[
+  {
+    "name": "Sample Character",
+    "role": "NPC",
+    "description": "Character description"
+  }
+]
+```
 
-### Manifest File Format
-
-The `genreManifest.json` file structure:
-
+**Manifest Files:**
 ```json
 {
-  "genreFiles": [
-    "/data/file1.json",
-    "/data/file2.json",
-    "/data/file3.json"
-  ]
+  "files": []
 }
 ```
 
-- Only files listed in `genreFiles` are loaded by the game
-- Paths must start with `/data/`
-- Order in the array doesn't affect game behavior
+### How to Use
+
+#### Initial Setup
+
+1. **Start the server**: Run `npm start` from the `tools/` directory
+2. **Open your browser**: Navigate to `http://localhost:3030`
+3. **You'll see**: The root `/data/` folder with all existing files
+
+#### Creating a Content System
+
+Let's say you want to add a character system to your game:
+
+1. **Create a folder**:
+   - Click "📁 New Folder"
+   - Enter name: `characters`
+   - Click "Create Folder"
+
+2. **Navigate into folder**:
+   - Click the `characters` folder card
+   - You're now in `/data/characters/`
+
+3. **Create a manifest**:
+   - Click "📋 New Manifest"
+   - Enter name: `character` (will create `characterManifest.json`)
+   - Click "Create Manifest"
+
+4. **Create character files**:
+   - Click "📄 New File"
+   - Enter filename: `npcs.json`
+   - Select content type: "Character Data"
+   - Click "Create File"
+
+5. **Edit the files**:
+   - Click "👁️ View" to see contents
+   - Edit files manually in your code editor
+   - Refresh the tool to see updates
+
+6. **Update the manifest**:
+   - Manually edit `characterManifest.json` to include your files
+   - Or implement manifest editing UI (future feature)
+
+#### Navigating the Project
+
+- **Breadcrumbs**: Click any part of the path to jump to that folder
+- **Folders**: Displayed as visual cards at the top
+- **Files**: Listed below with metadata
+- **Sidebar**: Shows manifests in the current folder
+
+### File Organization
+
+The tool supports this structure:
+
+```
+/public/data/
+├── genreManifest.json          # Main puzzle manifest
+├── kethaneumPuzzles.json       # Puzzle files
+├── naturePuzzles.json
+├── /characters/                 # Character system folder
+│   ├── characterManifest.json  # Character manifest
+│   ├── npcs.json               # NPC data
+│   └── protagonists.json       # Main character data
+├── /items/                      # Item system folder
+│   ├── itemManifest.json       # Item manifest
+│   ├── weapons.json            # Weapon data
+│   └── consumables.json        # Consumable items
+└── /environments/               # Environment system folder
+    ├── environmentManifest.json
+    └── locations.json
+```
 
 ### API Endpoints
 
-The tool exposes these REST API endpoints (for advanced usage):
+The tool provides these REST endpoints:
 
-- `GET /api/scan-files` - List all JSON files in data directory
-- `GET /api/manifest` - Get current manifest
-- `POST /api/manifest` - Save manifest changes
-- `GET /api/file/:filename` - Get file contents
+- `GET /api/browse?path=<path>` - Browse folder structure
+- `GET /api/manifest/:manifestName?path=<path>` - Get specific manifest
+- `POST /api/manifest/:manifestName` - Save manifest
+- `GET /api/file?path=<path>` - Get file contents
 - `POST /api/file` - Create new file
-- `PUT /api/file/:filename` - Update file
-- `DELETE /api/file/:filename` - Delete file
+- `DELETE /api/file?path=<path>` - Delete file
+- `POST /api/folder` - Create new folder
+
+### Modular Content Architecture
+
+This tool is designed to support **swappable game content**:
+
+#### Benefits
+
+1. **System Separation**: Each game system (puzzles, characters, items) has its own folder and manifest
+2. **Content Reusability**: Copy entire folders between games
+3. **Clean Organization**: No mixing of different content types
+4. **Easy Maintenance**: Update one system without affecting others
+5. **Scalability**: Add new systems without modifying existing code
+
+#### Example: Swapping Puzzle Sets
+
+To use different puzzles in a game:
+
+1. Create puzzle sets in separate folders
+2. Each set has its own manifest
+3. Point your game loader to different manifests
+4. Swap content by changing manifest references
+
+```
+/public/data/
+├── /puzzles-fantasy/
+│   ├── genreManifest.json
+│   └── (fantasy puzzle files)
+├── /puzzles-scifi/
+│   ├── genreManifest.json
+│   └── (sci-fi puzzle files)
+└── /puzzles-historical/
+    ├── genreManifest.json
+    └── (historical puzzle files)
+```
 
 ### Security Notes
 
 **IMPORTANT**: This tool:
 - Should **ONLY** be run locally during development
 - Has full file system access to `/public/data/`
-- Can create, modify, and delete puzzle files
+- Can create, modify, and delete files and folders
 - Should **NEVER** be deployed to production
 - Should **NEVER** be accessible to players
 - Runs on `localhost` only by default
@@ -156,56 +226,59 @@ The tool exposes these REST API endpoints (for advanced usage):
 ### Troubleshooting
 
 **Server won't start:**
-- Make sure you ran `npm install` first
+- Run `npm install` first
 - Check that port 3030 is not in use
 - Verify you're in the `tools/` directory
 
 **Can't see files:**
-- Make sure the `/public/data/` directory exists
+- Ensure `/public/data/` directory exists
 - Check file permissions
 - Verify files are valid JSON
 
-**Changes not saving:**
-- Check server console for errors
-- Verify write permissions on `/public/data/`
-- Make sure the server is still running
+**Can't create folders:**
+- Check disk space
+- Verify write permissions
+- Ensure parent folder exists
 
-**File creation fails:**
-- Ensure filename ends with `.json`
-- Check for filename conflicts
-- Verify disk space
-
-## Future Tools
-
-This directory can be expanded with additional development tools:
-
-- **Character Asset Manager**: Upload and organize character images
-- **Story Validator**: Check story continuity and progression
-- **Puzzle Tester**: Test puzzle difficulty and word placement
-- **Asset Inventory**: Track all game assets
-- **Build Validator**: Verify build integrity
+**Changes not appearing:**
+- Click the "🔄 Refresh" button
+- Check browser console for errors
+- Verify server is still running
 
 ## Technical Details
 
 ### Stack
 - **Backend**: Node.js + Express
-- **Frontend**: Vanilla JavaScript (no framework needed)
+- **Frontend**: Vanilla JavaScript (no framework)
 - **Storage**: Direct file system operations
 - **Port**: 3030 (default)
 
 ### File Organization
 ```
 tools/
-├── package.json          # Dependencies
-├── server.js            # Express server with API
-├── manifest-editor.html # Web interface
-└── README.md           # This file
+├── package.json            # Dependencies
+├── server.js              # Express server with file system API
+├── manifest-editor.html   # Web interface
+├── .gitignore            # Excludes node_modules
+└── README.md             # This file
 ```
 
 ### Dependencies
 - `express` - Web server framework
 - `cors` - Cross-origin resource sharing
 
+## Future Enhancements
+
+Possible additions to this tool:
+
+- **Manifest Editing UI**: Visual interface to add/remove files from manifests
+- **Drag & Drop**: Drag files into manifests
+- **File Upload**: Upload JSON files through the browser
+- **JSON Editor**: Edit file contents in the tool
+- **Validation**: Verify file structure and content
+- **Templates**: More content type templates
+- **Export/Import**: Package entire content systems
+
 ---
 
-For more information about puzzle data and manifests, see `/public/data/README.md`.
+For more information about the game data structure, see `/public/data/README.md`.

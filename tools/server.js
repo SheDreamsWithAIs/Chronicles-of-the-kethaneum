@@ -14,61 +14,136 @@ app.use(express.static(__dirname));
 
 // Paths
 const DATA_DIR = path.join(__dirname, '../public/data');
-const MANIFEST_PATH = path.join(DATA_DIR, 'genreManifest.json');
+
+// Helper function to check if path is safe (within DATA_DIR)
+function isSafePath(requestedPath) {
+  const resolved = path.resolve(DATA_DIR, requestedPath);
+  return resolved.startsWith(DATA_DIR);
+}
+
+// Helper function to detect manifest files
+function isManifestFile(filename) {
+  return filename.endsWith('Manifest.json');
+}
+
+// Helper function to recursively scan directory
+async function scanDirectory(dirPath, relativePath = '') {
+  try {
+    const entries = await fs.readdir(dirPath, { withFileTypes: true });
+    const result = {
+      folders: [],
+      files: [],
+      manifests: []
+    };
+
+    for (const entry of entries) {
+      const fullPath = path.join(dirPath, entry.name);
+      const relPath = path.join(relativePath, entry.name);
+
+      if (entry.isDirectory()) {
+        result.folders.push({
+          name: entry.name,
+          path: relPath,
+          fullPath: fullPath
+        });
+      } else if (entry.isFile() && entry.name.endsWith('.json')) {
+        try {
+          const stats = await fs.stat(fullPath);
+          const content = await fs.readFile(fullPath, 'utf8');
+          const data = JSON.parse(content);
+
+          const fileInfo = {
+            name: entry.name,
+            path: relPath,
+            fullPath: fullPath,
+            size: stats.size,
+            modified: stats.mtime,
+            isManifest: isManifestFile(entry.name)
+          };
+
+          // Analyze content type
+          if (fileInfo.isManifest) {
+            fileInfo.manifestType = entry.name.replace('Manifest.json', '');
+            fileInfo.itemCount = Object.values(data)[0]?.length || 0;
+            result.manifests.push(fileInfo);
+          } else {
+            // Try to detect content type
+            if (Array.isArray(data)) {
+              fileInfo.itemCount = data.length;
+
+              // Check if it's puzzle data
+              if (data[0]?.genre && data[0]?.words) {
+                fileInfo.contentType = 'puzzle';
+                fileInfo.genre = data[0].genre;
+                fileInfo.books = [...new Set(data.map(p => p.book).filter(Boolean))];
+              }
+              // Check if it's character data
+              else if (data[0]?.name && data[0]?.role) {
+                fileInfo.contentType = 'character';
+              }
+              // Generic array
+              else {
+                fileInfo.contentType = 'array';
+              }
+            } else if (typeof data === 'object') {
+              fileInfo.contentType = 'object';
+              fileInfo.keys = Object.keys(data);
+            }
+
+            result.files.push(fileInfo);
+          }
+        } catch (err) {
+          result.files.push({
+            name: entry.name,
+            path: relPath,
+            fullPath: fullPath,
+            error: true,
+            errorMessage: err.message
+          });
+        }
+      }
+    }
+
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
 
 // API Routes
 
 /**
- * Get all JSON files in the data directory
+ * Scan directory structure
  */
-app.get('/api/scan-files', async (req, res) => {
+app.get('/api/browse', async (req, res) => {
   try {
-    const files = await fs.readdir(DATA_DIR);
-    const jsonFiles = files
-      .filter(file => file.endsWith('.json'))
-      .map(file => ({
-        name: file,
-        path: `/data/${file}`,
-        fullPath: path.join(DATA_DIR, file)
-      }));
+    const requestedPath = req.query.path || '';
 
-    // Get file stats for each file
-    const filesWithStats = await Promise.all(
-      jsonFiles.map(async (file) => {
-        try {
-          const stats = await fs.stat(file.fullPath);
-          const content = await fs.readFile(file.fullPath, 'utf8');
-          const data = JSON.parse(content);
+    if (!isSafePath(requestedPath)) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied'
+      });
+    }
 
-          let fileInfo = {
-            ...file,
-            size: stats.size,
-            modified: stats.mtime,
-            isManifest: file.name === 'genreManifest.json'
-          };
+    const fullPath = path.join(DATA_DIR, requestedPath);
 
-          // If it's not a manifest, try to get puzzle info
-          if (!fileInfo.isManifest && Array.isArray(data)) {
-            fileInfo.puzzleCount = data.length;
-            fileInfo.genre = data[0]?.genre || 'Unknown';
-            fileInfo.books = [...new Set(data.map(p => p.book).filter(Boolean))];
-          }
+    // Check if path exists
+    try {
+      await fs.access(fullPath);
+    } catch {
+      return res.status(404).json({
+        success: false,
+        error: 'Path not found'
+      });
+    }
 
-          return fileInfo;
-        } catch (err) {
-          return {
-            ...file,
-            error: true,
-            errorMessage: err.message
-          };
-        }
-      })
-    );
+    const structure = await scanDirectory(fullPath, requestedPath);
 
     res.json({
       success: true,
-      files: filesWithStats,
-      dataDir: DATA_DIR
+      currentPath: requestedPath,
+      ...structure
     });
   } catch (error) {
     res.status(500).json({
@@ -79,39 +154,72 @@ app.get('/api/scan-files', async (req, res) => {
 });
 
 /**
- * Get the current manifest
+ * Get a specific manifest file
  */
-app.get('/api/manifest', async (req, res) => {
+app.get('/api/manifest/:manifestName', async (req, res) => {
   try {
-    const content = await fs.readFile(MANIFEST_PATH, 'utf8');
-    const manifest = JSON.parse(content);
-    res.json({
-      success: true,
-      manifest: manifest
-    });
-  } catch (error) {
-    // If manifest doesn't exist, return empty
-    if (error.code === 'ENOENT') {
-      res.json({
-        success: true,
-        manifest: { genreFiles: [] }
-      });
-    } else {
-      res.status(500).json({
+    const manifestName = req.params.manifestName;
+    const folderPath = req.query.path || '';
+
+    if (!isSafePath(folderPath)) {
+      return res.status(403).json({
         success: false,
-        error: error.message
+        error: 'Access denied'
       });
     }
+
+    const manifestPath = path.join(DATA_DIR, folderPath, `${manifestName}Manifest.json`);
+
+    try {
+      const content = await fs.readFile(manifestPath, 'utf8');
+      const manifest = JSON.parse(content);
+      res.json({
+        success: true,
+        manifest: manifest,
+        manifestName: manifestName,
+        path: folderPath
+      });
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        // Manifest doesn't exist, return empty structure
+        res.json({
+          success: true,
+          manifest: {},
+          manifestName: manifestName,
+          path: folderPath,
+          exists: false
+        });
+      } else {
+        throw error;
+      }
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 });
 
 /**
- * Save the manifest
+ * Save a manifest file
  */
-app.post('/api/manifest', async (req, res) => {
+app.post('/api/manifest/:manifestName', async (req, res) => {
   try {
-    const manifest = req.body;
-    await fs.writeFile(MANIFEST_PATH, JSON.stringify(manifest, null, 2), 'utf8');
+    const manifestName = req.params.manifestName;
+    const folderPath = req.body.path || '';
+    const manifest = req.body.manifest;
+
+    if (!isSafePath(folderPath)) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied'
+      });
+    }
+
+    const manifestPath = path.join(DATA_DIR, folderPath, `${manifestName}Manifest.json`);
+    await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2), 'utf8');
+
     res.json({
       success: true,
       message: 'Manifest saved successfully'
@@ -125,27 +233,27 @@ app.post('/api/manifest', async (req, res) => {
 });
 
 /**
- * Get contents of a specific puzzle file
+ * Get file contents
  */
-app.get('/api/file/:filename', async (req, res) => {
+app.get('/api/file', async (req, res) => {
   try {
-    const filename = req.params.filename;
-    const filePath = path.join(DATA_DIR, filename);
+    const filePath = req.query.path;
 
-    // Security check - ensure file is within DATA_DIR
-    if (!filePath.startsWith(DATA_DIR)) {
+    if (!filePath || !isSafePath(filePath)) {
       return res.status(403).json({
         success: false,
         error: 'Access denied'
       });
     }
 
-    const content = await fs.readFile(filePath, 'utf8');
+    const fullPath = path.join(DATA_DIR, filePath);
+    const content = await fs.readFile(fullPath, 'utf8');
     const data = JSON.parse(content);
 
     res.json({
       success: true,
-      data: data
+      data: data,
+      path: filePath
     });
   } catch (error) {
     res.status(500).json({
@@ -156,11 +264,11 @@ app.get('/api/file/:filename', async (req, res) => {
 });
 
 /**
- * Create a new puzzle file
+ * Create a new file
  */
 app.post('/api/file', async (req, res) => {
   try {
-    const { filename, genre, initialData } = req.body;
+    const { filename, folderPath, contentType, initialData } = req.body;
 
     if (!filename || !filename.endsWith('.json')) {
       return res.status(400).json({
@@ -169,7 +277,15 @@ app.post('/api/file', async (req, res) => {
       });
     }
 
-    const filePath = path.join(DATA_DIR, filename);
+    const targetPath = folderPath || '';
+    if (!isSafePath(targetPath)) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied'
+      });
+    }
+
+    const filePath = path.join(DATA_DIR, targetPath, filename);
 
     // Check if file already exists
     if (fsSync.existsSync(filePath)) {
@@ -179,24 +295,48 @@ app.post('/api/file', async (req, res) => {
       });
     }
 
-    // Create initial data structure
-    const defaultData = initialData || [
-      {
-        title: `Sample Puzzle - Part 1`,
-        book: `Sample Book`,
-        storyPart: 0,
-        genre: genre || 'New Genre',
-        words: ['sample', 'words', 'here'],
-        storyExcerpt: 'This is a sample puzzle. Replace with your own content.'
+    // Create default data based on content type
+    let defaultData = initialData;
+
+    if (!defaultData) {
+      switch (contentType) {
+        case 'puzzle':
+          defaultData = [
+            {
+              title: 'Sample Puzzle - Part 1',
+              book: 'Sample Book',
+              storyPart: 0,
+              genre: 'New Genre',
+              words: ['sample', 'words', 'here'],
+              storyExcerpt: 'This is a sample puzzle. Replace with your own content.'
+            }
+          ];
+          break;
+        case 'character':
+          defaultData = [
+            {
+              name: 'Sample Character',
+              role: 'NPC',
+              description: 'A sample character description'
+            }
+          ];
+          break;
+        case 'manifest':
+          defaultData = {
+            files: []
+          };
+          break;
+        default:
+          defaultData = [];
       }
-    ];
+    }
 
     await fs.writeFile(filePath, JSON.stringify(defaultData, null, 2), 'utf8');
 
     res.json({
       success: true,
       message: 'File created successfully',
-      path: `/data/${filename}`
+      path: path.join(targetPath, filename)
     });
   } catch (error) {
     res.status(500).json({
@@ -207,31 +347,30 @@ app.post('/api/file', async (req, res) => {
 });
 
 /**
- * Delete a puzzle file
+ * Delete a file
  */
-app.delete('/api/file/:filename', async (req, res) => {
+app.delete('/api/file', async (req, res) => {
   try {
-    const filename = req.params.filename;
+    const filePath = req.query.path;
 
-    // Prevent deletion of manifest file
-    if (filename === 'genreManifest.json') {
-      return res.status(403).json({
-        success: false,
-        error: 'Cannot delete the manifest file'
-      });
-    }
-
-    const filePath = path.join(DATA_DIR, filename);
-
-    // Security check
-    if (!filePath.startsWith(DATA_DIR)) {
+    if (!filePath || !isSafePath(filePath)) {
       return res.status(403).json({
         success: false,
         error: 'Access denied'
       });
     }
 
-    await fs.unlink(filePath);
+    // Prevent deletion of important manifests
+    const filename = path.basename(filePath);
+    if (filename === 'genreManifest.json' && filePath === 'genreManifest.json') {
+      return res.status(403).json({
+        success: false,
+        error: 'Cannot delete the main genre manifest'
+      });
+    }
+
+    const fullPath = path.join(DATA_DIR, filePath);
+    await fs.unlink(fullPath);
 
     res.json({
       success: true,
@@ -246,36 +385,43 @@ app.delete('/api/file/:filename', async (req, res) => {
 });
 
 /**
- * Update a puzzle file
+ * Create a new folder
  */
-app.put('/api/file/:filename', async (req, res) => {
+app.post('/api/folder', async (req, res) => {
   try {
-    const filename = req.params.filename;
-    const { data } = req.body;
+    const { folderName, parentPath } = req.body;
 
-    const filePath = path.join(DATA_DIR, filename);
+    if (!folderName) {
+      return res.status(400).json({
+        success: false,
+        error: 'Folder name is required'
+      });
+    }
 
-    // Security check
-    if (!filePath.startsWith(DATA_DIR)) {
+    const targetPath = parentPath || '';
+    if (!isSafePath(targetPath)) {
       return res.status(403).json({
         success: false,
         error: 'Access denied'
       });
     }
 
-    // Validate JSON
-    if (!data) {
-      return res.status(400).json({
+    const folderPath = path.join(DATA_DIR, targetPath, folderName);
+
+    // Check if folder already exists
+    if (fsSync.existsSync(folderPath)) {
+      return res.status(409).json({
         success: false,
-        error: 'No data provided'
+        error: 'Folder already exists'
       });
     }
 
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+    await fs.mkdir(folderPath, { recursive: true });
 
     res.json({
       success: true,
-      message: 'File updated successfully'
+      message: 'Folder created successfully',
+      path: path.join(targetPath, folderName)
     });
   } catch (error) {
     res.status(500).json({

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manifest Editor - Chronicles of the Kethaneum</title>
+    <title>Manifest Manager - Chronicles of the Kethaneum</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             background: white;
             border-radius: 12px;
@@ -48,16 +48,133 @@
             padding: 30px;
         }
 
-        .two-column {
+        /* Breadcrumbs */
+        .breadcrumbs {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .breadcrumb-item {
+            cursor: pointer;
+            color: #667eea;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .breadcrumb-item:hover {
+            color: #5568d3;
+            text-decoration: underline;
+        }
+
+        .breadcrumb-item.current {
+            color: #333;
+            cursor: default;
+        }
+
+        .breadcrumb-item.current:hover {
+            text-decoration: none;
+        }
+
+        .breadcrumb-separator {
+            color: #999;
+        }
+
+        /* Actions Bar */
+        .actions-bar {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* Grid Layout */
+        .grid-layout {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 250px 1fr;
             gap: 30px;
         }
 
-        @media (max-width: 968px) {
-            .two-column {
+        @media (max-width: 1200px) {
+            .grid-layout {
                 grid-template-columns: 1fr;
             }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            height: fit-content;
+        }
+
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+
+        .sidebar-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .manifest-list {
+            list-style: none;
+        }
+
+        .manifest-item {
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid #667eea;
+        }
+
+        .manifest-item:hover {
+            background: #e9ecef;
+            transform: translateX(3px);
+        }
+
+        .manifest-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .manifest-name {
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .manifest-meta {
+            font-size: 0.75em;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        /* Main Content */
+        .main-content {
+            background: white;
         }
 
         .section {
@@ -65,7 +182,7 @@
         }
 
         .section-title {
-            font-size: 1.5em;
+            font-size: 1.3em;
             color: #333;
             margin-bottom: 15px;
             padding-bottom: 10px;
@@ -75,36 +192,42 @@
             align-items: center;
         }
 
-        .stats {
+        /* Folder Grid */
+        .folder-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 15px;
             margin-bottom: 30px;
         }
 
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .folder-card {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
             padding: 20px;
             border-radius: 8px;
             text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
         }
 
-        .stat-value {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin-bottom: 5px;
+        .folder-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
 
-        .stat-label {
-            font-size: 0.9em;
-            opacity: 0.9;
+        .folder-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
         }
 
+        .folder-name {
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        /* File List */
         .file-list {
             list-style: none;
-            max-height: 600px;
-            overflow-y: auto;
         }
 
         .file-item {
@@ -113,30 +236,41 @@
             margin-bottom: 10px;
             border-radius: 8px;
             transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
         }
 
         .file-item:hover {
             background: #e9ecef;
-            transform: translateX(5px);
         }
 
-        .file-item.in-manifest {
+        .file-item.manifest {
+            border-left: 4px solid #667eea;
+            background: #e7f3ff;
+        }
+
+        .file-item.puzzle {
             border-left: 4px solid #28a745;
         }
 
-        .file-item.not-in-manifest {
-            border-left: 4px solid #ffc107;
+        .file-item.character {
+            border-left: 4px solid #ff6b6b;
         }
 
-        .file-item.is-manifest {
-            border-left: 4px solid #667eea;
-            opacity: 0.7;
+        .file-item.generic {
+            border-left: 4px solid #ffd93d;
+        }
+
+        .file-info {
+            flex: 1;
         }
 
         .file-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 10px;
             margin-bottom: 8px;
         }
 
@@ -147,26 +281,12 @@
             font-size: 1em;
         }
 
-        .file-badges {
-            display: flex;
-            gap: 8px;
-        }
-
         .badge {
-            padding: 4px 10px;
+            padding: 3px 8px;
             border-radius: 12px;
-            font-size: 0.75em;
+            font-size: 0.7em;
             font-weight: 600;
-        }
-
-        .badge.in-manifest {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .badge.not-in-manifest {
-            background: #fff3cd;
-            color: #856404;
+            text-transform: uppercase;
         }
 
         .badge.manifest {
@@ -174,10 +294,24 @@
             color: #0c5460;
         }
 
+        .badge.puzzle {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.character {
+            background: #ffe0e0;
+            color: #7a1515;
+        }
+
+        .badge.generic {
+            background: #fff3cd;
+            color: #856404;
+        }
+
         .file-meta {
             font-size: 0.85em;
             color: #666;
-            margin-bottom: 8px;
         }
 
         .file-actions {
@@ -186,6 +320,7 @@
             flex-wrap: wrap;
         }
 
+        /* Buttons */
         button {
             padding: 8px 16px;
             border: none;
@@ -233,15 +368,6 @@
             background: #218838;
         }
 
-        .btn-warning {
-            background: #ffc107;
-            color: #333;
-        }
-
-        .btn-warning:hover {
-            background: #e0a800;
-        }
-
         .btn-secondary {
             background: #6c757d;
             color: white;
@@ -256,11 +382,52 @@
             font-size: 0.8em;
         }
 
-        .form-card {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 90%;
+        }
+
+        .modal-header {
             margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: #333;
         }
 
         .form-group {
@@ -281,10 +448,6 @@
             border: 2px solid #dee2e6;
             border-radius: 6px;
             font-size: 1em;
-        }
-
-        .form-group input[type="text"] {
-            font-family: 'Courier New', monospace;
         }
 
         .form-group input:focus,
@@ -317,12 +480,6 @@
             border-left: 4px solid #dc3545;
         }
 
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border-left: 4px solid #ffc107;
-        }
-
         .loading {
             text-align: center;
             padding: 40px;
@@ -344,71 +501,16 @@
             100% { transform: rotate(360deg); }
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            max-width: 800px;
-            max-height: 80vh;
-            overflow-y: auto;
-            width: 90%;
-        }
-
-        .modal-header {
-            margin-bottom: 20px;
-        }
-
-        .modal-header h2 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .modal-close {
-            float: right;
-            font-size: 1.5em;
-            cursor: pointer;
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
             color: #999;
         }
 
-        .modal-close:hover {
-            color: #333;
-        }
-
-        .puzzle-preview {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid #667eea;
-        }
-
-        .puzzle-title {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .puzzle-detail {
-            font-size: 0.9em;
-            color: #666;
-            margin: 3px 0;
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
         }
 
         pre {
@@ -417,129 +519,74 @@
             border-radius: 8px;
             overflow-x: auto;
             font-size: 0.85em;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-
-        .empty-state-icon {
-            font-size: 3em;
-            margin-bottom: 15px;
+            max-height: 400px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📝 Manifest Editor</h1>
-            <p>Development tool for managing puzzle data files</p>
+            <h1>📋 Manifest Manager</h1>
+            <p>Modular content management system for game data</p>
         </div>
 
         <div class="content">
             <div id="loading" class="loading">
                 <div class="spinner"></div>
-                <p>Loading data...</p>
+                <p>Loading...</p>
             </div>
 
             <div id="error-display"></div>
 
             <div id="main-content" style="display: none;">
-                <!-- Stats Section -->
-                <div class="stats">
-                    <div class="stat-card">
-                        <div class="stat-value" id="total-files">0</div>
-                        <div class="stat-label">Total Files</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="in-manifest-count">0</div>
-                        <div class="stat-label">In Manifest</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="not-in-manifest-count">0</div>
-                        <div class="stat-label">Not in Manifest</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="total-puzzles">0</div>
-                        <div class="stat-label">Total Puzzles</div>
-                    </div>
+                <!-- Breadcrumbs -->
+                <div class="breadcrumbs" id="breadcrumbs">
+                    <!-- Populated by JS -->
                 </div>
 
-                <div class="two-column">
-                    <!-- Left Column: All Files -->
-                    <div class="section">
-                        <h2 class="section-title">
-                            All Puzzle Files
-                            <button class="btn-primary btn-small" onclick="refreshData()">Refresh</button>
-                        </h2>
+                <!-- Actions Bar -->
+                <div class="actions-bar">
+                    <button class="btn-primary btn-small" onclick="showCreateFolderModal()">
+                        📁 New Folder
+                    </button>
+                    <button class="btn-success btn-small" onclick="showCreateFileModal()">
+                        📄 New File
+                    </button>
+                    <button class="btn-secondary btn-small" onclick="showCreateManifestModal()">
+                        📋 New Manifest
+                    </button>
+                    <button class="btn-secondary btn-small" onclick="refreshData()">
+                        🔄 Refresh
+                    </button>
+                </div>
 
-                        <div class="alert alert-info">
-                            <strong>Legend:</strong><br>
-                            🟢 Green = In manifest<br>
-                            🟡 Yellow = Not in manifest<br>
-                            🔵 Blue = Manifest file itself
+                <div class="grid-layout">
+                    <!-- Sidebar -->
+                    <div class="sidebar">
+                        <div class="sidebar-section">
+                            <div class="sidebar-title">Manifests in This Folder</div>
+                            <ul id="manifest-list" class="manifest-list">
+                                <!-- Populated by JS -->
+                            </ul>
                         </div>
-
-                        <ul id="all-files-list" class="file-list">
-                            <!-- Files will be populated here -->
-                        </ul>
                     </div>
 
-                    <!-- Right Column: Create/Manage -->
-                    <div>
-                        <!-- Create New File -->
-                        <div class="section">
-                            <h2 class="section-title">Create New Puzzle File</h2>
-                            <div class="form-card">
-                                <div class="form-group">
-                                    <label for="new-filename">Filename:</label>
-                                    <input
-                                        type="text"
-                                        id="new-filename"
-                                        placeholder="myNewGenre.json"
-                                        value=""
-                                    >
-                                </div>
-                                <div class="form-group">
-                                    <label for="new-genre">Genre Name:</label>
-                                    <input
-                                        type="text"
-                                        id="new-genre"
-                                        placeholder="Fantasy"
-                                    >
-                                </div>
-                                <button class="btn-success" onclick="createNewFile()">
-                                    Create File
-                                </button>
+                    <!-- Main Content -->
+                    <div class="main-content">
+                        <!-- Folders -->
+                        <div class="section" id="folders-section" style="display: none;">
+                            <h2 class="section-title">Folders</h2>
+                            <div class="folder-grid" id="folder-grid">
+                                <!-- Populated by JS -->
                             </div>
                         </div>
 
-                        <!-- Manifest Actions -->
+                        <!-- Files -->
                         <div class="section">
-                            <h2 class="section-title">Manifest Actions</h2>
-                            <div class="form-card">
-                                <p style="margin-bottom: 15px; color: #666;">
-                                    Changes are saved automatically to the manifest file.
-                                </p>
-                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                    <button class="btn-primary" onclick="saveManifest()">
-                                        💾 Save Manifest Now
-                                    </button>
-                                    <button class="btn-secondary" onclick="viewManifestJson()">
-                                        👁️ View JSON
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Current Manifest -->
-                        <div class="section">
-                            <h2 class="section-title">Current Manifest Order</h2>
-                            <div id="manifest-preview" class="form-card">
-                                <!-- Will be populated -->
-                            </div>
+                            <h2 class="section-title">Files</h2>
+                            <ul id="file-list" class="file-list">
+                                <!-- Populated by JS -->
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -547,61 +594,107 @@
         </div>
     </div>
 
-    <!-- Modal for viewing file contents -->
-    <div id="file-modal" class="modal">
+    <!-- Create Folder Modal -->
+    <div id="create-folder-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span class="modal-close" onclick="closeModal()">&times;</span>
-                <h2 id="modal-title">File Preview</h2>
+                <span class="modal-close" onclick="closeModal('create-folder-modal')">&times;</span>
+                <h2>Create New Folder</h2>
             </div>
-            <div id="modal-body">
-                <!-- Content will be populated here -->
+            <div class="form-group">
+                <label for="folder-name">Folder Name:</label>
+                <input type="text" id="folder-name" placeholder="characters">
+            </div>
+            <button class="btn-success" onclick="createFolder()">Create Folder</button>
+        </div>
+    </div>
+
+    <!-- Create File Modal -->
+    <div id="create-file-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('create-file-modal')">&times;</span>
+                <h2>Create New File</h2>
+            </div>
+            <div class="form-group">
+                <label for="file-name">Filename:</label>
+                <input type="text" id="file-name" placeholder="myData.json">
+            </div>
+            <div class="form-group">
+                <label for="content-type">Content Type:</label>
+                <select id="content-type">
+                    <option value="array">Generic Array</option>
+                    <option value="puzzle">Puzzle Data</option>
+                    <option value="character">Character Data</option>
+                    <option value="object">Generic Object</option>
+                </select>
+            </div>
+            <button class="btn-success" onclick="createFile()">Create File</button>
+        </div>
+    </div>
+
+    <!-- Create Manifest Modal -->
+    <div id="create-manifest-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('create-manifest-modal')">&times;</span>
+                <h2>Create New Manifest</h2>
+            </div>
+            <div class="form-group">
+                <label for="manifest-name">Manifest Name:</label>
+                <input type="text" id="manifest-name" placeholder="character">
+                <small style="color: #666; display: block; margin-top: 5px;">
+                    Will create: <span id="manifest-preview" style="font-family: monospace;">characterManifest.json</span>
+                </small>
+            </div>
+            <button class="btn-success" onclick="createManifest()">Create Manifest</button>
+        </div>
+    </div>
+
+    <!-- View File Modal -->
+    <div id="view-file-modal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('view-file-modal')">&times;</span>
+                <h2 id="view-file-title">File Preview</h2>
+            </div>
+            <div id="view-file-body">
+                <!-- Content populated by JS -->
             </div>
         </div>
     </div>
 
     <script>
         const API_BASE = 'http://localhost:3030/api';
-        let allFiles = [];
-        let manifestData = { genreFiles: [] };
+        let currentPath = '';
+        let currentData = { folders: [], files: [], manifests: [] };
+        let selectedManifest = null;
 
-        // Initialize the application
+        // Initialize
         async function init() {
             try {
                 await loadData();
                 renderUI();
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('main-content').style.display = 'block';
+                hideLoading();
             } catch (error) {
-                console.error('Initialization error:', error);
-                showError('Failed to connect to the server. Make sure the server is running (npm start in tools directory).');
+                console.error('Init error:', error);
+                showError('Failed to connect to server. Make sure the server is running (npm start).');
             }
         }
 
-        // Load all data
+        // Load data for current path
         async function loadData() {
             try {
-                // Load all files
-                const filesResponse = await fetch(`${API_BASE}/scan-files`);
-                const filesData = await filesResponse.json();
+                const response = await fetch(`${API_BASE}/browse?path=${encodeURIComponent(currentPath)}`);
+                const result = await response.json();
 
-                if (!filesData.success) {
-                    throw new Error(filesData.error);
+                if (!result.success) {
+                    throw new Error(result.error);
                 }
 
-                allFiles = filesData.files;
-
-                // Load manifest
-                const manifestResponse = await fetch(`${API_BASE}/manifest`);
-                const manifestResult = await manifestResponse.json();
-
-                if (!manifestResult.success) {
-                    throw new Error(manifestResult.error);
-                }
-
-                manifestData = manifestResult.manifest;
+                currentData = result;
             } catch (error) {
-                console.error('Error loading data:', error);
+                console.error('Load error:', error);
                 throw error;
             }
         }
@@ -612,159 +705,150 @@
             await loadData();
             renderUI();
             hideLoading();
-            showSuccess('Data refreshed!');
+            showSuccess('Refreshed!');
         }
 
-        // Render the UI
+        // Render UI
         function renderUI() {
-            updateStats();
-            renderAllFiles();
-            renderManifestPreview();
+            renderBreadcrumbs();
+            renderManifestList();
+            renderFolders();
+            renderFiles();
         }
 
-        // Update statistics
-        function updateStats() {
-            const totalFiles = allFiles.filter(f => !f.isManifest).length;
-            const inManifest = allFiles.filter(f =>
-                !f.isManifest && manifestData.genreFiles.includes(f.path)
-            ).length;
-            const notInManifest = totalFiles - inManifest;
-            const totalPuzzles = allFiles
-                .filter(f => !f.isManifest && f.puzzleCount)
-                .reduce((sum, f) => sum + f.puzzleCount, 0);
+        // Render breadcrumbs
+        function renderBreadcrumbs() {
+            const breadcrumbs = document.getElementById('breadcrumbs');
+            const parts = currentPath ? currentPath.split('/').filter(Boolean) : [];
 
-            document.getElementById('total-files').textContent = totalFiles;
-            document.getElementById('in-manifest-count').textContent = inManifest;
-            document.getElementById('not-in-manifest-count').textContent = notInManifest;
-            document.getElementById('total-puzzles').textContent = totalPuzzles;
-        }
+            let html = '<div class="breadcrumb">';
+            html += '<span class="breadcrumb-item" onclick="navigateTo(\'\')">📁 /data</span>';
 
-        // Render all files list
-        function renderAllFiles() {
-            const fileList = document.getElementById('all-files-list');
-            fileList.innerHTML = '';
+            let pathSoFar = '';
+            parts.forEach((part, index) => {
+                pathSoFar += (pathSoFar ? '/' : '') + part;
+                const isLast = index === parts.length - 1;
 
-            if (allFiles.length === 0) {
-                fileList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📁</div><p>No files found</p></div>';
-                return;
-            }
-
-            allFiles.forEach(file => {
-                const inManifest = manifestData.genreFiles.includes(file.path);
-                const isManifest = file.isManifest;
-
-                const li = document.createElement('li');
-                li.className = `file-item ${
-                    isManifest ? 'is-manifest' :
-                    inManifest ? 'in-manifest' : 'not-in-manifest'
-                }`;
-
-                let metaInfo = '';
-                if (!isManifest && file.genre) {
-                    metaInfo = `
-                        <div class="file-meta">
-                            Genre: ${file.genre} |
-                            Puzzles: ${file.puzzleCount || 0} |
-                            Books: ${file.books?.length || 0}
-                        </div>
-                    `;
-                }
-
-                li.innerHTML = `
-                    <div class="file-header">
-                        <span class="file-name">${file.name}</span>
-                        <div class="file-badges">
-                            ${isManifest ?
-                                '<span class="badge manifest">Manifest</span>' :
-                                inManifest ?
-                                '<span class="badge in-manifest">In Manifest</span>' :
-                                '<span class="badge not-in-manifest">Not in Manifest</span>'
-                            }
-                        </div>
-                    </div>
-                    ${metaInfo}
-                    <div class="file-actions">
-                        ${!isManifest ? `
-                            <button class="btn-primary btn-small" onclick="viewFile('${file.name}')">
-                                👁️ View
-                            </button>
-                            ${inManifest ? `
-                                <button class="btn-warning btn-small" onclick="removeFromManifest('${file.path}')">
-                                    ➖ Remove from Manifest
-                                </button>
-                            ` : `
-                                <button class="btn-success btn-small" onclick="addToManifest('${file.path}')">
-                                    ➕ Add to Manifest
-                                </button>
-                            `}
-                            <button class="btn-danger btn-small" onclick="deleteFile('${file.name}')">
-                                🗑️ Delete File
-                            </button>
-                        ` : ''}
-                    </div>
-                `;
-
-                fileList.appendChild(li);
+                html += '<span class="breadcrumb-separator">/</span>';
+                html += `<span class="breadcrumb-item ${isLast ? 'current' : ''}"
+                         onclick="navigateTo('${pathSoFar}')">${part}</span>`;
             });
+
+            html += '</div>';
+            breadcrumbs.innerHTML = html;
         }
 
-        // Render manifest preview
-        function renderManifestPreview() {
-            const preview = document.getElementById('manifest-preview');
+        // Render manifest list
+        function renderManifestList() {
+            const list = document.getElementById('manifest-list');
 
-            if (manifestData.genreFiles.length === 0) {
-                preview.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>No files in manifest</p></div>';
+            if (currentData.manifests.length === 0) {
+                list.innerHTML = '<div style="text-align: center; padding: 20px; color: #999; font-size: 0.9em;">No manifests in this folder</div>';
                 return;
             }
 
-            let html = '<ol style="margin-left: 20px;">';
-            manifestData.genreFiles.forEach((path, index) => {
-                const filename = path.split('/').pop();
+            let html = '';
+            currentData.manifests.forEach(manifest => {
                 html += `
-                    <li style="margin-bottom: 8px;">
-                        <span style="font-family: monospace;">${filename}</span>
-                        <button class="btn-danger btn-small" style="margin-left: 10px;"
-                                onclick="removeFromManifest('${path}')">
-                            Remove
-                        </button>
+                    <li class="manifest-item" onclick="selectManifest('${manifest.manifestType}')">
+                        <div class="manifest-name">${manifest.name}</div>
+                        <div class="manifest-meta">${manifest.itemCount} items</div>
                     </li>
                 `;
             });
-            html += '</ol>';
 
-            preview.innerHTML = html;
+            list.innerHTML = html;
         }
 
-        // Add file to manifest
-        async function addToManifest(filePath) {
-            if (!manifestData.genreFiles.includes(filePath)) {
-                manifestData.genreFiles.push(filePath);
-                await saveManifest();
-                renderUI();
-                showSuccess(`Added ${filePath} to manifest`);
+        // Render folders
+        function renderFolders() {
+            const section = document.getElementById('folders-section');
+            const grid = document.getElementById('folder-grid');
+
+            if (currentData.folders.length === 0) {
+                section.style.display = 'none';
+                return;
             }
+
+            section.style.display = 'block';
+
+            let html = '';
+            currentData.folders.forEach(folder => {
+                html += `
+                    <div class="folder-card" onclick="navigateTo('${folder.path}')">
+                        <div class="folder-icon">📁</div>
+                        <div class="folder-name">${folder.name}</div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
         }
 
-        // Remove file from manifest
-        async function removeFromManifest(filePath) {
-            const index = manifestData.genreFiles.indexOf(filePath);
-            if (index > -1) {
-                if (confirm(`Remove ${filePath} from manifest?`)) {
-                    manifestData.genreFiles.splice(index, 1);
-                    await saveManifest();
-                    renderUI();
-                    showSuccess(`Removed ${filePath} from manifest`);
-                }
+        // Render files
+        function renderFiles() {
+            const list = document.getElementById('file-list');
+
+            if (currentData.files.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📄</div><p>No files in this folder</p></div>';
+                return;
             }
+
+            let html = '';
+            currentData.files.forEach(file => {
+                const contentType = file.contentType || 'generic';
+
+                html += `
+                    <li class="file-item ${contentType}">
+                        <div class="file-info">
+                            <div class="file-header">
+                                <span class="file-name">${file.name}</span>
+                                <span class="badge ${contentType}">${contentType}</span>
+                            </div>
+                            <div class="file-meta">
+                                ${file.itemCount !== undefined ? `Items: ${file.itemCount}` : ''}
+                                ${file.genre ? ` | Genre: ${file.genre}` : ''}
+                                ${file.books ? ` | Books: ${file.books.length}` : ''}
+                            </div>
+                        </div>
+                        <div class="file-actions">
+                            <button class="btn-primary btn-small" onclick="viewFile('${file.path}')">
+                                👁️ View
+                            </button>
+                            <button class="btn-danger btn-small" onclick="deleteFile('${file.path}', '${file.name}')">
+                                🗑️ Delete
+                            </button>
+                        </div>
+                    </li>
+                `;
+            });
+
+            list.innerHTML = html;
         }
 
-        // Save manifest to server
-        async function saveManifest() {
+        // Navigate to path
+        async function navigateTo(path) {
+            currentPath = path;
+            showLoading();
+            await loadData();
+            renderUI();
+            hideLoading();
+        }
+
+        // Create folder
+        async function createFolder() {
+            const name = document.getElementById('folder-name').value.trim();
+
+            if (!name) {
+                alert('Please enter a folder name');
+                return;
+            }
+
             try {
-                const response = await fetch(`${API_BASE}/manifest`, {
+                const response = await fetch(`${API_BASE}/folder`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(manifestData)
+                    body: JSON.stringify({ folderName: name, parentPath: currentPath })
                 });
 
                 const result = await response.json();
@@ -773,47 +857,27 @@
                     throw new Error(result.error);
                 }
 
-                showSuccess('Manifest saved successfully!');
+                closeModal('create-folder-modal');
+                document.getElementById('folder-name').value = '';
+                await refreshData();
+                showSuccess(`Created folder: ${name}`);
             } catch (error) {
-                console.error('Error saving manifest:', error);
-                alert('Failed to save manifest: ' + error.message);
+                alert('Error: ' + error.message);
             }
         }
 
-        // View manifest JSON
-        function viewManifestJson() {
-            const modal = document.getElementById('file-modal');
-            const modalTitle = document.getElementById('modal-title');
-            const modalBody = document.getElementById('modal-body');
+        // Create file
+        async function createFile() {
+            const name = document.getElementById('file-name').value.trim();
+            const contentType = document.getElementById('content-type').value;
 
-            modalTitle.textContent = 'Manifest JSON';
-            modalBody.innerHTML = `
-                <pre>${JSON.stringify(manifestData, null, 2)}</pre>
-                <button class="btn-secondary" onclick="copyToClipboard()">
-                    📋 Copy to Clipboard
-                </button>
-            `;
-
-            modal.classList.add('active');
-        }
-
-        // Create new puzzle file
-        async function createNewFile() {
-            const filename = document.getElementById('new-filename').value.trim();
-            const genre = document.getElementById('new-genre').value.trim();
-
-            if (!filename) {
+            if (!name) {
                 alert('Please enter a filename');
                 return;
             }
 
-            if (!filename.endsWith('.json')) {
+            if (!name.endsWith('.json')) {
                 alert('Filename must end with .json');
-                return;
-            }
-
-            if (!genre) {
-                alert('Please enter a genre name');
                 return;
             }
 
@@ -821,7 +885,7 @@
                 const response = await fetch(`${API_BASE}/file`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ filename, genre })
+                    body: JSON.stringify({ filename: name, folderPath: currentPath, contentType })
                 });
 
                 const result = await response.json();
@@ -830,28 +894,82 @@
                     throw new Error(result.error);
                 }
 
-                showSuccess(`Created ${filename}!`);
-
-                // Clear inputs
-                document.getElementById('new-filename').value = '';
-                document.getElementById('new-genre').value = '';
-
-                // Refresh data
+                closeModal('create-file-modal');
+                document.getElementById('file-name').value = '';
                 await refreshData();
+                showSuccess(`Created file: ${name}`);
             } catch (error) {
-                console.error('Error creating file:', error);
-                alert('Failed to create file: ' + error.message);
+                alert('Error: ' + error.message);
             }
         }
 
-        // Delete a file
-        async function deleteFile(filename) {
-            if (!confirm(`Are you sure you want to delete ${filename}? This cannot be undone!`)) {
+        // Create manifest
+        async function createManifest() {
+            const name = document.getElementById('manifest-name').value.trim();
+
+            if (!name) {
+                alert('Please enter a manifest name');
                 return;
             }
 
             try {
-                const response = await fetch(`${API_BASE}/file/${filename}`, {
+                const filename = `${name}Manifest.json`;
+                const response = await fetch(`${API_BASE}/file`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename,
+                        folderPath: currentPath,
+                        contentType: 'manifest'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                closeModal('create-manifest-modal');
+                document.getElementById('manifest-name').value = '';
+                await refreshData();
+                showSuccess(`Created manifest: ${filename}`);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // View file
+        async function viewFile(filePath) {
+            try {
+                const response = await fetch(`${API_BASE}/file?path=${encodeURIComponent(filePath)}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                const modal = document.getElementById('view-file-modal');
+                const title = document.getElementById('view-file-title');
+                const body = document.getElementById('view-file-body');
+
+                title.textContent = `Preview: ${filePath}`;
+                body.innerHTML = `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+
+                modal.classList.add('active');
+            } catch (error) {
+                alert('Error loading file: ' + error.message);
+            }
+        }
+
+        // Delete file
+        async function deleteFile(filePath, fileName) {
+            if (!confirm(`Delete ${fileName}? This cannot be undone!`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/file?path=${encodeURIComponent(filePath)}`, {
                     method: 'DELETE'
                 });
 
@@ -861,105 +979,45 @@
                     throw new Error(result.error);
                 }
 
-                showSuccess(`Deleted ${filename}`);
-
-                // Remove from manifest if it was there
-                const filePath = `/data/${filename}`;
-                const index = manifestData.genreFiles.indexOf(filePath);
-                if (index > -1) {
-                    manifestData.genreFiles.splice(index, 1);
-                    await saveManifest();
-                }
-
-                // Refresh data
                 await refreshData();
+                showSuccess(`Deleted: ${fileName}`);
             } catch (error) {
-                console.error('Error deleting file:', error);
-                alert('Failed to delete file: ' + error.message);
+                alert('Error: ' + error.message);
             }
         }
 
-        // View a puzzle file
-        async function viewFile(filename) {
-            try {
-                const response = await fetch(`${API_BASE}/file/${filename}`);
-                const result = await response.json();
-
-                if (!result.success) {
-                    throw new Error(result.error);
-                }
-
-                showFileModal(filename, result.data);
-            } catch (error) {
-                console.error('Error loading file:', error);
-                alert('Failed to load file: ' + error.message);
-            }
+        // Show modals
+        function showCreateFolderModal() {
+            document.getElementById('create-folder-modal').classList.add('active');
         }
 
-        // Show file modal
-        function showFileModal(filename, puzzles) {
-            const modal = document.getElementById('file-modal');
-            const modalTitle = document.getElementById('modal-title');
-            const modalBody = document.getElementById('modal-body');
-
-            modalTitle.textContent = `Preview: ${filename}`;
-
-            if (!Array.isArray(puzzles) || puzzles.length === 0) {
-                modalBody.innerHTML = '<div class="alert alert-error">No puzzles found in this file</div>';
-            } else {
-                const genre = puzzles[0]?.genre || 'Unknown';
-                const bookSet = new Set(puzzles.map(p => p.book));
-
-                let html = `
-                    <div class="alert alert-info">
-                        <strong>Genre:</strong> ${genre}<br>
-                        <strong>Total Puzzles:</strong> ${puzzles.length}<br>
-                        <strong>Books:</strong> ${bookSet.size}
-                    </div>
-                `;
-
-                puzzles.slice(0, 5).forEach(puzzle => {
-                    html += `
-                        <div class="puzzle-preview">
-                            <div class="puzzle-title">${puzzle.title || 'Untitled'}</div>
-                            <div class="puzzle-detail"><strong>Book:</strong> ${puzzle.book || 'N/A'}</div>
-                            <div class="puzzle-detail"><strong>Story Part:</strong> ${puzzle.storyPart !== undefined ? puzzle.storyPart : 'N/A'}</div>
-                            <div class="puzzle-detail"><strong>Words:</strong> ${puzzle.words?.length || 0} words</div>
-                        </div>
-                    `;
-                });
-
-                if (puzzles.length > 5) {
-                    html += `<div class="alert alert-info">Showing first 5 of ${puzzles.length} puzzles</div>`;
-                }
-
-                html += `
-                    <h3 style="margin-top: 20px; margin-bottom: 10px;">Raw JSON (First Puzzle)</h3>
-                    <pre>${JSON.stringify(puzzles[0], null, 2)}</pre>
-                `;
-
-                modalBody.innerHTML = html;
-            }
-
-            modal.classList.add('active');
+        function showCreateFileModal() {
+            document.getElementById('create-file-modal').classList.add('active');
         }
 
-        // Close modal
-        function closeModal() {
-            document.getElementById('file-modal').classList.remove('active');
-        }
-
-        // Copy to clipboard
-        function copyToClipboard() {
-            const json = JSON.stringify(manifestData, null, 2);
-            navigator.clipboard.writeText(json).then(() => {
-                showSuccess('Manifest JSON copied to clipboard!');
-            }).catch(() => {
-                alert('Failed to copy to clipboard');
+        function showCreateManifestModal() {
+            document.getElementById('create-manifest-modal').classList.add('active');
+            document.getElementById('manifest-name').addEventListener('input', (e) => {
+                document.getElementById('manifest-preview').textContent = `${e.target.value}Manifest.json`;
             });
         }
 
-        // Show success message
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Utility functions
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('main-content').style.display = 'none';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+        }
+
         function showSuccess(message) {
             const alert = document.createElement('div');
             alert.className = 'alert alert-success';
@@ -973,33 +1031,19 @@
             setTimeout(() => alert.remove(), 3000);
         }
 
-        // Show error message
         function showError(message) {
             const errorDisplay = document.getElementById('error-display');
-            errorDisplay.innerHTML = `
-                <div class="alert alert-error">
-                    <strong>Error:</strong> ${message}
-                </div>
-            `;
+            errorDisplay.innerHTML = `<div class="alert alert-error"><strong>Error:</strong> ${message}</div>`;
             document.getElementById('loading').style.display = 'none';
         }
 
-        // Show/hide loading
-        function showLoading() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('main-content').style.display = 'none';
-        }
-
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
-        }
-
-        // Close modal when clicking outside
-        document.getElementById('file-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'file-modal') {
-                closeModal();
-            }
+        // Close modals when clicking outside
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
         });
 
         // Initialize on load
