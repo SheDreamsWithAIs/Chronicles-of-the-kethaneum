@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manifest Editor - Chronicles of the Kethaneum</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .manifest-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .manifest-path {
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .file-list {
+            list-style: none;
+        }
+
+        .file-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .file-item.exists {
+            border-left: 4px solid #28a745;
+        }
+
+        .file-item.missing {
+            border-left: 4px solid #dc3545;
+        }
+
+        .file-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-path {
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status-badge.exists {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.missing {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            font-size: 0.9em;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .add-file-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 1em;
+            font-family: 'Courier New', monospace;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 90%;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .puzzle-preview {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .puzzle-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .puzzle-detail {
+            font-size: 0.9em;
+            color: #666;
+            margin: 3px 0;
+        }
+
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Manifest Editor</h1>
+            <p>Manage puzzle data files for Chronicles of the Kethaneum</p>
+        </div>
+
+        <div class="content">
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Loading manifest data...</p>
+            </div>
+
+            <div id="main-content" style="display: none;">
+                <!-- Stats Section -->
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-files">0</div>
+                        <div class="stat-label">Total Files</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="existing-files">0</div>
+                        <div class="stat-label">Existing Files</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="missing-files">0</div>
+                        <div class="stat-label">Missing Files</div>
+                    </div>
+                </div>
+
+                <!-- Manifest Info Section -->
+                <div class="section">
+                    <h2 class="section-title">Manifest Information</h2>
+                    <div class="manifest-info">
+                        <p><strong>Manifest File:</strong></p>
+                        <div class="manifest-path">/public/data/genreManifest.json</div>
+                    </div>
+                </div>
+
+                <!-- Add File Section -->
+                <div class="section">
+                    <h2 class="section-title">Add New File</h2>
+                    <div class="add-file-form">
+                        <div class="form-group">
+                            <label for="new-file-path">File Path:</label>
+                            <input
+                                type="text"
+                                id="new-file-path"
+                                placeholder="/data/yourNewPuzzles.json"
+                                value="/data/"
+                            >
+                        </div>
+                        <button class="btn-primary" onclick="addFile()">Add File to Manifest</button>
+                    </div>
+                </div>
+
+                <!-- File List Section -->
+                <div class="section">
+                    <h2 class="section-title">Files in Manifest</h2>
+                    <ul id="file-list" class="file-list">
+                        <!-- Files will be populated here -->
+                    </ul>
+                </div>
+
+                <!-- Export Section -->
+                <div class="section">
+                    <h2 class="section-title">Export</h2>
+                    <button class="btn-success" onclick="exportManifest()">Download Updated Manifest</button>
+                    <button class="btn-secondary" onclick="copyToClipboard()">Copy JSON to Clipboard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for viewing puzzle contents -->
+    <div id="puzzle-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+                <h2 id="modal-title">Puzzle File Preview</h2>
+            </div>
+            <div id="modal-body">
+                <!-- Content will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let manifestData = { genreFiles: [] };
+        let fileStatuses = {};
+
+        // Initialize the application
+        async function init() {
+            try {
+                await loadManifest();
+                await checkFileStatuses();
+                renderUI();
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showError('Failed to initialize the application. Make sure you are serving this page from the project root.');
+            }
+        }
+
+        // Load the manifest file
+        async function loadManifest() {
+            try {
+                const response = await fetch('../public/data/genreManifest.json');
+                if (!response.ok) {
+                    throw new Error('Failed to load manifest');
+                }
+                manifestData = await response.json();
+            } catch (error) {
+                console.error('Error loading manifest:', error);
+                // Initialize with empty manifest if file doesn't exist
+                manifestData = { genreFiles: [] };
+                throw error;
+            }
+        }
+
+        // Check which files actually exist
+        async function checkFileStatuses() {
+            fileStatuses = {};
+            const checkPromises = manifestData.genreFiles.map(async (filePath) => {
+                try {
+                    const response = await fetch('..' + filePath);
+                    fileStatuses[filePath] = {
+                        exists: response.ok,
+                        status: response.status
+                    };
+                } catch (error) {
+                    fileStatuses[filePath] = {
+                        exists: false,
+                        status: 'error'
+                    };
+                }
+            });
+            await Promise.all(checkPromises);
+        }
+
+        // Render the UI
+        function renderUI() {
+            updateStats();
+            renderFileList();
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = manifestData.genreFiles.length;
+            const existing = Object.values(fileStatuses).filter(s => s.exists).length;
+            const missing = total - existing;
+
+            document.getElementById('total-files').textContent = total;
+            document.getElementById('existing-files').textContent = existing;
+            document.getElementById('missing-files').textContent = missing;
+        }
+
+        // Render the file list
+        function renderFileList() {
+            const fileList = document.getElementById('file-list');
+            fileList.innerHTML = '';
+
+            if (manifestData.genreFiles.length === 0) {
+                fileList.innerHTML = '<div class="alert alert-info">No files in manifest yet. Add your first file above!</div>';
+                return;
+            }
+
+            manifestData.genreFiles.forEach((filePath, index) => {
+                const status = fileStatuses[filePath];
+                const exists = status?.exists || false;
+
+                const li = document.createElement('li');
+                li.className = `file-item ${exists ? 'exists' : 'missing'}`;
+
+                li.innerHTML = `
+                    <div class="file-info">
+                        <span class="file-path">${filePath}</span>
+                        <span class="status-badge ${exists ? 'exists' : 'missing'}">
+                            ${exists ? 'Exists' : 'Missing'}
+                        </span>
+                    </div>
+                    <div class="file-actions">
+                        ${exists ? `<button class="btn-primary" onclick="viewFile('${filePath}')">View</button>` : ''}
+                        <button class="btn-danger" onclick="removeFile(${index})">Remove</button>
+                    </div>
+                `;
+
+                fileList.appendChild(li);
+            });
+        }
+
+        // Add a new file to the manifest
+        function addFile() {
+            const input = document.getElementById('new-file-path');
+            const filePath = input.value.trim();
+
+            if (!filePath) {
+                alert('Please enter a file path');
+                return;
+            }
+
+            if (!filePath.startsWith('/data/')) {
+                alert('File path should start with /data/');
+                return;
+            }
+
+            if (!filePath.endsWith('.json')) {
+                alert('File path should end with .json');
+                return;
+            }
+
+            if (manifestData.genreFiles.includes(filePath)) {
+                alert('This file is already in the manifest');
+                return;
+            }
+
+            manifestData.genreFiles.push(filePath);
+            input.value = '/data/';
+
+            // Re-check file statuses and re-render
+            checkFileStatuses().then(() => {
+                renderUI();
+                showSuccess('File added to manifest!');
+            });
+        }
+
+        // Remove a file from the manifest
+        function removeFile(index) {
+            const filePath = manifestData.genreFiles[index];
+            if (confirm(`Remove ${filePath} from manifest?`)) {
+                manifestData.genreFiles.splice(index, 1);
+                delete fileStatuses[filePath];
+                renderUI();
+                showSuccess('File removed from manifest!');
+            }
+        }
+
+        // View a puzzle file
+        async function viewFile(filePath) {
+            try {
+                const response = await fetch('..' + filePath);
+                if (!response.ok) {
+                    throw new Error('Failed to load file');
+                }
+
+                const puzzles = await response.json();
+                showPuzzleModal(filePath, puzzles);
+            } catch (error) {
+                console.error('Error loading puzzle file:', error);
+                alert('Failed to load puzzle file');
+            }
+        }
+
+        // Show puzzle modal
+        function showPuzzleModal(filePath, puzzles) {
+            const modal = document.getElementById('puzzle-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+
+            modalTitle.textContent = `Preview: ${filePath}`;
+
+            if (!Array.isArray(puzzles) || puzzles.length === 0) {
+                modalBody.innerHTML = '<div class="alert alert-error">No puzzles found in this file</div>';
+            } else {
+                const genre = puzzles[0]?.genre || 'Unknown';
+                const bookSet = new Set(puzzles.map(p => p.book));
+
+                let html = `
+                    <div class="alert alert-info">
+                        <strong>Genre:</strong> ${genre}<br>
+                        <strong>Total Puzzles:</strong> ${puzzles.length}<br>
+                        <strong>Books:</strong> ${bookSet.size}
+                    </div>
+                `;
+
+                puzzles.slice(0, 5).forEach(puzzle => {
+                    html += `
+                        <div class="puzzle-preview">
+                            <div class="puzzle-title">${puzzle.title || 'Untitled'}</div>
+                            <div class="puzzle-detail"><strong>Book:</strong> ${puzzle.book || 'N/A'}</div>
+                            <div class="puzzle-detail"><strong>Story Part:</strong> ${puzzle.storyPart !== undefined ? puzzle.storyPart : 'N/A'}</div>
+                            <div class="puzzle-detail"><strong>Words:</strong> ${puzzle.words?.length || 0} words</div>
+                        </div>
+                    `;
+                });
+
+                if (puzzles.length > 5) {
+                    html += `<div class="alert alert-info">Showing first 5 of ${puzzles.length} puzzles</div>`;
+                }
+
+                html += `
+                    <h3 style="margin-top: 20px; margin-bottom: 10px;">Raw JSON (First Puzzle)</h3>
+                    <pre>${JSON.stringify(puzzles[0], null, 2)}</pre>
+                `;
+
+                modalBody.innerHTML = html;
+            }
+
+            modal.classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('puzzle-modal').classList.remove('active');
+        }
+
+        // Export manifest
+        function exportManifest() {
+            const json = JSON.stringify(manifestData, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'genreManifest.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showSuccess('Manifest downloaded!');
+        }
+
+        // Copy to clipboard
+        function copyToClipboard() {
+            const json = JSON.stringify(manifestData, null, 2);
+            navigator.clipboard.writeText(json).then(() => {
+                showSuccess('Manifest JSON copied to clipboard!');
+            }).catch(() => {
+                alert('Failed to copy to clipboard');
+            });
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-success';
+            alert.textContent = message;
+            alert.style.position = 'fixed';
+            alert.style.top = '20px';
+            alert.style.right = '20px';
+            alert.style.zIndex = '2000';
+            document.body.appendChild(alert);
+            setTimeout(() => alert.remove(), 3000);
+        }
+
+        // Show error message
+        function showError(message) {
+            document.getElementById('loading').innerHTML = `
+                <div class="alert alert-error">${message}</div>
+            `;
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('puzzle-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'puzzle-modal') {
+                closeModal();
+            }
+        });
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
