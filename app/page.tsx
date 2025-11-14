@@ -48,6 +48,11 @@ export default function TitleScreen() {
   }, []);
 
   const handleNewGame = () => {
+    // Clear all saved progress when starting a new game
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('kethaneumProgress');
+    }
+
     setIsLoading(true);
     setTimeout(() => {
       router.push('/backstory');
@@ -69,7 +74,7 @@ export default function TitleScreen() {
 
   return (
     <>
-      <div className={`${styles.titleContainer} ${isLoading ? styles.loading : ''}`}>
+      <div className={`${styles.titleContainer} ${isLoading ? styles.loading : ''}`} data-testid="title-screen">
         <CosmicBackground variant="title" starCount={100} particleCount={30} />
 
         <div className={styles.titleScreen}>
@@ -85,13 +90,14 @@ export default function TitleScreen() {
             </div>
 
             <div className={styles.titleContent}>
-              <h1 className={styles.gameTitle}>Chronicles of the Kethaneum</h1>
-              <h2 className={styles.gameSubtitle}>Searching the Cosmic Catalog</h2>
+              <h1 className={styles.gameTitle} data-testid="game-title">Chronicles of the Kethaneum</h1>
+              <h2 className={styles.gameSubtitle} data-testid="game-subtitle">Searching the Cosmic Catalog</h2>
 
               <div className={styles.buttonContainer}>
                 <button
                   className={`${styles.gameButton} ${styles.primary}`}
                   onClick={handleNewGame}
+                  data-testid="new-game-btn"
                 >
                   New Game
                 </button>
@@ -100,6 +106,7 @@ export default function TitleScreen() {
                   className={`${styles.gameButton} ${styles.secondary} ${!hasSavedGame ? styles.disabled : ''}`}
                   onClick={handleContinue}
                   disabled={!hasSavedGame}
+                  data-testid="continue-btn"
                 >
                   Continue
                 </button>
@@ -107,6 +114,7 @@ export default function TitleScreen() {
                 <button
                   className={`${styles.gameButton} ${styles.secondary}`}
                   onClick={() => setShowSettings(true)}
+                  data-testid="settings-btn"
                 >
                   Settings
                 </button>
@@ -114,6 +122,7 @@ export default function TitleScreen() {
                 <button
                   className={`${styles.gameButton} ${styles.secondary} ${styles.disabled}`}
                   disabled
+                  data-testid="credits-btn"
                 >
                   Credits
                 </button>

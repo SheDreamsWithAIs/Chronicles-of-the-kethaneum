@@ -54,8 +54,8 @@ export function GenreSelectionModal({
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.panelContent} onClick={(e) => e.stopPropagation()}>
-        <h2 className={styles.panelTitle}>Select a Knowledge Category</h2>
+      <div className={styles.panelContent} onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby="genre-modal-title">
+        <h2 className={styles.panelTitle} id="genre-modal-title">Select a Knowledge Category</h2>
         
         <div className={styles.genreContainer}>
           {genreCards.map((card) => (

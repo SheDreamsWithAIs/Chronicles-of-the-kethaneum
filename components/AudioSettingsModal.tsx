@@ -87,8 +87,8 @@ export function AudioSettingsModal({
 
   return (
     <div className={styles.overlay} onClick={handleCancel}>
-      <div className={styles.panelContent} onClick={(e) => e.stopPropagation()}>
-        <h2 className={styles.panelTitle}>Audio Settings</h2>
+      <div className={styles.panelContent} onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby="audio-modal-title">
+        <h2 className={styles.panelTitle} id="audio-modal-title">Audio Settings</h2>
 
         <div className={styles.settingsContainer}>
           {VOLUME_CONTROLS.map((control) => (
