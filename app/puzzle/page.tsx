@@ -100,10 +100,18 @@ export default function PuzzleScreen() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ row: number; col: number } | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  
+
   // Use refs to track selection during drag without causing re-renders
   const selectedCellsRef = useRef<Set<string>>(new Set());
   const isDraggingRef = useRef(false);
+
+  // Expose game state to window for Cypress testing (development only)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      (window as any).__GAME_STATE__ = state;
+      (window as any).__UPDATE_GAME_STATE__ = setState;
+    }
+  }, [state, setState]);
 
   // Load puzzle if not already loaded
   useEffect(() => {
