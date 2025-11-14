@@ -116,8 +116,8 @@ function findWordsUsingGridScan(
           if (location) {
             cy.log(`Found pattern "${pattern}" for word "${wordData.word}" at [${location.row}, ${location.col}]`);
 
-            // Select the word
-            return selectWord(location, wordData.direction, wordData.word.length).then(() => {
+            // Select the word using direct method (bypasses mouse simulation)
+            return selectWordDirect(location, wordData.direction, wordData.word.length, wordData.word).then(() => {
               stats.foundByGridScan++;
               // Small delay to allow state to update
               cy.wait(100);
@@ -162,7 +162,7 @@ function findWordsUsingPlacementData(
 
         const location = { row: wordData.row, col: wordData.col };
 
-        return selectWord(location, wordData.direction, wordData.word.length).then(() => {
+        return selectWordDirect(location, wordData.direction, wordData.word.length, wordData.word).then(() => {
           stats.foundByPlacementData++;
           // Small delay to allow state to update
           cy.wait(100);
