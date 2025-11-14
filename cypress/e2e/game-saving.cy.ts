@@ -145,7 +145,7 @@ describe('Game Saving and Loading', () => {
 
     // Check that localStorage has save data
     cy.window().then((win) => {
-      const saveData = win.localStorage.getItem('chronicles-game-progress');
+      const saveData = win.localStorage.getItem('kethaneumProgress');
 
       if (!saveData) {
         // Log all localStorage keys for debugging
@@ -210,7 +210,7 @@ describe('Game Saving and Loading', () => {
   it('should handle missing or corrupted save data gracefully', () => {
     // Manually set corrupted save data
     cy.window().then((win) => {
-      win.localStorage.setItem('chronicles-game-progress', 'corrupted-data-{invalid-json}');
+      win.localStorage.setItem('kethaneumProgress', 'corrupted-data-{invalid-json}');
     });
 
     // Reload the page

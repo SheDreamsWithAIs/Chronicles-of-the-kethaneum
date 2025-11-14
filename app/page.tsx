@@ -48,6 +48,11 @@ export default function TitleScreen() {
   }, []);
 
   const handleNewGame = () => {
+    // Clear all saved progress when starting a new game
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('kethaneumProgress');
+    }
+
     setIsLoading(true);
     setTimeout(() => {
       router.push('/backstory');
