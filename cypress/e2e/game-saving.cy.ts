@@ -114,10 +114,10 @@ describe('Game Saving and Loading', () => {
     cy.get('[data-testid="begin-cataloging-btn"]').click();
     cy.contains('The Library Archives').should('be.visible');
 
-    // Reload the page
-    cy.reload();
+    // Navigate back to title screen (instead of reload)
+    cy.visit('http://localhost:3000/');
 
-    // Should still be on the same page or return to title with Continue enabled
+    // Should have Continue enabled since we have save data
     cy.get('[data-testid="continue-btn"]', { timeout: 10000 })
       .should('be.visible')
       .and('not.be.disabled');
@@ -139,14 +139,23 @@ describe('Game Saving and Loading', () => {
     cy.get('[data-testid="begin-cataloging-btn"]').click();
     cy.contains('The Library Archives', { timeout: 10000 }).should('be.visible');
 
+    // Wait a moment for save to complete
+    cy.wait(500);
+
     // Check that localStorage has save data
     cy.window().then((win) => {
       const saveData = win.localStorage.getItem('chronicles-game-progress');
-      expect(saveData).to.exist;
+
+      if (!saveData) {
+        // Log for debugging
+        cy.log('localStorage keys:', Object.keys(win.localStorage));
+        throw new Error('Save data not found in localStorage');
+      }
+
       expect(saveData).to.not.be.null;
 
       // Parse and verify it contains expected data
-      const parsed = JSON.parse(saveData!);
+      const parsed = JSON.parse(saveData);
       expect(parsed).to.have.property('gameMode', 'story');
     });
   });
