@@ -135,6 +135,10 @@ describe('Game Saving and Loading', () => {
     // Wait for Book of Passage
     cy.get('[data-testid="book-of-passage-screen"]', { timeout: 10000 }).should('be.visible');
 
+    // Navigate to Library to ensure save happens
+    cy.get('[data-testid="begin-cataloging-btn"]').click();
+    cy.contains('The Library Archives', { timeout: 10000 }).should('be.visible');
+
     // Check that localStorage has save data
     cy.window().then((win) => {
       const saveData = win.localStorage.getItem('chronicles-game-progress');
