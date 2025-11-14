@@ -87,11 +87,9 @@ describe('Basic Game Flow', () => {
     // Browse the archives
     cy.contains('button', 'Browse the Archives').click();
 
-    // Select a genre (wait for modal to appear)
-    cy.get('[role="dialog"]', { timeout: 10000 }).within(() => {
-      // Click the first available genre button
-      cy.get('button').first().click();
-    });
+    // Select the nature genre (wait for modal to appear)
+    cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
+    cy.contains('Natural Wisdom').click(); // Click the nature genre card
 
     // Verify puzzle screen is visible
     cy.get('[data-testid="puzzle-screen"]', { timeout: 15000 }).should('be.visible');
@@ -109,9 +107,9 @@ describe('Basic Game Flow', () => {
     cy.contains('button', 'Confirm').click(); // Click confirm button
     cy.get('[data-testid="begin-cataloging-btn"]').click();
     cy.contains('button', 'Browse the Archives').click();
-    cy.get('[role="dialog"]').within(() => {
-      cy.get('button').first().click();
-    });
+    // Select the nature genre
+    cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
+    cy.contains('Natural Wisdom').click(); // Click the nature genre card
 
     // Wait for puzzle to load
     cy.get('[data-testid="puzzle-screen"]', { timeout: 15000 }).should('be.visible');
@@ -140,9 +138,9 @@ describe('Basic Game Flow', () => {
     cy.contains('button', 'Confirm').click(); // Click confirm button
     cy.get('[data-testid="begin-cataloging-btn"]').click();
     cy.contains('button', 'Browse the Archives').click();
-    cy.get('[role="dialog"]').within(() => {
-      cy.get('button').first().click();
-    });
+    // Select the nature genre
+    cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
+    cy.contains('Natural Wisdom').click(); // Click the nature genre card
 
     // Wait for puzzle to load
     cy.get('[data-testid="puzzle-screen"]', { timeout: 15000 }).should('be.visible');
@@ -167,9 +165,9 @@ describe('Basic Game Flow', () => {
     cy.contains('button', 'Confirm').click(); // Click confirm button
     cy.get('[data-testid="begin-cataloging-btn"]').click();
     cy.contains('button', 'Browse the Archives').click();
-    cy.get('[role="dialog"]').within(() => {
-      cy.get('button').first().click();
-    });
+    // Select the nature genre
+    cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
+    cy.contains('Natural Wisdom').click(); // Click the nature genre card
 
     // Wait for puzzle to load
     cy.get('[data-testid="puzzle-screen"]', { timeout: 15000 }).should('be.visible');
