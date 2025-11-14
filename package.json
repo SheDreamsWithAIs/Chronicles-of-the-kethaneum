@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3030",
+    "dev": "next dev",
     "build": "next build",
-    "start": "next start -p 3030",
+    "start": "next start",
     "lint": "eslint",
     "cypress": "cypress open",
     "cypress:headless": "cypress run",
-    "test:e2e": "start-server-and-test dev http://localhost:3030 cypress",
-    "test:e2e:headless": "start-server-and-test dev http://localhost:3030 cypress:headless"
+    "test:e2e": "start-server-and-test dev http://localhost:3000 cypress",
+    "test:e2e:headless": "start-server-and-test dev http://localhost:3000 cypress:headless"
   },
   "dependencies": {
     "react": "19.2.0",
