@@ -5,8 +5,12 @@
   "scripts": {
     "dev": "next dev -p 3030",
     "build": "next build",
-    "start": "next start -p 3030",
-    "lint": "eslint"
+    "start": "next start",
+    "lint": "eslint",
+    "cypress": "cypress open",
+    "cypress:headless": "cypress run",
+    "test:e2e": "start-server-and-test dev http://localhost:3000 cypress",
+    "test:e2e:headless": "start-server-and-test dev http://localhost:3000 cypress:headless"
   },
   "dependencies": {
     "react": "19.2.0",
@@ -21,6 +25,8 @@
     "@tailwindcss/postcss": "^4",
     "tailwindcss": "^4",
     "eslint": "^9",
-    "eslint-config-next": "16.0.1"
+    "eslint-config-next": "16.0.1",
+    "cypress": "^13.6.0",
+    "start-server-and-test": "^2.0.3"
   }
 }

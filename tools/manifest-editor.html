@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manifest Manager - Chronicles of the Kethaneum</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        /* Breadcrumbs */
+        .breadcrumbs {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .breadcrumb-item {
+            cursor: pointer;
+            color: #667eea;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .breadcrumb-item:hover {
+            color: #5568d3;
+            text-decoration: underline;
+        }
+
+        .breadcrumb-item.current {
+            color: #333;
+            cursor: default;
+        }
+
+        .breadcrumb-item.current:hover {
+            text-decoration: none;
+        }
+
+        .breadcrumb-separator {
+            color: #999;
+        }
+
+        /* Actions Bar */
+        .actions-bar {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* Grid Layout */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 1200px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            height: fit-content;
+        }
+
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+
+        .sidebar-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .manifest-list {
+            list-style: none;
+        }
+
+        .manifest-item {
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid #667eea;
+        }
+
+        .manifest-item:hover {
+            background: #e9ecef;
+            transform: translateX(3px);
+        }
+
+        .manifest-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .manifest-name {
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .manifest-meta {
+            font-size: 0.75em;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        /* Main Content */
+        .main-content {
+            background: white;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Manifest Editor Panel */
+        .manifest-editor {
+            background: #e7f3ff;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .manifest-editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .manifest-editor-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .manifest-editor-panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 900px) {
+            .manifest-editor-panels {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .manifest-panel {
+            background: white;
+            border-radius: 6px;
+            padding: 15px;
+        }
+
+        .manifest-panel-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .manifest-panel-count {
+            font-size: 0.85em;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .manifest-files-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .manifest-file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 6px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+
+        .manifest-file-item:hover {
+            background: #e9ecef;
+        }
+
+        .manifest-file-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .manifest-file-item.available {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            cursor: pointer;
+        }
+
+        .manifest-file-item.available:hover {
+            background: #f0f9ff;
+            border-color: #667eea;
+        }
+
+        .manifest-empty {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+
+        .file-type-icon {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .file-type-icon.puzzle {
+            background: #28a745;
+        }
+
+        .file-type-icon.character {
+            background: #ff6b6b;
+        }
+
+        .file-type-icon.generic {
+            background: #ffd93d;
+        }
+
+        /* Folder Grid */
+        .folder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .folder-card {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .folder-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .folder-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .folder-name {
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        /* File List */
+        .file-list {
+            list-style: none;
+        }
+
+        .file-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .file-item:hover {
+            background: #e9ecef;
+        }
+
+        .file-item.manifest {
+            border-left: 4px solid #667eea;
+            background: #e7f3ff;
+        }
+
+        .file-item.puzzle {
+            border-left: 4px solid #28a745;
+        }
+
+        .file-item.character {
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .file-item.generic {
+            border-left: 4px solid #ffd93d;
+        }
+
+        .file-item.in-manifest {
+            opacity: 0.6;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .file-name {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #333;
+            font-size: 1em;
+        }
+
+        .badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge.manifest {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .badge.puzzle {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.character {
+            background: #ffe0e0;
+            color: #7a1515;
+        }
+
+        .badge.generic {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge.in-manifest {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .file-meta {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            font-size: 0.9em;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-small {
+            padding: 4px 10px;
+            font-size: 0.8em;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 90%;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.85em;
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Manifest Manager</h1>
+            <p>Modular content management system for game data</p>
+        </div>
+
+        <div class="content">
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Loading...</p>
+            </div>
+
+            <div id="error-display"></div>
+
+            <div id="main-content" style="display: none;">
+                <!-- Breadcrumbs -->
+                <div class="breadcrumbs" id="breadcrumbs">
+                    <!-- Populated by JS -->
+                </div>
+
+                <!-- Actions Bar -->
+                <div class="actions-bar">
+                    <button class="btn-primary btn-small" onclick="showCreateFolderModal()">
+                        📁 New Folder
+                    </button>
+                    <button class="btn-success btn-small" onclick="showCreateFileModal()">
+                        📄 New File
+                    </button>
+                    <button class="btn-secondary btn-small" onclick="showCreateManifestModal()">
+                        📋 New Manifest
+                    </button>
+                    <button class="btn-secondary btn-small" onclick="refreshData()">
+                        🔄 Refresh
+                    </button>
+                </div>
+
+                <div class="grid-layout">
+                    <!-- Sidebar -->
+                    <div class="sidebar">
+                        <div class="sidebar-section">
+                            <div class="sidebar-title">Manifests in This Folder</div>
+                            <ul id="manifest-list" class="manifest-list">
+                                <!-- Populated by JS -->
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="main-content">
+                        <!-- Manifest Editor Panel -->
+                        <div id="manifest-editor" class="manifest-editor" style="display: none;">
+                            <div class="manifest-editor-header">
+                                <div class="manifest-editor-title" id="manifest-editor-title">
+                                    📋 Editing: genreManifest.json
+                                </div>
+                                <div>
+                                    <button class="btn-success btn-small" onclick="saveManifest()">
+                                        💾 Save Manifest
+                                    </button>
+                                    <button class="btn-secondary btn-small" onclick="closeManifestEditor()">
+                                        ✖ Close
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="manifest-editor-panels">
+                                <!-- Left: Files in Manifest -->
+                                <div class="manifest-panel">
+                                    <div class="manifest-panel-title">
+                                        ✅ Files in Manifest
+                                        <span class="manifest-panel-count" id="in-manifest-count-label">0 files</span>
+                                    </div>
+                                    <div class="manifest-files-list" id="manifest-files-in">
+                                        <!-- Populated by JS -->
+                                    </div>
+                                </div>
+
+                                <!-- Right: Available to Add -->
+                                <div class="manifest-panel">
+                                    <div class="manifest-panel-title">
+                                        📁 Available to Add
+                                        <span class="manifest-panel-count" id="available-count-label">0 files</span>
+                                    </div>
+                                    <div class="manifest-files-list" id="manifest-files-available">
+                                        <!-- Populated by JS -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Folders -->
+                        <div class="section" id="folders-section" style="display: none;">
+                            <h2 class="section-title">Folders</h2>
+                            <div class="folder-grid" id="folder-grid">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Files -->
+                        <div class="section">
+                            <h2 class="section-title">
+                                Files
+                                <span id="file-count-badge" style="font-size: 0.7em; color: #666;"></span>
+                            </h2>
+                            <ul id="file-list" class="file-list">
+                                <!-- Populated by JS -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Folder Modal -->
+    <div id="create-folder-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('create-folder-modal')">&times;</span>
+                <h2>Create New Folder</h2>
+            </div>
+            <div class="form-group">
+                <label for="folder-name">Folder Name:</label>
+                <input type="text" id="folder-name" placeholder="characters">
+            </div>
+            <button class="btn-success" onclick="createFolder()">Create Folder</button>
+        </div>
+    </div>
+
+    <!-- Create File Modal -->
+    <div id="create-file-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('create-file-modal')">&times;</span>
+                <h2>Create New File</h2>
+            </div>
+            <div class="form-group">
+                <label for="file-name">Filename:</label>
+                <input type="text" id="file-name" placeholder="myData.json">
+            </div>
+            <div class="form-group">
+                <label for="content-type">Content Type:</label>
+                <select id="content-type">
+                    <option value="array">Generic Array</option>
+                    <option value="puzzle">Puzzle Data</option>
+                    <option value="character">Character Data</option>
+                    <option value="object">Generic Object</option>
+                </select>
+            </div>
+            <button class="btn-success" onclick="createFile()">Create File</button>
+        </div>
+    </div>
+
+    <!-- Create Manifest Modal -->
+    <div id="create-manifest-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('create-manifest-modal')">&times;</span>
+                <h2>Create New Manifest</h2>
+            </div>
+            <div class="form-group">
+                <label for="manifest-name">Manifest Name:</label>
+                <input type="text" id="manifest-name" placeholder="character">
+                <small style="color: #666; display: block; margin-top: 5px;">
+                    Will create: <span id="manifest-preview" style="font-family: monospace;">characterManifest.json</span>
+                </small>
+            </div>
+            <button class="btn-success" onclick="createManifest()">Create Manifest</button>
+        </div>
+    </div>
+
+    <!-- View File Modal -->
+    <div id="view-file-modal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('view-file-modal')">&times;</span>
+                <h2 id="view-file-title">File Preview</h2>
+            </div>
+            <div id="view-file-body">
+                <!-- Content populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3030/api';
+        let currentPath = '';
+        let currentData = { folders: [], files: [], manifests: [] };
+        let selectedManifest = null;
+        let manifestData = null;
+
+        // Initialize
+        async function init() {
+            try {
+                await loadData();
+                renderUI();
+                hideLoading();
+            } catch (error) {
+                console.error('Init error:', error);
+                showError('Failed to connect to server. Make sure the server is running (npm start).');
+            }
+        }
+
+        // Load data for current path
+        async function loadData() {
+            try {
+                const response = await fetch(`${API_BASE}/browse?path=${encodeURIComponent(currentPath)}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                currentData = result;
+            } catch (error) {
+                console.error('Load error:', error);
+                throw error;
+            }
+        }
+
+        // Refresh data
+        async function refreshData() {
+            showLoading();
+            await loadData();
+
+            // Reload manifest if one is selected
+            if (selectedManifest) {
+                await loadManifest(selectedManifest.manifestType);
+            }
+
+            renderUI();
+            hideLoading();
+            showSuccess('Refreshed!');
+        }
+
+        // Load a manifest
+        async function loadManifest(manifestType) {
+            try {
+                const response = await fetch(`${API_BASE}/manifest/${manifestType}?path=${encodeURIComponent(currentPath)}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                manifestData = result.manifest;
+                selectedManifest = { manifestType, path: currentPath };
+            } catch (error) {
+                console.error('Error loading manifest:', error);
+                throw error;
+            }
+        }
+
+        // Select a manifest for editing
+        async function selectManifest(manifestType) {
+            try {
+                await loadManifest(manifestType);
+                renderManifestEditor();
+                renderFiles(); // Re-render files to show which are in manifest
+            } catch (error) {
+                alert('Error loading manifest: ' + error.message);
+            }
+        }
+
+        // Close manifest editor
+        function closeManifestEditor() {
+            selectedManifest = null;
+            manifestData = null;
+            document.getElementById('manifest-editor').style.display = 'none';
+
+            // Remove active state from all manifest items
+            document.querySelectorAll('.manifest-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            renderFiles(); // Re-render files without manifest highlighting
+        }
+
+        // Save manifest
+        async function saveManifest() {
+            if (!selectedManifest || !manifestData) {
+                alert('No manifest selected');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/manifest/${selectedManifest.manifestType}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        manifest: manifestData,
+                        path: currentPath
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                showSuccess('Manifest saved successfully!');
+                await refreshData();
+            } catch (error) {
+                alert('Error saving manifest: ' + error.message);
+            }
+        }
+
+        // Add file to manifest
+        function addToManifest(filePath) {
+            if (!manifestData) return;
+
+            // Determine the manifest structure and add the file
+            if (Array.isArray(manifestData.files)) {
+                if (!manifestData.files.includes(filePath)) {
+                    manifestData.files.push(filePath);
+                }
+            } else if (Array.isArray(manifestData.genreFiles)) {
+                if (!manifestData.genreFiles.includes(filePath)) {
+                    manifestData.genreFiles.push(filePath);
+                }
+            } else {
+                // Generic object - look for array property
+                const arrayKey = Object.keys(manifestData).find(key => Array.isArray(manifestData[key]));
+                if (arrayKey) {
+                    if (!manifestData[arrayKey].includes(filePath)) {
+                        manifestData[arrayKey].push(filePath);
+                    }
+                } else {
+                    // No array found, create one
+                    manifestData.files = [filePath];
+                }
+            }
+
+            renderManifestEditor();
+            renderFiles();
+            showSuccess(`Added ${filePath.split('/').pop()} to manifest`);
+        }
+
+        // Remove file from manifest
+        function removeFromManifest(filePath) {
+            if (!manifestData) return;
+
+            // Find and remove from appropriate array
+            if (Array.isArray(manifestData.files)) {
+                const index = manifestData.files.indexOf(filePath);
+                if (index > -1) manifestData.files.splice(index, 1);
+            } else if (Array.isArray(manifestData.genreFiles)) {
+                const index = manifestData.genreFiles.indexOf(filePath);
+                if (index > -1) manifestData.genreFiles.splice(index, 1);
+            } else {
+                // Generic object - look for array property
+                const arrayKey = Object.keys(manifestData).find(key => Array.isArray(manifestData[key]));
+                if (arrayKey) {
+                    const index = manifestData[arrayKey].indexOf(filePath);
+                    if (index > -1) manifestData[arrayKey].splice(index, 1);
+                }
+            }
+
+            renderManifestEditor();
+            renderFiles();
+            showSuccess(`Removed ${filePath.split('/').pop()} from manifest`);
+        }
+
+        // Get files in manifest as array
+        function getManifestFiles() {
+            if (!manifestData) return [];
+
+            if (Array.isArray(manifestData.files)) return manifestData.files;
+            if (Array.isArray(manifestData.genreFiles)) return manifestData.genreFiles;
+
+            // Look for any array property
+            const arrayKey = Object.keys(manifestData).find(key => Array.isArray(manifestData[key]));
+            return arrayKey ? manifestData[arrayKey] : [];
+        }
+
+        // Check if file is in manifest
+        function isFileInManifest(filePath) {
+            const filesInManifest = getManifestFiles();
+            return filesInManifest.includes(filePath) || filesInManifest.includes('/' + filePath);
+        }
+
+        // Render UI
+        function renderUI() {
+            renderBreadcrumbs();
+            renderManifestList();
+            renderFolders();
+            renderFiles();
+            if (selectedManifest) {
+                renderManifestEditor();
+            }
+        }
+
+        // Render breadcrumbs
+        function renderBreadcrumbs() {
+            const breadcrumbs = document.getElementById('breadcrumbs');
+            const parts = currentPath ? currentPath.split('/').filter(Boolean) : [];
+
+            let html = '<div class="breadcrumb">';
+            html += '<span class="breadcrumb-item" onclick="navigateTo(\'\')">📁 /data</span>';
+
+            let pathSoFar = '';
+            parts.forEach((part, index) => {
+                pathSoFar += (pathSoFar ? '/' : '') + part;
+                const isLast = index === parts.length - 1;
+
+                html += '<span class="breadcrumb-separator">/</span>';
+                html += `<span class="breadcrumb-item ${isLast ? 'current' : ''}"
+                         onclick="navigateTo('${pathSoFar}')">${part}</span>`;
+            });
+
+            html += '</div>';
+            breadcrumbs.innerHTML = html;
+        }
+
+        // Render manifest list
+        function renderManifestList() {
+            const list = document.getElementById('manifest-list');
+
+            if (currentData.manifests.length === 0) {
+                list.innerHTML = '<div style="text-align: center; padding: 20px; color: #999; font-size: 0.9em;">No manifests in this folder</div>';
+                return;
+            }
+
+            let html = '';
+            currentData.manifests.forEach(manifest => {
+                const isActive = selectedManifest && selectedManifest.manifestType === manifest.manifestType;
+                html += `
+                    <li class="manifest-item ${isActive ? 'active' : ''}" onclick="selectManifest('${manifest.manifestType}')">
+                        <div class="manifest-name">${manifest.name}</div>
+                        <div class="manifest-meta">${manifest.itemCount} items</div>
+                    </li>
+                `;
+            });
+
+            list.innerHTML = html;
+        }
+
+        // Render manifest editor
+        function renderManifestEditor() {
+            if (!selectedManifest || !manifestData) {
+                document.getElementById('manifest-editor').style.display = 'none';
+                return;
+            }
+
+            const editor = document.getElementById('manifest-editor');
+            const title = document.getElementById('manifest-editor-title');
+            const filesInDiv = document.getElementById('manifest-files-in');
+            const filesAvailableDiv = document.getElementById('manifest-files-available');
+            const inCountLabel = document.getElementById('in-manifest-count-label');
+            const availableCountLabel = document.getElementById('available-count-label');
+
+            editor.style.display = 'block';
+            title.textContent = `📋 Editing: ${selectedManifest.manifestType}Manifest.json`;
+
+            const filesInManifest = getManifestFiles();
+
+            // Get all files in current folder (excluding manifest files)
+            const availableFiles = currentData.files.filter(file => !file.isManifest);
+            const filesNotInManifest = availableFiles.filter(file => {
+                const filePath = currentPath ? `${currentPath}/${file.name}` : file.name;
+                const dataPath = `/data/${filePath}`;
+                return !isFileInManifest(file.path);
+            });
+
+            // Update counts
+            inCountLabel.textContent = `${filesInManifest.length} file${filesInManifest.length !== 1 ? 's' : ''}`;
+            availableCountLabel.textContent = `${filesNotInManifest.length} file${filesNotInManifest.length !== 1 ? 's' : ''}`;
+
+            // Render files in manifest
+            if (filesInManifest.length === 0) {
+                filesInDiv.innerHTML = '<div class="manifest-empty">No files yet.<br>Add from the right panel →</div>';
+            } else {
+                let html = '';
+                filesInManifest.forEach(filePath => {
+                    const fileName = filePath.split('/').pop();
+                    html += `
+                        <div class="manifest-file-item">
+                            <span><span class="file-type-icon generic"></span>${fileName}</span>
+                            <button class="btn-danger btn-small" onclick="removeFromManifest('${filePath}')">
+                                ➖
+                            </button>
+                        </div>
+                    `;
+                });
+                filesInDiv.innerHTML = html;
+            }
+
+            // Render available files
+            if (filesNotInManifest.length === 0) {
+                filesAvailableDiv.innerHTML = '<div class="manifest-empty">All files in this folder<br>are already in the manifest!</div>';
+            } else {
+                let html = '';
+                filesNotInManifest.forEach(file => {
+                    const filePath = currentPath ? `${currentPath}/${file.name}` : file.name;
+                    const dataPath = `/data/${filePath}`;
+                    const contentType = file.contentType || 'generic';
+
+                    html += `
+                        <div class="manifest-file-item available" onclick="addToManifest('${dataPath}')">
+                            <span>
+                                <span class="file-type-icon ${contentType}"></span>${file.name}
+                            </span>
+                            <button class="btn-success btn-small" onclick="addToManifest('${dataPath}'); event.stopPropagation();">
+                                ➕
+                            </button>
+                        </div>
+                    `;
+                });
+                filesAvailableDiv.innerHTML = html;
+            }
+        }
+
+        // Render folders
+        function renderFolders() {
+            const section = document.getElementById('folders-section');
+            const grid = document.getElementById('folder-grid');
+
+            if (currentData.folders.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+
+            let html = '';
+            currentData.folders.forEach(folder => {
+                html += `
+                    <div class="folder-card" onclick="navigateTo('${folder.path}')">
+                        <div class="folder-icon">📁</div>
+                        <div class="folder-name">${folder.name}</div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        // Render files
+        function renderFiles() {
+            const list = document.getElementById('file-list');
+            const badge = document.getElementById('file-count-badge');
+
+            if (currentData.files.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📄</div><p>No files in this folder</p></div>';
+                badge.textContent = '';
+                return;
+            }
+
+            badge.textContent = `(${currentData.files.length} files)`;
+
+            let html = '';
+            currentData.files.forEach(file => {
+                const contentType = file.contentType || 'generic';
+                const inManifest = selectedManifest && isFileInManifest(file.path);
+                const filePath = currentPath ? `${currentPath}/${file.name}` : file.name;
+                const dataPath = `/data/${filePath}`;
+
+                html += `
+                    <li class="file-item ${contentType} ${inManifest ? 'in-manifest' : ''}">
+                        <div class="file-info">
+                            <div class="file-header">
+                                <span class="file-name">${file.name}</span>
+                                <span class="badge ${contentType}">${contentType}</span>
+                                ${inManifest ? '<span class="badge in-manifest">In Manifest</span>' : ''}
+                            </div>
+                            <div class="file-meta">
+                                ${file.itemCount !== undefined ? `Items: ${file.itemCount}` : ''}
+                                ${file.genre ? ` | Genre: ${file.genre}` : ''}
+                                ${file.books ? ` | Books: ${file.books.length}` : ''}
+                            </div>
+                        </div>
+                        <div class="file-actions">
+                            <button class="btn-primary btn-small" onclick="viewFile('${file.path}')">
+                                👁️ View
+                            </button>
+                            ${selectedManifest && !file.isManifest ? (
+                                inManifest
+                                ? `<button class="btn-warning btn-small" onclick="removeFromManifest('${dataPath}')">➖ Remove from Manifest</button>`
+                                : `<button class="btn-success btn-small" onclick="addToManifest('${dataPath}')">➕ Add to Manifest</button>`
+                            ) : ''}
+                            ${!file.isManifest ? `
+                            <button class="btn-danger btn-small" onclick="deleteFile('${file.path}', '${file.name}')">
+                                🗑️ Delete
+                            </button>` : ''}
+                        </div>
+                    </li>
+                `;
+            });
+
+            list.innerHTML = html;
+        }
+
+        // Navigate to path
+        async function navigateTo(path) {
+            currentPath = path;
+            selectedManifest = null;
+            manifestData = null;
+            showLoading();
+            await loadData();
+            renderUI();
+            hideLoading();
+        }
+
+        // Create folder
+        async function createFolder() {
+            const name = document.getElementById('folder-name').value.trim();
+
+            if (!name) {
+                alert('Please enter a folder name');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/folder`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ folderName: name, parentPath: currentPath })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                closeModal('create-folder-modal');
+                document.getElementById('folder-name').value = '';
+                await refreshData();
+                showSuccess(`Created folder: ${name}`);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Create file
+        async function createFile() {
+            const name = document.getElementById('file-name').value.trim();
+            const contentType = document.getElementById('content-type').value;
+
+            if (!name) {
+                alert('Please enter a filename');
+                return;
+            }
+
+            if (!name.endsWith('.json')) {
+                alert('Filename must end with .json');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/file`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: name, folderPath: currentPath, contentType })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                closeModal('create-file-modal');
+                document.getElementById('file-name').value = '';
+                await refreshData();
+                showSuccess(`Created file: ${name}`);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Create manifest
+        async function createManifest() {
+            const name = document.getElementById('manifest-name').value.trim();
+
+            if (!name) {
+                alert('Please enter a manifest name');
+                return;
+            }
+
+            try {
+                const filename = `${name}Manifest.json`;
+                const response = await fetch(`${API_BASE}/file`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename,
+                        folderPath: currentPath,
+                        contentType: 'manifest'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                closeModal('create-manifest-modal');
+                document.getElementById('manifest-name').value = '';
+                await refreshData();
+                showSuccess(`Created manifest: ${filename}`);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // View file
+        async function viewFile(filePath) {
+            try {
+                const response = await fetch(`${API_BASE}/file?path=${encodeURIComponent(filePath)}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                const modal = document.getElementById('view-file-modal');
+                const title = document.getElementById('view-file-title');
+                const body = document.getElementById('view-file-body');
+
+                title.textContent = `Preview: ${filePath}`;
+                body.innerHTML = `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+
+                modal.classList.add('active');
+            } catch (error) {
+                alert('Error loading file: ' + error.message);
+            }
+        }
+
+        // Delete file
+        async function deleteFile(filePath, fileName) {
+            if (!confirm(`Delete ${fileName}? This cannot be undone!`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/file?path=${encodeURIComponent(filePath)}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                await refreshData();
+                showSuccess(`Deleted: ${fileName}`);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Show modals
+        function showCreateFolderModal() {
+            document.getElementById('create-folder-modal').classList.add('active');
+        }
+
+        function showCreateFileModal() {
+            document.getElementById('create-file-modal').classList.add('active');
+        }
+
+        function showCreateManifestModal() {
+            document.getElementById('create-manifest-modal').classList.add('active');
+            document.getElementById('manifest-name').addEventListener('input', (e) => {
+                document.getElementById('manifest-preview').textContent = `${e.target.value}Manifest.json`;
+            });
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Utility functions
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('main-content').style.display = 'none';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+        }
+
+        function showSuccess(message) {
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-success';
+            alert.textContent = message;
+            alert.style.position = 'fixed';
+            alert.style.top = '20px';
+            alert.style.right = '20px';
+            alert.style.zIndex = '2000';
+            alert.style.minWidth = '300px';
+            document.body.appendChild(alert);
+            setTimeout(() => alert.remove(), 3000);
+        }
+
+        function showError(message) {
+            const errorDisplay = document.getElementById('error-display');
+            errorDisplay.innerHTML = `<div class="alert alert-error"><strong>Error:</strong> ${message}</div>`;
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Close modals when clicking outside
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
