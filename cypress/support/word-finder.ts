@@ -415,6 +415,56 @@ function selectWord(
 }
 
 /**
+ * Alternative: Select word by directly calling React handlers
+ * This bypasses the mouse event simulation and directly calls the selection logic
+ * Use this if mouse event simulation doesn't work in Cypress
+ */
+export function selectWordDirect(
+  start: { row: number; col: number },
+  direction: [number, number],
+  length: number,
+  word: string
+): Cypress.Chainable {
+  cy.log(`Direct select: "${word}" from [${start.row},${start.col}]`);
+
+  return cy.window().then((win: any) => {
+    const state = win.__GAME_STATE__;
+    if (!state || !state.grid) {
+      throw new Error('Game state not available');
+    }
+
+    // Build the cell array for this word
+    const [dRow, dCol] = direction;
+    const cells: any[] = [];
+
+    for (let i = 0; i < length; i++) {
+      const row = start.row + (dRow * i);
+      const col = start.col + (dCol * i);
+      cells.push({
+        row,
+        col,
+        value: state.grid[row][col]
+      });
+    }
+
+    cy.log(`Built cells array with ${cells.length} cells`);
+
+    // Try to find and call the checkWord function
+    // It should be available through React Fiber or window
+    if (win.__CHECK_WORD__) {
+      cy.log('Calling __CHECK_WORD__ directly');
+      const result = win.__CHECK_WORD__(cells);
+      cy.log(`Direct call result: ${result}`);
+      return cy.wait(200); // Wait for state update
+    } else {
+      cy.log('⚠️ __CHECK_WORD__ not available on window');
+      cy.log('You may need to expose it in puzzle/page.tsx');
+      return cy.wrap(false);
+    }
+  });
+}
+
+/**
  * Helper to wait for game state to be available
  * The puzzle page exposes state to window in development mode
  */

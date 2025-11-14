@@ -110,8 +110,9 @@ export default function PuzzleScreen() {
     if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
       (window as any).__GAME_STATE__ = state;
       (window as any).__UPDATE_GAME_STATE__ = setState;
+      (window as any).__CHECK_WORD__ = checkWord;
     }
-  }, [state, setState]);
+  }, [state, setState, checkWord]);
 
   // Load puzzle if not already loaded
   useEffect(() => {
