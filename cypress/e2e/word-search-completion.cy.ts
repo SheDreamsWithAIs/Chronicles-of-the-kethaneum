@@ -50,9 +50,9 @@ describe('Word Search Puzzle Completion', () => {
       cy.log(`Completed puzzle with ${stats.totalWords} words`);
       cy.log(`Grid scan found: ${stats.foundByGridScan}, Placement data found: ${stats.foundByPlacementData}`);
 
-      // Verify all words are found
+      // Verify all words are found (CSS modules hash the class name)
       cy.get('[data-testid="word-list"] li').each(($li) => {
-        cy.wrap($li).should('have.class', 'found');
+        cy.wrap($li).should('have.attr', 'class').and('match', /found/);
       });
 
       // Win modal should appear
@@ -135,8 +135,8 @@ describe('Word Search Puzzle Completion', () => {
     cy.get('[data-testid="puzzle-screen"]', { timeout: 15000 }).should('be.visible');
     cy.get('[data-testid="word-list"]', { timeout: 10000 }).should('be.visible');
 
-    // Initially, no words should be found
-    cy.get('[data-testid="word-list"] li.found').should('not.exist');
+    // Initially, no words should be found (CSS modules hash class names)
+    cy.get('[data-testid="word-list"] li[class*="found"]').should('not.exist');
 
     // Expose game state
     exposeGameState();
@@ -174,9 +174,9 @@ describe('Word Search Puzzle Completion', () => {
       // Wait for state update
       cy.wait(200);
 
-      // Verify exactly one word is found
-      cy.get('[data-testid="word-list"] li.found').should('have.length', 1);
-      cy.get('[data-testid="word-list"] li.found').should('contain', firstWord.word);
+      // Verify exactly one word is found (CSS modules hash class names)
+      cy.get('[data-testid="word-list"] li[class*="found"]').should('have.length', 1);
+      cy.get('[data-testid="word-list"] li[class*="found"]').should('contain', firstWord.word);
     });
   });
 
@@ -233,9 +233,10 @@ describe('Word Search Puzzle Completion', () => {
 
       cy.get(`[data-cell-key="${endRow}-${endCol}"]`).trigger('mouseup', { force: true });
 
-      // Verify word is marked as found
+      // Verify word is marked as found (CSS modules hash class names)
       cy.wait(200);
-      cy.get('[data-testid="word-list"] li').contains(testWord.word).parent().should('have.class', 'found');
+      cy.get('[data-testid="word-list"] li').contains(testWord.word).parent()
+        .should('have.attr', 'class').and('match', /found/);
     });
   });
 
