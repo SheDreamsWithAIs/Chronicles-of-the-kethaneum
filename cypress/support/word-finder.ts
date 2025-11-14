@@ -357,11 +357,11 @@ function selectWord(
       const endY = endRect.top + endRect.height / 2;
 
       // Trigger mousedown on start cell
-      cy.wrap($startCell).trigger('mousedown', {
+      return cy.wrap($startCell).trigger('mousedown', {
         clientX: startX,
         clientY: startY,
         button: 0,
-        buttons: 1, // Left mouse button pressed
+        buttons: 1,
         bubbles: true,
         cancelable: true,
         force: true
@@ -371,9 +371,10 @@ function selectWord(
         const cells: Array<{ row: number; col: number; x: number; y: number }> = [];
 
         // Include ALL cells from start (i=0) to end (i=steps)
+        // Direction values are always integers (-1, 0, or 1)
         for (let i = 0; i <= steps; i++) {
-          const row = start.row + Math.round(dRow * i);
-          const col = start.col + Math.round(dCol * i);
+          const row = start.row + (dRow * i);
+          const col = start.col + (dCol * i);
 
           const progress = steps === 0 ? 0 : i / steps;
           const x = startX + (endX - startX) * progress;
@@ -384,44 +385,32 @@ function selectWord(
 
         cy.log(`Moving through ${cells.length} cells (should be ${length})`);
 
-        // Chain mousemove events - trigger on grid container, not individual cells
-        // This ensures the container's handleMouseMove is called
+        // Chain mousemove events on each cell - bubbling will handle container updates
         let chain = cy.wrap(null);
-        cells.forEach((cell, index) => {
+        cells.forEach((cell) => {
           chain = chain.then(() => {
-            // Trigger on the specific cell to update hover state
             return cy.get(`[data-cell-key="${cell.row}-${cell.col}"]`).trigger('mousemove', {
               clientX: cell.x,
               clientY: cell.y,
-              buttons: 1, // Button still pressed during drag
+              buttons: 1,
               bubbles: true,
               cancelable: true,
               force: true
-            }).then(() => {
-              // Also trigger on the grid container to ensure handleMouseMove fires
-              // Using CSS module class selector
-              return cy.get('[class*="gridContainer"]').first().trigger('mousemove', {
-                clientX: cell.x,
-                clientY: cell.y,
-                buttons: 1,
-                bubbles: true,
-                force: true
-              });
             });
           });
         });
 
-        // After all mousemove events, trigger mouseup on the grid container
+        // Trigger mouseup on the end cell - will bubble to container
         return chain.then(() => {
-          return cy.get('[class*="gridContainer"]').first().trigger('mouseup', {
+          return cy.wrap($endCell).trigger('mouseup', {
             clientX: endX,
             clientY: endY,
             button: 0,
-            buttons: 0, // Button released
+            buttons: 0,
             bubbles: true,
             cancelable: true,
             force: true
-          }).wait(300); // Wait for selection to be processed and state to update
+          }).wait(300);
         });
       });
     });
