@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Crimson_Text, Dancing_Script, Cinzel } from "next/font/google";
+import { AudioProvider } from "@/components/AudioProvider";
 import "./globals.css";
 
 const crimsonText = Crimson_Text({
@@ -36,9 +37,11 @@ export default function RootLayout({
       <body
         className={`${crimsonText.variable} ${dancingScript.variable} ${cinzel.variable} antialiased`}
       >
-        <div id="game-container" className="min-h-screen">
-          {children}
-        </div>
+        <AudioProvider>
+          <div id="game-container" className="min-h-screen">
+            {children}
+          </div>
+        </AudioProvider>
       </body>
     </html>
   );

@@ -30,6 +30,19 @@ export interface SystemSettings {
   errorReporting: boolean;
 }
 
+export interface AudioSettings {
+  masterVolume: number; // 0-1
+  musicVolume: number; // 0-1
+  ambientVolume: number; // 0-1
+  sfxVolume: number; // 0-1
+  voiceVolume: number; // 0-1
+  masterMuted: boolean;
+  musicMuted: boolean;
+  ambientMuted: boolean;
+  sfxMuted: boolean;
+  voiceMuted: boolean;
+}
+
 export interface Config {
   gridSize: number;
   timeLimit: number;
@@ -45,6 +58,7 @@ export interface Config {
   testing: TestingConfig;
   features: FeatureFlags;
   system: SystemSettings;
+  audio: AudioSettings;
 }
 
 // Default configuration values
@@ -109,6 +123,20 @@ const defaultConfig: Config = {
     debugMode: false,
     persistence: true,
     errorReporting: false
+  },
+
+  // Audio settings
+  audio: {
+    masterVolume: 0.7,
+    musicVolume: 0.8,
+    ambientVolume: 0.6,
+    sfxVolume: 0.7,
+    voiceVolume: 1.0,
+    masterMuted: false,
+    musicMuted: false,
+    ambientMuted: false,
+    sfxMuted: false,
+    voiceMuted: false
   }
 };
 

@@ -4,6 +4,7 @@
  */
 
 import type { GameState } from '../game/state';
+import type { AudioSettings } from '../core/config';
 
 export interface SavedProgress {
   completedPuzzles: number;
@@ -96,6 +97,45 @@ export function clearGameProgress(): void {
     localStorage.removeItem('kethaneumProgress');
   } catch (error) {
     console.error('Failed to clear game progress:', error);
+  }
+}
+
+/**
+ * Save audio settings to local storage
+ */
+export function saveAudioSettings(settings: AudioSettings): void {
+  try {
+    localStorage.setItem('kethaneumAudioSettings', JSON.stringify(settings));
+  } catch (error) {
+    console.error('Failed to save audio settings:', error);
+  }
+}
+
+/**
+ * Load audio settings from local storage
+ */
+export function loadAudioSettings(): AudioSettings | null {
+  try {
+    const savedSettings = localStorage.getItem('kethaneumAudioSettings');
+    if (!savedSettings) {
+      return null;
+    }
+
+    return JSON.parse(savedSettings) as AudioSettings;
+  } catch (error) {
+    console.error('Failed to load audio settings:', error);
+    return null;
+  }
+}
+
+/**
+ * Clear audio settings
+ */
+export function clearAudioSettings(): void {
+  try {
+    localStorage.removeItem('kethaneumAudioSettings');
+  } catch (error) {
+    console.error('Failed to clear audio settings:', error);
   }
 }
 
