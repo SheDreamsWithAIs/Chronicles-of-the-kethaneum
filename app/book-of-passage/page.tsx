@@ -24,9 +24,9 @@ export default function BookOfPassageScreen() {
   };
 
   return (
-    <div className={styles.bookPassageContainer}>
+    <div className={styles.bookPassageContainer} data-testid="book-of-passage-screen">
       <CosmicBackground variant="book" starCount={200} particleCount={30} />
-      
+
       <div className={styles.bookPassageScreen}>
         <div className={styles.bookContainer}>
           <div className={styles.bookSpine}>
@@ -76,7 +76,7 @@ export default function BookOfPassageScreen() {
 
       <div className={styles.bottomNav}>
         <div className={styles.navOrnament}>
-          <button className={styles.navButton} onClick={handleBeginCataloging}>
+          <button className={styles.navButton} onClick={handleBeginCataloging} data-testid="begin-cataloging-btn">
             Begin Cataloging
           </button>
         </div>

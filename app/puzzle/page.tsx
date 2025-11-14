@@ -587,7 +587,7 @@ export default function PuzzleScreen() {
   }, [isPaused, handlePause, handleResume]); // Include dependencies for pause/resume handlers
 
   return (
-    <div className={styles.puzzleContainer}>
+    <div className={styles.puzzleContainer} data-testid="puzzle-screen">
       <CosmicBackground variant="puzzle" starCount={450} particleCount={0} />
       
       {/* Timer display - Story Mode shows decorative full bar, others show countdown */}
@@ -735,7 +735,7 @@ export default function PuzzleScreen() {
 
             <div className={`${styles.wordsPanel} hidden md:block`}>
               <h3 className={styles.wordsTitle}>Find These Words:</h3>
-              <ul className={styles.wordList}>
+              <ul className={styles.wordList} data-testid="word-list">
                 {wordList.map((word, index) => (
                   <li 
                     key={`${word.word}-${index}`}
@@ -749,7 +749,7 @@ export default function PuzzleScreen() {
           </div>
 
           <div className={`${styles.mobileWords} md:hidden`}>
-            <ul className={styles.wordList}>
+            <ul className={styles.wordList} data-testid="mobile-word-list">
               {wordList.map((word, index) => (
                 <li 
                   key={`${word.word}-${index}`}
@@ -763,9 +763,10 @@ export default function PuzzleScreen() {
         </div>
 
         <div className={styles.puzzleControls}>
-          <button 
+          <button
             className={`${styles.controlBtn} ${styles.primary}`}
             onClick={handlePause}
+            data-testid="pause-btn"
           >
             Pause
           </button>
@@ -774,46 +775,52 @@ export default function PuzzleScreen() {
 
       {/* Pause Menu Overlay */}
       {isPaused && (
-        <div className={styles.pauseOverlay} onClick={handleResume}>
-          <div 
+        <div className={styles.pauseOverlay} onClick={handleResume} data-testid="pause-overlay">
+          <div
             className={styles.pauseMenu}
             onClick={(e) => e.stopPropagation()}
+            data-testid="pause-menu"
           >
             <h2 className={styles.pauseTitle}>Paused</h2>
             
             <div className={styles.pauseButtons}>
-              <button 
+              <button
                 className={`${styles.pauseBtn} ${styles.primary}`}
                 onClick={handleResume}
+                data-testid="resume-btn"
               >
                 Resume
               </button>
-              
-              <button 
+
+              <button
                 className={styles.pauseBtn}
                 onClick={handleBackToBookOfPassage}
+                data-testid="back-to-book-btn"
               >
                 Back to Book of Passage
               </button>
-              
-              <button 
+
+              <button
                 className={styles.pauseBtn}
                 onClick={handleBackToLibrary}
+                data-testid="back-to-library-btn"
               >
                 Back to Library
               </button>
-              
-              <button 
+
+              <button
                 className={styles.pauseBtn}
                 onClick={handleBackToMainMenu}
+                data-testid="back-to-menu-btn"
               >
                 Back to Main Menu
               </button>
-              
-              <button 
+
+              <button
                 className={`${styles.pauseBtn} ${styles.disabled}`}
                 onClick={handleOptions}
                 disabled
+                data-testid="options-btn"
               >
                 Options
               </button>

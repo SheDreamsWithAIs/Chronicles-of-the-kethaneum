@@ -70,19 +70,19 @@ export default function BackstoryScreen() {
   ];
 
   return (
-    <div className={`${styles.backstoryContainer} ${isVisible ? styles.visible : ''}`}>
+    <div className={`${styles.backstoryContainer} ${isVisible ? styles.visible : ''}`} data-testid="backstory-screen">
       <CosmicBackground variant="backstory" starCount={150} particleCount={40} />
-      
+
       <div className={styles.backstoryScreen}>
         <div className={styles.bookContainer}>
           <div className={styles.bookSpine}></div>
           
           <div className={styles.bookContent}>
             <div className={styles.pageDecoration}>✦</div>
-            
+
             <h1 className={styles.chapterTitle}>The Kethaneum</h1>
-            
-            <div className={styles.storyContent}>
+
+            <div className={styles.storyContent} data-testid="backstory-content">
               <p>The Kethaneum exists in the spaces between worlds—a vast library stretching across dimensions, accessible only to those deemed worthy by its mysterious custodians. Neither fully physical nor entirely ethereal, this repository houses knowledge from countless civilizations, epochs, and realities.</p>
               
               <p>For millennia, brilliant minds across the multiverse have sought entry to this hallowed space. Few succeed. The journey requires years of dedicated study and the completion of increasingly complex trials that test not just intellect, but character and perseverance. Those who prove themselves receive a <em>Book of Passage</em>—a living artifact that serves as both key and chronicle.</p>
@@ -104,7 +104,7 @@ export default function BackstoryScreen() {
               ))}
             </div>
             
-            <button className={styles.continueButton} onClick={handleContinue}>
+            <button className={styles.continueButton} onClick={handleContinue} data-testid="continue-to-mode-select-btn">
               Continue
             </button>
             
