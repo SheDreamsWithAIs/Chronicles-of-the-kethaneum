@@ -366,40 +366,54 @@ function selectWord(
         cancelable: true,
         force: true
       }).then(() => {
-        // Build array of intermediate cells
+        // Build array of all cells from start to end (inclusive)
         const steps = Math.max(Math.abs(endRow - start.row), Math.abs(endCol - start.col));
-        const cells: Array<{ key: string; x: number; y: number }> = [];
+        const cells: Array<{ row: number; col: number; x: number; y: number }> = [];
 
-        for (let i = 1; i <= steps; i++) {
-          const intermediateRow = start.row + Math.round(dRow * i);
-          const intermediateCol = start.col + Math.round(dCol * i);
-          const intermediateKey = `${intermediateRow}-${intermediateCol}`;
+        // Include ALL cells from start (i=0) to end (i=steps)
+        for (let i = 0; i <= steps; i++) {
+          const row = start.row + Math.round(dRow * i);
+          const col = start.col + Math.round(dCol * i);
 
-          const progress = i / steps;
-          const currentX = startX + (endX - startX) * progress;
-          const currentY = startY + (endY - startY) * progress;
+          const progress = steps === 0 ? 0 : i / steps;
+          const x = startX + (endX - startX) * progress;
+          const y = startY + (endY - startY) * progress;
 
-          cells.push({ key: intermediateKey, x: currentX, y: currentY });
+          cells.push({ row, col, x, y });
         }
 
-        // Chain mousemove events through each cell
+        cy.log(`Moving through ${cells.length} cells (should be ${length})`);
+
+        // Chain mousemove events - trigger on grid container, not individual cells
+        // This ensures the container's handleMouseMove is called
         let chain = cy.wrap(null);
-        cells.forEach((cell) => {
+        cells.forEach((cell, index) => {
           chain = chain.then(() => {
-            return cy.get(`[data-cell-key="${cell.key}"]`).trigger('mousemove', {
+            // Trigger on the specific cell to update hover state
+            return cy.get(`[data-cell-key="${cell.row}-${cell.col}"]`).trigger('mousemove', {
               clientX: cell.x,
               clientY: cell.y,
               buttons: 1, // Button still pressed during drag
               bubbles: true,
               cancelable: true,
               force: true
+            }).then(() => {
+              // Also trigger on the grid container to ensure handleMouseMove fires
+              // Using CSS module class selector
+              return cy.get('[class*="gridContainer"]').first().trigger('mousemove', {
+                clientX: cell.x,
+                clientY: cell.y,
+                buttons: 1,
+                bubbles: true,
+                force: true
+              });
             });
           });
         });
 
-        // After all mousemove events, trigger mouseup
+        // After all mousemove events, trigger mouseup on the grid container
         return chain.then(() => {
-          return cy.get('[data-testid="puzzle-screen"]').trigger('mouseup', {
+          return cy.get('[class*="gridContainer"]').first().trigger('mouseup', {
             clientX: endX,
             clientY: endY,
             button: 0,
@@ -407,7 +421,7 @@ function selectWord(
             bubbles: true,
             cancelable: true,
             force: true
-          }).wait(250); // Wait for selection to be processed and state to update
+          }).wait(300); // Wait for selection to be processed and state to update
         });
       });
     });
