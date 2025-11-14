@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { CosmicBackground } from '@/components/shared/CosmicBackground';
 
 // ============================================================================
 // TYPES
@@ -372,22 +373,24 @@ export default function GenreBuilder() {
   }, [scope, genreFile]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <header className="mb-6 bg-white rounded-lg shadow p-4">
-          <h1 className="text-3xl font-bold mb-4">Genre Builder Tool</h1>
+    <>
+      <CosmicBackground variant="library" />
+      <div className="min-h-screen p-6 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <header className="mb-6 bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-4">
+          <h1 className="text-3xl font-bold mb-4 text-[var(--text-light)]">Genre Builder Tool</h1>
 
           {/* File Controls */}
           <div className="flex gap-4 items-center flex-wrap">
             <button
               onClick={handleNewFile}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              className="px-4 py-2 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded hover:bg-[var(--accent-light)] transition-all font-semibold"
             >
               New File
             </button>
 
-            <label className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer">
+            <label className="px-4 py-2 bg-[var(--primary-light)] text-white rounded hover:bg-[var(--primary-lighter)] cursor-pointer transition-all font-semibold">
               Load File
               <input
                 type="file"
@@ -399,7 +402,7 @@ export default function GenreBuilder() {
 
             <button
               onClick={handleSaveFile}
-              className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+              className="px-4 py-2 bg-[var(--accent-dark)] text-white rounded hover:bg-[var(--accent-main)] transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={validationErrors.length > 0}
             >
               Save to File
@@ -407,26 +410,26 @@ export default function GenreBuilder() {
 
             <button
               onClick={() => setShowPreview(true)}
-              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+              className="px-4 py-2 bg-[var(--primary-lighter)] text-white rounded hover:bg-[var(--primary-light)] transition-all font-semibold"
             >
               Preview JSON
             </button>
 
             <button
               onClick={() => setShowValidation(!showValidation)}
-              className={`px-4 py-2 rounded ${validationErrors.length > 0 ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-400'} text-white`}
+              className={`px-4 py-2 rounded transition-all font-semibold ${validationErrors.length > 0 ? 'bg-red-600 hover:bg-red-700' : 'bg-[var(--neutral-medium)] hover:bg-[var(--neutral-dark)]'} text-white`}
             >
               Validation ({validationErrors.length})
             </button>
 
             {lastSaved && (
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-[var(--text-medium)]">
                 Auto-saved: {lastSaved.toLocaleTimeString()}
               </span>
             )}
 
             {saveMessage && (
-              <span className="text-sm text-green-600 font-semibold">
+              <span className="text-sm text-[var(--accent-light)] font-semibold">
                 {saveMessage}
               </span>
             )}
@@ -442,7 +445,7 @@ export default function GenreBuilder() {
           />
 
           {/* Main Content */}
-          <main className="flex-1 bg-white rounded-lg shadow p-6">
+          <main className="flex-1 bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-6">
             {/* Breadcrumbs */}
             <Breadcrumbs
               genreFile={genreFile}
@@ -522,6 +525,7 @@ export default function GenreBuilder() {
         )}
       </div>
     </div>
+    </>
   );
 }
 
@@ -535,13 +539,13 @@ function Sidebar({ genreFile, scope, onScopeChange }: {
   onScopeChange: (scope: ScopeState) => void;
 }) {
   return (
-    <aside className="w-64 bg-white rounded-lg shadow p-4">
-      <h2 className="font-bold text-lg mb-4">Navigation</h2>
+    <aside className="w-64 bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-4">
+      <h2 className="font-bold text-lg mb-4 text-[var(--text-light)]">Navigation</h2>
 
       <div className="mb-4">
         <button
           onClick={() => onScopeChange({ level: 'file' })}
-          className={`w-full text-left px-3 py-2 rounded ${scope.level === 'file' ? 'bg-blue-100 text-blue-800' : 'hover:bg-gray-100'}`}
+          className={`w-full text-left px-3 py-2 rounded transition-all ${scope.level === 'file' ? 'bg-[var(--accent-main)] text-[var(--primary-dark)] font-semibold' : 'text-[var(--text-light)] hover:bg-[var(--primary-light)]'}`}
         >
           📁 {genreFile.filename}
         </button>
@@ -552,7 +556,7 @@ function Sidebar({ genreFile, scope, onScopeChange }: {
           <div key={bookIndex}>
             <button
               onClick={() => onScopeChange({ level: 'book', bookIndex })}
-              className={`w-full text-left px-3 py-2 rounded ${scope.level === 'book' && scope.bookIndex === bookIndex ? 'bg-blue-100 text-blue-800' : 'hover:bg-gray-100'}`}
+              className={`w-full text-left px-3 py-2 rounded transition-all ${scope.level === 'book' && scope.bookIndex === bookIndex ? 'bg-[var(--accent-main)] text-[var(--primary-dark)] font-semibold' : 'text-[var(--text-light)] hover:bg-[var(--primary-light)]'}`}
             >
               📖 {book.name || `Book ${bookIndex + 1}`}
             </button>
@@ -563,7 +567,7 @@ function Sidebar({ genreFile, scope, onScopeChange }: {
                   <button
                     key={puzzleIndex}
                     onClick={() => onScopeChange({ level: 'puzzle', bookIndex, puzzleIndex })}
-                    className={`w-full text-left px-2 py-1 text-sm rounded ${scope.level === 'puzzle' && scope.puzzleIndex === puzzleIndex ? 'bg-blue-100 text-blue-800' : 'hover:bg-gray-100'}`}
+                    className={`w-full text-left px-2 py-1 text-sm rounded transition-all ${scope.level === 'puzzle' && scope.puzzleIndex === puzzleIndex ? 'bg-[var(--accent-main)] text-[var(--primary-dark)] font-semibold' : 'text-[var(--text-medium)] hover:bg-[var(--primary-light)]'}`}
                   >
                     {puzzleIndex + 1}. {puzzle.title || `Puzzle ${puzzleIndex + 1}`}
                   </button>
@@ -583,10 +587,10 @@ function Breadcrumbs({ genreFile, scope, onScopeChange }: {
   onScopeChange: (scope: ScopeState) => void;
 }) {
   return (
-    <nav className="mb-6 text-sm text-gray-600">
+    <nav className="mb-6 text-sm text-[var(--text-medium)]">
       <button
         onClick={() => onScopeChange({ level: 'file' })}
-        className="hover:text-blue-600 underline"
+        className="hover:text-[var(--accent-light)] underline"
       >
         {genreFile.filename}
       </button>
@@ -596,7 +600,7 @@ function Breadcrumbs({ genreFile, scope, onScopeChange }: {
           <span className="mx-2">/</span>
           <button
             onClick={() => onScopeChange({ level: 'book', bookIndex: scope.bookIndex })}
-            className="hover:text-blue-600 underline"
+            className="hover:text-[var(--accent-light)] underline"
           >
             {genreFile.books[scope.bookIndex]?.name || `Book ${scope.bookIndex + 1}`}
           </button>
@@ -606,7 +610,7 @@ function Breadcrumbs({ genreFile, scope, onScopeChange }: {
       {scope.puzzleIndex !== undefined && (
         <>
           <span className="mx-2">/</span>
-          <span className="text-gray-800">
+          <span className="text-[var(--text-light)]">
             Puzzle {scope.puzzleIndex + 1}
           </span>
         </>
@@ -625,38 +629,38 @@ function FileView({ genreFile, onUpdateGenre, onUpdateFilename, onAddBook, onDel
 }) {
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-4">File Settings</h2>
+      <h2 className="text-2xl font-bold mb-4 text-[var(--text-light)]">File Settings</h2>
 
       <div className="mb-6 space-y-4">
         <div>
-          <label className="block font-semibold mb-2">Filename</label>
+          <label className="block font-semibold mb-2 text-[var(--text-light)]">Filename</label>
           <input
             type="text"
             value={genreFile.filename}
             onChange={(e) => onUpdateFilename(e.target.value)}
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] focus:outline-none"
             placeholder="myGenrePuzzles.json"
           />
         </div>
 
         <div>
-          <label className="block font-semibold mb-2">Genre</label>
+          <label className="block font-semibold mb-2 text-[var(--text-light)]">Genre</label>
           <input
             type="text"
             value={genreFile.genre}
             onChange={(e) => onUpdateGenre(e.target.value)}
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] focus:outline-none"
             placeholder="nature, kethaneum, etc."
           />
-          <p className="text-sm text-gray-500 mt-1">This genre will be applied to all puzzles in this file.</p>
+          <p className="text-sm text-[var(--text-medium)] mt-1">This genre will be applied to all puzzles in this file.</p>
         </div>
       </div>
 
       <div className="mb-4 flex justify-between items-center">
-        <h3 className="text-xl font-bold">Books ({genreFile.books.length})</h3>
+        <h3 className="text-xl font-bold text-[var(--text-light)]">Books ({genreFile.books.length})</h3>
         <button
           onClick={onAddBook}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          className="px-4 py-2 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded hover:bg-[var(--accent-light)] transition-all font-semibold"
         >
           + Add Book
         </button>
@@ -664,22 +668,22 @@ function FileView({ genreFile, onUpdateGenre, onUpdateFilename, onAddBook, onDel
 
       <div className="space-y-4">
         {genreFile.books.map((book, index) => (
-          <div key={index} className="border rounded p-4 hover:bg-gray-50">
+          <div key={index} className="bg-[var(--neutral-medium)] border border-[var(--primary-light)] rounded p-4 hover:bg-[var(--primary-light)] transition-all">
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                <h4 className="font-bold text-lg">{book.name || `Book ${index + 1}`}</h4>
-                <p className="text-sm text-gray-600">{book.puzzles.length} puzzle(s)</p>
+                <h4 className="font-bold text-lg text-[var(--text-light)]">{book.name || `Book ${index + 1}`}</h4>
+                <p className="text-sm text-[var(--text-medium)]">{book.puzzles.length} puzzle(s)</p>
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => onSelectBook(index)}
-                  className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className="px-3 py-1 bg-[var(--primary-lighter)] text-white rounded hover:bg-[var(--primary-light)] transition-all font-semibold"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => onDeleteBook(index)}
-                  className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                  className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-all font-semibold"
                 >
                   Delete
                 </button>
@@ -704,21 +708,21 @@ function BookView({ book, bookIndex, genre, onAddPuzzle, onDeletePuzzle, onSelec
   return (
     <div>
       <div className="mb-6">
-        <label className="block font-semibold mb-2">Book Name</label>
+        <label className="block font-semibold mb-2 text-[var(--text-light)]">Book Name</label>
         <input
           type="text"
           value={book.name}
           onChange={(e) => onUpdateBookName(e.target.value)}
-          className="w-full px-3 py-2 border rounded"
+          className="w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] focus:outline-none"
           placeholder="Enter book name"
         />
       </div>
 
       <div className="mb-4 flex justify-between items-center">
-        <h3 className="text-xl font-bold">Puzzles ({book.puzzles.length})</h3>
+        <h3 className="text-xl font-bold text-[var(--text-light)]">Puzzles ({book.puzzles.length})</h3>
         <button
           onClick={onAddPuzzle}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          className="px-4 py-2 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded hover:bg-[var(--accent-light)] transition-all font-semibold"
         >
           + Add Puzzle
         </button>
@@ -726,32 +730,32 @@ function BookView({ book, bookIndex, genre, onAddPuzzle, onDeletePuzzle, onSelec
 
       <div className="space-y-3">
         {book.puzzles.map((puzzle, index) => (
-          <div key={index} className="border rounded p-4 hover:bg-gray-50">
+          <div key={index} className="bg-[var(--neutral-medium)] border border-[var(--primary-light)] rounded p-4 hover:bg-[var(--primary-light)] transition-all">
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-semibold">
+                  <span className="bg-[var(--accent-dark)] text-[var(--text-light)] px-2 py-1 rounded text-sm font-semibold">
                     Part {index}
                   </span>
-                  <h4 className="font-bold">{puzzle.title || `Untitled Puzzle ${index + 1}`}</h4>
+                  <h4 className="font-bold text-[var(--text-light)]">{puzzle.title || `Untitled Puzzle ${index + 1}`}</h4>
                 </div>
-                <p className="text-sm text-gray-600 mb-2">
+                <p className="text-sm text-[var(--text-medium)] mb-2">
                   Words: {puzzle.words.length > 0 ? puzzle.words.join(', ') : 'None'}
                 </p>
-                <p className="text-sm text-gray-700 line-clamp-2">
+                <p className="text-sm text-[var(--text-light)] line-clamp-2">
                   {puzzle.storyExcerpt || 'No story excerpt'}
                 </p>
               </div>
               <div className="flex gap-2 ml-4">
                 <button
                   onClick={() => onSelectPuzzle(index)}
-                  className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className="px-3 py-1 bg-[var(--primary-lighter)] text-white rounded hover:bg-[var(--primary-light)] transition-all font-semibold"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => onDeletePuzzle(index)}
-                  className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                  className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-all font-semibold"
                 >
                   Delete
                 </button>
@@ -775,36 +779,36 @@ function PuzzleForm({ puzzle, puzzleIndex, bookIndex, onUpdate, validationErrors
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-4">Puzzle Editor (Part {puzzleIndex})</h2>
+      <h2 className="text-2xl font-bold mb-4 text-[var(--text-light)]">Puzzle Editor (Part {puzzleIndex})</h2>
 
       <div className="space-y-4">
         <div>
-          <label className="block font-semibold mb-2">Title</label>
+          <label className="block font-semibold mb-2 text-[var(--text-light)]">Title</label>
           <input
             type="text"
             value={puzzle.title}
             onChange={(e) => onUpdate({ title: e.target.value })}
-            className={`w-full px-3 py-2 border rounded ${getError('title') ? 'border-red-500' : ''}`}
+            className={`w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border rounded focus:outline-none ${getError('title') ? 'border-red-500 focus:border-red-500' : 'border-[var(--primary-light)] focus:border-[var(--accent-light)]'}`}
             placeholder="e.g., Fruits of the Orchard - Part 1"
           />
           {getError('title') && <p className="text-red-500 text-sm mt-1">{getError('title')!.message}</p>}
         </div>
 
         <div>
-          <label className="block font-semibold mb-2">Book Name</label>
+          <label className="block font-semibold mb-2 text-[var(--text-light)]">Book Name</label>
           <input
             type="text"
             value={puzzle.book}
             onChange={(e) => onUpdate({ book: e.target.value })}
-            className={`w-full px-3 py-2 border rounded ${getError('book') ? 'border-red-500' : ''}`}
+            className={`w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border rounded focus:outline-none ${getError('book') ? 'border-red-500 focus:border-red-500' : 'border-[var(--primary-light)] focus:border-[var(--accent-light)]'}`}
             placeholder="e.g., Fruits of the Orchard"
           />
           {getError('book') && <p className="text-red-500 text-sm mt-1">{getError('book')!.message}</p>}
-          <p className="text-sm text-gray-500 mt-1">All puzzles with the same book name will be grouped together.</p>
+          <p className="text-sm text-[var(--text-medium)] mt-1">All puzzles with the same book name will be grouped together.</p>
         </div>
 
         <div>
-          <label className="block font-semibold mb-2">Words</label>
+          <label className="block font-semibold mb-2 text-[var(--text-light)]">Words</label>
           <textarea
             value={puzzle.words.join(', ')}
             onChange={(e) => {
@@ -814,30 +818,30 @@ function PuzzleForm({ puzzle, puzzleIndex, bookIndex, onUpdate, validationErrors
                 .filter(w => w.length > 0);
               onUpdate({ words });
             }}
-            className={`w-full px-3 py-2 border rounded h-24 ${getError('words') ? 'border-red-500' : ''}`}
+            className={`w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border rounded h-24 focus:outline-none ${getError('words') ? 'border-red-500 focus:border-red-500' : 'border-[var(--primary-light)] focus:border-[var(--accent-light)]'}`}
             placeholder="Enter words separated by commas (e.g., apple, banana, cherry)"
           />
           {getError('words') && <p className="text-red-500 text-sm mt-1">{getError('words')!.message}</p>}
-          <p className="text-sm text-gray-500 mt-1">Enter words separated by commas. These are the words players will search for in the puzzle.</p>
+          <p className="text-sm text-[var(--text-medium)] mt-1">Enter words separated by commas. These are the words players will search for in the puzzle.</p>
         </div>
 
         <div>
-          <label className="block font-semibold mb-2">Story Excerpt</label>
+          <label className="block font-semibold mb-2 text-[var(--text-light)]">Story Excerpt</label>
           <textarea
             value={puzzle.storyExcerpt}
             onChange={(e) => onUpdate({ storyExcerpt: e.target.value })}
-            className={`w-full px-3 py-2 border rounded h-32 ${getError('storyExcerpt') ? 'border-red-500' : ''}`}
+            className={`w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border rounded h-32 focus:outline-none ${getError('storyExcerpt') ? 'border-red-500 focus:border-red-500' : 'border-[var(--primary-light)] focus:border-[var(--accent-light)]'}`}
             placeholder="Enter the story text for this puzzle part..."
           />
           {getError('storyExcerpt') && <p className="text-red-500 text-sm mt-1">{getError('storyExcerpt')!.message}</p>}
-          <p className="text-sm text-gray-500 mt-1">This is the story text that will be displayed to players. Order matters as it tells a sequential story.</p>
+          <p className="text-sm text-[var(--text-medium)] mt-1">This is the story text that will be displayed to players. Order matters as it tells a sequential story.</p>
         </div>
 
-        <div className="bg-gray-100 p-3 rounded">
-          <p className="text-sm">
+        <div className="bg-[var(--primary-light)] bg-opacity-50 p-3 rounded border border-[var(--primary-lighter)]">
+          <p className="text-sm text-[var(--text-light)]">
             <strong>Story Part:</strong> {puzzleIndex} (auto-calculated by position)
           </p>
-          <p className="text-sm">
+          <p className="text-sm text-[var(--text-light)]">
             <strong>Genre:</strong> {puzzle.genre} (set at file level)
           </p>
         </div>
@@ -854,15 +858,15 @@ function ValidationPanel({ errors, genreFile, onClose, onNavigate }: {
 }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-        <div className="p-4 border-b flex justify-between items-center">
-          <h2 className="text-xl font-bold">Validation Errors ({errors.length})</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+      <div className="bg-[var(--primary-medium)] rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col border border-[var(--primary-light)]">
+        <div className="p-4 border-b border-[var(--primary-light)] flex justify-between items-center">
+          <h2 className="text-xl font-bold text-[var(--text-light)]">Validation Errors ({errors.length})</h2>
+          <button onClick={onClose} className="text-[var(--text-medium)] hover:text-[var(--text-light)] text-2xl">&times;</button>
         </div>
 
         <div className="p-4 overflow-y-auto flex-1">
           {errors.length === 0 ? (
-            <p className="text-green-600 font-semibold">✓ All validations passed!</p>
+            <p className="text-[var(--accent-main)] font-semibold">✓ All validations passed!</p>
           ) : (
             <div className="space-y-3">
               {errors.map((error, index) => {
@@ -876,14 +880,14 @@ function ValidationPanel({ errors, genreFile, onClose, onNavigate }: {
                 }
 
                 return (
-                  <div key={index} className="border-l-4 border-red-500 pl-4 py-2">
+                  <div key={index} className="border-l-4 border-red-500 pl-4 py-2 bg-[var(--primary-light)] bg-opacity-30 rounded">
                     <button
                       onClick={() => onNavigate(error.bookIndex, error.puzzleIndex)}
-                      className="text-blue-600 hover:underline text-sm font-semibold"
+                      className="text-[var(--accent-light)] hover:underline text-sm font-semibold"
                     >
                       {location}
                     </button>
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm text-[var(--text-light)]">
                       <strong>{error.field}:</strong> {error.message}
                     </p>
                   </div>
@@ -893,10 +897,10 @@ function ValidationPanel({ errors, genreFile, onClose, onNavigate }: {
           )}
         </div>
 
-        <div className="p-4 border-t flex justify-end">
+        <div className="p-4 border-t border-[var(--primary-light)] flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+            className="px-4 py-2 bg-[var(--neutral-medium)] text-white rounded hover:bg-[var(--neutral-dark)] transition-all font-semibold"
           >
             Close
           </button>
@@ -917,30 +921,30 @@ function JSONPreview({ json, onClose }: {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-        <div className="p-4 border-b flex justify-between items-center">
-          <h2 className="text-xl font-bold">JSON Preview</h2>
+      <div className="bg-[var(--primary-medium)] rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col border border-[var(--primary-light)]">
+        <div className="p-4 border-b border-[var(--primary-light)] flex justify-between items-center">
+          <h2 className="text-xl font-bold text-[var(--text-light)]">JSON Preview</h2>
           <div className="flex gap-2">
             <button
               onClick={copyToClipboard}
-              className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-3 py-1 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded hover:bg-[var(--accent-light)] transition-all font-semibold"
             >
               Copy
             </button>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            <button onClick={onClose} className="text-[var(--text-medium)] hover:text-[var(--text-light)] text-2xl">&times;</button>
           </div>
         </div>
 
         <div className="p-4 overflow-y-auto flex-1">
-          <pre className="bg-gray-50 p-4 rounded text-sm overflow-x-auto">
+          <pre className="bg-[var(--primary-dark)] text-[var(--text-light)] p-4 rounded text-sm overflow-x-auto border border-[var(--primary-lighter)]">
             {json}
           </pre>
         </div>
 
-        <div className="p-4 border-t flex justify-end">
+        <div className="p-4 border-t border-[var(--primary-light)] flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+            className="px-4 py-2 bg-[var(--neutral-medium)] text-white rounded hover:bg-[var(--neutral-dark)] transition-all font-semibold"
           >
             Close
           </button>
