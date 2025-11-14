@@ -205,6 +205,7 @@
 
 .storyContent p {
   margin-bottom: 0.75rem;
+  white-space: pre-line;
 }
 
 .storyContent p:last-child {
