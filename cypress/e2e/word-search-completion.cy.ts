@@ -45,7 +45,10 @@ describe('Word Search Puzzle Completion', () => {
     findWordsInPuzzle().then((stats) => {
       // Verify statistics
       expect(stats.totalWords).to.be.greaterThan(0);
+      expect(stats.notFound).to.equal(0, 'All words should be found');
+      expect(stats.foundByForce).to.equal(0, 'Should not need to force win');
       cy.log(`Completed puzzle with ${stats.totalWords} words`);
+      cy.log(`Grid scan found: ${stats.foundByGridScan}, Placement data found: ${stats.foundByPlacementData}`);
 
       // Verify all words are found
       cy.get('[data-testid="word-list"] li').each(($li) => {
@@ -83,6 +86,7 @@ describe('Word Search Puzzle Completion', () => {
     cy.wait(500);
 
     findWordsInPuzzle().then((stats) => {
+      expect(stats.notFound).to.equal(0, 'All words in first puzzle should be found');
       cy.log(`Completed first puzzle with ${stats.totalWords} words`);
 
       // Click Next Puzzle button
@@ -98,6 +102,7 @@ describe('Word Search Puzzle Completion', () => {
       cy.wait(500);
 
       findWordsInPuzzle().then((stats2) => {
+        expect(stats2.notFound).to.equal(0, 'All words in second puzzle should be found');
         cy.log(`Completed second puzzle with ${stats2.totalWords} words`);
 
         // Verify win modal appears again

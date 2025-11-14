@@ -16,7 +16,7 @@ interface FindStats {
   totalWords: number;
   foundByGridScan: number;
   foundByPlacementData: number;
-  foundByForce: number;
+  foundByForce: number; // DEBUG ONLY - should always be 0 in real tests
   notFound: number;
 }
 
@@ -55,18 +55,28 @@ export function findWordsInPuzzle(): Cypress.Chainable<FindStats> {
       // Strategy 2: Use placement data for remaining words
       return findWordsUsingPlacementData(grid, wordList, stats);
     }).then(() => {
-      // Strategy 3: Force win if needed (fallback)
-      return forceWinCondition(wordList, stats);
-    }).then(() => {
-      // Log final statistics
-      cy.log('=== Word Finding Statistics ===');
-      cy.log(`Total Words: ${stats.totalWords}`);
-      cy.log(`Found by Grid Scan: ${stats.foundByGridScan}`);
-      cy.log(`Found by Placement Data: ${stats.foundByPlacementData}`);
-      cy.log(`Found by Force: ${stats.foundByForce}`);
-      cy.log(`Not Found: ${stats.notFound}`);
+      // Verify all words were found
+      return cy.window().then((win: any) => {
+        const currentState = win.__GAME_STATE__;
+        const currentWordList = currentState?.wordList || wordList;
+        const unfoundWords = currentWordList.filter((w: WordData) => !w.found);
 
-      return cy.wrap(stats);
+        stats.notFound = unfoundWords.length;
+
+        // Log final statistics
+        cy.log('=== Word Finding Statistics ===');
+        cy.log(`Total Words: ${stats.totalWords}`);
+        cy.log(`Found by Grid Scan: ${stats.foundByGridScan}`);
+        cy.log(`Found by Placement Data: ${stats.foundByPlacementData}`);
+        cy.log(`Not Found: ${stats.notFound}`);
+
+        if (unfoundWords.length > 0) {
+          cy.log(`❌ FAILED TO FIND: ${unfoundWords.map((w: WordData) => w.word).join(', ')}`);
+          throw new Error(`Failed to find ${unfoundWords.length} words: ${unfoundWords.map((w: WordData) => w.word).join(', ')}`);
+        }
+
+        return cy.wrap(stats);
+      });
     });
   });
 }
@@ -165,10 +175,15 @@ function findWordsUsingPlacementData(
 }
 
 /**
- * Strategy 3: Force win condition by directly updating state
- * Last resort if other strategies fail
+ * DEBUG ONLY: Force win condition by directly updating state
+ *
+ * WARNING: This function bypasses the actual word selection mechanism and should
+ * NOT be used in real tests. It's only here for debugging purposes to verify
+ * the win condition logic works when all words are marked as found.
+ *
+ * If you need to use this, your word-finding logic is broken and needs to be fixed!
  */
-function forceWinCondition(wordList: WordData[], stats: FindStats): Cypress.Chainable {
+export function forceWinCondition(wordList: WordData[], stats: FindStats): Cypress.Chainable {
   return cy.window().then((win: any) => {
     const currentState = win.__GAME_STATE__;
     const currentWordList = currentState?.wordList || wordList;
@@ -177,7 +192,8 @@ function forceWinCondition(wordList: WordData[], stats: FindStats): Cypress.Chai
     const unfoundWords = currentWordList.filter((w: WordData) => !w.found);
 
     if (unfoundWords.length > 0) {
-      cy.log(`Strategy 3: Forcing win condition for ${unfoundWords.length} remaining words`);
+      cy.log(`⚠️ DEBUG: Forcing win condition for ${unfoundWords.length} remaining words`);
+      cy.log(`⚠️ This bypasses the actual word selection - fix your word finder!`);
       stats.foundByForce = unfoundWords.length;
 
       // Mark all words as found
