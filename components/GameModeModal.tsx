@@ -62,8 +62,8 @@ export function GameModeModal({
 
   return (
     <div className={styles.overlay} onClick={handleCancel}>
-      <div className={styles.panelContent} onClick={(e) => e.stopPropagation()}>
-        <h2 className={styles.panelTitle}>Select Game Mode</h2>
+      <div className={styles.panelContent} onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby="mode-modal-title">
+        <h2 className={styles.panelTitle} id="mode-modal-title">Select Game Mode</h2>
         
         {hasExistingProgress && (
           <div className={styles.warning}>
