@@ -345,10 +345,9 @@ function selectWord(
   cy.log(`Selecting word from [${start.row},${start.col}] to [${endRow},${endCol}]`);
 
   // Get the start and end cell elements
-  return cy.get(`[data-cell-key="${startKey}"]`).then(($startCell) => {
-    return cy.get(`[data-cell-key="${endKey}"]`).then(($endCell) => {
-      // Simulate drag from start to end
-      // Get center coordinates of cells
+  return cy.get(`[data-cell-key="${startKey}"]`).should('be.visible').then(($startCell) => {
+    return cy.get(`[data-cell-key="${endKey}"]`).should('be.visible').then(($endCell) => {
+      // Get coordinates
       const startRect = $startCell[0].getBoundingClientRect();
       const endRect = $endCell[0].getBoundingClientRect();
 
@@ -358,33 +357,59 @@ function selectWord(
       const endY = endRect.top + endRect.height / 2;
 
       // Trigger mousedown on start cell
-      cy.wrap($startCell)
-        .trigger('mousedown', {
-          clientX: startX,
-          clientY: startY,
-          force: true
+      cy.wrap($startCell).trigger('mousedown', {
+        clientX: startX,
+        clientY: startY,
+        button: 0,
+        buttons: 1, // Left mouse button pressed
+        bubbles: true,
+        cancelable: true,
+        force: true
+      }).then(() => {
+        // Build array of intermediate cells
+        const steps = Math.max(Math.abs(endRow - start.row), Math.abs(endCol - start.col));
+        const cells: Array<{ key: string; x: number; y: number }> = [];
+
+        for (let i = 1; i <= steps; i++) {
+          const intermediateRow = start.row + Math.round(dRow * i);
+          const intermediateCol = start.col + Math.round(dCol * i);
+          const intermediateKey = `${intermediateRow}-${intermediateCol}`;
+
+          const progress = i / steps;
+          const currentX = startX + (endX - startX) * progress;
+          const currentY = startY + (endY - startY) * progress;
+
+          cells.push({ key: intermediateKey, x: currentX, y: currentY });
+        }
+
+        // Chain mousemove events through each cell
+        let chain = cy.wrap(null);
+        cells.forEach((cell) => {
+          chain = chain.then(() => {
+            return cy.get(`[data-cell-key="${cell.key}"]`).trigger('mousemove', {
+              clientX: cell.x,
+              clientY: cell.y,
+              buttons: 1, // Button still pressed during drag
+              bubbles: true,
+              cancelable: true,
+              force: true
+            });
+          });
         });
 
-      // Trigger mousemove to end cell (move through intermediate cells for better selection)
-      const steps = Math.max(Math.abs(endRow - start.row), Math.abs(endCol - start.col));
-
-      for (let i = 1; i <= steps; i++) {
-        const intermediateRow = start.row + Math.round(dRow * i);
-        const intermediateCol = start.col + Math.round(dCol * i);
-        const intermediateKey = `${intermediateRow}-${intermediateCol}`;
-
-        cy.get(`[data-cell-key="${intermediateKey}"]`).trigger('mousemove', {
-          force: true
+        // After all mousemove events, trigger mouseup
+        return chain.then(() => {
+          return cy.get('[data-testid="puzzle-screen"]').trigger('mouseup', {
+            clientX: endX,
+            clientY: endY,
+            button: 0,
+            buttons: 0, // Button released
+            bubbles: true,
+            cancelable: true,
+            force: true
+          }).wait(250); // Wait for selection to be processed and state to update
         });
-      }
-
-      // Trigger mouseup on end cell
-      cy.wrap($endCell)
-        .trigger('mouseup', {
-          clientX: endX,
-          clientY: endY,
-          force: true
-        });
+      });
     });
   });
 }
