@@ -139,16 +139,24 @@ describe('Game Saving and Loading', () => {
     cy.get('[data-testid="begin-cataloging-btn"]').click();
     cy.contains('The Library Archives', { timeout: 10000 }).should('be.visible');
 
-    // Wait a moment for save to complete
-    cy.wait(500);
+    // Return to title screen (this might trigger the save)
+    cy.visit('http://localhost:3000/');
+    cy.get('[data-testid="title-screen"]', { timeout: 10000 }).should('be.visible');
 
     // Check that localStorage has save data
     cy.window().then((win) => {
       const saveData = win.localStorage.getItem('chronicles-game-progress');
 
       if (!saveData) {
-        // Log for debugging
-        cy.log('localStorage keys:', Object.keys(win.localStorage));
+        // Log all localStorage keys for debugging
+        const allKeys = Object.keys(win.localStorage);
+        cy.log('localStorage keys:', allKeys.length > 0 ? allKeys.join(', ') : 'EMPTY');
+
+        // Log all localStorage content
+        allKeys.forEach(key => {
+          cy.log(`${key}:`, win.localStorage.getItem(key)?.substring(0, 100));
+        });
+
         throw new Error('Save data not found in localStorage');
       }
 
