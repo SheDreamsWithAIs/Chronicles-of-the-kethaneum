@@ -14,13 +14,13 @@
 
 .panelContent {
   background: linear-gradient(135deg, #1a0520 0%, #0f0218 100%);
-  border: 2px solid rgba(252, 211, 77, 0.4);
+  border: 2px solid rgba(254, 243, 199, 0.4);
   border-radius: 12px;
   padding: 2rem;
   max-width: 500px;
   width: 90%;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8),
-              0 0 40px rgba(252, 211, 77, 0.2),
+              0 0 40px rgba(254, 243, 199, 0.2),
               inset 0 1px 0 rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
@@ -37,7 +37,7 @@
 .title {
   font-family: 'Cinzel', serif;
   font-size: 2rem;
-  color: #fcd34d;
+  color: #fef3c7;
   text-align: center;
   margin: 0;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
@@ -54,9 +54,9 @@
 }
 
 .statusBadge.win {
-  background: linear-gradient(135deg, rgba(252, 211, 77, 0.3), rgba(251, 191, 36, 0.3));
-  border: 2px solid rgba(252, 211, 77, 0.6);
-  color: #fcd34d;
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.3), rgba(253, 224, 138, 0.3));
+  border: 2px solid rgba(254, 243, 199, 0.6);
+  color: #fef3c7;
 }
 
 .statusBadge.lose {
@@ -72,7 +72,7 @@
   padding: 1rem;
   background: rgba(10, 1, 18, 0.6);
   border-radius: 8px;
-  border: 1px solid rgba(252, 211, 77, 0.2);
+  border: 1px solid rgba(254, 243, 199, 0.2);
 }
 
 .statRow {
@@ -80,7 +80,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0;
-  border-bottom: 1px solid rgba(252, 211, 77, 0.15);
+  border-bottom: 1px solid rgba(254, 243, 199, 0.15);
 }
 
 .statRow:last-child {
@@ -96,7 +96,7 @@
 .statValue {
   font-family: 'Cinzel', serif;
   font-size: 1.25rem;
-  color: #fcd34d;
+  color: #fef3c7;
   font-weight: 600;
 }
 
@@ -112,29 +112,29 @@
   font-family: 'Cinzel', serif;
   font-size: 1rem;
   padding: 0.75rem 2rem;
-  border: 2px solid rgba(252, 211, 77, 0.4);
+  border: 2px solid rgba(254, 243, 199, 0.4);
   border-radius: 8px;
   background: linear-gradient(135deg, #1a0520 0%, #0f0218 100%);
-  color: #fcd34d;
+  color: #fef3c7;
   cursor: pointer;
   transition: all 0.3s ease;
   width: 100%;
 }
 
 .primaryButton {
-  background: linear-gradient(135deg, rgba(252, 211, 77, 0.2) 0%, rgba(251, 191, 36, 0.2) 100%);
-  border-color: #fcd34d;
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.2) 0%, rgba(253, 224, 138, 0.2) 100%);
+  border-color: #fef3c7;
 }
 
 .primaryButton:hover {
-  background: linear-gradient(135deg, rgba(252, 211, 77, 0.3) 0%, rgba(251, 191, 36, 0.3) 100%);
-  box-shadow: 0 0 15px rgba(252, 211, 77, 0.4);
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.3) 0%, rgba(253, 224, 138, 0.3) 100%);
+  box-shadow: 0 0 15px rgba(254, 243, 199, 0.4);
 }
 
 .secondaryButton:hover {
-  border-color: rgba(252, 211, 77, 0.7);
+  border-color: rgba(254, 243, 199, 0.7);
   background: linear-gradient(135deg, #0f0218 0%, #1a0520 100%);
-  box-shadow: 0 4px 8px rgba(252, 211, 77, 0.3);
+  box-shadow: 0 4px 8px rgba(254, 243, 199, 0.3);
 }
 
 /* Mobile responsiveness */
