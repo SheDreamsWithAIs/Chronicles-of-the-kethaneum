@@ -548,7 +548,8 @@ export default function PuzzleScreen() {
         await new Promise(resolve => setTimeout(resolve, 50));
       }
 
-      const { success, genreComplete } = loadSequential(state.currentGenre, state.currentBook);
+      // Don't pass current book - let loader select next book/puzzle
+      const { success, genreComplete } = loadSequential(state.currentGenre, null);
       if (genreComplete) {
         // All books in genre complete - show modal
         setShowGenreCompletionModal(true);
