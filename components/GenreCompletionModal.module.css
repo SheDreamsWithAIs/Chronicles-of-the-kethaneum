@@ -24,7 +24,7 @@
 
 .panelContent {
   background: linear-gradient(135deg, #1a0520, #0f0218);
-  border: 3px solid rgba(230, 168, 23, 0.4);
+  border: 3px solid rgba(254, 243, 199, 0.3);
   border-radius: 15px;
   padding: 30px;
   max-width: 800px;
@@ -32,7 +32,7 @@
   max-height: 90vh;
   overflow-y: auto;
   overflow-x: hidden;
-  box-shadow: var(--elevation-high), 0 0 40px rgba(230, 168, 23, 0.2);
+  box-shadow: var(--elevation-high), 0 0 40px rgba(254, 243, 199, 0.15);
   animation: slideUp 0.3s ease-out;
   display: flex;
   flex-direction: column;
@@ -51,7 +51,7 @@
 .panelContent::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, var(--accent-main), var(--accent-dark));
   border-radius: 6px;
-  border: 1px solid rgba(230, 168, 23, 0.3);
+  border: 1px solid rgba(254, 243, 199, 0.2);
 }
 
 .panelContent::-webkit-scrollbar-thumb:hover {
@@ -126,7 +126,7 @@
   width: 280px;
   height: 280px;
   background: linear-gradient(135deg, rgba(26, 5, 32, 0.8), rgba(15, 2, 24, 0.9));
-  border: 2px solid rgba(230, 168, 23, 0.4);
+  border: 2px solid rgba(254, 243, 199, 0.3);
   border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
@@ -135,8 +135,8 @@
 
 .optionCard:hover {
   transform: translateY(-10px);
-  box-shadow: 0 0 30px rgba(230, 168, 23, 0.5);
-  border-color: rgba(230, 168, 23, 0.7);
+  box-shadow: 0 0 30px rgba(254, 243, 199, 0.3);
+  border-color: rgba(254, 243, 199, 0.5);
 }
 
 .cardGlow {
@@ -145,7 +145,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at center, rgba(230, 168, 23, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(254, 243, 199, 0.1) 0%, transparent 70%);
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
@@ -171,7 +171,7 @@
   font-size: 64px;
   color: var(--accent-main);
   margin-bottom: 20px;
-  filter: drop-shadow(0 0 10px rgba(230, 168, 23, 0.5));
+  filter: drop-shadow(0 0 10px rgba(254, 243, 199, 0.3));
 }
 
 .cardContent h3 {
@@ -216,12 +216,12 @@
 }
 
 .genreContainer::-webkit-scrollbar-thumb {
-  background: rgba(230, 168, 23, 0.4);
+  background: rgba(254, 243, 199, 0.3);
   border-radius: 4px;
 }
 
 .genreContainer::-webkit-scrollbar-thumb:hover {
-  background: rgba(230, 168, 23, 0.6);
+  background: rgba(254, 243, 199, 0.4);
 }
 
 .genreCard {
@@ -229,7 +229,7 @@
   width: 180px;
   height: 240px;
   background: linear-gradient(135deg, rgba(26, 5, 32, 0.8), rgba(15, 2, 24, 0.9));
-  border: 2px solid rgba(230, 168, 23, 0.4);
+  border: 2px solid rgba(254, 243, 199, 0.3);
   border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
@@ -238,8 +238,8 @@
 
 .genreCard:hover {
   transform: translateY(-10px);
-  box-shadow: 0 0 30px rgba(230, 168, 23, 0.5);
-  border-color: rgba(230, 168, 23, 0.7);
+  box-shadow: 0 0 30px rgba(254, 243, 199, 0.3);
+  border-color: rgba(254, 243, 199, 0.5);
 }
 
 .genreCard .cardContent {
@@ -262,13 +262,13 @@
   color: var(--accent-main);
   opacity: 0.8;
   margin-top: 10px;
-  filter: drop-shadow(0 0 10px rgba(230, 168, 23, 0.5));
+  filter: drop-shadow(0 0 10px rgba(254, 243, 199, 0.3));
 }
 
 .panelClose {
-  background: rgba(230, 168, 23, 0.2);
+  background: rgba(254, 243, 199, 0.15);
   color: var(--accent-main);
-  border: 2px solid rgba(230, 168, 23, 0.4);
+  border: 2px solid rgba(254, 243, 199, 0.3);
   padding: 12px 24px;
   border-radius: 25px;
   cursor: pointer;
@@ -284,10 +284,10 @@
 }
 
 .panelClose:hover {
-  background: rgba(230, 168, 23, 0.4);
-  border-color: rgba(230, 168, 23, 0.7);
+  background: rgba(254, 243, 199, 0.3);
+  border-color: rgba(254, 243, 199, 0.5);
   transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(230, 168, 23, 0.3);
+  box-shadow: 0 4px 8px rgba(254, 243, 199, 0.2);
 }
 
 @media (max-width: 768px) {
