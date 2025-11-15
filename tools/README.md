@@ -19,11 +19,11 @@ npm install
 npm start
 ```
 
-The server will start on `http://localhost:3030`
+The server will start on `http://localhost:3000`
 
 ## Manifest Manager
 
-**Access:** `http://localhost:3030` (when server is running)
+**Access:** `http://localhost:3000` (when server is running)
 
 A modular content management system for organizing and managing game data files across multiple systems (puzzles, characters, items, etc.).
 
@@ -102,7 +102,7 @@ The tool supports multiple content types with appropriate templates:
 #### Initial Setup
 
 1. **Start the server**: Run `npm start` from the `tools/` directory
-2. **Open your browser**: Navigate to `http://localhost:3030`
+2. **Open your browser**: Navigate to `http://localhost:3000`
 3. **You'll see**: The root `/data/` folder with all existing files
 
 #### Creating a Content System
@@ -227,7 +227,7 @@ To use different puzzles in a game:
 
 **Server won't start:**
 - Run `npm install` first
-- Check that port 3030 is not in use
+- Check that port 3000 is not in use
 - Verify you're in the `tools/` directory
 
 **Can't see files:**
@@ -251,7 +251,7 @@ To use different puzzles in a game:
 - **Backend**: Node.js + Express
 - **Frontend**: Vanilla JavaScript (no framework)
 - **Storage**: Direct file system operations
-- **Port**: 3030 (default)
+- **Port**: 3000 (default)
 
 ### File Organization
 ```

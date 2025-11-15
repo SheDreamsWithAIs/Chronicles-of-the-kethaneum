@@ -36,7 +36,7 @@ npm install
 npm start
 ```
 
-The development server will start on [http://localhost:3030](http://localhost:3030)
+The development server will start on [http://localhost:3000](http://localhost:3000)
 
 ### Available Tools
 

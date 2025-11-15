@@ -85,7 +85,7 @@ Cypress configuration is in `cypress.config.ts`:
 
 ## Notes
 
-- The tests expect the Next.js dev server to be running on port 3030
+- The tests expect the Next.js dev server to be running on port 3000
 - Tests use the new app structure which differs from the original game:
   - Story Mode: Title → Backstory → Mode Selection → Book of Passage → Library → Puzzle
   - Other Modes: Title → Backstory → Mode Selection → Puzzle
