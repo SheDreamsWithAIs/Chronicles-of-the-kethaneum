@@ -32,6 +32,8 @@ export function selectNextPuzzle(
   state: GameState,
   config: PuzzleSelectionConfig = defaultPuzzleSelectionConfig
 ): PuzzleSelectionResult {
+  console.log(`[PuzzleSelector] Selecting next puzzle. Selected genre: "${state.selectedGenre}", Puzzles since last Kethaneum: ${state.puzzlesSinceLastKethaneum}/${state.nextKethaneumInterval}`);
+
   // Ensure completedPuzzlesByGenre is initialized
   if (!state.completedPuzzlesByGenre) {
     state.completedPuzzlesByGenre = {};
@@ -39,6 +41,7 @@ export function selectNextPuzzle(
 
   // Check if we have a selected genre
   if (!state.selectedGenre || !state.puzzles[state.selectedGenre]) {
+    console.error('[PuzzleSelector] No genre selected or genre not found in puzzles');
     return {
       puzzle: null,
       newState: state,
@@ -55,6 +58,7 @@ export function selectNextPuzzle(
   const shouldInsertKethaneum = checkIfTimeForKethaneum(newState, config);
 
   if (shouldInsertKethaneum) {
+    console.log('[PuzzleSelector] Time for Kethaneum puzzle!');
     const kethaneumResult = selectKethaneumPuzzle(newState, config);
 
     if (kethaneumResult.puzzle) {
@@ -62,6 +66,7 @@ export function selectNextPuzzle(
       return kethaneumResult;
     } else {
       // No more Kethaneum puzzles available, continue with regular genre
+      console.log('[PuzzleSelector] No Kethaneum puzzles available, continuing with regular genre');
       // Fall through to select from chosen genre
     }
   }
@@ -125,6 +130,21 @@ function selectKethaneumPuzzle(
   // Get the next Kethaneum puzzle
   const puzzle = kethaneumPuzzles[state.nextKethaneumIndex];
 
+  // Validate puzzle exists
+  if (!puzzle) {
+    console.error(`Kethaneum puzzle at index ${state.nextKethaneumIndex} not found. Total puzzles: ${kethaneumPuzzles.length}`);
+    return {
+      puzzle: null,
+      newState: state,
+      isKethaneum: false,
+      genreExhausted: false,
+      kethaneumExhausted: true,
+      message: 'Kethaneum puzzle not found at expected index',
+    };
+  }
+
+  console.log(`[Kethaneum] Selecting puzzle ${state.nextKethaneumIndex + 1}/${kethaneumPuzzles.length}: "${puzzle.title}"`);
+
   const newState = { ...state };
 
   // Update state for next selection
@@ -141,8 +161,8 @@ function selectKethaneumPuzzle(
     newState.kethaneumRevealed = true;
   }
 
-  // Find the index of this puzzle in the Kethaneum array
-  newState.currentPuzzleIndex = state.nextKethaneumIndex - 1;
+  // Store the index we just used (before we incremented nextKethaneumIndex)
+  newState.currentPuzzleIndex = state.nextKethaneumIndex;
 
   const kethaneumExhausted = newState.nextKethaneumIndex >= kethaneumPuzzles.length;
 
@@ -195,6 +215,7 @@ function selectGenrePuzzle(
     // Randomly select from uncompleted puzzles
     const randomIndex = Math.floor(Math.random() * uncompletedPuzzles.length);
     puzzle = uncompletedPuzzles[randomIndex];
+    console.log(`[Genre: ${selectedGenre}] Selected puzzle ${randomIndex + 1}/${uncompletedPuzzles.length} uncompleted: "${puzzle.title}"`);
   } else {
     // All puzzles in this genre have been completed
     // Reset and start over, but notify the player
@@ -204,6 +225,20 @@ function selectGenrePuzzle(
     // Select a random puzzle
     const randomIndex = Math.floor(Math.random() * genrePuzzles.length);
     puzzle = genrePuzzles[randomIndex];
+    console.log(`[Genre: ${selectedGenre}] Genre exhausted! Restarting with puzzle: "${puzzle.title}"`);
+  }
+
+  // Validate puzzle
+  if (!puzzle) {
+    console.error(`Failed to select puzzle from genre "${selectedGenre}"`);
+    return {
+      puzzle: null,
+      newState: state,
+      isKethaneum: false,
+      genreExhausted: true,
+      kethaneumExhausted: false,
+      message: `Failed to select puzzle from genre: ${selectedGenre}`,
+    };
   }
 
   const newState = { ...state };
