@@ -547,9 +547,12 @@ export default function PuzzleScreen() {
         await loadAll();
         await new Promise(resolve => setTimeout(resolve, 50));
       }
-      
-      const success = loadSequential(state.currentGenre, state.currentBook);
-      if (success) {
+
+      const { success, genreComplete } = loadSequential(state.currentGenre, state.currentBook);
+      if (genreComplete) {
+        // All books in genre complete - show modal
+        setShowGenreCompletionModal(true);
+      } else if (success) {
         setPuzzleStartTime(Date.now());
       }
     }
