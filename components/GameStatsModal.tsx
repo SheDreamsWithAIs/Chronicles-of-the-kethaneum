@@ -51,9 +51,9 @@ export function GameStatsModal({
 
   return (
     <div className={styles.overlay} onClick={handleMainMenu}>
-      <div className={styles.panelContent} onClick={(e) => e.stopPropagation()}>
+      <div className={styles.panelContent} onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby="stats-modal-title">
         <div className={styles.header}>
-          <h2 className={styles.title}>
+          <h2 className={styles.title} id="stats-modal-title">
             {isWin ? '✓ Puzzle Complete!' : '✗ Time\'s Up!'}
           </h2>
           <div className={`${styles.statusBadge} ${isWin ? styles.win : styles.lose}`}>

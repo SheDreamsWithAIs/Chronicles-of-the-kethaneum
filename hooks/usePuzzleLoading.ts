@@ -15,7 +15,7 @@ interface UsePuzzleLoadingProps {
   loadBeatTheClock: () => Promise<boolean>;
   loadRandom: () => boolean;
   restorePuzzleOnly: (genre: string, puzzleIndex: number) => boolean;
-  loadSequential: (genre: string | null, book: string | null) => boolean;
+  loadSequential: (genre: string | null, book: string | null, allowReplay?: boolean) => { success: boolean; genreComplete?: boolean };
   loadWithSelection: () => { success: boolean; isKethaneum?: boolean; message?: string };
   initialize: (puzzleData: any) => boolean;
   setPuzzleStartTime: (time: number) => void;
@@ -37,7 +37,7 @@ export function usePuzzleLoading({
   router,
 }: UsePuzzleLoadingProps) {
   
-  const loadPuzzleForMode = useCallback(async () => {
+  const loadPuzzleForMode = useCallback(async (): Promise<{ genreComplete?: boolean } | void> => {
     // Don't try to load until state restoration is complete
     if (!isReady) return;
     

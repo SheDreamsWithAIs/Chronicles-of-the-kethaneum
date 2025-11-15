@@ -33,18 +33,28 @@ export function usePuzzle(state: GameState, setState: (state: GameState) => void
   }, [setState, config]);
 
   // Load sequential puzzle
-  const loadSequential = useCallback((genre: string | null = null, book: string | null = null) => {
+  const loadSequential = useCallback((
+    genre: string | null = null,
+    book: string | null = null,
+    allowReplay: boolean = false
+  ): { success: boolean; genreComplete?: boolean } => {
     try {
       // Use ref to get latest state
       const currentState = stateRef.current;
-      const { success, newState } = loadSequentialPuzzle(genre, book, currentState, config);
+      const { success, newState, genreComplete } = loadSequentialPuzzle(
+        genre,
+        book,
+        currentState,
+        config,
+        allowReplay
+      );
       if (success) {
         setState(newState);
       }
-      return success;
+      return { success, genreComplete };
     } catch (error) {
       console.error('Error loading sequential puzzle:', error);
-      return false;
+      return { success: false };
     }
   }, [setState, config]);
 

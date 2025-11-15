@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { GameStatsModal } from '@/components/GameStatsModal';
+import { GenreCompletionModal } from '@/components/GenreCompletionModal';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
 import { useGameLogic } from '@/hooks/useGameLogic';
@@ -22,6 +23,7 @@ export default function PuzzleScreen() {
   const config = getConfig();
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [statsModalIsWin, setStatsModalIsWin] = useState(false);
+  const [showGenreCompletionModal, setShowGenreCompletionModal] = useState(false);
   const [puzzleStartTime, setPuzzleStartTime] = useState<number | null>(null);
   // Track if we're transitioning between puzzles to prevent timer restart
   const isTransitioningRef = useRef(false);
@@ -102,15 +104,28 @@ export default function PuzzleScreen() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ row: number; col: number } | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  
+
   // Use refs to track selection during drag without causing re-renders
   const selectedCellsRef = useRef<Set<string>>(new Set());
   const isDraggingRef = useRef(false);
 
+  // Expose game state to window for Cypress testing (development only)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      (window as any).__GAME_STATE__ = state;
+      (window as any).__UPDATE_GAME_STATE__ = setState;
+      (window as any).__CHECK_WORD__ = checkWord;
+    }
+  }, [state, setState, checkWord]);
+
   // Load puzzle if not already loaded
   useEffect(() => {
     if (!state.grid || state.grid.length === 0) {
-      loadPuzzleForMode();
+      loadPuzzleForMode().then((result) => {
+        if (result?.genreComplete) {
+          setShowGenreCompletionModal(true);
+        }
+      });
     }
   }, [isReady, state.currentGenre, state.currentPuzzleIndex, state.grid?.length, loadPuzzleForMode]); // Re-run when ready, genre, puzzle index, or grid changes
 
@@ -539,10 +554,9 @@ export default function PuzzleScreen() {
       if (result.success) {
         setPuzzleStartTime(Date.now());
 
-        // Show notification if genre is exhausted
-        if (result.message) {
-          console.log(result.message);
-          // You could show a toast notification here in the future
+        // Show genre completion modal if genre is exhausted
+        if (result.message && result.message.includes('completed all puzzles')) {
+          setShowGenreCompletionModal(true);
         }
       } else {
         console.warn('Failed to load next puzzle:', result.message);
@@ -578,6 +592,47 @@ export default function PuzzleScreen() {
     setPuzzleStartTime(Date.now());
   }, [state, setState, loadBeatTheClock]);
 
+  // Genre completion modal handlers
+  const handleContinueSameGenre = useCallback(async () => {
+    console.log('[puzzle.page.handleContinueSameGenre] Replaying books in current genre');
+    setShowGenreCompletionModal(false);
+
+    // Load sequential puzzle with allowReplay flag
+    const { success } = loadSequential(state.currentGenre, null, true);
+    if (success) {
+      setPuzzleStartTime(Date.now());
+    }
+  }, [state.currentGenre, loadSequential]);
+
+  const handleSelectNewGenre = useCallback(async (newGenre: string) => {
+    console.log('[puzzle.page.handleSelectNewGenre] Switching to new genre:', newGenre);
+    setShowGenreCompletionModal(false);
+
+    // Update state with new genre and clear book/puzzle index
+    setState(prevState => ({
+      ...prevState,
+      currentGenre: newGenre,
+      currentBook: '',
+      currentPuzzleIndex: -1,
+      currentStoryPart: -1,
+    }));
+
+    // Wait for state update
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    // Load first puzzle in new genre
+    const { success } = loadSequential(newGenre, null, false);
+    if (success) {
+      setPuzzleStartTime(Date.now());
+    }
+  }, [setState, loadSequential]);
+
+  const handleCloseGenreCompletionModal = useCallback(() => {
+    console.log('[puzzle.page.handleCloseGenreCompletionModal] Closing modal and returning to library');
+    setShowGenreCompletionModal(false);
+    router.push('/library');
+  }, [router]);
+
   // Handle Escape key to pause/resume
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -597,7 +652,7 @@ export default function PuzzleScreen() {
   }, [isPaused, handlePause, handleResume]); // Include dependencies for pause/resume handlers
 
   return (
-    <div className={styles.puzzleContainer}>
+    <div className={styles.puzzleContainer} data-testid="puzzle-screen">
       <CosmicBackground variant="puzzle" starCount={450} particleCount={0} />
       
       {/* Timer display - Story Mode shows decorative full bar, others show countdown */}
@@ -745,7 +800,7 @@ export default function PuzzleScreen() {
 
             <div className={`${styles.wordsPanel} hidden md:block`}>
               <h3 className={styles.wordsTitle}>Find These Words:</h3>
-              <ul className={styles.wordList}>
+              <ul className={styles.wordList} data-testid="word-list">
                 {wordList.map((word, index) => (
                   <li 
                     key={`${word.word}-${index}`}
@@ -759,7 +814,7 @@ export default function PuzzleScreen() {
           </div>
 
           <div className={`${styles.mobileWords} md:hidden`}>
-            <ul className={styles.wordList}>
+            <ul className={styles.wordList} data-testid="mobile-word-list">
               {wordList.map((word, index) => (
                 <li 
                   key={`${word.word}-${index}`}
@@ -773,9 +828,10 @@ export default function PuzzleScreen() {
         </div>
 
         <div className={styles.puzzleControls}>
-          <button 
+          <button
             className={`${styles.controlBtn} ${styles.primary}`}
             onClick={handlePause}
+            data-testid="pause-btn"
           >
             Pause
           </button>
@@ -784,46 +840,52 @@ export default function PuzzleScreen() {
 
       {/* Pause Menu Overlay */}
       {isPaused && (
-        <div className={styles.pauseOverlay} onClick={handleResume}>
-          <div 
+        <div className={styles.pauseOverlay} onClick={handleResume} data-testid="pause-overlay">
+          <div
             className={styles.pauseMenu}
             onClick={(e) => e.stopPropagation()}
+            data-testid="pause-menu"
           >
             <h2 className={styles.pauseTitle}>Paused</h2>
             
             <div className={styles.pauseButtons}>
-              <button 
+              <button
                 className={`${styles.pauseBtn} ${styles.primary}`}
                 onClick={handleResume}
+                data-testid="resume-btn"
               >
                 Resume
               </button>
-              
-              <button 
+
+              <button
                 className={styles.pauseBtn}
                 onClick={handleBackToBookOfPassage}
+                data-testid="back-to-book-btn"
               >
                 Back to Book of Passage
               </button>
-              
-              <button 
+
+              <button
                 className={styles.pauseBtn}
                 onClick={handleBackToLibrary}
+                data-testid="back-to-library-btn"
               >
                 Back to Library
               </button>
-              
-              <button 
+
+              <button
                 className={styles.pauseBtn}
                 onClick={handleBackToMainMenu}
+                data-testid="back-to-menu-btn"
               >
                 Back to Main Menu
               </button>
-              
-              <button 
+
+              <button
                 className={`${styles.pauseBtn} ${styles.disabled}`}
                 onClick={handleOptions}
                 disabled
+                data-testid="options-btn"
               >
                 Options
               </button>
@@ -844,6 +906,18 @@ export default function PuzzleScreen() {
         onMainMenu={handleBackToMainMenu}
         onBackToLibrary={state.gameMode === 'story' ? handleBackToLibrary : undefined}
         onBackToBookOfPassage={state.gameMode === 'story' ? handleBackToBookOfPassage : undefined}
+      />
+
+      {/* Genre Completion Modal */}
+      <GenreCompletionModal
+        isOpen={showGenreCompletionModal}
+        currentGenre={state.currentGenre}
+        availableGenres={Object.keys(state.puzzles || {}).filter(
+          genre => state.puzzles[genre] && state.puzzles[genre].length > 0
+        )}
+        onContinueSameGenre={handleContinueSameGenre}
+        onSelectNewGenre={handleSelectNewGenre}
+        onClose={handleCloseGenreCompletionModal}
       />
     </div>
   );
