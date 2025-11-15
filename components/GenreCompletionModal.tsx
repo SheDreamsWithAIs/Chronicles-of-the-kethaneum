@@ -28,7 +28,7 @@ function getGenreDisplayInfo(genre: string): GenreDisplayInfo {
     "nature": {
       title: "Natural Wisdom",
       description: "Words of the living world",
-      icon: "🍃"
+      icon: "❦"
     }
   };
 
