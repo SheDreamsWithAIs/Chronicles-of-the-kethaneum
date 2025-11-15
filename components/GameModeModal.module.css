@@ -13,7 +13,7 @@
 }
 
 .panelContent {
-  background: linear-gradient(135deg, #86198f 0%, #4a044e 100%);
+  background: linear-gradient(135deg, #6b4d7a 0%, #3d2742 100%);
   border: 2px solid rgba(251, 191, 36, 0.4);
   border-radius: 12px;
   padding: 2rem;
@@ -61,7 +61,7 @@
 
 .modeCard {
   position: relative;
-  background: linear-gradient(135deg, rgba(192, 38, 211, 0.6) 0%, rgba(134, 25, 143, 0.8) 100%);
+  background: linear-gradient(135deg, rgba(154, 123, 168, 0.6) 0%, rgba(107, 77, 122, 0.8) 100%);
   border: 2px solid rgba(251, 191, 36, 0.4);
   border-radius: 12px;
   padding: 1.5rem;
@@ -163,7 +163,7 @@
   padding: 0.75rem 2rem;
   border: 2px solid rgba(251, 191, 36, 0.4);
   border-radius: 8px;
-  background: linear-gradient(135deg, #86198f 0%, #4a044e 100%);
+  background: linear-gradient(135deg, #6b4d7a 0%, #3d2742 100%);
   color: #fbbf24;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -172,7 +172,7 @@
 
 .cancelButton:hover {
   border-color: rgba(251, 191, 36, 0.7);
-  background: linear-gradient(135deg, #4a044e 0%, #86198f 100%);
+  background: linear-gradient(135deg, #3d2742 0%, #6b4d7a 100%);
   box-shadow: 0 4px 8px rgba(251, 191, 36, 0.3);
 }
 
