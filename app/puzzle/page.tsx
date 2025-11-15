@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { GameStatsModal } from '@/components/GameStatsModal';
+import { GenreCompletionModal } from '@/components/GenreCompletionModal';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
 import { useGameLogic } from '@/hooks/useGameLogic';
@@ -22,6 +23,7 @@ export default function PuzzleScreen() {
   const config = getConfig();
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [statsModalIsWin, setStatsModalIsWin] = useState(false);
+  const [showGenreCompletionModal, setShowGenreCompletionModal] = useState(false);
   const [puzzleStartTime, setPuzzleStartTime] = useState<number | null>(null);
   // Track if we're transitioning between puzzles to prevent timer restart
   const isTransitioningRef = useRef(false);
@@ -117,7 +119,11 @@ export default function PuzzleScreen() {
   // Load puzzle if not already loaded
   useEffect(() => {
     if (!state.grid || state.grid.length === 0) {
-      loadPuzzleForMode();
+      loadPuzzleForMode().then((result) => {
+        if (result?.genreComplete) {
+          setShowGenreCompletionModal(true);
+        }
+      });
     }
   }, [isReady, state.currentGenre, state.currentPuzzleIndex, state.grid?.length, loadPuzzleForMode]); // Re-run when ready, genre, puzzle index, or grid changes
 
@@ -541,9 +547,13 @@ export default function PuzzleScreen() {
         await loadAll();
         await new Promise(resolve => setTimeout(resolve, 50));
       }
-      
-      const success = loadSequential(state.currentGenre, state.currentBook);
-      if (success) {
+
+      // Don't pass current book - let loader select next book/puzzle
+      const { success, genreComplete } = loadSequential(state.currentGenre, null);
+      if (genreComplete) {
+        // All books in genre complete - show modal
+        setShowGenreCompletionModal(true);
+      } else if (success) {
         setPuzzleStartTime(Date.now());
       }
     }
@@ -576,6 +586,47 @@ export default function PuzzleScreen() {
     await loadBeatTheClock();
     setPuzzleStartTime(Date.now());
   }, [state, setState, loadBeatTheClock]);
+
+  // Genre completion modal handlers
+  const handleContinueSameGenre = useCallback(async () => {
+    console.log('[puzzle.page.handleContinueSameGenre] Replaying books in current genre');
+    setShowGenreCompletionModal(false);
+
+    // Load sequential puzzle with allowReplay flag
+    const { success } = loadSequential(state.currentGenre, null, true);
+    if (success) {
+      setPuzzleStartTime(Date.now());
+    }
+  }, [state.currentGenre, loadSequential]);
+
+  const handleSelectNewGenre = useCallback(async (newGenre: string) => {
+    console.log('[puzzle.page.handleSelectNewGenre] Switching to new genre:', newGenre);
+    setShowGenreCompletionModal(false);
+
+    // Update state with new genre and clear book/puzzle index
+    setState(prevState => ({
+      ...prevState,
+      currentGenre: newGenre,
+      currentBook: '',
+      currentPuzzleIndex: -1,
+      currentStoryPart: -1,
+    }));
+
+    // Wait for state update
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    // Load first puzzle in new genre
+    const { success } = loadSequential(newGenre, null, false);
+    if (success) {
+      setPuzzleStartTime(Date.now());
+    }
+  }, [setState, loadSequential]);
+
+  const handleCloseGenreCompletionModal = useCallback(() => {
+    console.log('[puzzle.page.handleCloseGenreCompletionModal] Closing modal and returning to library');
+    setShowGenreCompletionModal(false);
+    router.push('/library');
+  }, [router]);
 
   // Handle Escape key to pause/resume
   useEffect(() => {
@@ -850,6 +901,18 @@ export default function PuzzleScreen() {
         onMainMenu={handleBackToMainMenu}
         onBackToLibrary={state.gameMode === 'story' ? handleBackToLibrary : undefined}
         onBackToBookOfPassage={state.gameMode === 'story' ? handleBackToBookOfPassage : undefined}
+      />
+
+      {/* Genre Completion Modal */}
+      <GenreCompletionModal
+        isOpen={showGenreCompletionModal}
+        currentGenre={state.currentGenre}
+        availableGenres={Object.keys(state.puzzles || {}).filter(
+          genre => state.puzzles[genre] && state.puzzles[genre].length > 0
+        )}
+        onContinueSameGenre={handleContinueSameGenre}
+        onSelectNewGenre={handleSelectNewGenre}
+        onClose={handleCloseGenreCompletionModal}
       />
     </div>
   );

@@ -15,7 +15,7 @@ interface UsePuzzleLoadingProps {
   loadBeatTheClock: () => Promise<boolean>;
   loadRandom: () => boolean;
   restorePuzzleOnly: (genre: string, puzzleIndex: number) => boolean;
-  loadSequential: (genre: string | null, book: string | null) => boolean;
+  loadSequential: (genre: string | null, book: string | null, allowReplay?: boolean) => { success: boolean; genreComplete?: boolean };
   initialize: (puzzleData: any) => boolean;
   setPuzzleStartTime: (time: number) => void;
   router: { push: (path: string) => void };
@@ -35,7 +35,7 @@ export function usePuzzleLoading({
   router,
 }: UsePuzzleLoadingProps) {
   
-  const loadPuzzleForMode = useCallback(async () => {
+  const loadPuzzleForMode = useCallback(async (): Promise<{ genreComplete?: boolean } | void> => {
     // Don't try to load until state restoration is complete
     if (!isReady) return;
     
@@ -166,7 +166,11 @@ export function usePuzzleLoading({
         await new Promise(resolve => setTimeout(resolve, 0));
       }
 
-      const success = loadSequential(genreToLoad, bookToLoad);
+      const { success, genreComplete } = loadSequential(genreToLoad, bookToLoad);
+      if (genreComplete) {
+        // Signal that genre is complete - caller should show modal
+        return { genreComplete: true };
+      }
       if (!success) {
         console.warn('Failed to load puzzle, redirecting to library');
         router.push('/library');
