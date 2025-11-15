@@ -31,7 +31,7 @@
 
 .mobileTimerBar {
   height: 100%;
-  background: linear-gradient(90deg, #fffbeb, #fffbeb);
+  background: linear-gradient(90deg, var(--accent-main), var(--accent-main));
   transition: width 1s linear;
 }
 
@@ -55,7 +55,7 @@
   font-size: 1.25rem;
   font-weight: 600;
   text-align: center;
-  color: #dcd0c0;
+  color: var(--accent-main);
   margin-bottom: 0.5rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
   line-height: 1.2;
@@ -72,7 +72,7 @@
 
 .timerBar {
   height: 100%;
-  background: linear-gradient(90deg, #fffbeb, #fffbeb);
+  background: linear-gradient(90deg, var(--accent-main), var(--accent-main));
   transition: width 1s linear;
   border-radius: 8px;
 }
