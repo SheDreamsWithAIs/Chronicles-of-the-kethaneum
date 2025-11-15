@@ -32,47 +32,67 @@ export function selectNextPuzzle(
   state: GameState,
   config: PuzzleSelectionConfig = defaultPuzzleSelectionConfig
 ): PuzzleSelectionResult {
-  console.log(`[PuzzleSelector] Selecting next puzzle. Selected genre: "${state.selectedGenre}", Puzzles since last Kethaneum: ${state.puzzlesSinceLastKethaneum}/${state.nextKethaneumInterval}`);
+  try {
+    console.log(`[PuzzleSelector] Selecting next puzzle. Selected genre: "${state.selectedGenre}", Puzzles since last Kethaneum: ${state.puzzlesSinceLastKethaneum}/${state.nextKethaneumInterval}`);
 
-  // Ensure completedPuzzlesByGenre is initialized
-  if (!state.completedPuzzlesByGenre) {
-    state.completedPuzzlesByGenre = {};
-  }
+    // Validate state
+    if (!state) {
+      throw new Error('Game state is null or undefined');
+    }
 
-  // Check if we have a selected genre
-  if (!state.selectedGenre || !state.puzzles[state.selectedGenre]) {
-    console.error('[PuzzleSelector] No genre selected or genre not found in puzzles');
+    if (!state.puzzles || typeof state.puzzles !== 'object') {
+      throw new Error('Game state puzzles is invalid');
+    }
+
+    // Ensure completedPuzzlesByGenre is initialized
+    if (!state.completedPuzzlesByGenre) {
+      state.completedPuzzlesByGenre = {};
+    }
+
+    // Check if we have a selected genre
+    if (!state.selectedGenre || !state.puzzles[state.selectedGenre]) {
+      return {
+        puzzle: null,
+        newState: state,
+        isKethaneum: false,
+        genreExhausted: false,
+        kethaneumExhausted: false,
+        message: 'No genre selected. Please select a genre from the library.',
+      };
+    }
+
+    const newState = { ...state };
+
+    // Check if it's time for a Kethaneum puzzle
+    const shouldInsertKethaneum = checkIfTimeForKethaneum(newState, config);
+
+    if (shouldInsertKethaneum) {
+      console.log('[PuzzleSelector] Time for Kethaneum puzzle!');
+      const kethaneumResult = selectKethaneumPuzzle(newState, config);
+
+      if (kethaneumResult.puzzle) {
+        // Successfully got a Kethaneum puzzle
+        return kethaneumResult;
+      } else {
+        // No more Kethaneum puzzles available, continue with regular genre
+        console.log('[PuzzleSelector] No Kethaneum puzzles available, continuing with regular genre');
+        // Fall through to select from chosen genre
+      }
+    }
+
+    // Select from the player's chosen genre
+    return selectGenrePuzzle(newState, config);
+  } catch (error) {
+    console.error('[PuzzleSelector] Fatal error in selectNextPuzzle:', error);
     return {
       puzzle: null,
       newState: state,
       isKethaneum: false,
       genreExhausted: false,
       kethaneumExhausted: false,
-      message: 'No genre selected. Please select a genre from the library.',
+      message: `Error selecting puzzle: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
-
-  const newState = { ...state };
-
-  // Check if it's time for a Kethaneum puzzle
-  const shouldInsertKethaneum = checkIfTimeForKethaneum(newState, config);
-
-  if (shouldInsertKethaneum) {
-    console.log('[PuzzleSelector] Time for Kethaneum puzzle!');
-    const kethaneumResult = selectKethaneumPuzzle(newState, config);
-
-    if (kethaneumResult.puzzle) {
-      // Successfully got a Kethaneum puzzle
-      return kethaneumResult;
-    } else {
-      // No more Kethaneum puzzles available, continue with regular genre
-      console.log('[PuzzleSelector] No Kethaneum puzzles available, continuing with regular genre');
-      // Fall through to select from chosen genre
-    }
-  }
-
-  // Select from the player's chosen genre
-  return selectGenrePuzzle(newState, config);
 }
 
 /**
@@ -104,75 +124,88 @@ function selectKethaneumPuzzle(
   state: GameState,
   config: PuzzleSelectionConfig
 ): PuzzleSelectionResult {
-  const kethaneumPuzzles = state.puzzles[config.kethaneumGenreName];
+  try {
+    const kethaneumPuzzles = state.puzzles[config.kethaneumGenreName];
 
-  if (!kethaneumPuzzles || kethaneumPuzzles.length === 0) {
+    if (!kethaneumPuzzles || kethaneumPuzzles.length === 0) {
+      return {
+        puzzle: null,
+        newState: state,
+        isKethaneum: false,
+        genreExhausted: false,
+        kethaneumExhausted: true,
+      };
+    }
+
+    // Validate nextKethaneumIndex
+    if (typeof state.nextKethaneumIndex !== 'number' || state.nextKethaneumIndex < 0) {
+      throw new Error(`Invalid nextKethaneumIndex: ${state.nextKethaneumIndex}`);
+    }
+
+    // Check if all Kethaneum puzzles have been shown
+    if (state.nextKethaneumIndex >= kethaneumPuzzles.length) {
+      return {
+        puzzle: null,
+        newState: state,
+        isKethaneum: false,
+        genreExhausted: false,
+        kethaneumExhausted: true,
+      };
+    }
+
+    // Get the next Kethaneum puzzle
+    const puzzle = kethaneumPuzzles[state.nextKethaneumIndex];
+
+    // Validate puzzle exists and has required fields
+    if (!puzzle) {
+      throw new Error(`Kethaneum puzzle at index ${state.nextKethaneumIndex} not found. Total puzzles: ${kethaneumPuzzles.length}`);
+    }
+
+    if (!puzzle.title || !puzzle.book || !puzzle.words) {
+      throw new Error(`Kethaneum puzzle at index ${state.nextKethaneumIndex} is missing required fields`);
+    }
+
+    console.log(`[Kethaneum] Selecting puzzle ${state.nextKethaneumIndex + 1}/${kethaneumPuzzles.length}: "${puzzle.title}"`);
+
+    const newState = { ...state };
+
+    // Update state for next selection
+    newState.nextKethaneumIndex += 1;
+    newState.puzzlesSinceLastKethaneum = 0;
+    newState.nextKethaneumInterval = getRandomKethaneumInterval(config);
+    newState.currentGenre = config.kethaneumGenreName;
+    newState.currentBook = puzzle.book;
+    newState.currentStoryPart = puzzle.storyPart ?? 0;
+    newState.genreExhausted = false;
+
+    // Reveal Kethaneum genre after first encounter
+    if (!newState.kethaneumRevealed) {
+      newState.kethaneumRevealed = true;
+    }
+
+    // Store the index we just used (before we incremented nextKethaneumIndex)
+    newState.currentPuzzleIndex = state.nextKethaneumIndex;
+
+    const kethaneumExhausted = newState.nextKethaneumIndex >= kethaneumPuzzles.length;
+
+    return {
+      puzzle,
+      newState,
+      isKethaneum: true,
+      genreExhausted: false,
+      kethaneumExhausted,
+    };
+  } catch (error) {
+    console.error('[PuzzleSelector] Error in selectKethaneumPuzzle:', error);
     return {
       puzzle: null,
       newState: state,
       isKethaneum: false,
       genreExhausted: false,
       kethaneumExhausted: true,
+      message: `Kethaneum puzzle selection error: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
-
-  // Check if all Kethaneum puzzles have been shown
-  if (state.nextKethaneumIndex >= kethaneumPuzzles.length) {
-    return {
-      puzzle: null,
-      newState: state,
-      isKethaneum: false,
-      genreExhausted: false,
-      kethaneumExhausted: true,
-    };
-  }
-
-  // Get the next Kethaneum puzzle
-  const puzzle = kethaneumPuzzles[state.nextKethaneumIndex];
-
-  // Validate puzzle exists
-  if (!puzzle) {
-    console.error(`Kethaneum puzzle at index ${state.nextKethaneumIndex} not found. Total puzzles: ${kethaneumPuzzles.length}`);
-    return {
-      puzzle: null,
-      newState: state,
-      isKethaneum: false,
-      genreExhausted: false,
-      kethaneumExhausted: true,
-      message: 'Kethaneum puzzle not found at expected index',
-    };
-  }
-
-  console.log(`[Kethaneum] Selecting puzzle ${state.nextKethaneumIndex + 1}/${kethaneumPuzzles.length}: "${puzzle.title}"`);
-
-  const newState = { ...state };
-
-  // Update state for next selection
-  newState.nextKethaneumIndex += 1;
-  newState.puzzlesSinceLastKethaneum = 0;
-  newState.nextKethaneumInterval = getRandomKethaneumInterval(config);
-  newState.currentGenre = config.kethaneumGenreName;
-  newState.currentBook = puzzle.book;
-  newState.currentStoryPart = puzzle.storyPart ?? 0;
-  newState.genreExhausted = false;
-
-  // Reveal Kethaneum genre after first encounter
-  if (!newState.kethaneumRevealed) {
-    newState.kethaneumRevealed = true;
-  }
-
-  // Store the index we just used (before we incremented nextKethaneumIndex)
-  newState.currentPuzzleIndex = state.nextKethaneumIndex;
-
-  const kethaneumExhausted = newState.nextKethaneumIndex >= kethaneumPuzzles.length;
-
-  return {
-    puzzle,
-    newState,
-    isKethaneum: true,
-    genreExhausted: false,
-    kethaneumExhausted,
-  };
 }
 
 /**
@@ -182,87 +215,96 @@ function selectGenrePuzzle(
   state: GameState,
   config: PuzzleSelectionConfig
 ): PuzzleSelectionResult {
-  const selectedGenre = state.selectedGenre;
-  const genrePuzzles = state.puzzles[selectedGenre];
+  try {
+    const selectedGenre = state.selectedGenre;
 
-  if (!genrePuzzles || genrePuzzles.length === 0) {
+    if (!selectedGenre || typeof selectedGenre !== 'string') {
+      throw new Error('Invalid selected genre');
+    }
+
+    const genrePuzzles = state.puzzles[selectedGenre];
+
+    if (!genrePuzzles || genrePuzzles.length === 0) {
+      return {
+        puzzle: null,
+        newState: state,
+        isKethaneum: false,
+        genreExhausted: true,
+        kethaneumExhausted: false,
+        message: `No puzzles found in genre: ${selectedGenre}`,
+      };
+    }
+
+    // Initialize completed set for this genre if needed
+    if (!state.completedPuzzlesByGenre[selectedGenre]) {
+      state.completedPuzzlesByGenre[selectedGenre] = new Set();
+    }
+
+    const completedSet = state.completedPuzzlesByGenre[selectedGenre];
+
+    // Find uncompleted puzzles
+    const uncompletedPuzzles = genrePuzzles.filter(
+      (puzzle) => puzzle && puzzle.title && !completedSet.has(puzzle.title)
+    );
+
+    let puzzle: PuzzleData;
+    let genreExhausted = false;
+
+    if (uncompletedPuzzles.length > 0) {
+      // Randomly select from uncompleted puzzles
+      const randomIndex = Math.floor(Math.random() * uncompletedPuzzles.length);
+      puzzle = uncompletedPuzzles[randomIndex];
+      console.log(`[Genre: ${selectedGenre}] Selected puzzle ${randomIndex + 1}/${uncompletedPuzzles.length} uncompleted: "${puzzle.title}"`);
+    } else {
+      // All puzzles in this genre have been completed
+      // Reset and start over, but notify the player
+      genreExhausted = true;
+      state.completedPuzzlesByGenre[selectedGenre] = new Set();
+
+      // Select a random puzzle
+      const randomIndex = Math.floor(Math.random() * genrePuzzles.length);
+      puzzle = genrePuzzles[randomIndex];
+      console.log(`[Genre: ${selectedGenre}] Genre exhausted! Restarting with puzzle: "${puzzle.title}"`);
+    }
+
+    // Validate puzzle has required fields
+    if (!puzzle || !puzzle.title || !puzzle.book || !puzzle.words) {
+      throw new Error(`Selected puzzle from genre "${selectedGenre}" is missing required fields`);
+    }
+
+    const newState = { ...state };
+
+    // Update state
+    newState.puzzlesSinceLastKethaneum += 1;
+    newState.currentGenre = selectedGenre;
+    newState.currentBook = puzzle.book;
+    newState.currentStoryPart = puzzle.storyPart ?? 0;
+    newState.currentPuzzleIndex = genrePuzzles.indexOf(puzzle);
+    newState.genreExhausted = genreExhausted;
+
+    const message = genreExhausted
+      ? `You've completed all puzzles in the ${selectedGenre} genre! Starting over, or select a new genre from the library.`
+      : undefined;
+
+    return {
+      puzzle,
+      newState,
+      isKethaneum: false,
+      genreExhausted,
+      kethaneumExhausted: false,
+      message,
+    };
+  } catch (error) {
+    console.error('[PuzzleSelector] Error in selectGenrePuzzle:', error);
     return {
       puzzle: null,
       newState: state,
       isKethaneum: false,
       genreExhausted: true,
       kethaneumExhausted: false,
-      message: `No puzzles found in genre: ${selectedGenre}`,
+      message: `Genre puzzle selection error: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
-
-  // Initialize completed set for this genre if needed
-  if (!state.completedPuzzlesByGenre[selectedGenre]) {
-    state.completedPuzzlesByGenre[selectedGenre] = new Set();
-  }
-
-  const completedSet = state.completedPuzzlesByGenre[selectedGenre];
-
-  // Find uncompleted puzzles
-  const uncompletedPuzzles = genrePuzzles.filter(
-    (puzzle) => !completedSet.has(puzzle.title)
-  );
-
-  let puzzle: PuzzleData;
-  let genreExhausted = false;
-
-  if (uncompletedPuzzles.length > 0) {
-    // Randomly select from uncompleted puzzles
-    const randomIndex = Math.floor(Math.random() * uncompletedPuzzles.length);
-    puzzle = uncompletedPuzzles[randomIndex];
-    console.log(`[Genre: ${selectedGenre}] Selected puzzle ${randomIndex + 1}/${uncompletedPuzzles.length} uncompleted: "${puzzle.title}"`);
-  } else {
-    // All puzzles in this genre have been completed
-    // Reset and start over, but notify the player
-    genreExhausted = true;
-    state.completedPuzzlesByGenre[selectedGenre] = new Set();
-
-    // Select a random puzzle
-    const randomIndex = Math.floor(Math.random() * genrePuzzles.length);
-    puzzle = genrePuzzles[randomIndex];
-    console.log(`[Genre: ${selectedGenre}] Genre exhausted! Restarting with puzzle: "${puzzle.title}"`);
-  }
-
-  // Validate puzzle
-  if (!puzzle) {
-    console.error(`Failed to select puzzle from genre "${selectedGenre}"`);
-    return {
-      puzzle: null,
-      newState: state,
-      isKethaneum: false,
-      genreExhausted: true,
-      kethaneumExhausted: false,
-      message: `Failed to select puzzle from genre: ${selectedGenre}`,
-    };
-  }
-
-  const newState = { ...state };
-
-  // Update state
-  newState.puzzlesSinceLastKethaneum += 1;
-  newState.currentGenre = selectedGenre;
-  newState.currentBook = puzzle.book;
-  newState.currentStoryPart = puzzle.storyPart ?? 0;
-  newState.currentPuzzleIndex = genrePuzzles.indexOf(puzzle);
-  newState.genreExhausted = genreExhausted;
-
-  const message = genreExhausted
-    ? `You've completed all puzzles in the ${selectedGenre} genre! Starting over, or select a new genre from the library.`
-    : undefined;
-
-  return {
-    puzzle,
-    newState,
-    isKethaneum: false,
-    genreExhausted,
-    kethaneumExhausted: false,
-    message,
-  };
 }
 
 /**
@@ -272,28 +314,43 @@ export function markPuzzleCompleted(
   state: GameState,
   puzzle: PuzzleData
 ): GameState {
-  const newState = { ...state };
+  try {
+    if (!puzzle || !puzzle.title) {
+      throw new Error('Invalid puzzle: missing title');
+    }
 
-  // Ensure completedPuzzlesByGenre is initialized
-  if (!newState.completedPuzzlesByGenre) {
-    newState.completedPuzzlesByGenre = {};
+    const newState = { ...state };
+
+    // Ensure completedPuzzlesByGenre is initialized
+    if (!newState.completedPuzzlesByGenre) {
+      newState.completedPuzzlesByGenre = {};
+    }
+
+    // Get the genre from the puzzle
+    const genre = puzzle.genre || newState.currentGenre;
+
+    if (!genre || typeof genre !== 'string') {
+      throw new Error('Cannot determine genre for puzzle completion');
+    }
+
+    // Initialize the set for this genre if needed
+    if (!newState.completedPuzzlesByGenre[genre]) {
+      newState.completedPuzzlesByGenre[genre] = new Set();
+    }
+
+    // Mark this puzzle as completed
+    newState.completedPuzzlesByGenre[genre].add(puzzle.title);
+    console.log(`[PuzzleSelector] Marked puzzle "${puzzle.title}" as completed in genre "${genre}"`);
+
+    // Increment global completed counter
+    newState.completedPuzzles += 1;
+
+    return newState;
+  } catch (error) {
+    console.error('[PuzzleSelector] Error in markPuzzleCompleted:', error);
+    // Return original state unchanged on error
+    return state;
   }
-
-  // Get the genre from the puzzle
-  const genre = puzzle.genre || newState.currentGenre;
-
-  // Initialize the set for this genre if needed
-  if (!newState.completedPuzzlesByGenre[genre]) {
-    newState.completedPuzzlesByGenre[genre] = new Set();
-  }
-
-  // Mark this puzzle as completed
-  newState.completedPuzzlesByGenre[genre].add(puzzle.title);
-
-  // Increment global completed counter
-  newState.completedPuzzles += 1;
-
-  return newState;
 }
 
 /**
