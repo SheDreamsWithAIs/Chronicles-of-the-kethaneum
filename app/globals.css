@@ -2,22 +2,22 @@
 
 /* Design Tokens */
 :root {
-  --primary-dark: #3a1143;
-  --primary-medium: #4a3870;
-  --primary-light: #794d8e;
-  --primary-lighter: #9a7ecc;
+  --primary-dark: #441648;
+  --primary-medium: #793385;
+  --primary-light: #ad51be;
+  --primary-lighter: #d694e5;
   --neutral-dark: #2c2240;
   --neutral-medium: #3a2e51;
   --warm-light: #f4efe7;
   --warm-medium: #e9d8d0;
   --warm-dark: #dcd0c0;
-  --accent-main: #E6A817;
-  --accent-light: #F7C956;
-  --accent-dark: #C48A0F;
+  --accent-main: #fef3c7;
+  --accent-light: #fffbeb;
+  --accent-dark: #fde68a;
   --text-light: #f0ebe3;
   --text-medium: #e9d8d0;
-  --book-purple: #d9ccdf;
-  --book-purple-dark: #cbb8d1;
+  --book-purple: #eed3f6;
+  --book-purple-dark: #e2b5ed;
   --transition-fast: 0.2s;
   --transition-medium: 0.5s;
   --transition-slow: 1s;
@@ -52,7 +52,7 @@ body {
 }
 
 .cosmic-background.bg-title {
-  background: linear-gradient(135deg, var(--primary-light) 10%, var(--primary-dark) 66%);
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-medium) 40%, var(--primary-dark) 80%);
 }
 
 .cosmic-background.bg-backstory {
@@ -78,9 +78,9 @@ body {
   left: 0;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle at 30% 70%, rgba(230, 168, 23, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 70% 30%, rgba(121, 77, 142, 0.2) 0%, transparent 50%),
-              radial-gradient(circle at 20% 20%, rgba(74, 56, 112, 0.15) 0%, transparent 40%);
+  background: radial-gradient(circle at 30% 70%, rgba(254, 243, 199, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 70% 30%, rgba(173, 81, 190, 0.2) 0%, transparent 50%),
+              radial-gradient(circle at 20% 20%, rgba(121, 51, 133, 0.15) 0%, transparent 40%);
   animation: backgroundFlow 20s ease-in-out infinite;
 }
 
