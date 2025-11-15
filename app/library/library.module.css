@@ -19,7 +19,7 @@
   font-size: 42px;
   font-weight: 600;
   text-align: center;
-  color: var(--text-light);
+  color: var(--accent-main);
   margin-bottom: 30px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   animation: titleGlow 4s ease-in-out infinite;
