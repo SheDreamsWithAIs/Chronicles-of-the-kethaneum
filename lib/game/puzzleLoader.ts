@@ -230,8 +230,9 @@ export function loadSequentialPuzzle(
   genre: string | null,
   book: string | null,
   state: GameState,
-  config: Config
-): { success: boolean; newState: GameState } {
+  config: Config,
+  allowReplay: boolean = false
+): { success: boolean; newState: GameState; genreComplete?: boolean } {
   try {
     // Non-story modes should use their dedicated loaders
     if (state.gameMode === 'beat-the-clock' || state.gameMode === 'puzzle-only') {
@@ -398,32 +399,43 @@ export function loadSequentialPuzzle(
       });
       
       // Priority 1: Continue current book if it exists in this genre and is not complete
-      if (state.currentBook && 
-          bookTitles.includes(state.currentBook) && 
+      if (state.currentBook &&
+          bookTitles.includes(state.currentBook) &&
           !isBookComplete(state.currentBook, state)) {
         selectedBook = state.currentBook;
-      } 
+      }
       // Priority 2: Random in-progress book
       else if (inProgressBooks.length > 0) {
         selectedBook = inProgressBooks[Math.floor(Math.random() * inProgressBooks.length)];
-      } 
+      }
       // Priority 3: Random unstarted book
       else if (unstartedBooks.length > 0) {
         selectedBook = unstartedBooks[Math.floor(Math.random() * unstartedBooks.length)];
-      } 
-      // Priority 4: Reset a completed book
+      }
+      // Priority 4: All books complete in this genre
       else if (completeBooks.length > 0) {
-        selectedBook = completeBooks[Math.floor(Math.random() * completeBooks.length)];
-        
-        // Reset book completion status
-        if (selectedBook && state.books && state.books[selectedBook]) {
-          const availableParts = getAvailableParts(selectedBook, state.puzzles);
-          availableParts.forEach(part => {
-            const bookData = state.books[selectedBook!];
-            if (Array.isArray(bookData)) {
-              bookData[part] = false;
-            }
-          });
+        // If allowReplay is true, reset and replay a random book
+        if (allowReplay) {
+          selectedBook = completeBooks[Math.floor(Math.random() * completeBooks.length)];
+
+          // Reset book completion status
+          if (selectedBook && state.books && state.books[selectedBook]) {
+            const availableParts = getAvailableParts(selectedBook, state.puzzles);
+            availableParts.forEach(part => {
+              const bookData = state.books[selectedBook!];
+              if (Array.isArray(bookData)) {
+                bookData[part] = false;
+              }
+            });
+          }
+        } else {
+          // Genre is complete - signal to show modal instead of auto-replaying
+          console.log(`All books complete in genre "${selectedGenre}". Signaling genre completion.`);
+          return {
+            success: false,
+            newState: state,
+            genreComplete: true
+          };
         }
       } else {
         throw new Error(`No valid books found in genre: ${selectedGenre}`);
