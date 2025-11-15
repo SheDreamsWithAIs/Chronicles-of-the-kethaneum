@@ -11,9 +11,9 @@
   --warm-light: #f4efe7;
   --warm-medium: #e9d8d0;
   --warm-dark: #dcd0c0;
-  --accent-main: #fbbf24;
-  --accent-light: #fcd34d;
-  --accent-dark: #f59e0b;
+  --accent-main: #fcd34d;
+  --accent-light: #fde68a;
+  --accent-dark: #fbbf24;
   --text-light: #f0ebe3;
   --text-medium: #e9d8d0;
   --book-purple: #eed3f6;
@@ -78,7 +78,7 @@ body {
   left: 0;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle at 30% 70%, rgba(251, 191, 36, 0.1) 0%, transparent 50%),
+  background: radial-gradient(circle at 30% 70%, rgba(252, 211, 77, 0.1) 0%, transparent 50%),
               radial-gradient(circle at 70% 30%, rgba(173, 81, 190, 0.2) 0%, transparent 50%),
               radial-gradient(circle at 20% 20%, rgba(121, 51, 133, 0.15) 0%, transparent 40%);
   animation: backgroundFlow 20s ease-in-out infinite;
