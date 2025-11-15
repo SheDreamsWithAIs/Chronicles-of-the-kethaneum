@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
 
         files.push({
           name: entry.name,
-          path: `/${relativePath ? relativePath + '/' : ''}${entry.name}`.replace(/\/+/g, '/'),
+          path: `/data/${relativePath ? relativePath + '/' : ''}${entry.name}`.replace(/\/+/g, '/'),
           type: fileType,
           size: stats.size
         });
