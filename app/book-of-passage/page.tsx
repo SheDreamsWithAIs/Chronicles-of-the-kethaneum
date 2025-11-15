@@ -66,7 +66,75 @@ export default function BookOfPassageScreen() {
                 <div className={styles.pageSection}>
                   <h2 className={styles.pageTitle}>Discovered Books</h2>
                   <p className={styles.pageSubtitle}>Chronicles You Have Indexed</p>
-                  <p>No books discovered yet. Begin cataloging to discover new knowledge constructs!</p>
+
+                  {state.discoveredBooks && state.discoveredBooks.size > 0 ? (
+                    <div className={styles.booksList}>
+                      {Array.from(state.discoveredBooks).sort().map((bookTitle) => {
+                        // Get progress for this book
+                        const bookData = state.books[bookTitle];
+                        const partsMap = state.bookPartsMap[bookTitle] || [];
+
+                        let completedParts = 0;
+                        let totalParts = 0;
+
+                        if (Array.isArray(bookData)) {
+                          // Count completed parts
+                          completedParts = bookData.filter(completed => completed === true).length;
+                          totalParts = partsMap.length || bookData.length;
+                        } else if (bookData && typeof bookData === 'object' && bookData.complete) {
+                          // Book marked as complete
+                          totalParts = partsMap.length || 1;
+                          completedParts = totalParts;
+                        }
+
+                        const progressPercent = totalParts > 0
+                          ? Math.round((completedParts / totalParts) * 100)
+                          : 0;
+
+                        return (
+                          <div key={bookTitle} className={styles.bookEntry}>
+                            <div className={styles.bookHeader}>
+                              <h3 className={styles.bookTitle}>{bookTitle}</h3>
+                              {totalParts > 0 && (
+                                <span className={styles.bookProgress}>
+                                  {completedParts}/{totalParts} parts ({progressPercent}%)
+                                </span>
+                              )}
+                            </div>
+
+                            {totalParts > 0 && (
+                              <div className={styles.progressBar}>
+                                <div
+                                  className={styles.progressFill}
+                                  style={{ width: `${progressPercent}%` }}
+                                />
+                              </div>
+                            )}
+
+                            {/* Show which parts are completed */}
+                            {Array.isArray(bookData) && totalParts > 1 && (
+                              <div className={styles.partsList}>
+                                {partsMap.map((partIndex, idx) => {
+                                  const isCompleted = bookData[partIndex] === true;
+                                  return (
+                                    <span
+                                      key={idx}
+                                      className={`${styles.partIndicator} ${isCompleted ? styles.completed : ''}`}
+                                      title={`Part ${partIndex + 1}${isCompleted ? ' (completed)' : ''}`}
+                                    >
+                                      {partIndex + 1}
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className={styles.noBooks}>No books discovered yet. Begin cataloging to discover new knowledge constructs!</p>
+                  )}
                 </div>
               )}
             </div>
