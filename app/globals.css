@@ -2,10 +2,10 @@
 
 /* Design Tokens */
 :root {
-  --primary-dark: #3d2742;
-  --primary-medium: #6b4d7a;
-  --primary-light: #9a7ba8;
-  --primary-lighter: #c4afd1;
+  --primary-dark: #441648;
+  --primary-medium: #793385;
+  --primary-light: #ad51be;
+  --primary-lighter: #d694e5;
   --neutral-dark: #2c2240;
   --neutral-medium: #3a2e51;
   --warm-light: #f4efe7;
@@ -16,8 +16,8 @@
   --accent-dark: #f59e0b;
   --text-light: #f0ebe3;
   --text-medium: #e9d8d0;
-  --book-purple: #e6d5ed;
-  --book-purple-dark: #d4bfdd;
+  --book-purple: #eed3f6;
+  --book-purple-dark: #e2b5ed;
   --transition-fast: 0.2s;
   --transition-medium: 0.5s;
   --transition-slow: 1s;
@@ -79,8 +79,8 @@ body {
   width: 200%;
   height: 200%;
   background: radial-gradient(circle at 30% 70%, rgba(251, 191, 36, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 70% 30%, rgba(154, 123, 168, 0.2) 0%, transparent 50%),
-              radial-gradient(circle at 20% 20%, rgba(107, 77, 122, 0.15) 0%, transparent 40%);
+              radial-gradient(circle at 70% 30%, rgba(173, 81, 190, 0.2) 0%, transparent 50%),
+              radial-gradient(circle at 20% 20%, rgba(121, 51, 133, 0.15) 0%, transparent 40%);
   animation: backgroundFlow 20s ease-in-out infinite;
 }
 

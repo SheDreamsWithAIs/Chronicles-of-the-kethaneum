@@ -13,7 +13,7 @@
 }
 
 .panelContent {
-  background: linear-gradient(135deg, #6b4d7a 0%, #3d2742 100%);
+  background: linear-gradient(135deg, #793385 0%, #441648 100%);
   border: 2px solid rgba(251, 191, 36, 0.4);
   border-radius: 12px;
   padding: 2rem;
@@ -46,7 +46,7 @@
 }
 
 .controlGroup {
-  background: linear-gradient(135deg, rgba(154, 123, 168, 0.3) 0%, rgba(107, 77, 122, 0.5) 100%);
+  background: linear-gradient(135deg, rgba(173, 81, 190, 0.3) 0%, rgba(121, 51, 133, 0.5) 100%);
   border: 1px solid rgba(251, 191, 36, 0.2);
   border-radius: 8px;
   padding: 1rem;
@@ -239,7 +239,7 @@
   padding: 0.75rem 2rem;
   border: 2px solid rgba(251, 191, 36, 0.4);
   border-radius: 8px;
-  background: linear-gradient(135deg, #6b4d7a 0%, #3d2742 100%);
+  background: linear-gradient(135deg, #793385 0%, #441648 100%);
   color: #fbbf24;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -248,7 +248,7 @@
 
 .cancelButton:hover {
   border-color: rgba(251, 191, 36, 0.7);
-  background: linear-gradient(135deg, #3d2742 0%, #6b4d7a 100%);
+  background: linear-gradient(135deg, #441648 0%, #793385 100%);
   box-shadow: 0 4px 8px rgba(251, 191, 36, 0.3);
 }
 
