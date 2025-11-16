@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: 'export', // Static export for itch.io
+  assetPrefix: '.', // Use relative paths for itch.io compatibility
   images: {
     unoptimized: true, // Required for static export
   },
