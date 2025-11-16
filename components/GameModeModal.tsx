@@ -91,18 +91,18 @@ export function GameModeModal({
         </div>
         
         <div className={styles.buttonContainer}>
-          <button 
-            className={styles.cancelButton} 
-            onClick={handleCancel}
-          >
-            Cancel
-          </button>
-          <button 
+          <button
             className={`${styles.confirmButton} ${!selectedMode ? styles.disabled : ''}`}
             onClick={handleConfirm}
             disabled={!selectedMode}
           >
             Confirm
+          </button>
+          <button
+            className={styles.cancelButton}
+            onClick={handleCancel}
+          >
+            Cancel
           </button>
         </div>
       </div>
