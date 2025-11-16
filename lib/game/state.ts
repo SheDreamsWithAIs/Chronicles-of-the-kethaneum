@@ -82,6 +82,7 @@ export interface GameState {
 export interface PuzzleData {
   title: string;
   book: string;
+  genre?: string;
   words: string[];
   genre?: string; // Genre is included in puzzle data files
   storyPart?: number;
