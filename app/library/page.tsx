@@ -6,7 +6,6 @@ import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { GenreSelectionModal } from '@/components/GenreSelectionModal';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
-import { useDialogue } from '@/hooks/dialogue/useDialogue';
 import styles from './library.module.css';
 
 export default function LibraryScreen() {
@@ -15,13 +14,6 @@ export default function LibraryScreen() {
   const [showGenreModal, setShowGenreModal] = useState(false);
   const { state, setState } = useGameState();
   const { loadSequential, loadAll } = usePuzzle(state, setState);
-  const {
-    isInitialized: dialogueInitialized,
-    currentDialogue,
-    initialize: initializeDialogue,
-    getRandomBanter,
-    clearCurrentDialogue,
-  } = useDialogue();
 
   // Restrict access to Story Mode only
   useEffect(() => {
@@ -30,13 +22,6 @@ export default function LibraryScreen() {
       router.push('/puzzle');
     }
   }, [state.gameMode, router]);
-
-  // Initialize dialogue system on mount
-  useEffect(() => {
-    if (!dialogueInitialized) {
-      initializeDialogue();
-    }
-  }, [dialogueInitialized, initializeDialogue]);
 
   // Load puzzles on mount if not already loaded
   useEffect(() => {
@@ -52,42 +37,31 @@ export default function LibraryScreen() {
 
   const handleSelectGenre = async (genre: string) => {
     setShowGenreModal(false);
-    
+
     // Ensure puzzles are loaded
     if (!state.puzzles || Object.keys(state.puzzles).length === 0) {
       await loadAll();
     }
-    
+
     // Get updated state after loadAll (it updates state internally)
     // We need to wait a tick for state to update
     await new Promise(resolve => setTimeout(resolve, 0));
-    
-    // Verify genre exists - use functional update to get latest state
+
+    // Verify genre exists and update state using the new selection system
     setState(prevState => {
       if (!prevState.puzzles || !prevState.puzzles[genre] || prevState.puzzles[genre].length === 0) {
         console.error(`Genre "${genre}" not found. Available genres:`, Object.keys(prevState.puzzles || {}));
         return prevState; // Don't update if genre not found
       }
-      
-      // Get books in the selected genre
-      const booksInGenre = [...new Set(prevState.puzzles[genre].map(p => p.book))];
-      
-      // If current book doesn't exist in this genre, clear it
-      const updatedState: typeof prevState = {
-        ...prevState,
-        currentGenre: genre,
-      };
-      
-      if (prevState.currentBook && !booksInGenre.includes(prevState.currentBook)) {
-        console.log(`Clearing saved book "${prevState.currentBook}" - not in genre "${genre}"`);
-        updatedState.currentBook = '';
-        updatedState.currentPuzzleIndex = -1;
-        updatedState.currentStoryPart = -1;
-      }
-      
+
+      // Import and use the selectGenre function from puzzle selector
+      // Note: This will be a dynamic import since we're in a setState callback
+      const { selectGenre } = require('@/lib/game/puzzleSelector');
+      const updatedState = selectGenre(prevState, genre);
+
       return updatedState;
     });
-    
+
     // Wait for state update, then navigate
     await new Promise(resolve => setTimeout(resolve, 0));
     router.push('/puzzle');
@@ -103,24 +77,7 @@ export default function LibraryScreen() {
   );
 
   const handleStartConversation = () => {
-    if (!dialogueInitialized) {
-      console.warn('Dialogue system not initialized yet');
-      return;
-    }
-
-    // Get random banter for current story beat (hook is default)
-    const result = getRandomBanter('hook');
-
-    if (result && result.success) {
-      setShowDialogue(true);
-    } else {
-      console.error('Failed to get dialogue:', result?.error);
-    }
-  };
-
-  const handleCloseDialogue = () => {
-    setShowDialogue(false);
-    clearCurrentDialogue();
+    setShowDialogue(true);
   };
 
   const handleBookOfPassage = () => {
@@ -145,20 +102,21 @@ export default function LibraryScreen() {
         onClose={handleCloseGenreModal}
         onSelectGenre={handleSelectGenre}
         availableGenres={availableGenres}
+        kethaneumRevealed={state.kethaneumRevealed}
       />
 
-      {showDialogue && currentDialogue?.dialogue && (
-        <div className={styles.dialogueOverlay} onClick={handleCloseDialogue}>
+      {showDialogue && (
+        <div className={styles.dialogueOverlay} onClick={() => setShowDialogue(false)}>
           <div className={styles.dialoguePanel} onClick={(e) => e.stopPropagation()}>
-            <button className={styles.dialogueClose} onClick={handleCloseDialogue}>×</button>
+            <button className={styles.dialogueClose} onClick={() => setShowDialogue(false)}>×</button>
             <div className={styles.characterPortrait}>Portrait</div>
             <div className={styles.dialogueContent}>
-              <div className={styles.characterName}>{currentDialogue.dialogue.character}</div>
+              <div className={styles.characterName}>Archivist Lumina</div>
               <div className={styles.dialogueText}>
-                {currentDialogue.dialogue.text}
+                Welcome, new Assistant Archivist! I am Lumina, keeper of the western archives. The Kethaneum has chosen you for reasons that may not yet be clear, but I sense great potential within you.
               </div>
               <div className={styles.dialogueControls}>
-                <button className={styles.dialogueButton} onClick={handleCloseDialogue}>
+                <button className={styles.dialogueButton} onClick={() => setShowDialogue(false)}>
                   Continue
                 </button>
               </div>

@@ -6,7 +6,6 @@
 import type { GameState, PuzzleData } from './state';
 import { initializePuzzle } from './puzzleGenerator';
 import type { Config } from '../core/config';
-import { fetchAsset } from '../utils/assetPath';
 
 /**
  * Load a random puzzle for Beat the Clock Mode
@@ -27,7 +26,7 @@ export async function loadBeatTheClockPuzzle(
     
     // Load Beat the Clock puzzles if not already loaded
     if (!state.puzzles || !state.puzzles['Beat the Clock'] || state.puzzles['Beat the Clock'].length === 0) {
-      const response = await fetchAsset('/data/beatTheClockPuzzles.json');
+      const response = await fetch('/data/beatTheClockPuzzles.json');
       if (!response.ok) {
         throw new Error('Failed to load Beat the Clock puzzles');
       }

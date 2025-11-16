@@ -6,12 +6,10 @@
 
 # Testing
 /coverage
-cypress/screenshots/
 
 # Next.js
 /.next/
 /out/
-tsconfig.tsbuildinfo
 
 # Production
 /build
@@ -27,7 +25,3 @@ yarn-error.log*
 
 # Local env files
 .env*.local
-
-# Temporary directories created during production build
-/_dev_tools
-/_dev_api_manifest-manager

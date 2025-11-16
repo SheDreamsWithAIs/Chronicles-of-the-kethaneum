@@ -311,8 +311,7 @@ export class AudioManager {
     if (category === 'master') {
       this.settings.masterVolume = volume;
     } else {
-      const volumeKey = `${category}Volume` as 'musicVolume' | 'ambientVolume' | 'sfxVolume' | 'voiceVolume';
-      this.settings[volumeKey] = volume;
+      this.settings[`${category}Volume` as keyof AudioSettings] = volume;
     }
 
     // Update all active tracks
@@ -326,8 +325,7 @@ export class AudioManager {
     if (category === 'master') {
       return this.settings.masterVolume;
     }
-    const volumeKey = `${category}Volume` as 'musicVolume' | 'ambientVolume' | 'sfxVolume' | 'voiceVolume';
-    return this.settings[volumeKey];
+    return this.settings[`${category}Volume` as keyof AudioSettings] as number;
   }
 
   /**
@@ -337,8 +335,7 @@ export class AudioManager {
     if (category === 'master') {
       this.settings.masterMuted = muted;
     } else {
-      const mutedKey = `${category}Muted` as 'musicMuted' | 'ambientMuted' | 'sfxMuted' | 'voiceMuted';
-      this.settings[mutedKey] = muted;
+      this.settings[`${category}Muted` as keyof AudioSettings] = muted;
     }
 
     this.updateAllVolumes();
@@ -351,8 +348,7 @@ export class AudioManager {
     if (category === 'master') {
       return this.settings.masterMuted;
     }
-    const mutedKey = `${category}Muted` as 'musicMuted' | 'ambientMuted' | 'sfxMuted' | 'voiceMuted';
-    return this.settings[mutedKey];
+    return this.settings[`${category}Muted` as keyof AudioSettings] as boolean;
   }
 
   /**

@@ -9,13 +9,14 @@ import { startBeatTheClockRun } from '@/lib/game/logic';
 
 interface UsePuzzleLoadingProps {
   state: GameState;
-  setState: (state: GameState | ((prevState: GameState) => GameState)) => void;
+  setState: (state: GameState) => void;
   isReady: boolean;
   loadAll: () => Promise<{ [genre: string]: any[] }>;
   loadBeatTheClock: () => Promise<boolean>;
   loadRandom: () => boolean;
   restorePuzzleOnly: (genre: string, puzzleIndex: number) => boolean;
   loadSequential: (genre: string | null, book: string | null, allowReplay?: boolean) => { success: boolean; genreComplete?: boolean };
+  loadWithSelection: () => { success: boolean; isKethaneum?: boolean; message?: string };
   initialize: (puzzleData: any) => boolean;
   setPuzzleStartTime: (time: number) => void;
   router: { push: (path: string) => void };
@@ -30,6 +31,7 @@ export function usePuzzleLoading({
   loadRandom,
   restorePuzzleOnly,
   loadSequential,
+  loadWithSelection,
   initialize,
   setPuzzleStartTime,
   router,
@@ -113,13 +115,15 @@ export function usePuzzleLoading({
         setPuzzleStartTime(Date.now());
       }
     } else {
-      // Story Mode: Restore exact puzzle if possible
-      if (genreToLoad && puzzleIndex !== undefined && puzzleIndex >= 0 && 
-          state.puzzles && state.puzzles[genreToLoad] && 
+      // Story Mode: Use new puzzle selection system with Kethaneum weaving
+
+      // First, try to restore exact puzzle if we're refreshing the page
+      if (genreToLoad && puzzleIndex !== undefined && puzzleIndex >= 0 &&
+          state.puzzles && state.puzzles[genreToLoad] &&
           state.puzzles[genreToLoad][puzzleIndex]) {
         // Restore the exact puzzle we were on
         const puzzleToRestore = state.puzzles[genreToLoad][puzzleIndex];
-        
+
         // Verify it matches the saved book and story part
         if ((!bookToLoad || puzzleToRestore.book === bookToLoad) &&
             (state.currentStoryPart === undefined || puzzleToRestore.storyPart === state.currentStoryPart)) {
@@ -132,48 +136,45 @@ export function usePuzzleLoading({
             currentBook: puzzleToRestore.book,
             currentStoryPart: puzzleToRestore.storyPart !== undefined ? puzzleToRestore.storyPart : 0
           }));
-          
+
           // Wait for state update, then initialize
           await new Promise(resolve => setTimeout(resolve, 0));
-          
+
           const success = initialize(puzzleToRestore);
           if (success) {
             return;
           }
         }
       }
-      
-      // Story Mode: Use existing sequential loading
-      // Fallback to sequential loading if exact restore failed
-      if (!genreToLoad) {
-        console.warn('No genre specified, redirecting to library');
+
+      // Load new puzzle using the selection system
+      // Check if we have a selected genre
+      if (!state.selectedGenre || state.selectedGenre.trim() === '') {
+        console.warn('No genre selected, redirecting to library');
         router.push('/library');
         return;
       }
 
-      if (!state.puzzles || !state.puzzles[genreToLoad]) {
-        console.warn(`Genre "${genreToLoad}" not found in puzzles. Available:`, Object.keys(state.puzzles || {}));
+      if (!state.puzzles || !state.puzzles[state.selectedGenre]) {
+        console.warn(`Selected genre "${state.selectedGenre}" not found in puzzles. Available:`, Object.keys(state.puzzles || {}));
         router.push('/library');
         return;
       }
 
-      // Ensure genre is set in state before calling loadSequential
-      if (state.currentGenre !== genreToLoad) {
-        setState(prevState => ({
-          ...prevState,
-          currentGenre: genreToLoad
-        }));
-        await new Promise(resolve => setTimeout(resolve, 0));
-      }
+      // Use the new selection system
+      const result = loadWithSelection();
 
-      const { success, genreComplete } = loadSequential(genreToLoad, bookToLoad);
-      if (genreComplete) {
-        // Signal that genre is complete - caller should show modal
-        return { genreComplete: true };
-      }
-      if (!success) {
-        console.warn('Failed to load puzzle, redirecting to library');
-        router.push('/library');
+      if (!result.success) {
+        console.warn('Failed to load puzzle:', result.message);
+        if (result.message && result.message.includes('No genre selected')) {
+          router.push('/library');
+        }
+      } else {
+        // Show a notification if genre is exhausted
+        if (result.message) {
+          console.log(result.message);
+          // You could show a toast notification here in the future
+        }
       }
     }
   }, [
@@ -185,6 +186,7 @@ export function usePuzzleLoading({
     loadRandom,
     restorePuzzleOnly,
     loadSequential,
+    loadWithSelection,
     initialize,
     setPuzzleStartTime,
     router,

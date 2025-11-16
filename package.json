@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "node scripts/build-production.js",
-    "build:next": "next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "cypress": "cypress open",
