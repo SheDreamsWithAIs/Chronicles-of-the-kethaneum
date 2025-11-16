@@ -209,6 +209,35 @@ function selectKethaneumPuzzle(
 }
 
 /**
+ * Helper function to select a new book from uncompleted puzzles
+ * Finds the lowest uncompleted part for each book, then randomly selects between them
+ */
+function selectNewBook(uncompletedPuzzles: PuzzleData[], selectedGenre: string): PuzzleData {
+  // Group by book and select lowest uncompleted storyPart per book
+  const bookStartPoints: { [book: string]: PuzzleData } = {};
+
+  for (const p of uncompletedPuzzles) {
+    if (!p.book) continue;
+
+    const storyPart = p.storyPart ?? 0;
+    const existingPart = bookStartPoints[p.book];
+
+    if (!existingPart || storyPart < (existingPart.storyPart ?? 0)) {
+      bookStartPoints[p.book] = p;
+    }
+  }
+
+  // Randomly select from these starting points
+  const startingPuzzles = Object.values(bookStartPoints);
+  const randomIndex = Math.floor(Math.random() * startingPuzzles.length);
+  const puzzle = startingPuzzles[randomIndex];
+
+  console.log(`[Genre: ${selectedGenre}] Selected new book from ${startingPuzzles.length} options: "${puzzle.title}" (Part ${puzzle.storyPart ?? 0})`);
+
+  return puzzle;
+}
+
+/**
  * Select a puzzle from the player's chosen genre
  */
 function selectGenrePuzzle(
@@ -251,26 +280,28 @@ function selectGenrePuzzle(
     let genreExhausted = false;
 
     if (uncompletedPuzzles.length > 0) {
-      // For Story Mode: Group by book and select lowest uncompleted storyPart per book
-      // This ensures narrative order within books while allowing variety between books
-      const bookStartPoints: { [book: string]: PuzzleData } = {};
+      // Priority 1: Continue current book if it has uncompleted parts
+      if (state.currentBook) {
+        const currentBookPuzzles = uncompletedPuzzles.filter(p => p.book === state.currentBook);
 
-      for (const p of uncompletedPuzzles) {
-        if (!p.book) continue;
+        if (currentBookPuzzles.length > 0) {
+          // Find lowest uncompleted part in current book
+          const lowestPart = currentBookPuzzles.reduce((lowest, p) => {
+            const pPart = p.storyPart ?? 0;
+            const lowestPart = lowest.storyPart ?? 0;
+            return pPart < lowestPart ? p : lowest;
+          });
 
-        const storyPart = p.storyPart ?? 0;
-        const existingPart = bookStartPoints[p.book];
-
-        if (!existingPart || storyPart < (existingPart.storyPart ?? 0)) {
-          bookStartPoints[p.book] = p;
+          puzzle = lowestPart;
+          console.log(`[Genre: ${selectedGenre}] Continuing current book "${state.currentBook}": "${puzzle.title}" (Part ${puzzle.storyPart ?? 0})`);
+        } else {
+          // Current book is complete, select a new book
+          puzzle = selectNewBook(uncompletedPuzzles, selectedGenre);
         }
+      } else {
+        // No current book, select a new one
+        puzzle = selectNewBook(uncompletedPuzzles, selectedGenre);
       }
-
-      // Randomly select from these starting points
-      const startingPuzzles = Object.values(bookStartPoints);
-      const randomIndex = Math.floor(Math.random() * startingPuzzles.length);
-      puzzle = startingPuzzles[randomIndex];
-      console.log(`[Genre: ${selectedGenre}] Selected puzzle from ${startingPuzzles.length} books: "${puzzle.title}" (Part ${puzzle.storyPart ?? 0})`);
     } else {
       // All puzzles in this genre have been completed
       // Reset and start over, but notify the player
