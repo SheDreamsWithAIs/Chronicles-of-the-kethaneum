@@ -19,9 +19,9 @@ export default function LibraryScreen() {
   useEffect(() => {
     if (state.gameMode !== 'story') {
       // Redirect to puzzle screen for non-story modes
-      router.push('/puzzle');
+      window.location.href = '../puzzle/';
     }
-  }, [state.gameMode, router]);
+  }, [state.gameMode]);
 
   // Load puzzles on mount if not already loaded
   useEffect(() => {
@@ -75,7 +75,7 @@ export default function LibraryScreen() {
     
     // Wait for state update, then navigate
     await new Promise(resolve => setTimeout(resolve, 0));
-    router.push('/puzzle');
+    window.location.href = '../puzzle/';
   };
 
   const handleCloseGenreModal = () => {
@@ -92,11 +92,11 @@ export default function LibraryScreen() {
   };
 
   const handleBookOfPassage = () => {
-    router.push('/book-of-passage');
+    window.location.href = '../book-of-passage/';
   };
 
   const handleReturnToMenu = () => {
-    router.push('/');
+    window.location.href = '../';
   };
 
   const handleLibraryOptions = () => {
