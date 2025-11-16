@@ -4,6 +4,15 @@ import path from 'path';
 
 const DATA_DIR = path.join(process.cwd(), 'public', 'data');
 
+// This route is only for development - won't work in static export
+export const dynamic = 'force-static';
+export const dynamicParams = false;
+
+// Required for static export with dynamic routes - return empty array since this is dev-only
+export async function generateStaticParams() {
+  return [];
+}
+
 function validatePath(folderPath: string): boolean {
   const fullPath = path.join(DATA_DIR, folderPath);
   return fullPath.startsWith(DATA_DIR);
@@ -12,12 +21,12 @@ function validatePath(folderPath: string): boolean {
 // GET - Read manifest
 export async function GET(
   request: NextRequest,
-  { params }: { params: { manifestType: string } }
+  { params }: { params: Promise<{ manifestType: string }> }
 ) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const relativePath = searchParams.get('path') || '';
-    const { manifestType } = params;
+    const { manifestType } = await params;
 
     if (!validatePath(relativePath)) {
       return NextResponse.json(
@@ -49,12 +58,12 @@ export async function GET(
 // POST - Save manifest
 export async function POST(
   request: NextRequest,
-  { params }: { params: { manifestType: string } }
+  { params }: { params: Promise<{ manifestType: string }> }
 ) {
   try {
     const body = await request.json();
     const { manifest, path: relativePath, create } = body;
-    const { manifestType } = params;
+    const { manifestType } = await params;
 
     if (!validatePath(relativePath || '')) {
       return NextResponse.json(

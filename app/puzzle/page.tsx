@@ -134,18 +134,24 @@ export default function PuzzleScreen() {
       console.log('[puzzle.page] Timer not started - transitioning between puzzles');
       return;
     }
-    
+
     if (state.grid && state.grid.length > 0 && !state.timer && !state.paused && !state.gameOver) {
       if (state.gameMode === 'story') {
         // Story mode: initialize decorative timer
         if (state.timeRemaining === undefined || state.timeRemaining === 0) {
-          timer.initialize();
+          storyTimer.initialize();
         }
-      } else {
-        // Puzzle-only and beat-the-clock: start countdown timer
+      } else if (state.gameMode === 'puzzle-only') {
+        // Puzzle-only: start countdown timer
         if (state.timeRemaining > 0) {
           console.log('[puzzle.page] Starting timer - grid exists, no timer, not paused, not gameOver, timeRemaining:', state.timeRemaining);
-          timer.start();
+          puzzleOnlyTimer.start();
+        }
+      } else {
+        // Beat-the-clock: start countdown timer
+        if (state.timeRemaining > 0) {
+          console.log('[puzzle.page] Starting timer - grid exists, no timer, not paused, not gameOver, timeRemaining:', state.timeRemaining);
+          beatTheClockTimer.start();
         }
       }
     } else {
@@ -153,7 +159,7 @@ export default function PuzzleScreen() {
         console.log('[puzzle.page] Timer not started - timer:', state.timer ? 'exists' : 'null', 'paused:', state.paused, 'gameOver:', state.gameOver, 'timeRemaining:', state.timeRemaining, 'transitioning:', isTransitioningRef.current);
       }
     }
-  }, [state.grid?.length, state.timer, state.paused, state.gameOver, state.gameMode, timer]);
+  }, [state.grid?.length, state.timer, state.paused, state.gameOver, state.gameMode, storyTimer, puzzleOnlyTimer, beatTheClockTimer]);
 
   // Get current puzzle data
   const gridData = state.grid || [];
@@ -571,8 +577,16 @@ export default function PuzzleScreen() {
       gameOver: false,
     });
     setPuzzleStartTime(Date.now());
-    timer.start();
-  }, [state, setState, config, timer]);
+
+    // Start timer based on game mode
+    if (state.gameMode === 'story') {
+      storyTimer.initialize();
+    } else if (state.gameMode === 'puzzle-only') {
+      puzzleOnlyTimer.start();
+    } else {
+      beatTheClockTimer.start();
+    }
+  }, [state, setState, config, storyTimer, puzzleOnlyTimer, beatTheClockTimer]);
 
   const handleStartFreshRun = useCallback(async () => {
     console.log('[puzzle.page.handleStartFreshRun] Closing modal and starting fresh run');

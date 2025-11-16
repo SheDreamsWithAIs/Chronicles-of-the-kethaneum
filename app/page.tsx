@@ -82,7 +82,7 @@ export default function TitleScreen() {
             <div className={styles.logoContainer}>
               <div className={styles.logoWrapper}>
                 <img
-                  src="/images/logo-glow.png"
+                  src="./images/logo-glow.png"
                   alt="Chronicles of the Kethaneum Logo"
                   className={styles.logoGlow}
                 />
