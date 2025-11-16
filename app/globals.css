@@ -52,7 +52,7 @@ body {
 }
 
 .cosmic-background.bg-title {
-  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-medium) 40%, var(--primary-dark) 80%);
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-medium) 20%, var(--primary-dark) 80%);
 }
 
 .cosmic-background.bg-backstory {
