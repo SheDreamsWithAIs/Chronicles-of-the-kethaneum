@@ -251,10 +251,26 @@ function selectGenrePuzzle(
     let genreExhausted = false;
 
     if (uncompletedPuzzles.length > 0) {
-      // Randomly select from uncompleted puzzles
-      const randomIndex = Math.floor(Math.random() * uncompletedPuzzles.length);
-      puzzle = uncompletedPuzzles[randomIndex];
-      console.log(`[Genre: ${selectedGenre}] Selected puzzle ${randomIndex + 1}/${uncompletedPuzzles.length} uncompleted: "${puzzle.title}"`);
+      // For Story Mode: Group by book and select lowest uncompleted storyPart per book
+      // This ensures narrative order within books while allowing variety between books
+      const bookStartPoints: { [book: string]: PuzzleData } = {};
+
+      for (const p of uncompletedPuzzles) {
+        if (!p.book) continue;
+
+        const storyPart = p.storyPart ?? 0;
+        const existingPart = bookStartPoints[p.book];
+
+        if (!existingPart || storyPart < (existingPart.storyPart ?? 0)) {
+          bookStartPoints[p.book] = p;
+        }
+      }
+
+      // Randomly select from these starting points
+      const startingPuzzles = Object.values(bookStartPoints);
+      const randomIndex = Math.floor(Math.random() * startingPuzzles.length);
+      puzzle = startingPuzzles[randomIndex];
+      console.log(`[Genre: ${selectedGenre}] Selected puzzle from ${startingPuzzles.length} books: "${puzzle.title}" (Part ${puzzle.storyPart ?? 0})`);
     } else {
       // All puzzles in this genre have been completed
       // Reset and start over, but notify the player
