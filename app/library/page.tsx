@@ -6,6 +6,7 @@ import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { GenreSelectionModal } from '@/components/GenreSelectionModal';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
+import { useDialogue } from '@/hooks/dialogue/useDialogue';
 import styles from './library.module.css';
 
 export default function LibraryScreen() {
@@ -14,6 +15,13 @@ export default function LibraryScreen() {
   const [showGenreModal, setShowGenreModal] = useState(false);
   const { state, setState } = useGameState();
   const { loadSequential, loadAll } = usePuzzle(state, setState);
+  const {
+    isInitialized: dialogueInitialized,
+    currentDialogue,
+    initialize: initializeDialogue,
+    getRandomBanter,
+    clearCurrentDialogue,
+  } = useDialogue();
 
   // Restrict access to Story Mode only
   useEffect(() => {
@@ -22,6 +30,13 @@ export default function LibraryScreen() {
       router.push('/puzzle');
     }
   }, [state.gameMode, router]);
+
+  // Initialize dialogue system on mount
+  useEffect(() => {
+    if (!dialogueInitialized) {
+      initializeDialogue();
+    }
+  }, [dialogueInitialized, initializeDialogue]);
 
   // Load puzzles on mount if not already loaded
   useEffect(() => {
@@ -88,7 +103,24 @@ export default function LibraryScreen() {
   );
 
   const handleStartConversation = () => {
-    setShowDialogue(true);
+    if (!dialogueInitialized) {
+      console.warn('Dialogue system not initialized yet');
+      return;
+    }
+
+    // Get random banter for current story beat (hook is default)
+    const result = getRandomBanter('hook');
+
+    if (result && result.success) {
+      setShowDialogue(true);
+    } else {
+      console.error('Failed to get dialogue:', result?.error);
+    }
+  };
+
+  const handleCloseDialogue = () => {
+    setShowDialogue(false);
+    clearCurrentDialogue();
   };
 
   const handleBookOfPassage = () => {
@@ -115,18 +147,18 @@ export default function LibraryScreen() {
         availableGenres={availableGenres}
       />
 
-      {showDialogue && (
-        <div className={styles.dialogueOverlay} onClick={() => setShowDialogue(false)}>
+      {showDialogue && currentDialogue?.dialogue && (
+        <div className={styles.dialogueOverlay} onClick={handleCloseDialogue}>
           <div className={styles.dialoguePanel} onClick={(e) => e.stopPropagation()}>
-            <button className={styles.dialogueClose} onClick={() => setShowDialogue(false)}>×</button>
+            <button className={styles.dialogueClose} onClick={handleCloseDialogue}>×</button>
             <div className={styles.characterPortrait}>Portrait</div>
             <div className={styles.dialogueContent}>
-              <div className={styles.characterName}>Archivist Lumina</div>
+              <div className={styles.characterName}>{currentDialogue.dialogue.character}</div>
               <div className={styles.dialogueText}>
-                Welcome, new Assistant Archivist! I am Lumina, keeper of the western archives. The Kethaneum has chosen you for reasons that may not yet be clear, but I sense great potential within you.
+                {currentDialogue.dialogue.text}
               </div>
               <div className={styles.dialogueControls}>
-                <button className={styles.dialogueButton} onClick={() => setShowDialogue(false)}>
+                <button className={styles.dialogueButton} onClick={handleCloseDialogue}>
                   Continue
                 </button>
               </div>
