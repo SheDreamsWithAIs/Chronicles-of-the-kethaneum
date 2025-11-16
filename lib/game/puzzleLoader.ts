@@ -63,11 +63,7 @@ export async function loadAllPuzzles(
     const loadPromises = genreFiles.map(async (filePath) => {
       try {
         // Fetch the puzzle data
-<<<<<<< HEAD
-        const response = await fetch(filePath);
-=======
         const response = await fetchAsset(filePath);
->>>>>>> 3bf45a3774f17fca35225a51333a9d38bcf9ab87
 
         if (!response.ok) {
           console.warn(`Failed to load ${filePath}: ${response.status} ${response.statusText}`);

@@ -3,7 +3,7 @@
  * Provides easy access to dialogue functionality in React components
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { dialogueManager } from '@/lib/dialogue/DialogueManager';
 import type { BanterResult, StoryBeat, DialogueManagerStatus } from '@/lib/dialogue/types';
 
