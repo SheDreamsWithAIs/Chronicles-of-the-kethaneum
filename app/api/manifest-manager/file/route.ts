@@ -4,6 +4,9 @@ import path from 'path';
 
 const DATA_DIR = path.join(process.cwd(), 'public', 'data');
 
+// This route is only for development - won't work in static export
+export const dynamic = 'force-static';
+
 function validatePath(filePath: string): boolean {
   const fullPath = path.join(DATA_DIR, filePath);
   return fullPath.startsWith(DATA_DIR);

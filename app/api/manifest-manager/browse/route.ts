@@ -4,6 +4,9 @@ import path from 'path';
 
 const DATA_DIR = path.join(process.cwd(), 'public', 'data');
 
+// This route is only for development - won't work in static export
+export const dynamic = 'force-static';
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
