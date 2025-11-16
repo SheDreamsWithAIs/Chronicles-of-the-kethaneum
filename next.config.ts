@@ -1,10 +1,16 @@
 import type { NextConfig } from "next";
 
+const basePath = '/Chronicles-of-the-kethaneum';
+
 const nextConfig: NextConfig = {
   output: 'export', // Static export for GitHub Pages
-  basePath: '/Chronicles-of-the-kethaneum', // Your GitHub repo name
+  basePath: basePath, // Your GitHub repo name
   images: {
     unoptimized: true, // Required for static export
+  },
+  // Expose basePath as environment variable for asset loading
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
   },
   // Note: The Next.js dev overlay only appears in development mode.
   // Production builds (npm run build) won't include it, so it won't
