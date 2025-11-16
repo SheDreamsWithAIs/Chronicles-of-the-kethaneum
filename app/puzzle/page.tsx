@@ -577,8 +577,16 @@ export default function PuzzleScreen() {
       gameOver: false,
     });
     setPuzzleStartTime(Date.now());
-    timer.start();
-  }, [state, setState, config, timer]);
+
+    // Start timer based on game mode
+    if (state.gameMode === 'story') {
+      storyTimer.initialize();
+    } else if (state.gameMode === 'puzzle-only') {
+      puzzleOnlyTimer.start();
+    } else {
+      beatTheClockTimer.start();
+    }
+  }, [state, setState, config, storyTimer, puzzleOnlyTimer, beatTheClockTimer]);
 
   const handleStartFreshRun = useCallback(async () => {
     console.log('[puzzle.page.handleStartFreshRun] Closing modal and starting fresh run');
