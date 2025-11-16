@@ -9,7 +9,7 @@ import { startBeatTheClockRun } from '@/lib/game/logic';
 
 interface UsePuzzleLoadingProps {
   state: GameState;
-  setState: (state: GameState) => void;
+  setState: (state: GameState | ((prevState: GameState) => GameState)) => void;
   isReady: boolean;
   loadAll: () => Promise<{ [genre: string]: any[] }>;
   loadBeatTheClock: () => Promise<boolean>;
