@@ -6,6 +6,7 @@ const DATA_DIR = path.join(process.cwd(), 'public', 'data');
 
 // This route is only for development - won't work in static export
 export const dynamic = 'force-static';
+export const dynamicParams = false;
 
 // Required for static export with dynamic routes - return empty array since this is dev-only
 export async function generateStaticParams() {
