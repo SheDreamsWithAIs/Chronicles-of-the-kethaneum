@@ -5,6 +5,21 @@ describe('Dialogue System', () => {
     cy.clearLocalStorage();
   });
 
+  // Helper function to navigate to library and wait for dialogue system
+  const navigateToLibrary = () => {
+    cy.get('[data-testid="new-game-btn"]').click();
+    cy.get('[data-testid="continue-to-mode-select-btn"]').click();
+    cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
+    cy.contains('Story Mode').click();
+    cy.contains('button', 'Confirm').click();
+    cy.get('[data-testid="begin-cataloging-btn"]').click();
+    cy.url().should('include', '/library');
+
+    // Wait for dialogue system to initialize (give it time to load files)
+    // The system needs to load: dialogue-config.json, character-manifest.json, and character files
+    cy.wait(2000);
+  };
+
   it('should navigate to Library in Story Mode', () => {
     // Navigate to Library
     cy.get('[data-testid="new-game-btn"]').click();
@@ -24,26 +39,14 @@ describe('Dialogue System', () => {
   });
 
   it('should display the Start a Conversation button in Library', () => {
-    // Navigate to Library
-    cy.get('[data-testid="new-game-btn"]').click();
-    cy.get('[data-testid="continue-to-mode-select-btn"]').click();
-    cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
-    cy.contains('Story Mode').click();
-    cy.contains('button', 'Confirm').click();
-    cy.get('[data-testid="begin-cataloging-btn"]').click();
+    navigateToLibrary();
 
     // Verify conversation button exists
     cy.contains('button', 'Start a Conversation').should('be.visible');
   });
 
   it('should show dialogue panel when clicking Start a Conversation', () => {
-    // Navigate to Library
-    cy.get('[data-testid="new-game-btn"]').click();
-    cy.get('[data-testid="continue-to-mode-select-btn"]').click();
-    cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
-    cy.contains('Story Mode').click();
-    cy.contains('button', 'Confirm').click();
-    cy.get('[data-testid="begin-cataloging-btn"]').click();
+    navigateToLibrary();
 
     // Click to start conversation
     cy.contains('button', 'Start a Conversation').click();
@@ -54,13 +57,7 @@ describe('Dialogue System', () => {
   });
 
   it('should display character name and dialogue text', () => {
-    // Navigate to Library
-    cy.get('[data-testid="new-game-btn"]').click();
-    cy.get('[data-testid="continue-to-mode-select-btn"]').click();
-    cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
-    cy.contains('Story Mode').click();
-    cy.contains('button', 'Confirm').click();
-    cy.get('[data-testid="begin-cataloging-btn"]').click();
+    navigateToLibrary();
 
     // Click to start conversation
     cy.contains('button', 'Start a Conversation').click();
@@ -71,13 +68,7 @@ describe('Dialogue System', () => {
   });
 
   it('should close dialogue when clicking the close button', () => {
-    // Navigate to Library
-    cy.get('[data-testid="new-game-btn"]').click();
-    cy.get('[data-testid="continue-to-mode-select-btn"]').click();
-    cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
-    cy.contains('Story Mode').click();
-    cy.contains('button', 'Confirm').click();
-    cy.get('[data-testid="begin-cataloging-btn"]').click();
+    navigateToLibrary();
 
     // Open dialogue
     cy.contains('button', 'Start a Conversation').click();
@@ -91,13 +82,7 @@ describe('Dialogue System', () => {
   });
 
   it('should close dialogue when clicking the Continue button', () => {
-    // Navigate to Library
-    cy.get('[data-testid="new-game-btn"]').click();
-    cy.get('[data-testid="continue-to-mode-select-btn"]').click();
-    cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
-    cy.contains('Story Mode').click();
-    cy.contains('button', 'Confirm').click();
-    cy.get('[data-testid="begin-cataloging-btn"]').click();
+    navigateToLibrary();
 
     // Open dialogue
     cy.contains('button', 'Start a Conversation').click();
@@ -111,13 +96,7 @@ describe('Dialogue System', () => {
   });
 
   it('should close dialogue when clicking the overlay background', () => {
-    // Navigate to Library
-    cy.get('[data-testid="new-game-btn"]').click();
-    cy.get('[data-testid="continue-to-mode-select-btn"]').click();
-    cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
-    cy.contains('Story Mode').click();
-    cy.contains('button', 'Confirm').click();
-    cy.get('[data-testid="begin-cataloging-btn"]').click();
+    navigateToLibrary();
 
     // Open dialogue
     cy.contains('button', 'Start a Conversation').click();
@@ -132,13 +111,7 @@ describe('Dialogue System', () => {
   });
 
   it('should be able to open dialogue multiple times', () => {
-    // Navigate to Library
-    cy.get('[data-testid="new-game-btn"]').click();
-    cy.get('[data-testid="continue-to-mode-select-btn"]').click();
-    cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
-    cy.contains('Story Mode').click();
-    cy.contains('button', 'Confirm').click();
-    cy.get('[data-testid="begin-cataloging-btn"]').click();
+    navigateToLibrary();
 
     // Open dialogue first time
     cy.contains('button', 'Start a Conversation').click();
@@ -159,13 +132,7 @@ describe('Dialogue System', () => {
   });
 
   it('should display character portrait placeholder', () => {
-    // Navigate to Library
-    cy.get('[data-testid="new-game-btn"]').click();
-    cy.get('[data-testid="continue-to-mode-select-btn"]').click();
-    cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
-    cy.contains('Story Mode').click();
-    cy.contains('button', 'Confirm').click();
-    cy.get('[data-testid="begin-cataloging-btn"]').click();
+    navigateToLibrary();
 
     // Open dialogue
     cy.contains('button', 'Start a Conversation').click();
@@ -175,13 +142,7 @@ describe('Dialogue System', () => {
   });
 
   it('should prevent interaction with library content while dialogue is open', () => {
-    // Navigate to Library
-    cy.get('[data-testid="new-game-btn"]').click();
-    cy.get('[data-testid="continue-to-mode-select-btn"]').click();
-    cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
-    cy.contains('Story Mode').click();
-    cy.contains('button', 'Confirm').click();
-    cy.get('[data-testid="begin-cataloging-btn"]').click();
+    navigateToLibrary();
 
     // Open dialogue
     cy.contains('button', 'Start a Conversation').click();
