@@ -58,51 +58,55 @@ export async function loadAllPuzzles(
     // Load the genre manifest to get the list of files to load
     const genreFiles = await loadGenreManifest();
     
-    // Load all genre files in parallel and extract genre from data
+    // Load all genre files in parallel and organize puzzles by their genre field
     const loadPromises = genreFiles.map(async (filePath) => {
       try {
         // Fetch the puzzle data
         const response = await fetch(filePath);
-        
+
         if (!response.ok) {
           console.warn(`Failed to load ${filePath}: ${response.status} ${response.statusText}`);
           return null;
         }
-        
+
         // Parse the JSON data
         const puzzleData: PuzzleData[] = await response.json();
-        
+
         if (!Array.isArray(puzzleData) || puzzleData.length === 0) {
           console.warn(`No valid puzzles found in ${filePath}`);
           return null;
         }
-        
-        // Extract genre name from the first puzzle's genre field
-        const genre = puzzleData[0]?.genre;
-        if (!genre) {
-          console.warn(`No genre field found in ${filePath}`);
-          return null;
-        }
-        
-        // Process and store each puzzle
-        const validPuzzles: PuzzleData[] = [];
+
+        // Group puzzles by their individual genre fields
+        // This allows a single file to contain puzzles from multiple genres
+        const puzzlesByGenre: { [genre: string]: PuzzleData[] } = {};
+
         puzzleData.forEach(puzzle => {
           // Make sure puzzle has required fields
           if (!puzzle.title || !puzzle.book || !puzzle.words || !Array.isArray(puzzle.words)) {
             console.warn(`Skipping invalid puzzle in ${filePath}:`, puzzle);
             return;
           }
-          
+
+          // Make sure puzzle has genre field
+          if (!puzzle.genre) {
+            console.warn(`Skipping puzzle without genre in ${filePath}:`, puzzle.title);
+            return;
+          }
+
           // Make sure puzzle has storyPart information (default to introduction)
           if (puzzle.storyPart === undefined) {
             puzzle.storyPart = 0;
           }
-          
-          // Add the puzzle to the list
-          validPuzzles.push(puzzle);
+
+          // Add to the appropriate genre bucket
+          if (!puzzlesByGenre[puzzle.genre]) {
+            puzzlesByGenre[puzzle.genre] = [];
+          }
+          puzzlesByGenre[puzzle.genre].push(puzzle);
         });
-        
-        return { genre, puzzles: validPuzzles };
+
+        return puzzlesByGenre;
       } catch (error) {
         console.error(`Error loading ${filePath}:`, error);
         return null;
@@ -111,18 +115,23 @@ export async function loadAllPuzzles(
     
     // Wait for all puzzles to load
     const results = await Promise.all(loadPromises);
-    
+
     // Merge results into state (filter out null results)
-    results.forEach((result) => {
-      if (result) {
-        // If genre already exists, merge puzzles (avoid duplicates)
-        if (newState.puzzles[result.genre]) {
-          // Merge puzzles, avoiding duplicates based on title
-          const existingTitles = new Set(newState.puzzles[result.genre].map(p => p.title));
-          const newPuzzles = result.puzzles.filter(p => !existingTitles.has(p.title));
-          newState.puzzles[result.genre] = [...newState.puzzles[result.genre], ...newPuzzles];
-        } else {
-          newState.puzzles[result.genre] = result.puzzles;
+    results.forEach((puzzlesByGenre) => {
+      if (puzzlesByGenre) {
+        // Each result is now a map of genre -> puzzles[]
+        for (const genre in puzzlesByGenre) {
+          const puzzles = puzzlesByGenre[genre];
+
+          // If genre already exists, merge puzzles (avoid duplicates)
+          if (newState.puzzles[genre]) {
+            // Merge puzzles, avoiding duplicates based on title
+            const existingTitles = new Set(newState.puzzles[genre].map(p => p.title));
+            const newPuzzles = puzzles.filter(p => !existingTitles.has(p.title));
+            newState.puzzles[genre] = [...newState.puzzles[genre], ...newPuzzles];
+          } else {
+            newState.puzzles[genre] = puzzles;
+          }
         }
       }
     });
