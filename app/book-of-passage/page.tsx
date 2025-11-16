@@ -15,12 +15,12 @@ export default function BookOfPassageScreen() {
   useEffect(() => {
     if (state.gameMode !== 'story') {
       // Redirect to puzzle screen for non-story modes
-      window.location.href = '../puzzle/';
+      router.push('/puzzle');
     }
-  }, [state.gameMode]);
+  }, [state.gameMode, router]);
 
   const handleBeginCataloging = () => {
-    window.location.href = '../library/';
+    router.push('/library');
   };
 
   return (

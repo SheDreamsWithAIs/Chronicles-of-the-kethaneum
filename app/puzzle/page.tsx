@@ -513,15 +513,15 @@ export default function PuzzleScreen() {
   }, [timer]);
 
   const handleBackToBookOfPassage = () => {
-    window.location.href = '../book-of-passage/';
+    router.push('/book-of-passage');
   };
 
   const handleBackToLibrary = () => {
-    window.location.href = '../library/';
+    router.push('/library');
   };
 
   const handleBackToMainMenu = () => {
-    window.location.href = '../';
+    router.push('/');
   };
 
   const handleOptions = () => {

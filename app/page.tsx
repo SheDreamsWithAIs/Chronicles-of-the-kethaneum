@@ -55,7 +55,7 @@ export default function TitleScreen() {
 
     setIsLoading(true);
     setTimeout(() => {
-      window.location.href = './backstory/';
+      router.push('/backstory');
       setIsLoading(false);
     }, 500);
   };
@@ -64,10 +64,10 @@ export default function TitleScreen() {
     if (hasSavedGame) {
       // Navigate based on saved game mode
       if (savedGameMode === 'story') {
-        window.location.href = './book-of-passage/';
+        router.push('/book-of-passage');
       } else {
         // Puzzle Only or Beat the Clock - go directly to puzzle screen
-        window.location.href = './puzzle/';
+        router.push('/puzzle');
       }
     }
   };

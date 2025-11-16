@@ -55,10 +55,10 @@ export default function BackstoryScreen() {
 
     // Navigate based on mode
     if (mode === 'story') {
-      window.location.href = '../book-of-passage/';
+      router.push('/book-of-passage');
     } else {
       // Puzzle Only or Beat the Clock - go directly to puzzle screen
-      window.location.href = '../puzzle/';
+      router.push('/puzzle');
     }
   };
 
