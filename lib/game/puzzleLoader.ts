@@ -6,13 +6,14 @@
 import type { GameState, PuzzleData } from './state';
 import { initializePuzzle } from './puzzleGenerator';
 import type { Config } from '../core/config';
+import { fetchAsset } from '../utils/assetPath';
 
 /**
  * Load the genre manifest file
  */
 async function loadGenreManifest(): Promise<string[]> {
   try {
-    const response = await fetch('/data/genreManifest.json');
+    const response = await fetchAsset('/data/genreManifest.json');
     if (!response.ok) {
       console.warn('Failed to load genre manifest, falling back to default files');
       return [
@@ -62,7 +63,7 @@ export async function loadAllPuzzles(
     const loadPromises = genreFiles.map(async (filePath) => {
       try {
         // Fetch the puzzle data
-        const response = await fetch(filePath);
+        const response = await fetchAsset(filePath);
 
         if (!response.ok) {
           console.warn(`Failed to load ${filePath}: ${response.status} ${response.statusText}`);
@@ -193,8 +194,8 @@ export async function loadGenrePuzzles(
 ): Promise<{ genre: string; puzzles: PuzzleData[] }> {
   try {
     // Fetch the puzzle data
-    const response = await fetch(filePath);
-    
+    const response = await fetchAsset(filePath);
+
     if (!response.ok) {
       throw new Error(`Failed to load puzzles for ${genre}: ${response.status} ${response.statusText}`);
     }

@@ -9,7 +9,7 @@ import { startBeatTheClockRun } from '@/lib/game/logic';
 
 interface UsePuzzleLoadingProps {
   state: GameState;
-  setState: (state: GameState) => void;
+  setState: (state: GameState | ((prevState: GameState) => GameState)) => void;
   isReady: boolean;
   loadAll: () => Promise<{ [genre: string]: any[] }>;
   loadBeatTheClock: () => Promise<boolean>;
@@ -173,7 +173,10 @@ export function usePuzzleLoading({
         // Show a notification if genre is exhausted
         if (result.message) {
           console.log(result.message);
-          // You could show a toast notification here in the future
+          // Check if genre is exhausted and signal to caller
+          if (result.message.includes('completed all puzzles')) {
+            return { genreComplete: true };
+          }
         }
       }
     }
