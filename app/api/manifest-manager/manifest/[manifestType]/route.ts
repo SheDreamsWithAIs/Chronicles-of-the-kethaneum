@@ -7,6 +7,11 @@ const DATA_DIR = path.join(process.cwd(), 'public', 'data');
 // This route is only for development - won't work in static export
 export const dynamic = 'force-static';
 
+// Required for static export with dynamic routes - return empty array since this is dev-only
+export async function generateStaticParams() {
+  return [];
+}
+
 function validatePath(folderPath: string): boolean {
   const fullPath = path.join(DATA_DIR, folderPath);
   return fullPath.startsWith(DATA_DIR);
