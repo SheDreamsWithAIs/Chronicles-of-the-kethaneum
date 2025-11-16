@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  basePath: '/chronicles-of-the-kethaneum-1', // itch.io game path
   output: 'export', // Static export for itch.io
   images: {
     unoptimized: true, // Required for static export
