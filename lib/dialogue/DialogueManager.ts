@@ -4,6 +4,7 @@
  * Converted to TypeScript for Next.js integration
  */
 
+import { fetchAsset } from '@/lib/utils/assetPath';
 import type {
   StoryBeat,
   LoadingGroup,
@@ -61,7 +62,7 @@ export class DialogueManager {
    */
   private async loadConfiguration(): Promise<void> {
     try {
-      const response = await fetch('/data/dialogue-config.json');
+      const response = await fetchAsset('/data/dialogue-config.json');
       if (!response.ok) {
         throw new Error(`Failed to load config: ${response.status}`);
       }
@@ -197,7 +198,7 @@ export class DialogueManager {
       }
 
       const manifestPath = this.config.paths.charactersDirectory + 'character-manifest.json';
-      const response = await fetch(manifestPath);
+      const response = await fetchAsset(manifestPath);
 
       if (!response.ok) {
         throw new Error(`Failed to load character manifest: ${response.status}`);
@@ -228,7 +229,7 @@ export class DialogueManager {
       }
 
       const basePath = this.config.paths.charactersDirectory;
-      const response = await fetch(`${basePath}${filename}`);
+      const response = await fetchAsset(`${basePath}${filename}`);
 
       if (!response.ok) {
         throw new Error(`Failed to load character file: ${response.status}`);
