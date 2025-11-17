@@ -2,7 +2,13 @@
   "genreFiles": [
     "/data/kethaneumPuzzles.json",
     "/data/naturePuzzles.json",
-    "/data/testPuzzles.json"
+    "/data/testPuzzles.json",
+    "/data/mysteryPuzzles.json",
+    "/data/horrorPuzzles.json",
+    "/data/romancePuzzles.json",
+    "/data/adventurePuzzles.json",
+    "/data/historicalPuzzles.json",
+    "/data/mythologyPuzzles.json"
   ]
 }
 
