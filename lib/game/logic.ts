@@ -5,6 +5,8 @@
 
 import type { GameState, WordData, Cell, SessionStats } from './state';
 import type { Config } from '../core/config';
+import { storyProgressionManager } from '@/lib/story/StoryProgressionManager';
+import type { ProgressionMetrics } from '@/lib/story/types';
 
 /**
  * Check if the selected cells form a word in the puzzle
@@ -160,6 +162,21 @@ export function endGame(
           };
         }
       }
+    }
+
+    // Check story progression after completing a puzzle
+    const metrics: ProgressionMetrics = {
+      completedPuzzles: newState.completedPuzzles,
+      discoveredBooks: newState.discoveredBooks.size,
+      completedBooks: newState.completedBooks,
+    };
+
+    // Check if we should advance the story
+    const progressionResult = storyProgressionManager.checkAndAdvanceStory(metrics);
+
+    if (progressionResult.shouldAdvance) {
+      console.log(`[Story Progression] ${progressionResult.reason}`);
+      console.log(`[Story Progression] Advanced to: ${progressionResult.nextBeat}`);
     }
   }
 
