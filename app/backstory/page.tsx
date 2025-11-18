@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { GameModeModal, type GameMode } from '@/components/GameModeModal';
+import { FormattedBackstory } from '@/components/shared/FormattedBackstory';
 import { useGameState } from '@/hooks/useGameState';
 import { loadGameProgress } from '@/lib/save/saveSystem';
+import { loadBackstoryContent, type BackstoryContent } from '@/lib/utils/backstoryLoader';
 import styles from './backstory.module.css';
 
 export default function BackstoryScreen() {
@@ -14,10 +16,22 @@ export default function BackstoryScreen() {
   const [isVisible, setIsVisible] = useState(false);
   const [showModeModal, setShowModeModal] = useState(false);
   const [hasExistingProgress, setHasExistingProgress] = useState(false);
+  const [backstoryContent, setBackstoryContent] = useState<BackstoryContent | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    // Load backstory content
+    loadBackstoryContent().then((content) => {
+      if (content) {
+        setBackstoryContent(content);
+      } else {
+        console.error('Failed to load backstory content, using fallback');
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -80,16 +94,25 @@ export default function BackstoryScreen() {
           <div className={styles.bookContent}>
             <div className={styles.pageDecoration}>✦</div>
 
-            <h1 className={styles.chapterTitle}>The Kethaneum</h1>
+            <h1 className={styles.chapterTitle}>
+              {backstoryContent?.title || 'The Kethaneum'}
+            </h1>
 
             <div className={styles.storyContent} data-testid="backstory-content">
-              <p>The Kethaneum exists in the spaces between worlds—a vast library stretching across dimensions, accessible only to those deemed worthy by its mysterious custodians. Neither fully physical nor entirely ethereal, this repository houses knowledge from countless civilizations, epochs, and realities.</p>
-              
-              <p>For millennia, brilliant minds across the multiverse have sought entry to this hallowed space. Few succeed. The journey requires years of dedicated study and the completion of increasingly complex trials that test not just intellect, but character and perseverance. Those who prove themselves receive a <em>Book of Passage</em>—a living artifact that serves as both key and chronicle.</p>
-              
-              <p>Your Book of Passage now rests in your hands, its pages initially blank except for your name. Unlike ordinary books, it observes and records your journey, adding new chapters as you explore the Kethaneum's infinite collections. Every discovery, every challenge overcome, every insight gained—all become part of your unique narrative, preserved within its pages.</p>
-              
-              <p><em>Today marks your first day as Assistant Archivist. The cosmic catalog awaits your careful hand, and ancient knowledge stirs in anticipation of your touch. Step forward, seeker, and let your story begin...</em></p>
+              {backstoryContent ? (
+                <FormattedBackstory content={backstoryContent} />
+              ) : (
+                // Fallback content in case loading fails
+                <>
+                  <p>The Kethaneum exists in the spaces between worlds—a vast library stretching across dimensions, accessible only to those deemed worthy by its mysterious custodians. Neither fully physical nor entirely ethereal, this repository houses knowledge from countless civilizations, epochs, and realities.</p>
+
+                  <p>For millennia, brilliant minds across the multiverse have sought entry to this hallowed space. Few succeed. The journey requires years of dedicated study and the completion of increasingly complex trials that test not just intellect, but character and perseverance. Those who prove themselves receive a <em>Book of Passage</em>—a living artifact that serves as both key and chronicle.</p>
+
+                  <p>Your Book of Passage now rests in your hands, its pages initially blank except for your name. Unlike ordinary books, it observes and records your journey, adding new chapters as you explore the Kethaneum's infinite collections. Every discovery, every challenge overcome, every insight gained—all become part of your unique narrative, preserved within its pages.</p>
+
+                  <p><em>Today marks your first day as Assistant Archivist. The cosmic catalog awaits your careful hand, and ancient knowledge stirs in anticipation of your touch. Step forward, seeker, and let your story begin...</em></p>
+                </>
+              )}
             </div>
           </div>
         </div>

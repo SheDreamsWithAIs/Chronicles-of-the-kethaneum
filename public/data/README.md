@@ -1,8 +1,71 @@
-# Puzzle Data System
+# Game Data System
 
-This directory contains all puzzle data files for the Chronicles of the Kethaneum game.
+This directory contains all data files for the Chronicles of the Kethaneum game, including puzzle data and backstory content.
 
 ## File Structure
+
+### Backstory Content (`backstory-content.json`)
+
+The `backstory-content.json` file contains the text content displayed on the backstory screen when the game starts. This file supports rich text formatting including colors, italics, and bold text.
+
+**Format:**
+```json
+{
+  "title": "The Kethaneum",
+  "paragraphs": [
+    {
+      "segments": [
+        {
+          "text": "Plain text content"
+        },
+        {
+          "text": "Italicized text",
+          "italic": true
+        },
+        {
+          "text": "Bold text",
+          "bold": true
+        },
+        {
+          "text": "Colored text",
+          "color": "#ff6b6b"
+        },
+        {
+          "text": "Combination",
+          "italic": true,
+          "bold": true,
+          "color": "#4ecdc4"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Structure:**
+- `title`: The title displayed at the top of the backstory screen
+- `paragraphs`: An array of paragraph objects, each containing:
+  - `segments`: An array of text segments with optional formatting
+
+**Text Segment Properties:**
+- `text` (required): The text content to display
+- `italic` (optional): Set to `true` to italicize the text
+- `bold` (optional): Set to `true` to make the text bold
+- `color` (optional): A CSS color value (hex, rgb, or named color) to color the text
+
+**How to update:**
+1. Open `public/data/backstory-content.json`
+2. Modify the `title` field to change the backstory title
+3. Edit the `paragraphs` array to change the content
+4. Add or modify `segments` within paragraphs to apply formatting
+5. Save the file - changes will appear automatically on the backstory screen
+
+**Tips:**
+- Each paragraph creates a new `<p>` tag with appropriate spacing
+- Segments within a paragraph flow together without line breaks
+- Use multiple segments in a paragraph to apply different formatting to different parts
+- Colors can be hex codes (`#ff6b6b`), RGB values (`rgb(255, 107, 107)`), or named colors (`red`)
+- New lines are created by adding new paragraph objects to the array
 
 ### Genre Manifest (`genreManifest.json`)
 
