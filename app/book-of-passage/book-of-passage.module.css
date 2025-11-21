@@ -167,16 +167,15 @@
 
 .bookEntry {
   background: rgba(203, 184, 209, 0.15);
-  border: 2px solid rgba(230, 168, 23, 0.3);
+  border: 2px solid rgba(74, 56, 112, 0.4);
   border-radius: 12px;
   padding: 20px;
   transition: all var(--transition-fast);
 }
 
 .bookEntry:hover {
-  border-color: rgba(230, 168, 23, 0.6);
+  border-color: rgba(74, 56, 112, 0.7);
   background: rgba(203, 184, 209, 0.25);
-  transform: translateX(5px);
 }
 
 .bookHeader {
