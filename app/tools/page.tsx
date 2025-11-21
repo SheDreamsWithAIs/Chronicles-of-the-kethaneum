@@ -70,6 +70,33 @@ export default function ToolsPage() {
                 </div>
               </div>
             </Link>
+
+            {/* Book Registry Manager Tool */}
+            <Link href="/tools/book-registry">
+              <div className="bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-6 hover:bg-[var(--primary-light)] transition-all cursor-pointer h-full">
+                <div className="flex items-center mb-4">
+                  <div className="text-4xl mr-4">📚</div>
+                  <h2 className="text-2xl font-bold text-[var(--text-light)]">Book Registry</h2>
+                </div>
+                <p className="text-[var(--text-medium)] mb-4">
+                  Manage the central book registry for the optimized save system and Book of Passage tracking.
+                </p>
+                <div className="space-y-2 text-sm text-[var(--text-light)]">
+                  <div className="flex items-start">
+                    <span className="mr-2">✓</span>
+                    <span>Scan genre files for new books</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">✓</span>
+                    <span>Sync changes to registry</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">✓</span>
+                    <span>Reorder books with auto-shuffle</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
           </div>
 
           <div className="mt-8 bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-6">
