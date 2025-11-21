@@ -210,10 +210,11 @@ export default function BookOfPassageScreen() {
   }, [totalPages]);
 
   const handleReadStory = useCallback((bookId: string, bookTitle: string) => {
-    // TODO: Navigate to story reader page when implemented
-    // For now, navigate to a story page with the book info
-    router.push(`/story/${encodeURIComponent(bookId)}?title=${encodeURIComponent(bookTitle)}`);
-  }, [router]);
+    // TODO: Open story reader modal when implemented
+    // For now, show placeholder - will be replaced with modal
+    console.log(`[Book of Passage] Opening story reader for: ${bookTitle} (${bookId})`);
+    alert(`Story Reader coming soon!\n\nBook: ${bookTitle}\n\nThis will open a modal to read completed story excerpts.`);
+  }, []);
 
   // Calculate stats
   const stats = useMemo(() => {
