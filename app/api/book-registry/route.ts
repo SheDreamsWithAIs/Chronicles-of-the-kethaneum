@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 
-const REGISTRY_PATH = path.join(process.cwd(), 'public', 'data', 'bookRegistry.json');
+const DATA_DIR = path.join(process.cwd(), 'public', 'data');
+const REGISTRY_PATH = path.join(DATA_DIR, 'bookRegistry.json');
+const MANIFEST_PATH = path.join(DATA_DIR, 'genreManifest.json');
 
 interface BookEntry {
   title: string;
@@ -22,6 +24,25 @@ interface BookRegistry {
   genres: Record<string, GenreEntry>;
 }
 
+interface PuzzleEntry {
+  title: string;
+  book: string;
+  storyPart: number;
+  genre: string;
+  words: string[];
+  storyExcerpt: string;
+}
+
+interface ScannedBook {
+  title: string;
+  genre: string;
+  parts: number;
+  inRegistry: boolean;
+  registryId?: string;
+  registryParts?: number;
+  needsUpdate: boolean;
+}
+
 // Load the registry
 async function loadRegistry(): Promise<BookRegistry> {
   const content = await fs.readFile(REGISTRY_PATH, 'utf-8');
@@ -31,6 +52,73 @@ async function loadRegistry(): Promise<BookRegistry> {
 // Save the registry
 async function saveRegistry(registry: BookRegistry): Promise<void> {
   await fs.writeFile(REGISTRY_PATH, JSON.stringify(registry, null, 2), 'utf-8');
+}
+
+// Load genre manifest
+async function loadGenreManifest(): Promise<{ genreFiles: string[] }> {
+  const content = await fs.readFile(MANIFEST_PATH, 'utf-8');
+  return JSON.parse(content);
+}
+
+// Load and scan a genre file
+async function scanGenreFile(filePath: string): Promise<ScannedBook[]> {
+  const fullPath = path.join(process.cwd(), 'public', filePath);
+  const content = await fs.readFile(fullPath, 'utf-8');
+  const puzzles: PuzzleEntry[] = JSON.parse(content);
+
+  // Group puzzles by book
+  const bookMap = new Map<string, { genre: string; parts: Set<number> }>();
+
+  for (const puzzle of puzzles) {
+    if (!puzzle.book) continue;
+
+    if (!bookMap.has(puzzle.book)) {
+      bookMap.set(puzzle.book, {
+        genre: puzzle.genre,
+        parts: new Set()
+      });
+    }
+
+    const bookData = bookMap.get(puzzle.book)!;
+    bookData.parts.add(puzzle.storyPart);
+  }
+
+  // Convert to array with part counts
+  const books: Array<{ title: string; genre: string; parts: number }> = [];
+  bookMap.forEach((data, title) => {
+    books.push({
+      title,
+      genre: data.genre,
+      parts: data.parts.size
+    });
+  });
+
+  // Load registry to check status
+  const registry = await loadRegistry();
+
+  // Annotate with registry status
+  return books.map(book => {
+    const registryEntry = Object.entries(registry.books).find(
+      ([, b]) => b.title === book.title
+    );
+
+    if (registryEntry) {
+      const [id, regBook] = registryEntry;
+      return {
+        ...book,
+        inRegistry: true,
+        registryId: id,
+        registryParts: regBook.parts,
+        needsUpdate: regBook.parts !== book.parts
+      };
+    }
+
+    return {
+      ...book,
+      inRegistry: false,
+      needsUpdate: true // New book needs to be added
+    };
+  });
 }
 
 // Generate next available ID for a genre
@@ -54,32 +142,26 @@ function generateNextId(registry: BookRegistry, genre: string): string {
 function validateRegistry(registry: BookRegistry): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
-  // Check for duplicate IDs (inherently prevented by object keys, but check titles)
   const titles = new Set<string>();
   for (const [id, book] of Object.entries(registry.books)) {
-    // Check title uniqueness
     if (titles.has(book.title)) {
       errors.push(`Duplicate title: "${book.title}"`);
     }
     titles.add(book.title);
 
-    // Check genre exists
     if (!registry.genres[book.genre]) {
       errors.push(`Book ${id} has unknown genre: "${book.genre}"`);
     }
 
-    // Check ID prefix matches genre
     const expectedPrefix = registry.genres[book.genre]?.prefix;
     if (expectedPrefix && !id.startsWith(expectedPrefix)) {
       errors.push(`Book ${id} has mismatched prefix (expected ${expectedPrefix})`);
     }
 
-    // Check parts is positive
     if (book.parts < 1) {
       errors.push(`Book ${id} has invalid parts count: ${book.parts}`);
     }
 
-    // Check order is positive
     if (book.order < 1) {
       errors.push(`Book ${id} has invalid order: ${book.order}`);
     }
@@ -88,15 +170,42 @@ function validateRegistry(registry: BookRegistry): { valid: boolean; errors: str
   return { valid: errors.length === 0, errors };
 }
 
-// GET - Get registry data
+// GET - Get registry data, genre files, or scan results
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const action = searchParams.get('action');
 
-    const registry = await loadRegistry();
+    // Get list of genre files
+    if (action === 'genreFiles') {
+      const manifest = await loadGenreManifest();
+      return NextResponse.json({
+        success: true,
+        genreFiles: manifest.genreFiles
+      });
+    }
 
+    // Scan a specific genre file
+    if (action === 'scan') {
+      const filePath = searchParams.get('file');
+      if (!filePath) {
+        return NextResponse.json(
+          { success: false, error: 'File path is required' },
+          { status: 400 }
+        );
+      }
+
+      const books = await scanGenreFile(filePath);
+      return NextResponse.json({
+        success: true,
+        file: filePath,
+        books
+      });
+    }
+
+    // Validate registry
     if (action === 'validate') {
+      const registry = await loadRegistry();
       const validation = validateRegistry(registry);
       return NextResponse.json({
         success: true,
@@ -104,6 +213,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Get next ID for a genre
     if (action === 'nextId') {
       const genre = searchParams.get('genre');
       if (!genre) {
@@ -112,6 +222,7 @@ export async function GET(request: NextRequest) {
           { status: 400 }
         );
       }
+      const registry = await loadRegistry();
       try {
         const nextId = generateNextId(registry, genre);
         return NextResponse.json({ success: true, nextId });
@@ -124,6 +235,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Default: return full registry
+    const registry = await loadRegistry();
     return NextResponse.json({
       success: true,
       registry
@@ -137,76 +249,81 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Add new book or genre
+// POST - Sync books from genre file to registry
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { type, data } = body;
+    const { action, data } = body;
 
     const registry = await loadRegistry();
 
-    if (type === 'book') {
-      const { id, title, genre, parts, order } = data;
+    // Sync books from a scanned genre file
+    if (action === 'sync') {
+      const { books } = data as { books: ScannedBook[] };
 
-      // Validate required fields
-      if (!title || !genre || !parts) {
+      if (!Array.isArray(books)) {
         return NextResponse.json(
-          { success: false, error: 'Title, genre, and parts are required' },
+          { success: false, error: 'Books must be an array' },
           { status: 400 }
         );
       }
 
-      // Validate genre exists
-      if (!registry.genres[genre]) {
-        return NextResponse.json(
-          { success: false, error: `Unknown genre: ${genre}` },
-          { status: 400 }
-        );
+      const added: string[] = [];
+      const updated: string[] = [];
+      const errors: string[] = [];
+
+      for (const book of books) {
+        try {
+          // Validate genre exists
+          if (!registry.genres[book.genre]) {
+            errors.push(`Unknown genre "${book.genre}" for book: ${book.title}`);
+            continue;
+          }
+
+          if (book.inRegistry && book.registryId) {
+            // Update existing book
+            if (book.needsUpdate) {
+              registry.books[book.registryId].parts = book.parts;
+              updated.push(book.registryId);
+            }
+          } else {
+            // Add new book
+            const bookId = generateNextId(registry, book.genre);
+            const bookOrder = Object.values(registry.books)
+              .filter(b => b.genre === book.genre)
+              .length + 1;
+
+            registry.books[bookId] = {
+              title: book.title,
+              genre: book.genre,
+              parts: book.parts,
+              order: bookOrder
+            };
+
+            added.push(bookId);
+          }
+        } catch (error) {
+          errors.push(`Error processing "${book.title}": ${(error as Error).message}`);
+        }
       }
 
-      // Generate ID if not provided
-      const bookId = id || generateNextId(registry, genre);
-
-      // Check if ID already exists
-      if (registry.books[bookId]) {
-        return NextResponse.json(
-          { success: false, error: `Book ID ${bookId} already exists` },
-          { status: 400 }
-        );
+      if (added.length > 0 || updated.length > 0) {
+        await saveRegistry(registry);
       }
-
-      // Check for duplicate title
-      const existingTitle = Object.values(registry.books).find(b => b.title === title);
-      if (existingTitle) {
-        return NextResponse.json(
-          { success: false, error: `A book with title "${title}" already exists` },
-          { status: 400 }
-        );
-      }
-
-      // Calculate order if not provided
-      const bookOrder = order || Object.values(registry.books)
-        .filter(b => b.genre === genre)
-        .length + 1;
-
-      // Add book
-      registry.books[bookId] = {
-        title,
-        genre,
-        parts: Number(parts),
-        order: bookOrder
-      };
-
-      await saveRegistry(registry);
 
       return NextResponse.json({
         success: true,
-        bookId,
-        book: registry.books[bookId]
+        added,
+        updated,
+        errors,
+        totalAdded: added.length,
+        totalUpdated: updated.length,
+        totalErrors: errors.length
       });
     }
 
-    if (type === 'genre') {
+    // Add a new genre
+    if (action === 'addGenre') {
       const { id, name, prefix } = data;
 
       if (!id || !name || !prefix) {
@@ -223,7 +340,6 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Check prefix uniqueness
       const existingPrefix = Object.values(registry.genres).find(g => g.prefix === prefix);
       if (existingPrefix) {
         return NextResponse.json(
@@ -242,72 +358,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (type === 'bulk') {
-      const { books } = data;
-      if (!Array.isArray(books)) {
-        return NextResponse.json(
-          { success: false, error: 'Books must be an array' },
-          { status: 400 }
-        );
-      }
-
-      const added: string[] = [];
-      const errors: string[] = [];
-
-      for (const book of books) {
-        try {
-          const { title, genre, parts, order } = book;
-
-          if (!title || !genre || !parts) {
-            errors.push(`Missing required fields for book: ${title || 'unknown'}`);
-            continue;
-          }
-
-          if (!registry.genres[genre]) {
-            errors.push(`Unknown genre "${genre}" for book: ${title}`);
-            continue;
-          }
-
-          // Check for duplicate title
-          const existingTitle = Object.values(registry.books).find(b => b.title === title);
-          if (existingTitle) {
-            errors.push(`Duplicate title: ${title}`);
-            continue;
-          }
-
-          const bookId = generateNextId(registry, genre);
-          const bookOrder = order || Object.values(registry.books)
-            .filter(b => b.genre === genre)
-            .length + 1;
-
-          registry.books[bookId] = {
-            title,
-            genre,
-            parts: Number(parts),
-            order: bookOrder
-          };
-
-          added.push(bookId);
-        } catch (error) {
-          errors.push(`Error adding book: ${(error as Error).message}`);
-        }
-      }
-
-      if (added.length > 0) {
-        await saveRegistry(registry);
-      }
-
-      return NextResponse.json({
-        success: true,
-        added,
-        errors,
-        totalAdded: added.length,
-        totalErrors: errors.length
-      });
-    }
-
     return NextResponse.json(
-      { success: false, error: 'Invalid type. Use "book", "genre", or "bulk"' },
+      { success: false, error: 'Invalid action. Use "sync" or "addGenre"' },
       { status: 400 }
     );
   } catch (error) {
@@ -341,11 +393,9 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Apply updates
     const book = registry.books[bookId];
 
     if (updates.title !== undefined) {
-      // Check for duplicate title (excluding current book)
       const existingTitle = Object.entries(registry.books)
         .find(([id, b]) => id !== bookId && b.title === updates.title);
       if (existingTitle) {
@@ -364,9 +414,6 @@ export async function PUT(request: NextRequest) {
     if (updates.order !== undefined) {
       book.order = Number(updates.order);
     }
-
-    // Note: Changing genre would require changing the ID, which is complex
-    // For now, we don't support genre changes
 
     await saveRegistry(registry);
 

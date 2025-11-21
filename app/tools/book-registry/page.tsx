@@ -26,12 +26,22 @@ interface BookRegistry {
   genres: Record<string, GenreEntry>;
 }
 
+interface ScannedBook {
+  title: string;
+  genre: string;
+  parts: number;
+  inRegistry: boolean;
+  registryId?: string;
+  registryParts?: number;
+  needsUpdate: boolean;
+}
+
 interface ValidationResult {
   valid: boolean;
   errors: string[];
 }
 
-type ModalType = 'addBook' | 'editBook' | 'addGenre' | 'bulkImport' | 'validation' | null;
+type ModalType = 'addGenre' | 'validation' | 'editBook' | null;
 
 // ============================================================================
 // MAIN COMPONENT
@@ -39,26 +49,35 @@ type ModalType = 'addBook' | 'editBook' | 'addGenre' | 'bulkImport' | 'validatio
 
 export default function BookRegistryManager() {
   const [registry, setRegistry] = useState<BookRegistry | null>(null);
+  const [genreFiles, setGenreFiles] = useState<string[]>([]);
+  const [selectedFile, setSelectedFile] = useState<string>('');
+  const [scannedBooks, setScannedBooks] = useState<ScannedBook[]>([]);
   const [loading, setLoading] = useState(true);
+  const [scanning, setScanning] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
-  const [selectedGenre, setSelectedGenre] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [editingBook, setEditingBook] = useState<{ id: string; book: BookEntry } | null>(null);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+  const [editingBook, setEditingBook] = useState<{ id: string; book: BookEntry } | null>(null);
+  const [selectedGenreFilter, setSelectedGenreFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // Load registry data
-  const loadRegistry = useCallback(async () => {
+  // Load registry and genre files
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/book-registry');
-      const result = await response.json();
 
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to load registry');
-      }
+      // Load registry
+      const registryRes = await fetch('/api/book-registry');
+      const registryData = await registryRes.json();
+      if (!registryData.success) throw new Error(registryData.error);
+      setRegistry(registryData.registry);
 
-      setRegistry(result.registry);
+      // Load genre files
+      const filesRes = await fetch('/api/book-registry?action=genreFiles');
+      const filesData = await filesRes.json();
+      if (!filesData.success) throw new Error(filesData.error);
+      setGenreFiles(filesData.genreFiles);
+
     } catch (error) {
       showMessage('error', (error as Error).message);
     } finally {
@@ -72,9 +91,62 @@ export default function BookRegistryManager() {
     setTimeout(() => setMessage(null), 4000);
   };
 
+  // Scan selected genre file
+  const scanFile = async () => {
+    if (!selectedFile) return;
+
+    try {
+      setScanning(true);
+      const response = await fetch(`/api/book-registry?action=scan&file=${encodeURIComponent(selectedFile)}`);
+      const data = await response.json();
+
+      if (!data.success) throw new Error(data.error);
+
+      setScannedBooks(data.books);
+      showMessage('success', `Found ${data.books.length} books in file`);
+    } catch (error) {
+      showMessage('error', (error as Error).message);
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  // Sync scanned books to registry
+  const syncToRegistry = async (booksToSync: ScannedBook[]) => {
+    try {
+      const response = await fetch('/api/book-registry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'sync',
+          data: { books: booksToSync }
+        })
+      });
+
+      const result = await response.json();
+      if (!result.success) throw new Error(result.error);
+
+      const messages = [];
+      if (result.totalAdded > 0) messages.push(`${result.totalAdded} added`);
+      if (result.totalUpdated > 0) messages.push(`${result.totalUpdated} updated`);
+      if (result.totalErrors > 0) messages.push(`${result.totalErrors} errors`);
+
+      showMessage(result.totalErrors > 0 ? 'error' : 'success', messages.join(', ') || 'No changes needed');
+
+      // Reload data
+      await loadData();
+      // Re-scan to update status
+      if (selectedFile) {
+        await scanFile();
+      }
+    } catch (error) {
+      showMessage('error', (error as Error).message);
+    }
+  };
+
   // Delete book
   const deleteBook = async (bookId: string, bookTitle: string) => {
-    if (!confirm(`Are you sure you want to delete "${bookTitle}" (${bookId})?`)) return;
+    if (!confirm(`Are you sure you want to delete "${bookTitle}" (${bookId}) from the registry?`)) return;
 
     try {
       const response = await fetch(`/api/book-registry?bookId=${encodeURIComponent(bookId)}`, {
@@ -82,13 +154,10 @@ export default function BookRegistryManager() {
       });
 
       const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to delete book');
-      }
+      if (!result.success) throw new Error(result.error);
 
       showMessage('success', `Deleted ${bookTitle}`);
-      await loadRegistry();
+      await loadData();
     } catch (error) {
       showMessage('error', (error as Error).message);
     }
@@ -100,9 +169,7 @@ export default function BookRegistryManager() {
       const response = await fetch('/api/book-registry?action=validate');
       const result = await response.json();
 
-      if (!result.success) {
-        throw new Error(result.error || 'Validation failed');
-      }
+      if (!result.success) throw new Error(result.error);
 
       setValidationResult({ valid: result.valid, errors: result.errors });
       setActiveModal('validation');
@@ -113,21 +180,20 @@ export default function BookRegistryManager() {
 
   // Initial load
   useEffect(() => {
-    loadRegistry();
-  }, [loadRegistry]);
+    loadData();
+  }, [loadData]);
 
-  // Filter books
+  // Filter registry books for display
   const filteredBooks = registry
     ? Object.entries(registry.books)
         .filter(([id, book]) => {
-          const matchesGenre = selectedGenre === 'all' || book.genre === selectedGenre;
+          const matchesGenre = selectedGenreFilter === 'all' || book.genre === selectedGenreFilter;
           const matchesSearch = searchTerm === '' ||
             book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             id.toLowerCase().includes(searchTerm.toLowerCase());
           return matchesGenre && matchesSearch;
         })
         .sort((a, b) => {
-          // Sort by genre, then by order
           if (a[1].genre !== b[1].genre) {
             return a[1].genre.localeCompare(b[1].genre);
           }
@@ -135,7 +201,7 @@ export default function BookRegistryManager() {
         })
     : [];
 
-  // Group books by genre for display
+  // Group books by genre
   const booksByGenre: Record<string, Array<[string, BookEntry]>> = {};
   filteredBooks.forEach(([id, book]) => {
     if (!booksByGenre[book.genre]) {
@@ -147,6 +213,7 @@ export default function BookRegistryManager() {
   // Stats
   const totalBooks = registry ? Object.keys(registry.books).length : 0;
   const totalGenres = registry ? Object.keys(registry.genres).length : 0;
+  const booksNeedingSync = scannedBooks.filter(b => b.needsUpdate).length;
 
   return (
     <>
@@ -167,13 +234,6 @@ export default function BookRegistryManager() {
 
             <div className="flex gap-4 items-center flex-wrap">
               <button
-                onClick={() => setActiveModal('addBook')}
-                className="px-4 py-2 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded hover:bg-[var(--accent-light)] transition-all font-semibold"
-              >
-                + Add Book
-              </button>
-
-              <button
                 onClick={() => setActiveModal('addGenre')}
                 className="px-4 py-2 bg-[var(--primary-light)] text-white rounded hover:bg-[var(--primary-lighter)] transition-all font-semibold"
               >
@@ -181,21 +241,14 @@ export default function BookRegistryManager() {
               </button>
 
               <button
-                onClick={() => setActiveModal('bulkImport')}
+                onClick={validateRegistry}
                 className="px-4 py-2 bg-[var(--accent-dark)] text-white rounded hover:bg-[var(--accent-main)] transition-all font-semibold"
               >
-                Bulk Import
+                Validate Registry
               </button>
 
               <button
-                onClick={validateRegistry}
-                className="px-4 py-2 bg-[var(--primary-lighter)] text-white rounded hover:bg-[var(--primary-light)] transition-all font-semibold"
-              >
-                Validate
-              </button>
-
-              <button
-                onClick={loadRegistry}
+                onClick={loadData}
                 className="px-4 py-2 bg-[var(--neutral-medium)] text-white rounded hover:bg-[var(--neutral-dark)] transition-all font-semibold"
               >
                 Refresh
@@ -209,12 +262,108 @@ export default function BookRegistryManager() {
             </div>
           </header>
 
+          {/* Scan Genre File Section */}
+          <section className="mb-6 bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--accent-main)] p-4">
+            <h2 className="text-xl font-bold text-[var(--text-light)] mb-4">Scan Genre File</h2>
+            <p className="text-[var(--text-medium)] text-sm mb-4">
+              Select a genre file to scan for books. After scanning, you can sync new or changed books to the registry.
+            </p>
+
+            <div className="flex gap-4 items-center flex-wrap">
+              <select
+                value={selectedFile}
+                onChange={(e) => {
+                  setSelectedFile(e.target.value);
+                  setScannedBooks([]);
+                }}
+                className="flex-1 min-w-[200px] px-4 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] outline-none"
+              >
+                <option value="">Select a genre file...</option>
+                {genreFiles.map(file => (
+                  <option key={file} value={file}>{file}</option>
+                ))}
+              </select>
+
+              <button
+                onClick={scanFile}
+                disabled={!selectedFile || scanning}
+                className="px-6 py-2 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded hover:bg-[var(--accent-light)] transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {scanning ? 'Scanning...' : 'Scan File'}
+              </button>
+            </div>
+
+            {/* Scan Results */}
+            {scannedBooks.length > 0 && (
+              <div className="mt-4">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-semibold text-[var(--text-light)]">
+                    Scan Results ({scannedBooks.length} books found)
+                  </h3>
+                  {booksNeedingSync > 0 && (
+                    <button
+                      onClick={() => syncToRegistry(scannedBooks.filter(b => b.needsUpdate))}
+                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-all font-semibold"
+                    >
+                      Sync {booksNeedingSync} Book{booksNeedingSync !== 1 ? 's' : ''} to Registry
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {scannedBooks.map((book, index) => (
+                    <div
+                      key={index}
+                      className={`p-3 rounded border ${
+                        book.inRegistry && !book.needsUpdate
+                          ? 'bg-green-900 bg-opacity-20 border-green-600'
+                          : book.inRegistry && book.needsUpdate
+                          ? 'bg-yellow-900 bg-opacity-20 border-yellow-600'
+                          : 'bg-blue-900 bg-opacity-20 border-blue-600'
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="font-semibold text-[var(--text-light)]">{book.title}</span>
+                          <span className="text-[var(--text-medium)] text-sm ml-3">
+                            {book.parts} parts • {book.genre}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {book.inRegistry && !book.needsUpdate && (
+                            <span className="text-green-400 text-sm">✓ In sync ({book.registryId})</span>
+                          )}
+                          {book.inRegistry && book.needsUpdate && (
+                            <span className="text-yellow-400 text-sm">
+                              ⚠ Parts changed: {book.registryParts} → {book.parts}
+                            </span>
+                          )}
+                          {!book.inRegistry && (
+                            <span className="text-blue-400 text-sm">+ New book</span>
+                          )}
+                          {book.needsUpdate && (
+                            <button
+                              onClick={() => syncToRegistry([book])}
+                              className="px-3 py-1 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded text-sm font-semibold hover:bg-[var(--accent-light)] transition-all"
+                            >
+                              Sync
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+
           {/* Stats & Filters */}
           <div className="mb-6 bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-4">
             <div className="flex gap-6 items-center flex-wrap">
               <div className="text-[var(--text-light)]">
                 <span className="text-2xl font-bold text-[var(--accent-main)]">{totalBooks}</span>
-                <span className="ml-2">Books</span>
+                <span className="ml-2">Books in Registry</span>
               </div>
               <div className="text-[var(--text-light)]">
                 <span className="text-2xl font-bold text-[var(--accent-main)]">{totalGenres}</span>
@@ -232,8 +381,8 @@ export default function BookRegistryManager() {
               />
 
               <select
-                value={selectedGenre}
-                onChange={(e) => setSelectedGenre(e.target.value)}
+                value={selectedGenreFilter}
+                onChange={(e) => setSelectedGenreFilter(e.target.value)}
                 className="px-4 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] outline-none"
               >
                 <option value="all">All Genres</option>
@@ -251,7 +400,7 @@ export default function BookRegistryManager() {
             </div>
           )}
 
-          {/* Books List */}
+          {/* Registry Books */}
           {!loading && registry && (
             <div className="space-y-6">
               {Object.entries(booksByGenre).map(([genre, books]) => (
@@ -324,14 +473,13 @@ export default function BookRegistryManager() {
           )}
 
           {/* Modals */}
-          {activeModal === 'addBook' && registry && (
-            <AddBookModal
-              genres={registry.genres}
+          {activeModal === 'addGenre' && (
+            <AddGenreModal
               onClose={() => setActiveModal(null)}
               onSuccess={() => {
                 setActiveModal(null);
-                loadRegistry();
-                showMessage('success', 'Book added successfully!');
+                loadData();
+                showMessage('success', 'Genre added successfully!');
               }}
               onError={(error) => showMessage('error', error)}
             />
@@ -348,37 +496,8 @@ export default function BookRegistryManager() {
               onSuccess={() => {
                 setActiveModal(null);
                 setEditingBook(null);
-                loadRegistry();
+                loadData();
                 showMessage('success', 'Book updated successfully!');
-              }}
-              onError={(error) => showMessage('error', error)}
-            />
-          )}
-
-          {activeModal === 'addGenre' && (
-            <AddGenreModal
-              onClose={() => setActiveModal(null)}
-              onSuccess={() => {
-                setActiveModal(null);
-                loadRegistry();
-                showMessage('success', 'Genre added successfully!');
-              }}
-              onError={(error) => showMessage('error', error)}
-            />
-          )}
-
-          {activeModal === 'bulkImport' && registry && (
-            <BulkImportModal
-              genres={registry.genres}
-              onClose={() => setActiveModal(null)}
-              onSuccess={(added, errors) => {
-                setActiveModal(null);
-                loadRegistry();
-                if (errors > 0) {
-                  showMessage('error', `Added ${added} books, ${errors} errors`);
-                } else {
-                  showMessage('success', `Added ${added} books successfully!`);
-                }
               }}
               onError={(error) => showMessage('error', error)}
             />
@@ -403,33 +522,18 @@ export default function BookRegistryManager() {
 // MODAL COMPONENTS
 // ============================================================================
 
-function AddBookModal({ genres, onClose, onSuccess, onError }: {
-  genres: Record<string, GenreEntry>;
+function AddGenreModal({ onClose, onSuccess, onError }: {
   onClose: () => void;
   onSuccess: () => void;
   onError: (error: string) => void;
 }) {
-  const [title, setTitle] = useState('');
-  const [genre, setGenre] = useState(Object.keys(genres)[0] || '');
-  const [parts, setParts] = useState('5');
-  const [nextId, setNextId] = useState('');
-
-  // Fetch next ID when genre changes
-  useEffect(() => {
-    if (genre) {
-      fetch(`/api/book-registry?action=nextId&genre=${encodeURIComponent(genre)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            setNextId(data.nextId);
-          }
-        });
-    }
-  }, [genre]);
+  const [id, setId] = useState('');
+  const [name, setName] = useState('');
+  const [prefix, setPrefix] = useState('');
 
   const handleCreate = async () => {
-    if (!title.trim()) {
-      onError('Title is required');
+    if (!id.trim() || !name.trim() || !prefix.trim()) {
+      onError('All fields are required');
       return;
     }
 
@@ -438,15 +542,15 @@ function AddBookModal({ genres, onClose, onSuccess, onError }: {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: 'book',
-          data: { title: title.trim(), genre, parts: Number(parts) }
+          action: 'addGenre',
+          data: { id: id.trim(), name: name.trim(), prefix: prefix.trim().toUpperCase() }
         })
       });
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || 'Failed to create book');
+        throw new Error(result.error || 'Failed to create genre');
       }
 
       onSuccess();
@@ -459,56 +563,52 @@ function AddBookModal({ genres, onClose, onSuccess, onError }: {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-[var(--primary-medium)] rounded-lg shadow-xl max-w-md w-full border border-[var(--primary-light)]">
         <div className="p-4 border-b border-[var(--primary-light)] flex justify-between items-center">
-          <h2 className="text-xl font-bold text-[var(--text-light)]">Add New Book</h2>
+          <h2 className="text-xl font-bold text-[var(--text-light)]">Add New Genre</h2>
           <button onClick={onClose} className="text-[var(--text-medium)] hover:text-[var(--text-light)] text-2xl">&times;</button>
         </div>
         <div className="p-4 space-y-4">
           <div>
-            <label className="block font-semibold mb-2 text-[var(--text-light)]">Genre:</label>
-            <select
-              value={genre}
-              onChange={(e) => setGenre(e.target.value)}
-              className="w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] outline-none"
-            >
-              {Object.entries(genres).map(([id, g]) => (
-                <option key={id} value={id}>{g.name} ({g.prefix})</option>
-              ))}
-            </select>
-            {nextId && (
-              <p className="text-sm text-[var(--text-medium)] mt-1">
-                Next ID: <span className="font-mono text-[var(--accent-light)]">{nextId}</span>
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block font-semibold mb-2 text-[var(--text-light)]">Book Title:</label>
+            <label className="block font-semibold mb-2 text-[var(--text-light)]">Genre ID:</label>
             <input
               type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter book title..."
+              value={id}
+              onChange={(e) => setId(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
+              placeholder="e.g., fantasy"
               className="w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] outline-none"
             />
           </div>
 
           <div>
-            <label className="block font-semibold mb-2 text-[var(--text-light)]">Number of Parts:</label>
+            <label className="block font-semibold mb-2 text-[var(--text-light)]">Display Name:</label>
             <input
-              type="number"
-              value={parts}
-              onChange={(e) => setParts(e.target.value)}
-              min="1"
-              max="20"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g., Fantasy & Magic"
               className="w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] outline-none"
             />
+          </div>
+
+          <div>
+            <label className="block font-semibold mb-2 text-[var(--text-light)]">ID Prefix:</label>
+            <input
+              type="text"
+              value={prefix}
+              onChange={(e) => setPrefix(e.target.value.toUpperCase())}
+              placeholder="e.g., F"
+              maxLength={2}
+              className="w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] outline-none"
+            />
+            <p className="text-sm text-[var(--text-medium)] mt-1">
+              Book IDs will be: {prefix || 'X'}001, {prefix || 'X'}002, etc.
+            </p>
           </div>
 
           <button
             onClick={handleCreate}
             className="w-full px-4 py-2 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded hover:bg-[var(--accent-light)] transition-all font-semibold"
           >
-            Add Book
+            Add Genre
           </button>
         </div>
       </div>
@@ -614,212 +714,6 @@ function EditBookModal({ bookId, book, onClose, onSuccess, onError }: {
             className="w-full px-4 py-2 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded hover:bg-[var(--accent-light)] transition-all font-semibold"
           >
             Save Changes
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AddGenreModal({ onClose, onSuccess, onError }: {
-  onClose: () => void;
-  onSuccess: () => void;
-  onError: (error: string) => void;
-}) {
-  const [id, setId] = useState('');
-  const [name, setName] = useState('');
-  const [prefix, setPrefix] = useState('');
-
-  const handleCreate = async () => {
-    if (!id.trim() || !name.trim() || !prefix.trim()) {
-      onError('All fields are required');
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/book-registry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'genre',
-          data: { id: id.trim(), name: name.trim(), prefix: prefix.trim().toUpperCase() }
-        })
-      });
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to create genre');
-      }
-
-      onSuccess();
-    } catch (error) {
-      onError((error as Error).message);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-[var(--primary-medium)] rounded-lg shadow-xl max-w-md w-full border border-[var(--primary-light)]">
-        <div className="p-4 border-b border-[var(--primary-light)] flex justify-between items-center">
-          <h2 className="text-xl font-bold text-[var(--text-light)]">Add New Genre</h2>
-          <button onClick={onClose} className="text-[var(--text-medium)] hover:text-[var(--text-light)] text-2xl">&times;</button>
-        </div>
-        <div className="p-4 space-y-4">
-          <div>
-            <label className="block font-semibold mb-2 text-[var(--text-light)]">Genre ID:</label>
-            <input
-              type="text"
-              value={id}
-              onChange={(e) => setId(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
-              placeholder="e.g., fantasy"
-              className="w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block font-semibold mb-2 text-[var(--text-light)]">Display Name:</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Fantasy & Magic"
-              className="w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block font-semibold mb-2 text-[var(--text-light)]">ID Prefix:</label>
-            <input
-              type="text"
-              value={prefix}
-              onChange={(e) => setPrefix(e.target.value.toUpperCase())}
-              placeholder="e.g., F"
-              maxLength={2}
-              className="w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] outline-none"
-            />
-            <p className="text-sm text-[var(--text-medium)] mt-1">
-              Book IDs will be: {prefix || 'X'}001, {prefix || 'X'}002, etc.
-            </p>
-          </div>
-
-          <button
-            onClick={handleCreate}
-            className="w-full px-4 py-2 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded hover:bg-[var(--accent-light)] transition-all font-semibold"
-          >
-            Add Genre
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function BulkImportModal({ genres, onClose, onSuccess, onError }: {
-  genres: Record<string, GenreEntry>;
-  onClose: () => void;
-  onSuccess: (added: number, errors: number) => void;
-  onError: (error: string) => void;
-}) {
-  const [jsonInput, setJsonInput] = useState('');
-  const [importErrors, setImportErrors] = useState<string[]>([]);
-
-  const exampleJson = JSON.stringify([
-    { title: "Book Title 1", genre: "nature", parts: 5 },
-    { title: "Book Title 2", genre: "emotions", parts: 4 }
-  ], null, 2);
-
-  const handleImport = async () => {
-    try {
-      const books = JSON.parse(jsonInput);
-
-      if (!Array.isArray(books)) {
-        onError('Input must be a JSON array');
-        return;
-      }
-
-      const response = await fetch('/api/book-registry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'bulk',
-          data: { books }
-        })
-      });
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error || 'Import failed');
-      }
-
-      if (result.errors && result.errors.length > 0) {
-        setImportErrors(result.errors);
-      }
-
-      onSuccess(result.totalAdded, result.totalErrors);
-    } catch (error) {
-      if (error instanceof SyntaxError) {
-        onError('Invalid JSON format');
-      } else {
-        onError((error as Error).message);
-      }
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-[var(--primary-medium)] rounded-lg shadow-xl max-w-2xl w-full border border-[var(--primary-light)] max-h-[80vh] overflow-hidden flex flex-col">
-        <div className="p-4 border-b border-[var(--primary-light)] flex justify-between items-center">
-          <h2 className="text-xl font-bold text-[var(--text-light)]">Bulk Import Books</h2>
-          <button onClick={onClose} className="text-[var(--text-medium)] hover:text-[var(--text-light)] text-2xl">&times;</button>
-        </div>
-        <div className="p-4 space-y-4 overflow-y-auto flex-1">
-          <div>
-            <label className="block font-semibold mb-2 text-[var(--text-light)]">Available Genres:</label>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(genres).map(([id, g]) => (
-                <span key={id} className="px-2 py-1 bg-[var(--primary-dark)] rounded text-sm text-[var(--text-medium)]">
-                  {id} ({g.prefix})
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="block font-semibold mb-2 text-[var(--text-light)]">JSON Array of Books:</label>
-            <textarea
-              value={jsonInput}
-              onChange={(e) => setJsonInput(e.target.value)}
-              placeholder={exampleJson}
-              rows={10}
-              className="w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] outline-none font-mono text-sm"
-            />
-          </div>
-
-          <div className="text-sm text-[var(--text-medium)]">
-            <p className="font-semibold mb-1">Expected format:</p>
-            <pre className="bg-[var(--primary-dark)] p-2 rounded text-xs overflow-x-auto">
-              {exampleJson}
-            </pre>
-          </div>
-
-          {importErrors.length > 0 && (
-            <div className="bg-red-900 bg-opacity-30 border border-red-500 rounded p-3">
-              <p className="font-semibold text-red-400 mb-2">Import Errors:</p>
-              <ul className="text-sm text-red-300 list-disc list-inside">
-                {importErrors.map((err, i) => (
-                  <li key={i}>{err}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <button
-            onClick={handleImport}
-            className="w-full px-4 py-2 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded hover:bg-[var(--accent-light)] transition-all font-semibold"
-          >
-            Import Books
           </button>
         </div>
       </div>
