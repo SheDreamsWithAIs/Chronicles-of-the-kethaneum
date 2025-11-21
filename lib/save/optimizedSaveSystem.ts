@@ -153,25 +153,40 @@ export async function saveOptimizedProgress(state: GameState): Promise<void> {
     await bookRegistry.loadRegistry();
 
     // Build discovered books list (as IDs)
-    const discoveredIds: string[] = [];
+    // Use a Set to avoid duplicates from both sources
+    const discoveredTitles = new Set<string>();
     const progressMap: { [bookId: string]: number } = {};
 
-    if (state.discoveredBooks) {
+    // Source 1: discoveredBooks Set
+    if (state.discoveredBooks && state.discoveredBooks instanceof Set) {
       for (const title of state.discoveredBooks) {
-        const bookId = bookRegistry.getBookIdByTitleSync(title);
-        if (bookId) {
-          discoveredIds.push(bookId);
+        discoveredTitles.add(title);
+      }
+    }
 
-          // Convert progress to bitmap
-          const bookData = state.books[title];
-          if (Array.isArray(bookData)) {
-            progressMap[bookId] = encodeParts(bookData);
-          } else if (bookData && typeof bookData === 'object' && bookData.complete) {
-            // Book marked complete - get total parts and set all bits
-            const book = bookRegistry.getBookSync(bookId);
-            if (book) {
-              progressMap[bookId] = (1 << book.parts) - 1;
-            }
+    // Source 2: books object (fallback for when discoveredBooks is out of sync)
+    if (state.books) {
+      for (const title of Object.keys(state.books)) {
+        discoveredTitles.add(title);
+      }
+    }
+
+    // Convert titles to IDs and build progress map
+    const discoveredIds: string[] = [];
+    for (const title of discoveredTitles) {
+      const bookId = bookRegistry.getBookIdByTitleSync(title);
+      if (bookId) {
+        discoveredIds.push(bookId);
+
+        // Convert progress to bitmap
+        const bookData = state.books[title];
+        if (Array.isArray(bookData)) {
+          progressMap[bookId] = encodeParts(bookData);
+        } else if (bookData && typeof bookData === 'object' && bookData.complete) {
+          // Book marked complete - get total parts and set all bits
+          const book = bookRegistry.getBookSync(bookId);
+          if (book) {
+            progressMap[bookId] = (1 << book.parts) - 1;
           }
         }
       }
