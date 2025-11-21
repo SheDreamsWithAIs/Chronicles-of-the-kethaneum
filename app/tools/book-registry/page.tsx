@@ -421,7 +421,29 @@ export default function BookRegistryManager() {
                     </span>
                   </h2>
 
-                  <div className="overflow-x-auto">
+                  <div
+                    className={`overflow-x-auto ${books.length > 10 ? 'max-h-[500px] overflow-y-auto' : ''}`}
+                    style={books.length > 10 ? {
+                      scrollbarWidth: 'thin',
+                      scrollbarColor: 'var(--accent-main) var(--primary-dark)'
+                    } : undefined}
+                  >
+                    <style jsx>{`
+                      div::-webkit-scrollbar {
+                        width: 10px;
+                      }
+                      div::-webkit-scrollbar-track {
+                        background: var(--primary-dark);
+                        border-radius: 5px;
+                      }
+                      div::-webkit-scrollbar-thumb {
+                        background: linear-gradient(135deg, var(--accent-main), var(--accent-dark));
+                        border-radius: 5px;
+                      }
+                      div::-webkit-scrollbar-thumb:hover {
+                        background: linear-gradient(135deg, var(--accent-light), var(--accent-main));
+                      }
+                    `}</style>
                     <table className="w-full">
                       <thead>
                         <tr className="border-b border-[var(--primary-light)]">
