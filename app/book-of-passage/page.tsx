@@ -135,7 +135,7 @@ export default function BookOfPassageScreen() {
 
   // Filter and sort books
   const filteredBooks = useMemo(() => {
-    let filtered = processedBooks;
+    let filtered = [...processedBooks]; // Create copy to avoid mutation
 
     // Genre filter
     if (filterGenre !== 'all') {
@@ -150,24 +150,26 @@ export default function BookOfPassageScreen() {
       );
     }
 
-    // Sort
-    filtered.sort((a, b) => {
+    // Sort - create new sorted array
+    return filtered.sort((a, b) => {
       switch (sortBy) {
         case 'title':
           return a.title.localeCompare(b.title);
         case 'progress':
-          return b.progressPercent - a.progressPercent;
+          // Sort by progress descending, then by title for ties
+          if (b.progressPercent !== a.progressPercent) {
+            return b.progressPercent - a.progressPercent;
+          }
+          return a.title.localeCompare(b.title);
         case 'genre':
-          return a.genre.localeCompare(b.genre) || a.title.localeCompare(b.title);
-        case 'recent':
-          // For now, reverse order (most recently added last in set)
-          return 0;
+          // Sort by genre, then by title within genre
+          const genreCompare = a.genre.localeCompare(b.genre);
+          if (genreCompare !== 0) return genreCompare;
+          return a.title.localeCompare(b.title);
         default:
-          return 0;
+          return a.title.localeCompare(b.title);
       }
     });
-
-    return filtered;
   }, [processedBooks, filterGenre, searchQuery, sortBy]);
 
   // Pagination
@@ -206,6 +208,12 @@ export default function BookOfPassageScreen() {
   const handleNextPage = useCallback(() => {
     setCurrentPage(p => Math.min(totalPages, p + 1));
   }, [totalPages]);
+
+  const handleReadStory = useCallback((bookId: string, bookTitle: string) => {
+    // TODO: Navigate to story reader page when implemented
+    // For now, navigate to a story page with the book info
+    router.push(`/story/${encodeURIComponent(bookId)}?title=${encodeURIComponent(bookTitle)}`);
+  }, [router]);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -363,6 +371,19 @@ export default function BookOfPassageScreen() {
                                     {idx + 1}
                                   </span>
                                 ))}
+                              </div>
+                            )}
+
+                            {/* Read Story Button - only show if there's progress */}
+                            {book.completedParts > 0 && (
+                              <div className={styles.bookActions}>
+                                <button
+                                  className={styles.readStoryButton}
+                                  onClick={() => handleReadStory(book.id, book.title)}
+                                  aria-label={`Read story for ${book.title}`}
+                                >
+                                  Read Story
+                                </button>
                               </div>
                             )}
                           </div>
