@@ -41,7 +41,16 @@ interface ValidationResult {
   errors: string[];
 }
 
-type ModalType = 'addGenre' | 'validation' | 'editBook' | null;
+interface ReorderConfirmation {
+  bookId: string;
+  bookTitle: string;
+  oldOrder: number;
+  newOrder: number;
+  affectedBooks: Array<{ id: string; title: string; oldOrder: number; newOrder: number }>;
+  pendingUpdates: { title: string; parts: number };
+}
+
+type ModalType = 'validation' | 'editBook' | 'reorderConfirm' | null;
 
 // ============================================================================
 // MAIN COMPONENT
@@ -58,6 +67,7 @@ export default function BookRegistryManager() {
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [editingBook, setEditingBook] = useState<{ id: string; book: BookEntry } | null>(null);
+  const [reorderConfirmation, setReorderConfirmation] = useState<ReorderConfirmation | null>(null);
   const [selectedGenreFilter, setSelectedGenreFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -233,13 +243,6 @@ export default function BookRegistryManager() {
             </div>
 
             <div className="flex gap-4 items-center flex-wrap">
-              <button
-                onClick={() => setActiveModal('addGenre')}
-                className="px-4 py-2 bg-[var(--primary-light)] text-white rounded hover:bg-[var(--primary-lighter)] transition-all font-semibold"
-              >
-                + Add Genre
-              </button>
-
               <button
                 onClick={validateRegistry}
                 className="px-4 py-2 bg-[var(--accent-dark)] text-white rounded hover:bg-[var(--accent-main)] transition-all font-semibold"
@@ -473,22 +476,11 @@ export default function BookRegistryManager() {
           )}
 
           {/* Modals */}
-          {activeModal === 'addGenre' && (
-            <AddGenreModal
-              onClose={() => setActiveModal(null)}
-              onSuccess={() => {
-                setActiveModal(null);
-                loadData();
-                showMessage('success', 'Genre added successfully!');
-              }}
-              onError={(error) => showMessage('error', error)}
-            />
-          )}
-
-          {activeModal === 'editBook' && editingBook && (
+          {activeModal === 'editBook' && editingBook && registry && (
             <EditBookModal
               bookId={editingBook.id}
               book={editingBook.book}
+              maxOrder={Object.values(registry.books).filter(b => b.genre === editingBook.book.genre).length}
               onClose={() => {
                 setActiveModal(null);
                 setEditingBook(null);
@@ -499,7 +491,48 @@ export default function BookRegistryManager() {
                 loadData();
                 showMessage('success', 'Book updated successfully!');
               }}
+              onReorderConfirm={(confirmation) => {
+                setReorderConfirmation(confirmation);
+                setActiveModal('reorderConfirm');
+              }}
               onError={(error) => showMessage('error', error)}
+            />
+          )}
+
+          {activeModal === 'reorderConfirm' && reorderConfirmation && (
+            <ReorderConfirmModal
+              confirmation={reorderConfirmation}
+              onClose={() => {
+                setActiveModal('editBook');
+                setReorderConfirmation(null);
+              }}
+              onConfirm={async () => {
+                try {
+                  const response = await fetch('/api/book-registry', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      bookId: reorderConfirmation.bookId,
+                      updates: {
+                        title: reorderConfirmation.pendingUpdates.title,
+                        parts: reorderConfirmation.pendingUpdates.parts,
+                        order: reorderConfirmation.newOrder
+                      },
+                      confirmReorder: true
+                    })
+                  });
+                  const result = await response.json();
+                  if (!result.success) throw new Error(result.error);
+
+                  setActiveModal(null);
+                  setReorderConfirmation(null);
+                  setEditingBook(null);
+                  loadData();
+                  showMessage('success', 'Book order updated successfully!');
+                } catch (error) {
+                  showMessage('error', (error as Error).message);
+                }
+              }}
             />
           )}
 
@@ -522,105 +555,13 @@ export default function BookRegistryManager() {
 // MODAL COMPONENTS
 // ============================================================================
 
-function AddGenreModal({ onClose, onSuccess, onError }: {
-  onClose: () => void;
-  onSuccess: () => void;
-  onError: (error: string) => void;
-}) {
-  const [id, setId] = useState('');
-  const [name, setName] = useState('');
-  const [prefix, setPrefix] = useState('');
-
-  const handleCreate = async () => {
-    if (!id.trim() || !name.trim() || !prefix.trim()) {
-      onError('All fields are required');
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/book-registry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'addGenre',
-          data: { id: id.trim(), name: name.trim(), prefix: prefix.trim().toUpperCase() }
-        })
-      });
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to create genre');
-      }
-
-      onSuccess();
-    } catch (error) {
-      onError((error as Error).message);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-[var(--primary-medium)] rounded-lg shadow-xl max-w-md w-full border border-[var(--primary-light)]">
-        <div className="p-4 border-b border-[var(--primary-light)] flex justify-between items-center">
-          <h2 className="text-xl font-bold text-[var(--text-light)]">Add New Genre</h2>
-          <button onClick={onClose} className="text-[var(--text-medium)] hover:text-[var(--text-light)] text-2xl">&times;</button>
-        </div>
-        <div className="p-4 space-y-4">
-          <div>
-            <label className="block font-semibold mb-2 text-[var(--text-light)]">Genre ID:</label>
-            <input
-              type="text"
-              value={id}
-              onChange={(e) => setId(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
-              placeholder="e.g., fantasy"
-              className="w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block font-semibold mb-2 text-[var(--text-light)]">Display Name:</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Fantasy & Magic"
-              className="w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block font-semibold mb-2 text-[var(--text-light)]">ID Prefix:</label>
-            <input
-              type="text"
-              value={prefix}
-              onChange={(e) => setPrefix(e.target.value.toUpperCase())}
-              placeholder="e.g., F"
-              maxLength={2}
-              className="w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] outline-none"
-            />
-            <p className="text-sm text-[var(--text-medium)] mt-1">
-              Book IDs will be: {prefix || 'X'}001, {prefix || 'X'}002, etc.
-            </p>
-          </div>
-
-          <button
-            onClick={handleCreate}
-            className="w-full px-4 py-2 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded hover:bg-[var(--accent-light)] transition-all font-semibold"
-          >
-            Add Genre
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function EditBookModal({ bookId, book, onClose, onSuccess, onError }: {
+function EditBookModal({ bookId, book, maxOrder, onClose, onSuccess, onReorderConfirm, onError }: {
   bookId: string;
   book: BookEntry;
+  maxOrder: number;
   onClose: () => void;
   onSuccess: () => void;
+  onReorderConfirm: (confirmation: ReorderConfirmation) => void;
   onError: (error: string) => void;
 }) {
   const [title, setTitle] = useState(book.title);
@@ -633,6 +574,12 @@ function EditBookModal({ bookId, book, onClose, onSuccess, onError }: {
       return;
     }
 
+    const newOrder = Number(order);
+    if (newOrder < 1 || newOrder > maxOrder) {
+      onError(`Order must be between 1 and ${maxOrder}`);
+      return;
+    }
+
     try {
       const response = await fetch('/api/book-registry', {
         method: 'PUT',
@@ -642,7 +589,7 @@ function EditBookModal({ bookId, book, onClose, onSuccess, onError }: {
           updates: {
             title: title.trim(),
             parts: Number(parts),
-            order: Number(order)
+            order: newOrder
           }
         })
       });
@@ -651,6 +598,19 @@ function EditBookModal({ bookId, book, onClose, onSuccess, onError }: {
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to update book');
+      }
+
+      // If reorder confirmation needed, show that modal
+      if (result.requiresConfirmation) {
+        onReorderConfirm({
+          bookId: result.bookId,
+          bookTitle: result.bookTitle,
+          oldOrder: result.oldOrder,
+          newOrder: result.newOrder,
+          affectedBooks: result.affectedBooks,
+          pendingUpdates: { title: title.trim(), parts: Number(parts) }
+        });
+        return;
       }
 
       onSuccess();
@@ -704,8 +664,10 @@ function EditBookModal({ bookId, book, onClose, onSuccess, onError }: {
                 value={order}
                 onChange={(e) => setOrder(e.target.value)}
                 min="1"
+                max={maxOrder}
                 className="w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border border-[var(--primary-light)] rounded focus:border-[var(--accent-light)] outline-none"
               />
+              <p className="text-xs text-[var(--text-medium)] mt-1">Max: {maxOrder}</p>
             </div>
           </div>
 
@@ -715,6 +677,64 @@ function EditBookModal({ bookId, book, onClose, onSuccess, onError }: {
           >
             Save Changes
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ReorderConfirmModal({ confirmation, onClose, onConfirm }: {
+  confirmation: ReorderConfirmation;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  const movingDown = confirmation.newOrder > confirmation.oldOrder;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-[var(--primary-medium)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--primary-light)]">
+        <div className="p-4 border-b border-[var(--primary-light)] flex justify-between items-center">
+          <h2 className="text-xl font-bold text-[var(--text-light)]">Confirm Reorder</h2>
+          <button onClick={onClose} className="text-[var(--text-medium)] hover:text-[var(--text-light)] text-2xl">&times;</button>
+        </div>
+        <div className="p-4 space-y-4">
+          <p className="text-[var(--text-light)]">
+            Moving <strong>"{confirmation.bookTitle}"</strong> from position{' '}
+            <strong>{confirmation.oldOrder}</strong> to <strong>{confirmation.newOrder}</strong>.
+          </p>
+
+          {confirmation.affectedBooks.length > 0 && (
+            <div className="bg-[var(--primary-dark)] rounded p-3">
+              <p className="text-[var(--text-medium)] text-sm mb-2">
+                The following books will be shifted {movingDown ? 'up' : 'down'}:
+              </p>
+              <ul className="space-y-1">
+                {confirmation.affectedBooks.map((book) => (
+                  <li key={book.id} className="text-[var(--text-light)] text-sm flex justify-between">
+                    <span>{book.title}</span>
+                    <span className="text-[var(--text-medium)]">
+                      {book.oldOrder} → {book.newOrder}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="flex gap-3 pt-2">
+            <button
+              onClick={onClose}
+              className="flex-1 px-4 py-2 bg-[var(--neutral-medium)] text-white rounded hover:bg-[var(--neutral-dark)] transition-all font-semibold"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              className="flex-1 px-4 py-2 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded hover:bg-[var(--accent-light)] transition-all font-semibold"
+            >
+              Proceed
+            </button>
+          </div>
         </div>
       </div>
     </div>

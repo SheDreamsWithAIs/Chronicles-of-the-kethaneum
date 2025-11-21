@@ -84,15 +84,15 @@ export default function ToolsPage() {
                 <div className="space-y-2 text-sm text-[var(--text-light)]">
                   <div className="flex items-start">
                     <span className="mr-2">✓</span>
-                    <span>Add, edit, delete books & genres</span>
+                    <span>Scan genre files for new books</span>
                   </div>
                   <div className="flex items-start">
                     <span className="mr-2">✓</span>
-                    <span>Auto-generate book IDs</span>
+                    <span>Sync changes to registry</span>
                   </div>
                   <div className="flex items-start">
                     <span className="mr-2">✓</span>
-                    <span>Bulk import & validation</span>
+                    <span>Reorder books with auto-shuffle</span>
                   </div>
                 </div>
               </div>

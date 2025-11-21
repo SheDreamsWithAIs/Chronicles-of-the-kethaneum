@@ -375,7 +375,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { bookId, updates } = body;
+    const { bookId, updates, confirmReorder } = body;
 
     if (!bookId) {
       return NextResponse.json(
@@ -394,6 +394,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const book = registry.books[bookId];
+    const genre = book.genre;
 
     if (updates.title !== undefined) {
       const existingTitle = Object.entries(registry.books)
@@ -411,8 +412,88 @@ export async function PUT(request: NextRequest) {
       book.parts = Number(updates.parts);
     }
 
+    // Handle order changes with reshuffling
     if (updates.order !== undefined) {
-      book.order = Number(updates.order);
+      const newOrder = Number(updates.order);
+      const oldOrder = book.order;
+
+      // Get all books in the same genre
+      const genreBooks = Object.entries(registry.books)
+        .filter(([, b]) => b.genre === genre)
+        .sort((a, b) => a[1].order - b[1].order);
+
+      const maxOrder = genreBooks.length;
+
+      // Validate order is within bounds
+      if (newOrder < 1 || newOrder > maxOrder) {
+        return NextResponse.json(
+          { success: false, error: `Order must be between 1 and ${maxOrder}` },
+          { status: 400 }
+        );
+      }
+
+      // If order changed, need to reshuffle
+      if (newOrder !== oldOrder) {
+        // If not confirmed, return what would happen
+        if (!confirmReorder) {
+          const affectedBooks: Array<{ id: string; title: string; oldOrder: number; newOrder: number }> = [];
+
+          if (newOrder > oldOrder) {
+            // Moving down: books between old and new shift up
+            genreBooks.forEach(([id, b]) => {
+              if (id !== bookId && b.order > oldOrder && b.order <= newOrder) {
+                affectedBooks.push({
+                  id,
+                  title: b.title,
+                  oldOrder: b.order,
+                  newOrder: b.order - 1
+                });
+              }
+            });
+          } else {
+            // Moving up: books between new and old shift down
+            genreBooks.forEach(([id, b]) => {
+              if (id !== bookId && b.order >= newOrder && b.order < oldOrder) {
+                affectedBooks.push({
+                  id,
+                  title: b.title,
+                  oldOrder: b.order,
+                  newOrder: b.order + 1
+                });
+              }
+            });
+          }
+
+          return NextResponse.json({
+            success: true,
+            requiresConfirmation: true,
+            bookId,
+            bookTitle: book.title,
+            oldOrder,
+            newOrder,
+            affectedBooks
+          });
+        }
+
+        // Confirmed - perform the reshuffle
+        if (newOrder > oldOrder) {
+          // Moving down: shift books between old and new up by 1
+          Object.entries(registry.books).forEach(([id, b]) => {
+            if (b.genre === genre && id !== bookId && b.order > oldOrder && b.order <= newOrder) {
+              b.order -= 1;
+            }
+          });
+        } else {
+          // Moving up: shift books between new and old down by 1
+          Object.entries(registry.books).forEach(([id, b]) => {
+            if (b.genre === genre && id !== bookId && b.order >= newOrder && b.order < oldOrder) {
+              b.order += 1;
+            }
+          });
+        }
+
+        book.order = newOrder;
+      }
     }
 
     await saveRegistry(registry);
