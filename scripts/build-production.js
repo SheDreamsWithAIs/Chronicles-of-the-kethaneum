@@ -5,6 +5,7 @@ const { join } = require('path');
 const DEV_DIRS = [
   { src: join(process.cwd(), 'app', 'tools'), dest: join(process.cwd(), '_dev_tools') },
   { src: join(process.cwd(), 'app', 'api', 'manifest-manager'), dest: join(process.cwd(), '_dev_api_manifest-manager') },
+  { src: join(process.cwd(), 'app', 'api', 'book-registry'), dest: join(process.cwd(), '_dev_api_book-registry') },
 ];
 
 console.log('Preparing production build...');
