@@ -300,7 +300,7 @@ export default function ContentEditorPage() {
       const filePath = selectedFile.path.replace('/data/', '');
 
       const response = await fetch('/api/manifest-manager/file', {
-        method: 'POST',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           path: filePath,
