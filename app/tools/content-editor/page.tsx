@@ -452,7 +452,7 @@ export default function ContentEditorPage() {
           <header className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-4xl font-bold text-[var(--text-light)]">Content Editor</h1>
+                <h1 className="text-4xl font-bold text-[var(--text-light)]">Game Screen Content Editor</h1>
                 <p className="text-[var(--text-medium)] mt-2">
                   Edit formatted text content for game screens
                 </p>

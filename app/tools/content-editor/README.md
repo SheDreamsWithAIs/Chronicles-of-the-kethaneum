@@ -1,4 +1,4 @@
-# Content Editor Tool
+# Game Screen Content Editor Tool
 
 A visual editor for formatted text content files used in game screens (Backstory, Story End, etc.).
 

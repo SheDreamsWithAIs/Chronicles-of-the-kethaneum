@@ -28,12 +28,12 @@ export default function StoryEndScreen() {
     });
   }, []);
 
-  const handlePlayAgain = () => {
-    router.push('/backstory');
+  const handleMainMenu = () => {
+    router.push('/');
   };
 
-  const handleReturnHome = () => {
-    router.push('/');
+  const handleReturnToLibrary = () => {
+    router.push('/library');
   };
 
   const starSymbols = ['✦', '✧', '★', '☆'];
@@ -85,11 +85,11 @@ export default function StoryEndScreen() {
             </div>
 
             <div className={styles.buttonGroup}>
-              <button className={styles.playAgainButton} onClick={handlePlayAgain} data-testid="play-again-btn">
-                Play Again
+              <button className={styles.libraryButton} onClick={handleReturnToLibrary} data-testid="return-to-library-btn">
+                Return to Library
               </button>
-              <button className={styles.homeButton} onClick={handleReturnHome} data-testid="return-home-btn">
-                Return Home
+              <button className={styles.mainMenuButton} onClick={handleMainMenu} data-testid="main-menu-btn">
+                Main Menu
               </button>
             </div>
 

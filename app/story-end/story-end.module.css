@@ -198,8 +198,8 @@
   gap: 20px;
 }
 
-.playAgainButton,
-.homeButton {
+.libraryButton,
+.mainMenuButton {
   padding: 15px 30px;
   font-family: var(--font-cinzel), serif;
   font-size: 16px;
@@ -214,14 +214,14 @@
   overflow: hidden;
 }
 
-.playAgainButton {
+.libraryButton {
   background: linear-gradient(135deg, var(--accent-main), var(--accent-dark));
   color: var(--primary-dark);
   box-shadow: var(--elevation-medium);
 }
 
-.playAgainButton::before,
-.homeButton::before {
+.libraryButton::before,
+.mainMenuButton::before {
   content: '';
   position: absolute;
   top: 0;
@@ -232,25 +232,25 @@
   transition: left 0.5s;
 }
 
-.playAgainButton:hover::before,
-.homeButton:hover::before {
+.libraryButton:hover::before,
+.mainMenuButton:hover::before {
   left: 100%;
 }
 
-.playAgainButton:hover {
+.libraryButton:hover {
   background: linear-gradient(135deg, var(--accent-light), var(--accent-main));
   transform: translateY(-2px);
   box-shadow: var(--elevation-high);
 }
 
-.homeButton {
+.mainMenuButton {
   background: transparent;
   color: var(--text-light);
   border: 2px solid var(--accent-main);
   box-shadow: none;
 }
 
-.homeButton:hover {
+.mainMenuButton:hover {
   background: rgba(230, 168, 23, 0.2);
   transform: translateY(-2px);
   border-color: var(--accent-light);
@@ -291,8 +291,8 @@
     gap: 10px;
   }
 
-  .playAgainButton,
-  .homeButton {
+  .libraryButton,
+  .mainMenuButton {
     padding: 12px 25px;
     font-size: 14px;
   }

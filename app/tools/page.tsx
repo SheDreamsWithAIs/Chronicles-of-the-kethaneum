@@ -17,12 +17,12 @@ export default function ToolsPage() {
           </header>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Content Editor Tool */}
+            {/* Game Screen Content Editor Tool */}
             <Link href="/tools/content-editor">
               <div className="bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-6 hover:bg-[var(--primary-light)] transition-all cursor-pointer h-full">
                 <div className="flex items-center mb-4">
                   <div className="text-4xl mr-4">📝</div>
-                  <h2 className="text-2xl font-bold text-[var(--text-light)]">Content Editor</h2>
+                  <h2 className="text-2xl font-bold text-[var(--text-light)]">Game Screen Content Editor</h2>
                 </div>
                 <p className="text-[var(--text-medium)] mb-4">
                   Visual editor for formatted text content used in game screens like Backstory and Story End.
