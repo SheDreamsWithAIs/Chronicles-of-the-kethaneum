@@ -240,13 +240,6 @@ export default function ContentEditorPage() {
       setTitle(data.title);
       setSelectedFile(file);
       setRawJsonContent(JSON.stringify(data, null, 2));
-
-      // Set editor content after a brief delay to ensure ref is ready
-      setTimeout(() => {
-        if (editorRef.current) {
-          editorRef.current.innerHTML = contentToHtml(data);
-        }
-      }, 0);
     } catch (error) {
       console.error('Error loading content:', error);
       const emptyContent: FormattedContent = { title: 'New Title', paragraphs: [{ segments: [{ text: '' }] }] };
@@ -254,16 +247,17 @@ export default function ContentEditorPage() {
       setTitle('New Title');
       setSelectedFile(file);
       setRawJsonContent(JSON.stringify(emptyContent, null, 2));
-
-      setTimeout(() => {
-        if (editorRef.current) {
-          editorRef.current.innerHTML = '';
-        }
-      }, 0);
     } finally {
       setIsLoading(false);
     }
   }, []);
+
+  // Populate editor with content after it renders
+  useEffect(() => {
+    if (content && !isLoading && editorRef.current) {
+      editorRef.current.innerHTML = contentToHtml(content);
+    }
+  }, [content, isLoading]);
 
   // Get current content from editor
   const getCurrentContent = useCallback((): FormattedContent => {
