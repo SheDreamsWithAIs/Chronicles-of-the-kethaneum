@@ -213,23 +213,31 @@ function htmlToContent(html: string, title: string): FormattedContent {
 // MAIN COMPONENT
 // ============================================================================
 
+const AUTOSAVE_DELAY = 2000; // 2 seconds
+
 export default function ContentEditorPage() {
   const [selectedFile, setSelectedFile] = useState<ContentFile | null>(null);
   const [content, setContent] = useState<FormattedContent | null>(null);
   const [title, setTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [showRawJson, setShowRawJson] = useState(false);
-  const [rawJsonContent, setRawJsonContent] = useState<string>('');
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error' | 'autosaved'>('idle');
+  const [currentJson, setCurrentJson] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
+  const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSavedContentRef = useRef<string>('');
 
   // Load content from file
   const loadContent = useCallback(async (file: ContentFile) => {
     setIsLoading(true);
     setSaveStatus('idle');
-    setShowRawJson(false);
+    setHasUnsavedChanges(false);
+    // Clear any pending autosave
+    if (autosaveTimeoutRef.current) {
+      clearTimeout(autosaveTimeoutRef.current);
+    }
     try {
       const response = await fetch(file.path);
       if (!response.ok) {
@@ -239,14 +247,18 @@ export default function ContentEditorPage() {
       setContent(data);
       setTitle(data.title);
       setSelectedFile(file);
-      setRawJsonContent(JSON.stringify(data, null, 2));
+      const jsonStr = JSON.stringify(data, null, 2);
+      setCurrentJson(jsonStr);
+      lastSavedContentRef.current = jsonStr;
     } catch (error) {
       console.error('Error loading content:', error);
       const emptyContent: FormattedContent = { title: 'New Title', paragraphs: [{ segments: [{ text: '' }] }] };
       setContent(emptyContent);
       setTitle('New Title');
       setSelectedFile(file);
-      setRawJsonContent(JSON.stringify(emptyContent, null, 2));
+      const jsonStr = JSON.stringify(emptyContent, null, 2);
+      setCurrentJson(jsonStr);
+      lastSavedContentRef.current = jsonStr;
     } finally {
       setIsLoading(false);
     }
@@ -268,12 +280,21 @@ export default function ContentEditorPage() {
   }, [content, title]);
 
   // Save content to file
-  const saveContent = useCallback(async () => {
+  const saveContent = useCallback(async (isAutosave = false) => {
     if (!selectedFile) return;
 
     const currentContent = getCurrentContent();
+    const jsonStr = JSON.stringify(currentContent, null, 2);
+
+    // Skip save if content hasn't changed
+    if (jsonStr === lastSavedContentRef.current) {
+      return;
+    }
+
     setIsSaving(true);
-    setSaveStatus('idle');
+    if (!isAutosave) {
+      setSaveStatus('idle');
+    }
 
     try {
       const filePath = selectedFile.path.replace('/data/', '');
@@ -283,7 +304,7 @@ export default function ContentEditorPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           path: filePath,
-          content: JSON.stringify(currentContent, null, 2),
+          content: jsonStr,
         }),
       });
 
@@ -292,8 +313,9 @@ export default function ContentEditorPage() {
       }
 
       setContent(currentContent);
-      setRawJsonContent(JSON.stringify(currentContent, null, 2));
-      setSaveStatus('success');
+      lastSavedContentRef.current = jsonStr;
+      setHasUnsavedChanges(false);
+      setSaveStatus(isAutosave ? 'autosaved' : 'success');
       setTimeout(() => setSaveStatus('idle'), 3000);
     } catch (error) {
       console.error('Error saving content:', error);
@@ -303,16 +325,63 @@ export default function ContentEditorPage() {
     }
   }, [selectedFile, getCurrentContent]);
 
+  // Update JSON preview and trigger autosave
+  const handleEditorChange = useCallback(() => {
+    if (!editorRef.current) return;
+
+    const currentContent = getCurrentContent();
+    const jsonStr = JSON.stringify(currentContent, null, 2);
+    setCurrentJson(jsonStr);
+
+    // Check if content has changed from last save
+    if (jsonStr !== lastSavedContentRef.current) {
+      setHasUnsavedChanges(true);
+
+      // Clear existing autosave timeout
+      if (autosaveTimeoutRef.current) {
+        clearTimeout(autosaveTimeoutRef.current);
+      }
+
+      // Set new autosave timeout
+      autosaveTimeoutRef.current = setTimeout(() => {
+        saveContent(true);
+      }, AUTOSAVE_DELAY);
+    }
+  }, [getCurrentContent, saveContent]);
+
+  // Also trigger autosave on title change
+  useEffect(() => {
+    if (!content || isLoading) return;
+
+    const currentContent = getCurrentContent();
+    const jsonStr = JSON.stringify(currentContent, null, 2);
+    setCurrentJson(jsonStr);
+
+    if (jsonStr !== lastSavedContentRef.current) {
+      setHasUnsavedChanges(true);
+
+      if (autosaveTimeoutRef.current) {
+        clearTimeout(autosaveTimeoutRef.current);
+      }
+
+      autosaveTimeoutRef.current = setTimeout(() => {
+        saveContent(true);
+      }, AUTOSAVE_DELAY);
+    }
+  }, [title, content, isLoading, getCurrentContent, saveContent]);
+
   // Formatting commands
   const applyBold = useCallback(() => {
     document.execCommand('bold', false);
     editorRef.current?.focus();
-  }, []);
+    handleEditorChange();
+  }, [handleEditorChange]);
 
   const applyItalic = useCallback(() => {
     document.execCommand('italic', false);
     editorRef.current?.focus();
-  }, []);
+    handleEditorChange();
+  }, [handleEditorChange]);
 
   const applyColor = useCallback((color: string) => {
     if (color) {
@@ -322,34 +391,27 @@ export default function ContentEditorPage() {
     }
     setSelectedColor(color);
     editorRef.current?.focus();
-  }, []);
+    handleEditorChange();
+  }, [handleEditorChange]);
 
   const removeFormatting = useCallback(() => {
     document.execCommand('removeFormat', false);
     editorRef.current?.focus();
-  }, []);
+    handleEditorChange();
+  }, [handleEditorChange]);
+
+  // Undo last change
+  const applyUndo = useCallback(() => {
+    document.execCommand('undo', false);
+    editorRef.current?.focus();
+    // Update JSON preview after undo
+    setTimeout(handleEditorChange, 0);
+  }, [handleEditorChange]);
 
   // Copy JSON to clipboard
   const copyJsonToClipboard = useCallback(() => {
-    const currentContent = getCurrentContent();
-    navigator.clipboard.writeText(JSON.stringify(currentContent, null, 2));
-  }, [getCurrentContent]);
-
-  // View raw saved file
-  const viewRawFile = useCallback(async () => {
-    if (!selectedFile) return;
-
-    try {
-      const response = await fetch(selectedFile.path);
-      if (response.ok) {
-        const text = await response.text();
-        setRawJsonContent(text);
-      }
-    } catch (error) {
-      console.error('Error loading raw file:', error);
-    }
-    setShowRawJson(true);
-  }, [selectedFile]);
+    navigator.clipboard.writeText(currentJson);
+  }, [currentJson]);
 
   return (
     <>
@@ -424,6 +486,16 @@ export default function ContentEditorPage() {
                 {/* Formatting Toolbar */}
                 <div className="mb-4 p-3 bg-[var(--primary-dark)] rounded-lg border border-[var(--primary-light)] flex flex-wrap items-center gap-2">
                   <button
+                    onClick={applyUndo}
+                    className="px-3 py-2 bg-[var(--primary-light)] hover:bg-[var(--accent-main)] hover:text-[var(--primary-dark)] rounded transition-colors"
+                    title="Undo (Ctrl+Z)"
+                  >
+                    Undo
+                  </button>
+
+                  <div className="h-6 w-px bg-[var(--primary-light)] mx-2" />
+
+                  <button
                     onClick={applyBold}
                     className="px-3 py-2 bg-[var(--primary-light)] hover:bg-[var(--accent-main)] hover:text-[var(--primary-dark)] rounded font-bold transition-colors"
                     title="Bold (Ctrl+B)"
@@ -475,10 +547,14 @@ export default function ContentEditorPage() {
                 <div className="mb-4">
                   <label className="block text-sm text-[var(--text-medium)] mb-2">
                     Content <span className="text-xs opacity-70">(Two blank lines = new paragraph)</span>
+                    {hasUnsavedChanges && (
+                      <span className="ml-2 text-yellow-400 text-xs">(unsaved changes)</span>
+                    )}
                   </label>
                   <div
                     ref={editorRef}
                     contentEditable
+                    onInput={handleEditorChange}
                     className="w-full min-h-[300px] max-h-[500px] overflow-y-auto px-4 py-3 bg-[#f4e8f0] border border-[var(--primary-light)] rounded-lg text-[var(--neutral-dark)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-main)] leading-relaxed"
                     style={{ whiteSpace: 'pre-wrap' }}
                     suppressContentEditableWarning
@@ -491,26 +567,22 @@ export default function ContentEditorPage() {
                 </p>
               </div>
 
-              {/* Preview & Actions Panel */}
+              {/* JSON Preview & Actions Panel */}
               <div className="space-y-6">
-                {/* Live Preview */}
+                {/* JSON Preview */}
                 <div className="bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-6">
-                  <h2 className="text-xl font-bold text-[var(--text-light)] mb-4">Live Preview</h2>
-                  <div className="bg-[#f4e8f0] rounded-lg p-6 max-h-[350px] overflow-y-auto">
-                    <h3 className="text-3xl font-semibold text-[var(--primary-dark)] text-center mb-6" style={{ fontFamily: 'cursive' }}>
-                      {title}
-                    </h3>
-                    <div
-                      className="text-[var(--neutral-dark)] leading-relaxed prose"
-                      style={{ whiteSpace: 'pre-wrap' }}
-                      dangerouslySetInnerHTML={{
-                        __html: editorRef.current?.innerHTML
-                          ?.split(/\n\n+/)
-                          .map((p, i) => `<p style="margin-bottom: 1rem; text-indent: ${i > 0 ? '30px' : '0'}">${p.replace(/\n/g, ' ')}</p>`)
-                          .join('') || ''
-                      }}
-                    />
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold text-[var(--text-light)]">JSON Preview</h2>
+                    <button
+                      onClick={copyJsonToClipboard}
+                      className="px-3 py-1 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded text-sm font-semibold hover:bg-[var(--accent-light)] transition-colors"
+                    >
+                      Copy JSON
+                    </button>
                   </div>
+                  <pre className="bg-[var(--primary-dark)] rounded-lg p-4 text-sm text-[var(--text-light)] overflow-x-auto max-h-[400px] overflow-y-auto font-mono">
+                    {currentJson}
+                  </pre>
                 </div>
 
                 {/* Actions */}
@@ -518,7 +590,7 @@ export default function ContentEditorPage() {
                   <h2 className="text-xl font-bold text-[var(--text-light)] mb-4">Actions</h2>
                   <div className="space-y-3">
                     <button
-                      onClick={saveContent}
+                      onClick={() => saveContent(false)}
                       disabled={isSaving}
                       className={`w-full px-4 py-3 rounded font-semibold transition-colors ${
                         isSaving
@@ -526,50 +598,25 @@ export default function ContentEditorPage() {
                           : 'bg-green-600 text-white hover:bg-green-500'
                       }`}
                     >
-                      {isSaving ? 'Saving...' : 'Save to File'}
+                      {isSaving ? 'Saving...' : 'Save Now'}
                     </button>
 
                     {saveStatus === 'success' && (
                       <div className="text-green-400 text-center text-sm">Saved successfully!</div>
+                    )}
+                    {saveStatus === 'autosaved' && (
+                      <div className="text-blue-400 text-center text-sm">Autosaved!</div>
                     )}
                     {saveStatus === 'error' && (
                       <div className="text-red-400 text-center text-sm">
                         Error saving. Make sure the dev server is running with API routes.
                       </div>
                     )}
-
-                    <button
-                      onClick={viewRawFile}
-                      className="w-full px-4 py-3 bg-[var(--primary-light)] text-[var(--text-light)] rounded font-semibold hover:bg-[var(--primary-dark)] transition-colors"
-                    >
-                      View Raw Saved File
-                    </button>
-
-                    <button
-                      onClick={copyJsonToClipboard}
-                      className="w-full px-4 py-3 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded font-semibold hover:bg-[var(--accent-light)] transition-colors"
-                    >
-                      Copy Current JSON to Clipboard
-                    </button>
                   </div>
 
-                  {/* Raw JSON View */}
-                  {showRawJson && (
-                    <div className="mt-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-[var(--text-medium)]">Raw Saved File:</span>
-                        <button
-                          onClick={() => setShowRawJson(false)}
-                          className="text-sm text-[var(--text-medium)] hover:text-[var(--text-light)]"
-                        >
-                          Hide
-                        </button>
-                      </div>
-                      <pre className="bg-[var(--primary-dark)] rounded-lg p-4 text-sm text-[var(--text-light)] overflow-x-auto max-h-[300px] overflow-y-auto">
-                        {rawJsonContent}
-                      </pre>
-                    </div>
-                  )}
+                  <p className="text-xs text-[var(--text-medium)] mt-4">
+                    Changes are automatically saved after 2 seconds of inactivity.
+                  </p>
                 </div>
               </div>
             </div>
