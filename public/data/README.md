@@ -67,6 +67,47 @@ The `backstory-content.json` file contains the text content displayed on the bac
 - Colors can be hex codes (`#ff6b6b`), RGB values (`rgb(255, 107, 107)`), or named colors (`red`)
 - New lines are created by adding new paragraph objects to the array
 
+### Story End Content (`story-end-content.json`)
+
+The `story-end-content.json` file contains the congratulations message displayed when a player completes the game. It uses the same format as the backstory content.
+
+**Format:** Same as `backstory-content.json` (see above)
+
+**Usage:**
+- Displayed on the `/story-end` page when the game is completed
+- Shows a congratulatory message with the same rich formatting support
+- Can include colored text for emphasis (e.g., "Archivist", "Kethaneum")
+
+**Example:**
+```json
+{
+  "title": "Journey Complete",
+  "paragraphs": [
+    {
+      "segments": [
+        {"text": "Congratulations, "},
+        {"text": "Archivist", "color": "#fbbf24", "italic": true},
+        {"text": "."}
+      ]
+    }
+  ]
+}
+```
+
+### Editing Content Files
+
+Both `backstory-content.json` and `story-end-content.json` can be edited:
+
+1. **Manually**: Edit the JSON files directly in any text editor
+2. **Visual Editor**: Use the Content Editor tool at `/tools/content-editor` during development
+
+The Content Editor provides:
+- Visual paragraph and segment management
+- Color picker with preset colors
+- Bold and italic toggles
+- Live preview of formatted text
+- JSON export and save functionality
+
 ### Genre Manifest (`genreManifest.json`)
 
 The `genreManifest.json` file is a configuration file that lists all puzzle genre files that should be loaded by the game. This manifest system allows you to add or remove genre files without modifying the TypeScript code.

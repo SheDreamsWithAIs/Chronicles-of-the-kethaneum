@@ -1,16 +1,19 @@
-# Backstory Content System - Development Plan
+# Formatted Content System - Development Plan
 
-## Status: ✅ COMPLETED
+## Status: ✅ COMPLETED (Phase 2)
 
 **Branch:** `claude/backstory-text-source-01V59wehphGn9mrJTXxuvKPt`
-**Completion Date:** 2025-11-18
-**Commits:** df8d590, d2101b6
+**Completion Date:** 2025-11-22
+**Commits:** df8d590, d2101b6, 69a5398, a37136e
 
 ---
 
 ## Overview
 
-This system allows the backstory screen text content to be sourced from a JSON file in the data folder, enabling easy content updates without code changes. The system supports rich text formatting including colors, italics, bold text, and proper paragraph breaks.
+This system provides a comprehensive formatted text content system for game screens, with a visual editing tool for easy content management. The system supports rich text formatting including colors, italics, bold text, and proper paragraph breaks.
+
+**Phase 1 (Complete):** Backstory content from file
+**Phase 2 (Complete):** Story End page, generic loader, visual Content Editor tool
 
 ---
 
@@ -88,6 +91,61 @@ This system allows the backstory screen text content to be sourced from a JSON f
 #### `.gitignore`
 - **Changes:**
   - Added `*.tsbuildinfo` to ignore TypeScript build artifacts
+
+---
+
+## Phase 2: Story End Page & Content Editor
+
+### New Files Created
+
+#### `lib/utils/formattedContentLoader.ts`
+- **Purpose:** Generic content loader for any formatted content file
+- **Features:**
+  - `loadFormattedContent(contentType)` - Load by predefined type ('backstory', 'story-end')
+  - `loadFormattedContentFromPath(path)` - Load from custom file path
+  - Enhanced validation of content structure
+  - TypeScript interfaces for all content types
+- **Note:** `backstoryLoader.ts` now re-exports from this file for backward compatibility
+
+#### `public/data/story-end-content.json`
+- **Purpose:** Congratulations message shown at game completion
+- **Format:** Same as backstory-content.json
+- **Content:** Congratulates the player for completing their journey
+
+#### `app/story-end/page.tsx` & `story-end.module.css`
+- **Purpose:** Game completion screen
+- **Features:**
+  - Loads content from story-end-content.json
+  - Same book-style visual design as backstory
+  - "Play Again" and "Return Home" buttons
+  - Star symbol decorations instead of moon phases
+  - Full fallback content if loading fails
+
+#### `app/tools/content-editor/page.tsx` & `README.md`
+- **Purpose:** Visual editor for formatted content files
+- **Access:** `/tools/content-editor`
+- **Features:**
+  - File selector for backstory and story-end content
+  - Title editing
+  - Paragraph management (add, delete)
+  - Segment editor with:
+    - Text input
+    - Bold toggle
+    - Italic toggle
+    - Color picker (presets + custom)
+  - Live preview at segment, paragraph, and full document level
+  - JSON preview and copy to clipboard
+  - Save to file (requires dev server API)
+
+### Modified Files
+
+#### `app/tools/page.tsx`
+- Added Content Editor tool to the tools grid
+- Changed grid to 3-column layout on large screens
+
+#### `public/data/README.md`
+- Added Story End content documentation
+- Added Content Editor usage section
 
 ---
 

@@ -185,7 +185,11 @@ export function restoreGameState(state: GameState, savedState: Partial<GameState
       // Special handling for the discoveredBooks Set
       if (key === 'discoveredBooks') {
         const savedBooks = (savedState as any).discoveredBooks;
-        if (Array.isArray(savedBooks)) {
+        if (savedBooks instanceof Set) {
+          // Already a Set - use directly
+          restored.discoveredBooks = savedBooks;
+        } else if (Array.isArray(savedBooks)) {
+          // Array from JSON - convert to Set
           restored.discoveredBooks = new Set(savedBooks);
         }
       }
@@ -195,7 +199,11 @@ export function restoreGameState(state: GameState, savedState: Partial<GameState
         if (savedCompleted && typeof savedCompleted === 'object') {
           restored.completedPuzzlesByGenre = {};
           for (const genre in savedCompleted) {
-            if (Array.isArray(savedCompleted[genre])) {
+            if (savedCompleted[genre] instanceof Set) {
+              // Already a Set - use directly
+              restored.completedPuzzlesByGenre[genre] = savedCompleted[genre];
+            } else if (Array.isArray(savedCompleted[genre])) {
+              // Array from JSON - convert to Set
               restored.completedPuzzlesByGenre[genre] = new Set(savedCompleted[genre]);
             }
           }
