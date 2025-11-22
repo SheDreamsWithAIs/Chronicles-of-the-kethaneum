@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 
@@ -48,6 +48,7 @@ const CONTENT_FILES: ContentFile[] = [
 ];
 
 const PRESET_COLORS = [
+  { name: 'Default', value: '' },
   { name: 'Purple', value: '#8b5cf6' },
   { name: 'Gold', value: '#fbbf24' },
   { name: 'Blue', value: '#60a5fa' },
@@ -59,240 +60,153 @@ const PRESET_COLORS = [
 ];
 
 // ============================================================================
-// UTILITIES
+// UTILITIES: Convert between HTML and FormattedContent
 // ============================================================================
 
-function createEmptySegment(): TextSegment {
-  return { text: '' };
+/**
+ * Convert FormattedContent to HTML for the editor
+ */
+function contentToHtml(content: FormattedContent): string {
+  return content.paragraphs.map(para => {
+    const segments = para.segments.map(seg => {
+      let html = seg.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+      if (seg.bold) {
+        html = `<strong>${html}</strong>`;
+      }
+      if (seg.italic) {
+        html = `<em>${html}</em>`;
+      }
+      if (seg.color) {
+        html = `<span style="color: ${seg.color}">${html}</span>`;
+      }
+
+      return html;
+    }).join('');
+
+    return segments;
+  }).join('\n\n');
 }
 
-function createEmptyParagraph(): Paragraph {
-  return { segments: [createEmptySegment()] };
+/**
+ * Parse a single text node or element into segments
+ */
+function parseNode(node: Node, inheritedStyles: { bold: boolean; italic: boolean; color: string }): TextSegment[] {
+  const segments: TextSegment[] = [];
+
+  if (node.nodeType === Node.TEXT_NODE) {
+    const text = node.textContent || '';
+    if (text) {
+      const segment: TextSegment = { text };
+      if (inheritedStyles.bold) segment.bold = true;
+      if (inheritedStyles.italic) segment.italic = true;
+      if (inheritedStyles.color) segment.color = inheritedStyles.color;
+      segments.push(segment);
+    }
+  } else if (node.nodeType === Node.ELEMENT_NODE) {
+    const element = node as HTMLElement;
+    const tagName = element.tagName.toLowerCase();
+
+    // Update inherited styles based on element
+    const newStyles = { ...inheritedStyles };
+
+    if (tagName === 'strong' || tagName === 'b') {
+      newStyles.bold = true;
+    }
+    if (tagName === 'em' || tagName === 'i') {
+      newStyles.italic = true;
+    }
+    if (tagName === 'span' && element.style.color) {
+      newStyles.color = element.style.color;
+    }
+    // Handle font element (from execCommand)
+    if (tagName === 'font' && element.getAttribute('color')) {
+      newStyles.color = element.getAttribute('color') || '';
+    }
+
+    // Recursively parse children
+    for (const child of Array.from(node.childNodes)) {
+      segments.push(...parseNode(child, newStyles));
+    }
+  }
+
+  return segments;
 }
 
-function createEmptyContent(): FormattedContent {
+/**
+ * Merge adjacent segments with the same formatting
+ */
+function mergeSegments(segments: TextSegment[]): TextSegment[] {
+  if (segments.length === 0) return segments;
+
+  const merged: TextSegment[] = [];
+  let current = { ...segments[0] };
+
+  for (let i = 1; i < segments.length; i++) {
+    const seg = segments[i];
+    // Check if same formatting
+    if (
+      current.bold === seg.bold &&
+      current.italic === seg.italic &&
+      current.color === seg.color
+    ) {
+      current.text += seg.text;
+    } else {
+      merged.push(current);
+      current = { ...seg };
+    }
+  }
+  merged.push(current);
+
+  // Clean up undefined properties
+  return merged.map(seg => {
+    const clean: TextSegment = { text: seg.text };
+    if (seg.bold) clean.bold = true;
+    if (seg.italic) clean.italic = true;
+    if (seg.color) clean.color = seg.color;
+    return clean;
+  });
+}
+
+/**
+ * Convert HTML from the editor to FormattedContent
+ */
+function htmlToContent(html: string, title: string): FormattedContent {
+  // Create a temporary container to parse the HTML
+  const container = document.createElement('div');
+  container.innerHTML = html;
+
+  // Split by double newlines (paragraph breaks)
+  // First, normalize the content - replace <br> with newlines
+  let text = container.innerHTML
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/div><div>/gi, '\n')
+    .replace(/<div>/gi, '\n')
+    .replace(/<\/div>/gi, '');
+
+  // Split into paragraphs by double newlines
+  const paragraphTexts = text.split(/\n\n+/);
+
+  const paragraphs: Paragraph[] = paragraphTexts
+    .map(pText => {
+      // Create a temp element to parse this paragraph's HTML
+      const pContainer = document.createElement('div');
+      pContainer.innerHTML = pText.replace(/\n/g, ' ');
+
+      const segments = parseNode(pContainer, { bold: false, italic: false, color: '' });
+      const mergedSegments = mergeSegments(segments);
+
+      // Filter out empty segments
+      const nonEmpty = mergedSegments.filter(s => s.text.trim() !== '');
+
+      return { segments: nonEmpty.length > 0 ? nonEmpty : [{ text: '' }] };
+    })
+    .filter(p => p.segments.some(s => s.text.trim() !== ''));
+
   return {
-    title: 'New Title',
-    paragraphs: [createEmptyParagraph()],
+    title,
+    paragraphs: paragraphs.length > 0 ? paragraphs : [{ segments: [{ text: '' }] }]
   };
-}
-
-// ============================================================================
-// COMPONENTS
-// ============================================================================
-
-interface SegmentEditorProps {
-  segment: TextSegment;
-  segmentIndex: number;
-  paragraphIndex: number;
-  onChange: (pIndex: number, sIndex: number, segment: TextSegment) => void;
-  onDelete: (pIndex: number, sIndex: number) => void;
-  canDelete: boolean;
-}
-
-function SegmentEditor({
-  segment,
-  segmentIndex,
-  paragraphIndex,
-  onChange,
-  onDelete,
-  canDelete,
-}: SegmentEditorProps) {
-  return (
-    <div className="bg-[var(--primary-dark)] bg-opacity-50 rounded-lg p-4 mb-3 border border-[var(--primary-light)] border-opacity-30">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-sm text-[var(--text-medium)]">Segment {segmentIndex + 1}</span>
-        {canDelete && (
-          <button
-            onClick={() => onDelete(paragraphIndex, segmentIndex)}
-            className="text-red-400 hover:text-red-300 text-sm px-2 py-1 rounded hover:bg-red-500 hover:bg-opacity-20 transition-colors"
-          >
-            Remove
-          </button>
-        )}
-      </div>
-
-      {/* Text Input */}
-      <div className="mb-3">
-        <label className="block text-sm text-[var(--text-medium)] mb-1">Text</label>
-        <textarea
-          value={segment.text}
-          onChange={(e) =>
-            onChange(paragraphIndex, segmentIndex, { ...segment, text: e.target.value })
-          }
-          className="w-full px-3 py-2 bg-[var(--primary-medium)] border border-[var(--primary-light)] rounded text-[var(--text-light)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-main)] resize-y min-h-[60px]"
-          placeholder="Enter text..."
-        />
-      </div>
-
-      {/* Formatting Controls */}
-      <div className="flex flex-wrap gap-4 items-center">
-        {/* Bold Toggle */}
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={segment.bold || false}
-            onChange={(e) =>
-              onChange(paragraphIndex, segmentIndex, { ...segment, bold: e.target.checked || undefined })
-            }
-            className="w-4 h-4 accent-[var(--accent-main)]"
-          />
-          <span className="text-sm text-[var(--text-light)] font-bold">Bold</span>
-        </label>
-
-        {/* Italic Toggle */}
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={segment.italic || false}
-            onChange={(e) =>
-              onChange(paragraphIndex, segmentIndex, { ...segment, italic: e.target.checked || undefined })
-            }
-            className="w-4 h-4 accent-[var(--accent-main)]"
-          />
-          <span className="text-sm text-[var(--text-light)] italic">Italic</span>
-        </label>
-
-        {/* Color Picker */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-[var(--text-medium)]">Color:</span>
-          <select
-            value={segment.color || ''}
-            onChange={(e) =>
-              onChange(paragraphIndex, segmentIndex, {
-                ...segment,
-                color: e.target.value || undefined,
-              })
-            }
-            className="px-2 py-1 bg-[var(--primary-medium)] border border-[var(--primary-light)] rounded text-[var(--text-light)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-main)]"
-          >
-            <option value="">Default</option>
-            {PRESET_COLORS.map((color) => (
-              <option key={color.value} value={color.value}>
-                {color.name}
-              </option>
-            ))}
-          </select>
-          {segment.color && (
-            <div
-              className="w-6 h-6 rounded border border-[var(--primary-light)]"
-              style={{ backgroundColor: segment.color }}
-            />
-          )}
-        </div>
-
-        {/* Custom Color Input */}
-        <div className="flex items-center gap-2">
-          <input
-            type="color"
-            value={segment.color || '#ffffff'}
-            onChange={(e) =>
-              onChange(paragraphIndex, segmentIndex, { ...segment, color: e.target.value })
-            }
-            className="w-8 h-8 cursor-pointer rounded"
-            title="Custom color"
-          />
-        </div>
-      </div>
-
-      {/* Preview */}
-      <div className="mt-3 p-2 bg-[var(--primary-medium)] rounded border border-[var(--primary-light)] border-opacity-50">
-        <span className="text-xs text-[var(--text-medium)] block mb-1">Preview:</span>
-        <span
-          style={{
-            color: segment.color,
-            fontWeight: segment.bold ? 'bold' : 'normal',
-            fontStyle: segment.italic ? 'italic' : 'normal',
-          }}
-          className="text-[var(--text-light)]"
-        >
-          {segment.text || '(empty)'}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-interface ParagraphEditorProps {
-  paragraph: Paragraph;
-  paragraphIndex: number;
-  onSegmentChange: (pIndex: number, sIndex: number, segment: TextSegment) => void;
-  onSegmentDelete: (pIndex: number, sIndex: number) => void;
-  onSegmentAdd: (pIndex: number) => void;
-  onParagraphDelete: (pIndex: number) => void;
-  canDelete: boolean;
-}
-
-function ParagraphEditor({
-  paragraph,
-  paragraphIndex,
-  onSegmentChange,
-  onSegmentDelete,
-  onSegmentAdd,
-  onParagraphDelete,
-  canDelete,
-}: ParagraphEditorProps) {
-  return (
-    <div className="bg-[var(--primary-medium)] bg-opacity-90 rounded-lg p-4 mb-4 border border-[var(--primary-light)]">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-[var(--text-light)]">
-          Paragraph {paragraphIndex + 1}
-        </h3>
-        <div className="flex gap-2">
-          <button
-            onClick={() => onSegmentAdd(paragraphIndex)}
-            className="px-3 py-1 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded text-sm hover:bg-[var(--accent-light)] transition-colors font-medium"
-          >
-            + Add Segment
-          </button>
-          {canDelete && (
-            <button
-              onClick={() => onParagraphDelete(paragraphIndex)}
-              className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-500 transition-colors"
-            >
-              Delete Paragraph
-            </button>
-          )}
-        </div>
-      </div>
-
-      {paragraph.segments.map((segment, sIndex) => (
-        <SegmentEditor
-          key={sIndex}
-          segment={segment}
-          segmentIndex={sIndex}
-          paragraphIndex={paragraphIndex}
-          onChange={onSegmentChange}
-          onDelete={onSegmentDelete}
-          canDelete={paragraph.segments.length > 1}
-        />
-      ))}
-
-      {/* Paragraph Preview */}
-      <div className="mt-4 p-3 bg-[#f4e8f0] rounded border border-[var(--accent-main)] border-opacity-30">
-        <span className="text-xs text-[var(--neutral-dark)] block mb-2 font-medium">
-          Paragraph Preview:
-        </span>
-        <p className="text-[var(--neutral-dark)] leading-relaxed">
-          {paragraph.segments.map((seg, i) => (
-            <span
-              key={i}
-              style={{
-                color: seg.color,
-                fontWeight: seg.bold ? 'bold' : 'normal',
-                fontStyle: seg.italic ? 'italic' : 'normal',
-              }}
-            >
-              {seg.text}
-            </span>
-          ))}
-          {paragraph.segments.every((s) => !s.text) && (
-            <span className="text-gray-400">(empty paragraph)</span>
-          )}
-        </p>
-      </div>
-    </div>
-  );
 }
 
 // ============================================================================
@@ -302,42 +216,72 @@ function ParagraphEditor({
 export default function ContentEditorPage() {
   const [selectedFile, setSelectedFile] = useState<ContentFile | null>(null);
   const [content, setContent] = useState<FormattedContent | null>(null);
+  const [title, setTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [showJson, setShowJson] = useState(false);
+  const [showRawJson, setShowRawJson] = useState(false);
+  const [rawJsonContent, setRawJsonContent] = useState<string>('');
+  const [selectedColor, setSelectedColor] = useState('');
+  const editorRef = useRef<HTMLDivElement>(null);
 
   // Load content from file
   const loadContent = useCallback(async (file: ContentFile) => {
     setIsLoading(true);
     setSaveStatus('idle');
+    setShowRawJson(false);
     try {
       const response = await fetch(file.path);
       if (!response.ok) {
         throw new Error(`Failed to load: ${response.status}`);
       }
-      const data = await response.json();
+      const data: FormattedContent = await response.json();
       setContent(data);
+      setTitle(data.title);
       setSelectedFile(file);
+      setRawJsonContent(JSON.stringify(data, null, 2));
+
+      // Set editor content after a brief delay to ensure ref is ready
+      setTimeout(() => {
+        if (editorRef.current) {
+          editorRef.current.innerHTML = contentToHtml(data);
+        }
+      }, 0);
     } catch (error) {
       console.error('Error loading content:', error);
-      // Create new content if file doesn't exist
-      setContent(createEmptyContent());
+      const emptyContent: FormattedContent = { title: 'New Title', paragraphs: [{ segments: [{ text: '' }] }] };
+      setContent(emptyContent);
+      setTitle('New Title');
       setSelectedFile(file);
+      setRawJsonContent(JSON.stringify(emptyContent, null, 2));
+
+      setTimeout(() => {
+        if (editorRef.current) {
+          editorRef.current.innerHTML = '';
+        }
+      }, 0);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
+  // Get current content from editor
+  const getCurrentContent = useCallback((): FormattedContent => {
+    if (!editorRef.current) {
+      return content || { title, paragraphs: [{ segments: [{ text: '' }] }] };
+    }
+    return htmlToContent(editorRef.current.innerHTML, title);
+  }, [content, title]);
+
   // Save content to file
   const saveContent = useCallback(async () => {
-    if (!selectedFile || !content) return;
+    if (!selectedFile) return;
 
+    const currentContent = getCurrentContent();
     setIsSaving(true);
     setSaveStatus('idle');
 
     try {
-      // Get the file path without the leading /data/
       const filePath = selectedFile.path.replace('/data/', '');
 
       const response = await fetch('/api/manifest-manager/file', {
@@ -345,7 +289,7 @@ export default function ContentEditorPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           path: filePath,
-          content: JSON.stringify(content, null, 2),
+          content: JSON.stringify(currentContent, null, 2),
         }),
       });
 
@@ -353,6 +297,8 @@ export default function ContentEditorPage() {
         throw new Error(`Failed to save: ${response.status}`);
       }
 
+      setContent(currentContent);
+      setRawJsonContent(JSON.stringify(currentContent, null, 2));
       setSaveStatus('success');
       setTimeout(() => setSaveStatus('idle'), 3000);
     } catch (error) {
@@ -361,87 +307,55 @@ export default function ContentEditorPage() {
     } finally {
       setIsSaving(false);
     }
-  }, [selectedFile, content]);
+  }, [selectedFile, getCurrentContent]);
 
-  // Update title
-  const handleTitleChange = useCallback((newTitle: string) => {
-    if (!content) return;
-    setContent({ ...content, title: newTitle });
-  }, [content]);
+  // Formatting commands
+  const applyBold = useCallback(() => {
+    document.execCommand('bold', false);
+    editorRef.current?.focus();
+  }, []);
 
-  // Update segment
-  const handleSegmentChange = useCallback(
-    (pIndex: number, sIndex: number, newSegment: TextSegment) => {
-      if (!content) return;
+  const applyItalic = useCallback(() => {
+    document.execCommand('italic', false);
+    editorRef.current?.focus();
+  }, []);
 
-      const newParagraphs = [...content.paragraphs];
-      newParagraphs[pIndex] = {
-        ...newParagraphs[pIndex],
-        segments: newParagraphs[pIndex].segments.map((seg, i) =>
-          i === sIndex ? newSegment : seg
-        ),
-      };
-      setContent({ ...content, paragraphs: newParagraphs });
-    },
-    [content]
-  );
+  const applyColor = useCallback((color: string) => {
+    if (color) {
+      document.execCommand('foreColor', false, color);
+    } else {
+      document.execCommand('removeFormat', false);
+    }
+    setSelectedColor(color);
+    editorRef.current?.focus();
+  }, []);
 
-  // Delete segment
-  const handleSegmentDelete = useCallback(
-    (pIndex: number, sIndex: number) => {
-      if (!content) return;
-
-      const newParagraphs = [...content.paragraphs];
-      newParagraphs[pIndex] = {
-        ...newParagraphs[pIndex],
-        segments: newParagraphs[pIndex].segments.filter((_, i) => i !== sIndex),
-      };
-      setContent({ ...content, paragraphs: newParagraphs });
-    },
-    [content]
-  );
-
-  // Add segment
-  const handleSegmentAdd = useCallback(
-    (pIndex: number) => {
-      if (!content) return;
-
-      const newParagraphs = [...content.paragraphs];
-      newParagraphs[pIndex] = {
-        ...newParagraphs[pIndex],
-        segments: [...newParagraphs[pIndex].segments, createEmptySegment()],
-      };
-      setContent({ ...content, paragraphs: newParagraphs });
-    },
-    [content]
-  );
-
-  // Add paragraph
-  const handleParagraphAdd = useCallback(() => {
-    if (!content) return;
-    setContent({
-      ...content,
-      paragraphs: [...content.paragraphs, createEmptyParagraph()],
-    });
-  }, [content]);
-
-  // Delete paragraph
-  const handleParagraphDelete = useCallback(
-    (pIndex: number) => {
-      if (!content) return;
-      setContent({
-        ...content,
-        paragraphs: content.paragraphs.filter((_, i) => i !== pIndex),
-      });
-    },
-    [content]
-  );
+  const removeFormatting = useCallback(() => {
+    document.execCommand('removeFormat', false);
+    editorRef.current?.focus();
+  }, []);
 
   // Copy JSON to clipboard
   const copyJsonToClipboard = useCallback(() => {
-    if (!content) return;
-    navigator.clipboard.writeText(JSON.stringify(content, null, 2));
-  }, [content]);
+    const currentContent = getCurrentContent();
+    navigator.clipboard.writeText(JSON.stringify(currentContent, null, 2));
+  }, [getCurrentContent]);
+
+  // View raw saved file
+  const viewRawFile = useCallback(async () => {
+    if (!selectedFile) return;
+
+    try {
+      const response = await fetch(selectedFile.path);
+      if (response.ok) {
+        const text = await response.text();
+        setRawJsonContent(text);
+      }
+    } catch (error) {
+      console.error('Error loading raw file:', error);
+    }
+    setShowRawJson(true);
+  }, [selectedFile]);
 
   return (
     <>
@@ -500,73 +414,108 @@ export default function ContentEditorPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Editor Panel */}
               <div className="bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-[var(--text-light)]">Editor</h2>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleParagraphAdd}
-                      className="px-4 py-2 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded hover:bg-[var(--accent-light)] transition-colors font-medium"
-                    >
-                      + Add Paragraph
-                    </button>
-                  </div>
-                </div>
+                <h2 className="text-xl font-bold text-[var(--text-light)] mb-4">Editor</h2>
 
                 {/* Title Editor */}
-                <div className="mb-6">
+                <div className="mb-4">
                   <label className="block text-sm text-[var(--text-medium)] mb-2">Title</label>
                   <input
                     type="text"
-                    value={content.title}
-                    onChange={(e) => handleTitleChange(e.target.value)}
-                    className="w-full px-4 py-3 bg-[var(--primary-dark)] border border-[var(--primary-light)] rounded-lg text-[var(--text-light)] text-2xl font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--accent-main)]"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full px-4 py-3 bg-[var(--primary-dark)] border border-[var(--primary-light)] rounded-lg text-[var(--text-light)] text-xl font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--accent-main)]"
                   />
                 </div>
 
-                {/* Paragraphs */}
-                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-                  {content.paragraphs.map((paragraph, pIndex) => (
-                    <ParagraphEditor
-                      key={pIndex}
-                      paragraph={paragraph}
-                      paragraphIndex={pIndex}
-                      onSegmentChange={handleSegmentChange}
-                      onSegmentDelete={handleSegmentDelete}
-                      onSegmentAdd={handleSegmentAdd}
-                      onParagraphDelete={handleParagraphDelete}
-                      canDelete={content.paragraphs.length > 1}
-                    />
-                  ))}
+                {/* Formatting Toolbar */}
+                <div className="mb-4 p-3 bg-[var(--primary-dark)] rounded-lg border border-[var(--primary-light)] flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={applyBold}
+                    className="px-3 py-2 bg-[var(--primary-light)] hover:bg-[var(--accent-main)] hover:text-[var(--primary-dark)] rounded font-bold transition-colors"
+                    title="Bold (Ctrl+B)"
+                  >
+                    B
+                  </button>
+                  <button
+                    onClick={applyItalic}
+                    className="px-3 py-2 bg-[var(--primary-light)] hover:bg-[var(--accent-main)] hover:text-[var(--primary-dark)] rounded italic transition-colors"
+                    title="Italic (Ctrl+I)"
+                  >
+                    I
+                  </button>
+
+                  <div className="h-6 w-px bg-[var(--primary-light)] mx-2" />
+
+                  <select
+                    value={selectedColor}
+                    onChange={(e) => applyColor(e.target.value)}
+                    className="px-3 py-2 bg-[var(--primary-light)] rounded text-[var(--text-light)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-main)]"
+                    title="Text Color"
+                  >
+                    {PRESET_COLORS.map((color) => (
+                      <option key={color.value} value={color.value}>
+                        {color.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <input
+                    type="color"
+                    onChange={(e) => applyColor(e.target.value)}
+                    className="w-10 h-10 cursor-pointer rounded border-0"
+                    title="Custom Color"
+                  />
+
+                  <div className="h-6 w-px bg-[var(--primary-light)] mx-2" />
+
+                  <button
+                    onClick={removeFormatting}
+                    className="px-3 py-2 bg-[var(--primary-light)] hover:bg-red-500 hover:text-white rounded transition-colors text-sm"
+                    title="Remove Formatting"
+                  >
+                    Clear Format
+                  </button>
                 </div>
+
+                {/* Content Editor (contenteditable) */}
+                <div className="mb-4">
+                  <label className="block text-sm text-[var(--text-medium)] mb-2">
+                    Content <span className="text-xs opacity-70">(Two blank lines = new paragraph)</span>
+                  </label>
+                  <div
+                    ref={editorRef}
+                    contentEditable
+                    className="w-full min-h-[300px] max-h-[500px] overflow-y-auto px-4 py-3 bg-[#f4e8f0] border border-[var(--primary-light)] rounded-lg text-[var(--neutral-dark)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-main)] leading-relaxed"
+                    style={{ whiteSpace: 'pre-wrap' }}
+                    suppressContentEditableWarning
+                  />
+                </div>
+
+                <p className="text-xs text-[var(--text-medium)] mb-4">
+                  <strong>Tips:</strong> Select text and use the toolbar to apply formatting.
+                  Press Enter twice to create a new paragraph.
+                </p>
               </div>
 
               {/* Preview & Actions Panel */}
               <div className="space-y-6">
-                {/* Full Preview */}
+                {/* Live Preview */}
                 <div className="bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-6">
-                  <h2 className="text-xl font-bold text-[var(--text-light)] mb-4">Full Preview</h2>
-                  <div className="bg-[#f4e8f0] rounded-lg p-6 max-h-[400px] overflow-y-auto">
+                  <h2 className="text-xl font-bold text-[var(--text-light)] mb-4">Live Preview</h2>
+                  <div className="bg-[#f4e8f0] rounded-lg p-6 max-h-[350px] overflow-y-auto">
                     <h3 className="text-3xl font-semibold text-[var(--primary-dark)] text-center mb-6" style={{ fontFamily: 'cursive' }}>
-                      {content.title}
+                      {title}
                     </h3>
-                    <div className="text-[var(--neutral-dark)] leading-relaxed">
-                      {content.paragraphs.map((para, pIndex) => (
-                        <p key={pIndex} className="mb-4 text-justify" style={{ textIndent: pIndex > 0 ? '30px' : '0' }}>
-                          {para.segments.map((seg, sIndex) => (
-                            <span
-                              key={sIndex}
-                              style={{
-                                color: seg.color,
-                                fontWeight: seg.bold ? 'bold' : 'normal',
-                                fontStyle: seg.italic ? 'italic' : 'normal',
-                              }}
-                            >
-                              {seg.text}
-                            </span>
-                          ))}
-                        </p>
-                      ))}
-                    </div>
+                    <div
+                      className="text-[var(--neutral-dark)] leading-relaxed prose"
+                      style={{ whiteSpace: 'pre-wrap' }}
+                      dangerouslySetInnerHTML={{
+                        __html: editorRef.current?.innerHTML
+                          ?.split(/\n\n+/)
+                          .map((p, i) => `<p style="margin-bottom: 1rem; text-indent: ${i > 0 ? '30px' : '0'}">${p.replace(/\n/g, ' ')}</p>`)
+                          .join('') || ''
+                      }}
+                    />
                   </div>
                 </div>
 
@@ -596,25 +545,34 @@ export default function ContentEditorPage() {
                     )}
 
                     <button
-                      onClick={() => setShowJson(!showJson)}
-                      className="w-full px-4 py-3 bg-[var(--primary-light)] text-[var(--text-light)] rounded font-semibold hover:bg-[var(--primary-medium)] transition-colors"
+                      onClick={viewRawFile}
+                      className="w-full px-4 py-3 bg-[var(--primary-light)] text-[var(--text-light)] rounded font-semibold hover:bg-[var(--primary-dark)] transition-colors"
                     >
-                      {showJson ? 'Hide JSON' : 'Show JSON'}
+                      View Raw Saved File
                     </button>
 
                     <button
                       onClick={copyJsonToClipboard}
                       className="w-full px-4 py-3 bg-[var(--accent-main)] text-[var(--primary-dark)] rounded font-semibold hover:bg-[var(--accent-light)] transition-colors"
                     >
-                      Copy JSON to Clipboard
+                      Copy Current JSON to Clipboard
                     </button>
                   </div>
 
-                  {/* JSON Preview */}
-                  {showJson && (
+                  {/* Raw JSON View */}
+                  {showRawJson && (
                     <div className="mt-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-[var(--text-medium)]">Raw Saved File:</span>
+                        <button
+                          onClick={() => setShowRawJson(false)}
+                          className="text-sm text-[var(--text-medium)] hover:text-[var(--text-light)]"
+                        >
+                          Hide
+                        </button>
+                      </div>
                       <pre className="bg-[var(--primary-dark)] rounded-lg p-4 text-sm text-[var(--text-light)] overflow-x-auto max-h-[300px] overflow-y-auto">
-                        {JSON.stringify(content, null, 2)}
+                        {rawJsonContent}
                       </pre>
                     </div>
                   )}
@@ -631,8 +589,8 @@ export default function ContentEditorPage() {
                 Select a Content File
               </h2>
               <p className="text-[var(--text-medium)]">
-                Choose a content file above to start editing. You can modify the title,
-                add paragraphs, and apply formatting like colors, bold, and italic text.
+                Choose a content file above to start editing. You can type naturally,
+                select text to format it, and use two blank lines to create paragraphs.
               </p>
             </div>
           )}
