@@ -3,6 +3,11 @@
  * This module handles the core game state and initialization
  */
 
+import { StoryProgressState, DEFAULT_STORY_PROGRESS } from '../story/types';
+
+// Re-export for convenience
+export type { StoryProgressState } from '../story/types';
+
 export interface WordData {
   word: string;
   found: boolean;
@@ -77,6 +82,8 @@ export interface GameState {
   completedPuzzlesByGenre: { [genre: string]: Set<string> }; // Track completed puzzles by title
   kethaneumRevealed: boolean; // Whether Kethaneum genre is visible in selection
   genreExhausted: boolean; // Whether current selected genre has no more new puzzles
+  // Story progress tracking
+  storyProgress: StoryProgressState; // Player's story journey progress
 }
 
 export interface PuzzleData {
@@ -89,9 +96,10 @@ export interface PuzzleData {
 }
 
 // Define the base state with default values
-export const baseState: Omit<GameState, 'discoveredBooks' | 'completedPuzzlesByGenre'> & {
+export const baseState: Omit<GameState, 'discoveredBooks' | 'completedPuzzlesByGenre' | 'storyProgress'> & {
   discoveredBooks: Set<string>;
   completedPuzzlesByGenre: { [genre: string]: Set<string> };
+  storyProgress: StoryProgressState;
 } = {
   currentScreen: 'title-screen',
   grid: [],
@@ -127,6 +135,7 @@ export const baseState: Omit<GameState, 'discoveredBooks' | 'completedPuzzlesByG
   completedPuzzlesByGenre: {},
   kethaneumRevealed: false,
   genreExhausted: false,
+  storyProgress: { ...DEFAULT_STORY_PROGRESS },
 };
 
 /**
@@ -138,6 +147,7 @@ export function initializeGameState(): GameState {
     ...baseState,
     discoveredBooks: new Set(),
     completedPuzzlesByGenre: {},
+    storyProgress: { ...DEFAULT_STORY_PROGRESS },
   };
 
   return state;
@@ -207,6 +217,23 @@ export function restoreGameState(state: GameState, savedState: Partial<GameState
             }
           }
         }
+      }
+      // Special handling for storyProgress
+      else if (key === 'storyProgress') {
+        const savedProgress = (savedState as any).storyProgress;
+        if (savedProgress && typeof savedProgress === 'object') {
+          restored.storyProgress = {
+            ...DEFAULT_STORY_PROGRESS,
+            ...savedProgress,
+            // Ensure arrays are properly restored
+            unlockedBlurbs: Array.isArray(savedProgress.unlockedBlurbs)
+              ? savedProgress.unlockedBlurbs
+              : [],
+            firedTriggers: Array.isArray(savedProgress.firedTriggers)
+              ? savedProgress.firedTriggers
+              : [],
+          };
+        }
       } else {
         (restored as any)[key] = (savedState as any)[key];
       }
@@ -225,6 +252,11 @@ export function restoreGameState(state: GameState, savedState: Partial<GameState
 
   // Ensure completedBooks matches the size of discoveredBooks
   restored.completedBooks = restored.discoveredBooks.size;
+
+  // Ensure storyProgress exists with default values
+  if (!restored.storyProgress || typeof restored.storyProgress !== 'object') {
+    restored.storyProgress = { ...DEFAULT_STORY_PROGRESS };
+  }
 
   return restored;
 }

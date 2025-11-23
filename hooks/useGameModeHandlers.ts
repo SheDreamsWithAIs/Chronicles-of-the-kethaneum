@@ -6,6 +6,7 @@
 import { useCallback, useRef, useEffect } from 'react';
 import type { GameState, PuzzleData } from '@/lib/game/state';
 import { recordPuzzleStats, incrementTotalWords } from '@/lib/game/stats';
+import { storyProgressManager } from '@/lib/story';
 
 interface UseGameModeHandlersProps {
   state: GameState;
@@ -129,6 +130,23 @@ export function useGameModeHandlers({
         const currentPuzzle = currentState.puzzles[currentState.currentGenre][currentState.currentPuzzleIndex];
         if (currentPuzzle) {
           markCompleted(currentPuzzle);
+        }
+      }
+
+      // Check for story progress triggers (async, but fire-and-forget)
+      // The story progress manager will check conditions and update state if needed
+      if (storyProgressManager.isLoaded()) {
+        const triggerResult = storyProgressManager.checkTriggerConditions(currentState);
+        if (triggerResult.shouldTrigger && triggerResult.blurb) {
+          console.log('[useGameModeHandlers.handleWin] Story trigger fired:', triggerResult.trigger, '-', triggerResult.blurb.title);
+          const updatedProgress = storyProgressManager.unlockBlurb(
+            triggerResult.blurb.id,
+            currentState.storyProgress
+          );
+          setState({
+            ...currentState,
+            storyProgress: updatedProgress,
+          });
         }
       }
 
