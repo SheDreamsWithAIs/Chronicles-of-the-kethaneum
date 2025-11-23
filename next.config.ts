@@ -8,7 +8,10 @@ const nextConfig: NextConfig = {
   // Only use static export in production - allows API routes in development
   ...(isProd ? { output: 'export' } : {}),
   // Set basePath for GitHub Pages (project pages need this)
+  // basePath handles both routes and assets (_next/static) automatically
   ...(basePath ? { basePath } : {}),
+  // For static export with basePath, assetPrefix should match basePath
+  ...(basePath && isProd ? { assetPrefix: basePath } : {}),
   images: {
     unoptimized: true, // Required for static export
   },
