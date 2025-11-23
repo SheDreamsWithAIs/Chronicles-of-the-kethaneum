@@ -141,7 +141,7 @@ export default function PuzzleScreen() {
       if (state.gameMode === 'story') {
         // Story mode: initialize decorative timer
         if (state.timeRemaining === undefined || state.timeRemaining === 0) {
-          timer.initialize();
+          storyTimer.initialize();
         }
       } else {
         // Puzzle-only and beat-the-clock: start countdown timer
@@ -155,7 +155,7 @@ export default function PuzzleScreen() {
         console.log('[puzzle.page] Timer not started - timer:', state.timer ? 'exists' : 'null', 'paused:', state.paused, 'gameOver:', state.gameOver, 'timeRemaining:', state.timeRemaining, 'transitioning:', isTransitioningRef.current);
       }
     }
-  }, [state.grid?.length, state.timer, state.paused, state.gameOver, state.gameMode, timer]);
+  }, [state.grid?.length, state.timer, state.paused, state.gameOver, state.gameMode, state.timeRemaining, timer, storyTimer]);
 
   // Get current puzzle data
   const gridData = state.grid || [];
