@@ -1,0 +1,76 @@
+{
+  "system": {
+    "version": "1.0.0",
+    "enableLogging": true,
+    "fallbackOnError": true
+  },
+  "paths": {
+    "charactersDirectory": "/data/characters/",
+    "storyEventsDirectory": "/data/story-events/",
+    "characterPortraitsDirectory": "/images/portraits/"
+  },
+  "display": {
+    "textLimits": {
+      "mobile": {
+        "maxCharsPerScreen": 120,
+        "estimatedWordsPerScreen": 20
+      },
+      "tablet": {
+        "maxCharsPerScreen": 200,
+        "estimatedWordsPerScreen": 35
+      },
+      "desktop": {
+        "maxCharsPerScreen": 300,
+        "estimatedWordsPerScreen": 50
+      }
+    },
+    "animationSettings": {
+      "textRevealSpeed": "medium",
+      "panelTransitionDuration": 500,
+      "characterPortraitFadeTime": 300
+    }
+  },
+  "storyStructure": {
+    "storyBeats": {
+      "HOOK": "hook",
+      "FIRST_PLOT_POINT": "first_plot_point", 
+      "FIRST_PINCH_POINT": "first_pinch_point",
+      "MIDPOINT": "midpoint",
+      "SECOND_PINCH_POINT": "second_pinch_point", 
+      "SECOND_PLOT_POINT": "second_plot_point",
+      "CLIMAX": "climax",
+      "RESOLUTION": "resolution"
+    },
+    "defaultStoryBeat": "hook",
+    "enableSeasonalDialogue": true,
+    "characterRetirement": {
+      "introduction_characters": "never",
+      "regular_contacts": "never", 
+      "essential_library_staff": "never",
+      "extended_library_staff": "never",
+      "long_term_scholars": "never",
+      "visiting_scholars": "second_plot_point",
+      "visiting_dignitaries": "resolution",
+      "knowledge_contributors": "midpoint",
+      "special_event_characters": "varies"
+    }
+  },
+  "behavior": {
+    "banterSelection": {
+      "method": "random",
+      "avoidRepeats": true,
+      "resetAfterAllSeen": true,
+      "recentAvoidanceWindow": 3
+    },
+    "storyEvents": {
+      "triggerMethod": "external",
+      "autoAdvanceDelay": 0,
+      "allowSkipping": true
+    },
+    "errorHandling": {
+      "missingCharacterAction": "useDefault",
+      "missingStoryAction": "skipGracefully",
+      "corruptFileAction": "logAndContinue"
+    }
+  }
+}

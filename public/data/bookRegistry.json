@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "books": {
+    "K001": {
+      "title": "Luminos: The Price of 'Perfect Vision'",
+      "genre": "kethaneum",
+      "parts": 4,
+      "order": 1
+    },
+    "N001": {
+      "title": "Fruits of the Orchard",
+      "genre": "nature",
+      "parts": 5,
+      "order": 1
+    },
+    "N002": {
+      "title": "Animals of the Savanna",
+      "genre": "nature",
+      "parts": 3,
+      "order": 2
+    },
+    "N003": {
+      "title": "Creatures of the Sea",
+      "genre": "nature",
+      "parts": 1,
+      "order": 3
+    },
+    "F001": {
+      "title": "World of Magic",
+      "genre": "fantasy",
+      "parts": 1,
+      "order": 1
+    },
+    "F002": {
+      "title": "Kingdom of Legends",
+      "genre": "fantasy",
+      "parts": 1,
+      "order": 2
+    },
+    "F003": {
+      "title": "Mythical Creatures",
+      "genre": "fantasy",
+      "parts": 1,
+      "order": 3
+    },
+    "S001": {
+      "title": "Solar System",
+      "genre": "science",
+      "parts": 1,
+      "order": 1
+    },
+    "S002": {
+      "title": "Chemistry Basics",
+      "genre": "science",
+      "parts": 1,
+      "order": 2
+    }
+  },
+  "genres": {
+    "kethaneum": {
+      "name": "Kethaneum",
+      "description": "The core narrative of the Kethaneum library",
+      "bookCount": 1
+    },
+    "nature": {
+      "name": "Nature",
+      "description": "Books about the natural world",
+      "bookCount": 3
+    },
+    "fantasy": {
+      "name": "Fantasy",
+      "description": "Tales of magic and mythical creatures",
+      "bookCount": 3
+    },
+    "science": {
+      "name": "Science",
+      "description": "Explorations of scientific concepts",
+      "bookCount": 2
+    }
+  }
+}

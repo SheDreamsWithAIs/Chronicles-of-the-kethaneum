@@ -37,42 +37,31 @@ export default function LibraryScreen() {
 
   const handleSelectGenre = async (genre: string) => {
     setShowGenreModal(false);
-    
+
     // Ensure puzzles are loaded
     if (!state.puzzles || Object.keys(state.puzzles).length === 0) {
       await loadAll();
     }
-    
+
     // Get updated state after loadAll (it updates state internally)
     // We need to wait a tick for state to update
     await new Promise(resolve => setTimeout(resolve, 0));
-    
-    // Verify genre exists - use functional update to get latest state
+
+    // Verify genre exists and update state using the new selection system
     setState(prevState => {
       if (!prevState.puzzles || !prevState.puzzles[genre] || prevState.puzzles[genre].length === 0) {
         console.error(`Genre "${genre}" not found. Available genres:`, Object.keys(prevState.puzzles || {}));
         return prevState; // Don't update if genre not found
       }
-      
-      // Get books in the selected genre
-      const booksInGenre = [...new Set(prevState.puzzles[genre].map(p => p.book))];
-      
-      // If current book doesn't exist in this genre, clear it
-      const updatedState: typeof prevState = {
-        ...prevState,
-        currentGenre: genre,
-      };
-      
-      if (prevState.currentBook && !booksInGenre.includes(prevState.currentBook)) {
-        console.log(`Clearing saved book "${prevState.currentBook}" - not in genre "${genre}"`);
-        updatedState.currentBook = '';
-        updatedState.currentPuzzleIndex = -1;
-        updatedState.currentStoryPart = -1;
-      }
-      
+
+      // Import and use the selectGenre function from puzzle selector
+      // Note: This will be a dynamic import since we're in a setState callback
+      const { selectGenre } = require('@/lib/game/puzzleSelector');
+      const updatedState = selectGenre(prevState, genre);
+
       return updatedState;
     });
-    
+
     // Wait for state update, then navigate
     await new Promise(resolve => setTimeout(resolve, 0));
     router.push('/puzzle');
@@ -113,6 +102,7 @@ export default function LibraryScreen() {
         onClose={handleCloseGenreModal}
         onSelectGenre={handleSelectGenre}
         availableGenres={availableGenres}
+        kethaneumRevealed={state.kethaneumRevealed}
       />
 
       {showDialogue && (

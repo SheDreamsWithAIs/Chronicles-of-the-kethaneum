@@ -4,9 +4,6 @@ import path from 'path';
 
 const DATA_DIR = path.join(process.cwd(), 'public', 'data');
 
-// This route is only for development - won't work in static export
-export const dynamic = 'force-static';
-
 function validatePath(filePath: string): boolean {
   const fullPath = path.join(DATA_DIR, filePath);
   return fullPath.startsWith(DATA_DIR);
@@ -146,6 +143,55 @@ export async function DELETE(request: NextRequest) {
     });
   } catch (error) {
     console.error('File delete error:', error);
+    return NextResponse.json(
+      { success: false, error: (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT - Update existing file
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { path: filePath, content } = body;
+
+    if (!filePath) {
+      return NextResponse.json(
+        { success: false, error: 'Path is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!validatePath(filePath)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid path' },
+        { status: 400 }
+      );
+    }
+
+    const fullPath = path.join(DATA_DIR, filePath);
+
+    // Verify file exists before updating
+    try {
+      await fs.access(fullPath);
+    } catch {
+      return NextResponse.json(
+        { success: false, error: 'File does not exist' },
+        { status: 404 }
+      );
+    }
+
+    // Write the content (can be string or object)
+    const contentToWrite = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+    await fs.writeFile(fullPath, contentToWrite, 'utf-8');
+
+    return NextResponse.json({
+      success: true,
+      path: filePath
+    });
+  } catch (error) {
+    console.error('File update error:', error);
     return NextResponse.json(
       { success: false, error: (error as Error).message },
       { status: 500 }

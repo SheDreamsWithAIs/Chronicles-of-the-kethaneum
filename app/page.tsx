@@ -51,13 +51,11 @@ export default function TitleScreen() {
     // Clear all saved progress when starting a new game
     if (typeof window !== 'undefined') {
       localStorage.removeItem('kethaneumProgress');
-    }
 
-    setIsLoading(true);
-    setTimeout(() => {
-      router.push('/backstory');
-      setIsLoading(false);
-    }, 500);
+      // Force a full page reload to ensure all in-memory state is cleared
+      // This prevents race conditions where old state gets re-saved
+      window.location.href = '/backstory';
+    }
   };
 
   const handleContinue = () => {
@@ -82,7 +80,7 @@ export default function TitleScreen() {
             <div className={styles.logoContainer}>
               <div className={styles.logoWrapper}>
                 <img
-                  src="./images/logo-glow.png"
+                  src="/images/logo-glow.png"
                   alt="Chronicles of the Kethaneum Logo"
                   className={styles.logoGlow}
                 />
