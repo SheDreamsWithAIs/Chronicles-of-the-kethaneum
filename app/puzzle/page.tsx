@@ -147,7 +147,11 @@ export default function PuzzleScreen() {
         // Puzzle-only and beat-the-clock: start countdown timer
         if (state.timeRemaining > 0) {
           console.log('[puzzle.page] Starting timer - grid exists, no timer, not paused, not gameOver, timeRemaining:', state.timeRemaining);
-          timer.start();
+          if (state.gameMode === 'puzzle-only') {
+            puzzleOnlyTimer.start();
+          } else if (state.gameMode === 'beat-the-clock') {
+            beatTheClockTimer.start();
+          }
         }
       }
     } else {
@@ -155,7 +159,7 @@ export default function PuzzleScreen() {
         console.log('[puzzle.page] Timer not started - timer:', state.timer ? 'exists' : 'null', 'paused:', state.paused, 'gameOver:', state.gameOver, 'timeRemaining:', state.timeRemaining, 'transitioning:', isTransitioningRef.current);
       }
     }
-  }, [state.grid?.length, state.timer, state.paused, state.gameOver, state.gameMode, state.timeRemaining, timer, storyTimer]);
+  }, [state.grid?.length, state.timer, state.paused, state.gameOver, state.gameMode, state.timeRemaining, storyTimer, puzzleOnlyTimer, beatTheClockTimer]);
 
   // Get current puzzle data
   const gridData = state.grid || [];
