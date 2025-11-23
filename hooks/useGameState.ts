@@ -56,10 +56,21 @@ export function useGameState() {
           console.warn('Unified load failed, trying legacy...', result.error);
           const legacyData = loadLegacyProgress();
           if (legacyData) {
+            // Convert completedPuzzlesByGenre from arrays to Sets if present
+            const completedPuzzlesByGenre = legacyData.completedPuzzlesByGenre
+              ? Object.fromEntries(
+                  Object.entries(legacyData.completedPuzzlesByGenre).map(([genre, titles]) => [
+                    genre,
+                    new Set(titles),
+                  ])
+                )
+              : undefined;
+
             const progressState: Partial<GameState> = {
               ...legacyData,
               discoveredBooks: new Set(legacyData.discoveredBooks),
               gameMode: (legacyData.gameMode as GameState['gameMode']) || 'story',
+              completedPuzzlesByGenre,
             };
             setState(prevState => restoreGameState(prevState, progressState));
           }
