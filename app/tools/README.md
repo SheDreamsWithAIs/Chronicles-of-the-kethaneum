@@ -15,6 +15,30 @@ Then navigate to: `http://localhost:3000/tools`
 
 ## Available Tools
 
+### 📜 Story Blurb Editor
+
+**Access:** `http://localhost:3000/tools/story-blurb-editor`
+
+A visual editor for managing story progression blurbs that appear in the Book of Passage.
+
+**Key Features:**
+- Create, edit, and delete story blurbs
+- Configure triggers (milestones, events, story beats)
+- Organize blurbs by 8-beat narrative structure
+- Live preview of blurb appearance
+- Search and filter by story beat
+- Auto-save and manual save options
+
+**Use Cases:**
+- Writing narrative blurbs for player progression
+- Configuring when blurbs unlock (triggers)
+- Organizing story content by narrative beats
+- Testing story flow before deployment
+
+[📚 Full Documentation](./story-blurb-editor/README.md)
+
+---
+
 ### 📖 Genre Builder
 
 **Access:** `http://localhost:3000/tools/genre-builder`
