@@ -5,6 +5,8 @@
  * Uses compact IDs (e.g., "K001") instead of full titles to minimize storage.
  */
 
+import { fetchAsset } from '@/lib/utils/assetPath';
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -89,7 +91,7 @@ class BookRegistryManager {
    * Fetch the registry from the server
    */
   private async fetchRegistry(): Promise<BookRegistry> {
-    const response = await fetch('/data/bookRegistry.json');
+    const response = await fetchAsset('/data/bookRegistry.json');
     if (!response.ok) {
       throw new Error(`Failed to load book registry: ${response.status}`);
     }
