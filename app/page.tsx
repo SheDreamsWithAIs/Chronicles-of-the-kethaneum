@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { AudioSettingsModal } from '@/components/AudioSettingsModal';
 import { loadGameProgress } from '@/lib/save/saveSystem';
@@ -79,10 +80,13 @@ export default function TitleScreen() {
           <div className={styles.titleLayout}>
             <div className={styles.logoContainer}>
               <div className={styles.logoWrapper}>
-                <img
+                <Image
                   src="/images/logo-glow.png"
                   alt="Chronicles of the Kethaneum Logo"
+                  width={650}
+                  height={650}
                   className={styles.logoGlow}
+                  priority
                 />
               </div>
             </div>

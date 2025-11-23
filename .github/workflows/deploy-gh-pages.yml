@@ -40,6 +40,7 @@ jobs:
       - name: Build for production
         env:
           NODE_ENV: production
+          # Set basePath to repository name for project pages
           NEXT_PUBLIC_BASE_PATH: /Chronicles-of-the-kethaneum
         run: npm run build
 
