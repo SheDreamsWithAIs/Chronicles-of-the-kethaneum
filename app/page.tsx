@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { AudioSettingsModal } from '@/components/AudioSettingsModal';
 import { loadGameProgress } from '@/lib/save/saveSystem';
+import { navigateTo, getRoutePath } from '@/lib/utils/navigation';
 import styles from './title-screen.module.css';
 
 export default function TitleScreen() {
@@ -55,7 +55,8 @@ export default function TitleScreen() {
 
       // Force a full page reload to ensure all in-memory state is cleared
       // This prevents race conditions where old state gets re-saved
-      window.location.href = '/backstory';
+      // Use navigateTo to respect basePath for GitHub Pages
+      navigateTo('/backstory');
     }
   };
 
@@ -80,13 +81,10 @@ export default function TitleScreen() {
           <div className={styles.titleLayout}>
             <div className={styles.logoContainer}>
               <div className={styles.logoWrapper}>
-                <Image
-                  src="/images/logo-glow.png"
+                <img
+                  src={getRoutePath('/images/logo-glow.png')}
                   alt="Chronicles of the Kethaneum Logo"
-                  width={650}
-                  height={650}
                   className={styles.logoGlow}
-                  priority
                 />
               </div>
             </div>
