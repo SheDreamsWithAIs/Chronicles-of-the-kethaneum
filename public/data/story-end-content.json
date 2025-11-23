@@ -1,0 +1,65 @@
+{
+  "title": "Journey Complete",
+  "paragraphs": [
+    {
+      "segments": [
+        {
+          "text": "Congratulations, "
+        },
+        {
+          "text": "Archivist",
+          "color": "#fbbf24",
+          "italic": true
+        },
+        {
+          "text": "."
+        }
+      ]
+    },
+    {
+      "segments": [
+        {
+          "text": "You have proven yourself worthy of the "
+        },
+        {
+          "text": "Kethaneum's",
+          "color": "#8b5cf6"
+        },
+        {
+          "text": " sacred trust. Through countless puzzles and ancient texts, you have demonstrated not just intellect, but patience, perseverance, and a genuine love for knowledge."
+        }
+      ]
+    },
+    {
+      "segments": [
+        {
+          "text": "Your "
+        },
+        {
+          "text": "Book of Passage",
+          "italic": true,
+          "color": "#fbbf24"
+        },
+        {
+          "text": " now brims with the chronicles of your journey—each chapter a testament to the challenges you've overcome and the wisdom you've gained. The cosmic librarians have taken notice, and your name is now inscribed among the honored few."
+        }
+      ]
+    },
+    {
+      "segments": [
+        {
+          "text": "But remember: in the Kethaneum, every ending is merely a new beginning. The infinite shelves hold mysteries yet undiscovered, stories yet untold, and knowledge that awaits your curious mind."
+        }
+      ]
+    },
+    {
+      "segments": [
+        {
+          "text": "Until we meet again among the stars and stories...",
+          "italic": true,
+          "color": "#60a5fa"
+        }
+      ]
+    }
+  ]
+}

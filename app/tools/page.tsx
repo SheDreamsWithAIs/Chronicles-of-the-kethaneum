@@ -16,7 +16,34 @@ export default function ToolsPage() {
             </p>
           </header>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Game Screen Content Editor Tool */}
+            <Link href="/tools/content-editor">
+              <div className="bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-6 hover:bg-[var(--primary-light)] transition-all cursor-pointer h-full">
+                <div className="flex items-center mb-4">
+                  <div className="text-4xl mr-4">📝</div>
+                  <h2 className="text-2xl font-bold text-[var(--text-light)]">Game Screen Content Editor</h2>
+                </div>
+                <p className="text-[var(--text-medium)] mb-4">
+                  Visual editor for formatted text content used in game screens like Backstory and Story End.
+                </p>
+                <div className="space-y-2 text-sm text-[var(--text-light)]">
+                  <div className="flex items-start">
+                    <span className="mr-2">✓</span>
+                    <span>Rich text formatting (colors, bold, italic)</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">✓</span>
+                    <span>Live preview & paragraph management</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">✓</span>
+                    <span>JSON export & save to file</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
             {/* Genre Builder Tool */}
             <Link href="/tools/genre-builder">
               <div className="bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-6 hover:bg-[var(--primary-light)] transition-all cursor-pointer h-full">
