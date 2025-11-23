@@ -147,7 +147,11 @@ export default function PuzzleScreen() {
         // Puzzle-only and beat-the-clock: start countdown timer
         if (state.timeRemaining > 0) {
           console.log('[puzzle.page] Starting timer - grid exists, no timer, not paused, not gameOver, timeRemaining:', state.timeRemaining);
-          timer.start();
+          if (state.gameMode === 'puzzle-only') {
+            puzzleOnlyTimer.start();
+          } else if (state.gameMode === 'beat-the-clock') {
+            beatTheClockTimer.start();
+          }
         }
       }
     } else {
@@ -155,7 +159,7 @@ export default function PuzzleScreen() {
         console.log('[puzzle.page] Timer not started - timer:', state.timer ? 'exists' : 'null', 'paused:', state.paused, 'gameOver:', state.gameOver, 'timeRemaining:', state.timeRemaining, 'transitioning:', isTransitioningRef.current);
       }
     }
-  }, [state.grid?.length, state.timer, state.paused, state.gameOver, state.gameMode, state.timeRemaining, timer, storyTimer]);
+  }, [state.grid?.length, state.timer, state.paused, state.gameOver, state.gameMode, state.timeRemaining, storyTimer, puzzleOnlyTimer, beatTheClockTimer]);
 
   // Get current puzzle data
   const gridData = state.grid || [];
@@ -499,14 +503,27 @@ export default function PuzzleScreen() {
   }, [selectedCells, foundWordCells]);
 
   const handlePause = useCallback(() => {
-    timer.pause(); // Stop timer immediately first
+    // Stop timer immediately first
+    if (state.gameMode === 'story') {
+      storyTimer.pause();
+    } else if (state.gameMode === 'puzzle-only') {
+      puzzleOnlyTimer.pause();
+    } else {
+      beatTheClockTimer.pause();
+    }
     setIsPaused(true);
-  }, [timer]);
+  }, [state.gameMode, storyTimer, puzzleOnlyTimer, beatTheClockTimer]);
 
   const handleResume = useCallback(() => {
     setIsPaused(false);
-    timer.resume();
-  }, [timer]);
+    if (state.gameMode === 'story') {
+      storyTimer.resume();
+    } else if (state.gameMode === 'puzzle-only') {
+      puzzleOnlyTimer.resume();
+    } else {
+      beatTheClockTimer.resume();
+    }
+  }, [state.gameMode, storyTimer, puzzleOnlyTimer, beatTheClockTimer]);
 
   const handleBackToBookOfPassage = () => {
     router.push('/book-of-passage');
@@ -531,7 +548,7 @@ export default function PuzzleScreen() {
     setShowStatsModal(false);
     if (state.gameMode === 'puzzle-only') {
       // Clear timer before loading new puzzle to prevent stale callbacks
-      timer.clear();
+      puzzleOnlyTimer.clear();
       // Load a completely new random puzzle from any genre
       if (!state.puzzles || Object.keys(state.puzzles).length === 0) {
         await loadAll();
@@ -544,7 +561,7 @@ export default function PuzzleScreen() {
       }
     } else if (state.gameMode === 'story') {
       // Story mode: Load next puzzle using selection system with Kethaneum weaving
-      timer.clear();
+      storyTimer.clear();
       if (!state.puzzles || Object.keys(state.puzzles).length === 0) {
         await loadAll();
         await new Promise(resolve => setTimeout(resolve, 50));
@@ -562,7 +579,7 @@ export default function PuzzleScreen() {
         console.warn('Failed to load next puzzle:', result.message);
       }
     }
-  }, [state.gameMode, state.puzzles, loadRandom, loadAll, loadWithSelection, timer]);
+  }, [state.gameMode, state.puzzles, loadRandom, loadAll, loadWithSelection, puzzleOnlyTimer, storyTimer]);
 
   const handleRestartPuzzle = useCallback(() => {
     console.log('[puzzle.page.handleRestartPuzzle] Closing modal and restarting puzzle');
@@ -576,8 +593,13 @@ export default function PuzzleScreen() {
       gameOver: false,
     });
     setPuzzleStartTime(Date.now());
-    timer.start();
-  }, [state, setState, config, timer]);
+    if (state.gameMode === 'puzzle-only') {
+      puzzleOnlyTimer.start();
+    } else if (state.gameMode === 'beat-the-clock') {
+      beatTheClockTimer.start();
+    }
+    // Story mode doesn't use start() - it uses initialize()
+  }, [state, setState, config, state.gameMode, puzzleOnlyTimer, beatTheClockTimer]);
 
   const handleStartFreshRun = useCallback(async () => {
     console.log('[puzzle.page.handleStartFreshRun] Closing modal and starting fresh run');
