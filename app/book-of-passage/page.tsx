@@ -54,6 +54,18 @@ export default function BookOfPassageScreen() {
   // Initialize story progress hook
   const { initializeWithFirstBlurb } = useInitializeStoryProgress();
 
+  // Debug: Log story progress changes
+  useEffect(() => {
+    console.log('[BookOfPassage] Story progress updated:', {
+      currentBlurbId: state.storyProgress?.currentBlurbId,
+      unlockedBlurbs: state.storyProgress?.unlockedBlurbs,
+      currentBlurb: currentBlurb ? { id: currentBlurb.id, title: currentBlurb.title } : null,
+      storyReady,
+      hasHistory,
+      historyLength: storyHistory.length,
+    });
+  }, [state.storyProgress, currentBlurb, storyReady, hasHistory, storyHistory]);
+
   // Initialize story progress with first blurb if not already done
   useEffect(() => {
     if (!storyReady || !storyProgressManager.isLoaded()) return;
@@ -280,7 +292,7 @@ export default function BookOfPassageScreen() {
                 Current Story
               </button>
               {/* Story History tab - only visible when there's history */}
-              {hasHistory && storyHistory.length > 1 && (
+              {hasHistory && storyHistory.length > 0 && (
                 <button
                   className={`${styles.bookTab} ${activeTab === 'story-history' ? styles.active : ''}`}
                   onClick={() => setActiveTab('story-history')}
@@ -308,9 +320,7 @@ export default function BookOfPassageScreen() {
                       <>
                         <h3 className={styles.blurbTitle}>{currentBlurb.title}</h3>
                         <p><em>{currentBlurb.text}</em></p>
-                        <div className={styles.storyBeatIndicator}>
-                          {formatStoryBeat(currentBlurb.storyBeat)}
-                        </div>
+                        {/* Story beat indicator removed for final version */}
                       </>
                     ) : (
                       <>
