@@ -44,6 +44,7 @@ export function useGameModeHandlers({
   }, []);
   
   const handleWin = useCallback(() => {
+    console.log('[useGameModeHandlers.handleWin] ★★★ VERSION_DEBUG_2024_11_24_v2 ★★★');
     console.log('[useGameModeHandlers.handleWin] Win handler called');
 
     // Use stateRef.current instead of state prop to get the latest state
@@ -51,7 +52,7 @@ export function useGameModeHandlers({
     const currentState = stateRef.current;
     // Get previous state for trigger checking
     const previousState = previousStateRef.current;
-    
+
     const timeTaken = puzzleStartTime ? Math.floor((Date.now() - puzzleStartTime) / 1000) : 0;
     const wordsFound = currentState.wordList.filter((w: { found: boolean }) => w.found).length;
     const totalWords = currentState.wordList.length;
