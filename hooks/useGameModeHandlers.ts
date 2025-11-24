@@ -31,8 +31,10 @@ export function useGameModeHandlers({
 }: UseGameModeHandlersProps) {
   // Use ref to track current state for callbacks
   const stateRef = useRef(state);
-  
+  const previousStateRef = useRef(state);
+
   useEffect(() => {
+    previousStateRef.current = stateRef.current;
     stateRef.current = state;
   }, [state]);
   
@@ -43,10 +45,12 @@ export function useGameModeHandlers({
   
   const handleWin = useCallback(() => {
     console.log('[useGameModeHandlers.handleWin] Win handler called');
-    
+
     // Use stateRef.current instead of state prop to get the latest state
     // This is updated synchronously in checkWord before calling onWin
     const currentState = stateRef.current;
+    // Get previous state for trigger checking
+    const previousState = previousStateRef.current;
     
     const timeTaken = puzzleStartTime ? Math.floor((Date.now() - puzzleStartTime) / 1000) : 0;
     const wordsFound = currentState.wordList.filter((w: { found: boolean }) => w.found).length;
@@ -133,10 +137,10 @@ export function useGameModeHandlers({
         }
       }
 
-      // Check for story progress triggers (async, but fire-and-forget)
-      // The story progress manager will check conditions and update state if needed
+      // Check for story progress triggers
+      // Pass previous state to detect transitions (e.g., 0 → 1 books discovered)
       if (storyProgressManager.isLoaded()) {
-        const triggerResult = storyProgressManager.checkTriggerConditions(currentState);
+        const triggerResult = storyProgressManager.checkTriggerConditions(currentState, previousState);
         if (triggerResult.shouldTrigger && triggerResult.blurb) {
           console.log('[useGameModeHandlers.handleWin] Story trigger fired:', triggerResult.trigger, '-', triggerResult.blurb.title);
           const updatedProgress = storyProgressManager.unlockBlurb(
