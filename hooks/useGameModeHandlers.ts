@@ -130,41 +130,60 @@ export function useGameModeHandlers({
       console.log('[useGameModeHandlers.handleWin] Story mode - showing win modal');
 
       // Mark the puzzle as completed for the new selection system
-      if (markCompleted && currentState.currentGenre && currentState.puzzles[currentState.currentGenre]) {
-        const currentPuzzle = currentState.puzzles[currentState.currentGenre][currentState.currentPuzzleIndex];
-        if (currentPuzzle) {
-          markCompleted(currentPuzzle);
+      try {
+        console.log('[useGameModeHandlers.handleWin] About to call markCompleted...');
+        console.log('[useGameModeHandlers.handleWin] markCompleted exists:', typeof markCompleted);
+        console.log('[useGameModeHandlers.handleWin] currentGenre:', currentState.currentGenre);
+        console.log('[useGameModeHandlers.handleWin] currentPuzzleIndex:', currentState.currentPuzzleIndex);
+
+        if (markCompleted && currentState.currentGenre && currentState.puzzles[currentState.currentGenre]) {
+          const currentPuzzle = currentState.puzzles[currentState.currentGenre][currentState.currentPuzzleIndex];
+          console.log('[useGameModeHandlers.handleWin] currentPuzzle:', currentPuzzle ? 'exists' : 'null');
+          if (currentPuzzle) {
+            console.log('[useGameModeHandlers.handleWin] Calling markCompleted with puzzle:', currentPuzzle.name);
+            markCompleted(currentPuzzle);
+            console.log('[useGameModeHandlers.handleWin] markCompleted call finished');
+          }
+        } else {
+          console.log('[useGameModeHandlers.handleWin] Skipping markCompleted - conditions not met');
         }
+      } catch (error) {
+        console.error('[useGameModeHandlers.handleWin] ERROR in markCompleted section:', error);
       }
 
       // Check for story progress triggers
       // Pass previous state to detect transitions (e.g., 0 → 1 books discovered)
-      console.log('[useGameModeHandlers.handleWin] Checking story triggers...');
-      console.log('[useGameModeHandlers.handleWin] Manager loaded:', storyProgressManager.isLoaded());
-      console.log('[useGameModeHandlers.handleWin] Current books:', currentState.discoveredBooks?.size || 0);
-      console.log('[useGameModeHandlers.handleWin] Previous books:', previousState.discoveredBooks?.size || 0);
-      console.log('[useGameModeHandlers.handleWin] Current storyProgress:', currentState.storyProgress);
+      try {
+        console.log('[useGameModeHandlers.handleWin] Checking story triggers...');
+        console.log('[useGameModeHandlers.handleWin] storyProgressManager exists:', typeof storyProgressManager);
+        console.log('[useGameModeHandlers.handleWin] Manager loaded:', storyProgressManager.isLoaded());
+        console.log('[useGameModeHandlers.handleWin] Current books:', currentState.discoveredBooks?.size || 0);
+        console.log('[useGameModeHandlers.handleWin] Previous books:', previousState.discoveredBooks?.size || 0);
+        console.log('[useGameModeHandlers.handleWin] Current storyProgress:', currentState.storyProgress);
 
-      if (storyProgressManager.isLoaded()) {
-        const triggerResult = storyProgressManager.checkTriggerConditions(currentState, previousState);
-        console.log('[useGameModeHandlers.handleWin] Trigger result:', triggerResult);
+        if (storyProgressManager.isLoaded()) {
+          const triggerResult = storyProgressManager.checkTriggerConditions(currentState, previousState);
+          console.log('[useGameModeHandlers.handleWin] Trigger result:', triggerResult);
 
-        if (triggerResult.shouldTrigger && triggerResult.blurb) {
-          console.log('[useGameModeHandlers.handleWin] Story trigger fired:', triggerResult.trigger, '-', triggerResult.blurb.title);
-          const updatedProgress = storyProgressManager.unlockBlurb(
-            triggerResult.blurb.id,
-            currentState.storyProgress
-          );
-          console.log('[useGameModeHandlers.handleWin] Updated progress:', updatedProgress);
-          setState({
-            ...currentState,
-            storyProgress: updatedProgress,
-          });
+          if (triggerResult.shouldTrigger && triggerResult.blurb) {
+            console.log('[useGameModeHandlers.handleWin] Story trigger fired:', triggerResult.trigger, '-', triggerResult.blurb.title);
+            const updatedProgress = storyProgressManager.unlockBlurb(
+              triggerResult.blurb.id,
+              currentState.storyProgress
+            );
+            console.log('[useGameModeHandlers.handleWin] Updated progress:', updatedProgress);
+            setState({
+              ...currentState,
+              storyProgress: updatedProgress,
+            });
+          } else {
+            console.log('[useGameModeHandlers.handleWin] No trigger fired');
+          }
         } else {
-          console.log('[useGameModeHandlers.handleWin] No trigger fired');
+          console.log('[useGameModeHandlers.handleWin] Story progress manager not loaded yet');
         }
-      } else {
-        console.log('[useGameModeHandlers.handleWin] Story progress manager not loaded yet');
+      } catch (error) {
+        console.error('[useGameModeHandlers.handleWin] ERROR in story progress section:', error);
       }
 
       setStatsModalIsWin(true);
