@@ -365,11 +365,7 @@ export default function BookOfPassageScreen() {
                             <h3 className={styles.historyEntryTitle}>{blurb.title}</h3>
                           </div>
                           <p className={styles.historyEntryText}>{blurb.text}</p>
-                          <div className={styles.historyEntryMeta}>
-                            <span className={styles.historyEntryBeat}>
-                              {formatStoryBeat(blurb.storyBeat)}
-                            </span>
-                          </div>
+                          {/* Story beat indicator removed for final version */}
                         </div>
                       ))}
                     </div>
