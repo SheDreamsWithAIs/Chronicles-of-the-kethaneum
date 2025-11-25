@@ -205,6 +205,7 @@ export function restoreGameState(state: GameState, savedState: Partial<GameState
       // Special handling for completedPuzzlesByGenre (nested Sets)
       else if (key === 'completedPuzzlesByGenre') {
         const savedCompleted = (savedState as any).completedPuzzlesByGenre;
+        console.log('[restoreGameState] Restoring completedPuzzlesByGenre:', savedCompleted);
         if (savedCompleted && typeof savedCompleted === 'object') {
           restored.completedPuzzlesByGenre = {};
           for (const genre in savedCompleted) {
@@ -214,9 +215,15 @@ export function restoreGameState(state: GameState, savedState: Partial<GameState
             } else if (Array.isArray(savedCompleted[genre])) {
               // Array from JSON - convert to Set
               restored.completedPuzzlesByGenre[genre] = new Set(savedCompleted[genre]);
+              console.log(`[restoreGameState] Converted genre "${genre}" from array to Set:`, Array.from(restored.completedPuzzlesByGenre[genre]));
             }
           }
         }
+        console.log('[restoreGameState] Final completedPuzzlesByGenre:',
+          Object.fromEntries(
+            Object.entries(restored.completedPuzzlesByGenre).map(([k, v]) => [k, Array.from(v as Set<string>)])
+          )
+        );
       }
       // Special handling for storyProgress
       else if (key === 'storyProgress') {
