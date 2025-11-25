@@ -413,6 +413,14 @@ export function selectGenre(
   genre: string,
   config: PuzzleSelectionConfig = defaultPuzzleSelectionConfig
 ): GameState {
+  console.log(`[selectGenre] ENTRY - genre parameter: "${genre}"`);
+  console.log('[selectGenre] ENTRY - state.completedPuzzlesByGenre:', state.completedPuzzlesByGenre);
+  console.log(`[selectGenre] ENTRY - state.completedPuzzlesByGenre["${genre}"]:`,
+    state.completedPuzzlesByGenre?.[genre]
+      ? Array.from(state.completedPuzzlesByGenre[genre])
+      : 'undefined or empty'
+  );
+
   const newState = { ...state };
 
   // Set the selected genre
