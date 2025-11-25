@@ -33,6 +33,11 @@ export interface SavedProgress {
 
 /**
  * Save game progress to local storage
+ *
+ * @deprecated Use `saveProgress` from `unifiedSaveSystem` instead. This legacy
+ * format is ~3-5x larger and only maintained for backward compatibility.
+ *
+ * @see {@link unifiedSaveSystem.saveProgress}
  */
 export function saveGameProgress(state: GameState): void {
   try {
@@ -91,6 +96,11 @@ export function saveGameProgress(state: GameState): void {
 
 /**
  * Load game progress from local storage
+ *
+ * @deprecated Use `loadProgress` from `unifiedSaveSystem` instead. This function
+ * is only maintained for backward compatibility with old save formats.
+ *
+ * @see {@link unifiedSaveSystem.loadProgress}
  */
 export function loadGameProgress(): SavedProgress | null {
   try {
