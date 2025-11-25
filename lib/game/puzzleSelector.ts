@@ -271,10 +271,14 @@ function selectGenrePuzzle(
 
     const completedSet = state.completedPuzzlesByGenre[selectedGenre];
 
+    console.log(`[selectGenrePuzzle] Genre "${selectedGenre}" completed:`, Array.from(completedSet || []));
+
     // Find uncompleted puzzles
     const uncompletedPuzzles = genrePuzzles.filter(
       (puzzle) => puzzle && puzzle.title && !completedSet.has(puzzle.title)
     );
+
+    console.log(`[selectGenrePuzzle] Uncompleted puzzles:`, uncompletedPuzzles.map(p => p.title));
 
     let puzzle: PuzzleData;
     let genreExhausted = false;
@@ -408,6 +412,15 @@ export function selectGenre(
   genre: string,
   config: PuzzleSelectionConfig = defaultPuzzleSelectionConfig
 ): GameState {
+  console.log(`[selectGenre] ENTRY - genre: "${genre}"`);
+  console.log('[selectGenre] completedPuzzlesByGenre:',
+    state.completedPuzzlesByGenre
+      ? Object.fromEntries(
+          Object.entries(state.completedPuzzlesByGenre).map(([k, v]) => [k, Array.from(v)])
+        )
+      : 'undefined'
+  );
+
   const newState = { ...state };
 
   // Set the selected genre
