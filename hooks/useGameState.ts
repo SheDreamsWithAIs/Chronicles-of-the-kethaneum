@@ -42,6 +42,7 @@ export function useGameState() {
           success: result.success,
           hasData: !!result.data,
           storyProgress: result.data?.storyProgress,
+          completedPuzzlesByGenre: result.data?.completedPuzzlesByGenre,
           error: result.error
         });
 
@@ -58,7 +59,16 @@ export function useGameState() {
             console.log(`Storage size: ${info.storageSize.formatted}`);
           }
 
-          console.log('[useGameState] Restoring state with data:', result.data);
+          console.log('[useGameState] Restoring state with data:', {
+            ...result.data,
+            completedPuzzlesByGenre: result.data.completedPuzzlesByGenre
+              ? Object.fromEntries(
+                  Object.entries(result.data.completedPuzzlesByGenre).map(([k, v]) =>
+                    [k, v instanceof Set ? Array.from(v) : v]
+                  )
+                )
+              : undefined
+          });
           setState(prevState => restoreGameState(prevState, result.data as Partial<GameState>));
         } else if (!result.success) {
           // If unified load failed, try legacy as last resort
