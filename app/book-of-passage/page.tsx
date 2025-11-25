@@ -54,18 +54,6 @@ export default function BookOfPassageScreen() {
   // Initialize story progress hook
   const { initializeWithFirstBlurb } = useInitializeStoryProgress();
 
-  // Debug: Log story progress changes
-  useEffect(() => {
-    console.log('[BookOfPassage] Story progress updated:', {
-      currentBlurbId: state.storyProgress?.currentBlurbId,
-      unlockedBlurbs: state.storyProgress?.unlockedBlurbs,
-      currentBlurb: currentBlurb ? { id: currentBlurb.id, title: currentBlurb.title } : null,
-      storyReady,
-      hasHistory,
-      historyLength: storyHistory.length,
-    });
-  }, [state.storyProgress, currentBlurb, storyReady, hasHistory, storyHistory]);
-
   // Initialize story progress with first blurb if not already done
   useEffect(() => {
     if (!storyReady || !storyProgressManager.isLoaded()) return;
@@ -74,7 +62,6 @@ export default function BookOfPassageScreen() {
     if (state.storyProgress && state.storyProgress.unlockedBlurbs.length === 0) {
       const updatedProgress = initializeWithFirstBlurb(state.storyProgress);
       if (updatedProgress.unlockedBlurbs.length > 0) {
-        console.log('[BookOfPassage] Initialized story progress with first blurb');
         setState({ ...state, storyProgress: updatedProgress });
       }
     }
@@ -253,7 +240,6 @@ export default function BookOfPassageScreen() {
   const handleReadStory = useCallback((bookId: string, bookTitle: string) => {
     // TODO: Open story reader modal when implemented
     // For now, show placeholder - will be replaced with modal
-    console.log(`[Book of Passage] Opening story reader for: ${bookTitle} (${bookId})`);
     alert(`Story Reader coming soon!\n\nBook: ${bookTitle}\n\nThis will open a modal to read completed story excerpts.`);
   }, []);
 
