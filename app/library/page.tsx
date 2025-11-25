@@ -59,7 +59,56 @@ export default function LibraryScreen() {
       const { selectGenre } = require('@/lib/game/puzzleSelector');
       const updatedState = selectGenre(prevState, genre);
 
-      return updatedState;
+      // Check if we're selecting the same genre with an incomplete puzzle
+      const isSameGenre = prevState.currentGenre === genre;
+      const hasValidPuzzleIndex = prevState.currentPuzzleIndex !== undefined &&
+                                   prevState.currentPuzzleIndex >= 0;
+      let shouldClearCurrentState = true;
+      let shouldPreserveBook = false;
+
+      if (isSameGenre && hasValidPuzzleIndex && prevState.puzzles[genre]) {
+        const currentPuzzle = prevState.puzzles[genre][prevState.currentPuzzleIndex];
+        const completedSet = prevState.completedPuzzlesByGenre?.[genre];
+        const isCompleted = currentPuzzle &&
+                           completedSet &&
+                           completedSet.has(currentPuzzle.title);
+
+        if (!isCompleted) {
+          // Puzzle is incomplete - keep current state so restore logic can load same puzzle
+          shouldClearCurrentState = false;
+        } else {
+          // Puzzle is completed - preserve currentBook so selector can continue the book series
+          // Clear puzzleIndex and storyPart so restore logic doesn't trigger
+          shouldClearCurrentState = false;
+          shouldPreserveBook = true;
+        }
+      }
+
+      // Clear the grid to force puzzle page to load a new puzzle
+      // This ensures loadPuzzleForMode doesn't return early due to existing grid
+      const clearedState = {
+        ...updatedState,
+        grid: [],
+        wordList: [],
+        selectedCells: [],
+        gameOver: false,
+        ...(shouldClearCurrentState ? {
+          // Different genre or no saved puzzle - clear everything
+          currentGenre: '',
+          currentBook: '',
+          currentPuzzleIndex: -1,
+          currentStoryPart: -1,
+        } : shouldPreserveBook ? {
+          // Completed puzzle + same genre - preserve book, clear puzzle index and story part
+          currentPuzzleIndex: -1,
+          currentStoryPart: -1,
+          // currentBook and currentGenre are preserved from updatedState
+        } : {
+          // Incomplete puzzle - preserve everything (no clearing needed)
+        }),
+      };
+
+      return clearedState;
     });
 
     // Wait for state update, then navigate

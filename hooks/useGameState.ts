@@ -104,6 +104,8 @@ export function useGameState() {
             Object.entries(state.completedPuzzlesByGenre).map(([k, v]) => [k, Array.from(v)])
           )
         : {},
+      // Include story progress in save detection
+      storyProgress: state.storyProgress,
     });
 
     // Skip if nothing meaningful changed

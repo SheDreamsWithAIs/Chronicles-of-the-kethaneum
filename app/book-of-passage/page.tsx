@@ -4,7 +4,9 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { useGameState } from '@/hooks/useGameState';
+import { useStoryProgress, useInitializeStoryProgress } from '@/hooks/useStoryProgress';
 import { bookRegistry } from '@/lib/book/bookRegistry';
+import { storyProgressManager } from '@/lib/story';
 import styles from './book-of-passage.module.css';
 
 // ============================================================================
@@ -29,6 +31,7 @@ interface BookDisplayData {
 }
 
 type SortOption = 'title' | 'progress' | 'genre' | 'recent';
+type TabOption = 'current-journey' | 'story-history' | 'discovered-books';
 
 // ============================================================================
 // Component
@@ -36,8 +39,33 @@ type SortOption = 'title' | 'progress' | 'genre' | 'recent';
 
 export default function BookOfPassageScreen() {
   const router = useRouter();
-  const { state } = useGameState();
-  const [activeTab, setActiveTab] = useState('book-of-passage');
+  const { state, setState } = useGameState();
+  const [activeTab, setActiveTab] = useState<TabOption>('current-journey');
+
+  // Story progress hook
+  const {
+    isReady: storyReady,
+    currentBlurb,
+    storyHistory,
+    hasHistory,
+    currentStoryBeat,
+  } = useStoryProgress(state.storyProgress);
+
+  // Initialize story progress hook
+  const { initializeWithFirstBlurb } = useInitializeStoryProgress();
+
+  // Initialize story progress with first blurb if not already done
+  useEffect(() => {
+    if (!storyReady || !storyProgressManager.isLoaded()) return;
+
+    // Check if story progress needs initialization (no blurbs unlocked yet)
+    if (state.storyProgress && state.storyProgress.unlockedBlurbs.length === 0) {
+      const updatedProgress = initializeWithFirstBlurb(state.storyProgress);
+      if (updatedProgress.unlockedBlurbs.length > 0) {
+        setState({ ...state, storyProgress: updatedProgress });
+      }
+    }
+  }, [storyReady, state, setState, initializeWithFirstBlurb]);
 
   // Filter & Search State
   const [searchQuery, setSearchQuery] = useState('');
@@ -212,7 +240,6 @@ export default function BookOfPassageScreen() {
   const handleReadStory = useCallback((bookId: string, bookTitle: string) => {
     // TODO: Open story reader modal when implemented
     // For now, show placeholder - will be replaced with modal
-    console.log(`[Book of Passage] Opening story reader for: ${bookTitle} (${bookId})`);
     alert(`Story Reader coming soon!\n\nBook: ${bookTitle}\n\nThis will open a modal to read completed story excerpts.`);
   }, []);
 
@@ -223,6 +250,14 @@ export default function BookOfPassageScreen() {
     const inProgress = total - completed;
     return { total, completed, inProgress };
   }, [processedBooks]);
+
+  // Format story beat for display
+  const formatStoryBeat = (beat: string): string => {
+    return beat
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
 
   return (
     <div className={styles.bookPassageContainer} data-testid="book-of-passage-screen">
@@ -237,11 +272,20 @@ export default function BookOfPassageScreen() {
           <div className={styles.bookContent}>
             <div className={styles.bookTabs}>
               <button
-                className={`${styles.bookTab} ${activeTab === 'book-of-passage' ? styles.active : ''}`}
-                onClick={() => setActiveTab('book-of-passage')}
+                className={`${styles.bookTab} ${activeTab === 'current-journey' ? styles.active : ''}`}
+                onClick={() => setActiveTab('current-journey')}
               >
                 Current Story
               </button>
+              {/* Story History tab - only visible when there's history */}
+              {hasHistory && storyHistory.length > 0 && (
+                <button
+                  className={`${styles.bookTab} ${activeTab === 'story-history' ? styles.active : ''}`}
+                  onClick={() => setActiveTab('story-history')}
+                >
+                  Story History ({storyHistory.length})
+                </button>
+              )}
               <button
                 className={`${styles.bookTab} ${activeTab === 'discovered-books' ? styles.active : ''}`}
                 onClick={() => setActiveTab('discovered-books')}
@@ -251,14 +295,25 @@ export default function BookOfPassageScreen() {
             </div>
 
             <div className={styles.pageContent}>
-              {activeTab === 'book-of-passage' && (
+              {/* Current Journey Tab */}
+              {activeTab === 'current-journey' && (
                 <div className={styles.pageSection}>
                   <h2 className={styles.pageTitle}>Book of Passage</h2>
                   <p className={styles.pageSubtitle}>Your Current Journey</p>
 
                   <div className={styles.storyContent}>
-                    <p><em>The pages of your Book of Passage shimmer as new words appear...</em></p>
-                    <p>Today marks your first day as Assistant Archivist in the vast expanse of the Kethaneum. The cosmic library stretches before you, its infinite shelves holding knowledge from countless worlds and civilizations.</p>
+                    {storyReady && currentBlurb ? (
+                      <>
+                        <h3 className={styles.blurbTitle}>{currentBlurb.title}</h3>
+                        <p><em>{currentBlurb.text}</em></p>
+                        {/* Story beat indicator removed for final version */}
+                      </>
+                    ) : (
+                      <>
+                        <p><em>The pages of your Book of Passage shimmer as new words appear...</em></p>
+                        <p>Today marks your first day as Assistant Archivist in the vast expanse of the Kethaneum. The cosmic library stretches before you, its infinite shelves holding knowledge from countless worlds and civilizations.</p>
+                      </>
+                    )}
                   </div>
 
                   {/* Stats Summary */}
@@ -281,6 +336,34 @@ export default function BookOfPassageScreen() {
                 </div>
               )}
 
+              {/* Story History Tab */}
+              {activeTab === 'story-history' && (
+                <div className={styles.pageSection}>
+                  <h2 className={styles.pageTitle}>Story History</h2>
+                  <p className={styles.pageSubtitle}>Your Journey Through the Kethaneum</p>
+
+                  {storyHistory.length > 0 ? (
+                    <div className={styles.storyHistoryList}>
+                      {storyHistory.map((blurb, index) => (
+                        <div key={blurb.id} className={styles.historyEntry}>
+                          <div className={styles.historyEntryHeader}>
+                            <span className={styles.historyEntryNumber}>{index + 1}</span>
+                            <h3 className={styles.historyEntryTitle}>{blurb.title}</h3>
+                          </div>
+                          <p className={styles.historyEntryText}>{blurb.text}</p>
+                          {/* Story beat indicator removed for final version */}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className={styles.noHistory}>
+                      Your story has just begun. Continue your journey to fill these pages.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Discovered Books Tab */}
               {activeTab === 'discovered-books' && (
                 <div className={styles.pageSection}>
                   <h2 className={styles.pageTitle}>Discovered Books</h2>

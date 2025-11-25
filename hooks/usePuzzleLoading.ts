@@ -40,9 +40,9 @@ export function usePuzzleLoading({
   const loadPuzzleForMode = useCallback(async (): Promise<{ genreComplete?: boolean } | void> => {
     // Don't try to load until state restoration is complete
     if (!isReady) return;
-    
+
     if (state.grid && state.grid.length > 0) return; // Already loaded
-    
+
     // Wait a moment to ensure state restoration from localStorage has completed
     await new Promise(resolve => setTimeout(resolve, 50));
     
@@ -117,32 +117,43 @@ export function usePuzzleLoading({
     } else {
       // Story Mode: Use new puzzle selection system with Kethaneum weaving
 
-      // First, try to restore exact puzzle if we're refreshing the page
-      if (genreToLoad && puzzleIndex !== undefined && puzzleIndex >= 0 &&
-          state.puzzles && state.puzzles[genreToLoad] &&
-          state.puzzles[genreToLoad][puzzleIndex]) {
-        // Restore the exact puzzle we were on
+      // Determine if we should restore the same puzzle
+      // Restore if:
+      // 1. We have a valid currentGenre/puzzleIndex (saved state)
+      // 2. selectedGenre matches currentGenre (same genre)
+      // 3. The puzzle at that index is NOT completed (incomplete puzzle - user wants to continue)
+      const shouldRestore = genreToLoad &&
+                            puzzleIndex !== undefined &&
+                            puzzleIndex >= 0 &&
+                            state.selectedGenre === genreToLoad &&
+                            state.puzzles &&
+                            state.puzzles[genreToLoad] &&
+                            state.puzzles[genreToLoad][puzzleIndex];
+
+      if (shouldRestore) {
         const puzzleToRestore = state.puzzles[genreToLoad][puzzleIndex];
+        const completedSet = state.completedPuzzlesByGenre?.[genreToLoad];
+        const isCompleted = completedSet && completedSet.has(puzzleToRestore.title);
 
-        // Verify it matches the saved book and story part
-        if ((!bookToLoad || puzzleToRestore.book === bookToLoad) &&
-            (state.currentStoryPart === undefined || puzzleToRestore.storyPart === state.currentStoryPart)) {
-          // Initialize the puzzle - it will preserve currentGenre and currentPuzzleIndex from state
-          // But we need to ensure they're set before calling initialize
-          setState(prevState => ({
-            ...prevState,
-            currentGenre: genreToLoad,
-            currentPuzzleIndex: puzzleIndex,
-            currentBook: puzzleToRestore.book,
-            currentStoryPart: puzzleToRestore.storyPart !== undefined ? puzzleToRestore.storyPart : 0
-          }));
+        // Only restore if puzzle is NOT completed (user wants to continue same puzzle)
+        if (!isCompleted) {
+          // Verify it matches the saved book and story part
+          if ((!bookToLoad || puzzleToRestore.book === bookToLoad) &&
+              (state.currentStoryPart === undefined || puzzleToRestore.storyPart === state.currentStoryPart)) {
+            setState(prevState => ({
+              ...prevState,
+              currentGenre: genreToLoad,
+              currentPuzzleIndex: puzzleIndex,
+              currentBook: puzzleToRestore.book,
+              currentStoryPart: puzzleToRestore.storyPart !== undefined ? puzzleToRestore.storyPart : 0
+            }));
 
-          // Wait for state update, then initialize
-          await new Promise(resolve => setTimeout(resolve, 0));
+            await new Promise(resolve => setTimeout(resolve, 0));
 
-          const success = initialize(puzzleToRestore);
-          if (success) {
-            return;
+            const success = initialize(puzzleToRestore);
+            if (success) {
+              return;
+            }
           }
         }
       }

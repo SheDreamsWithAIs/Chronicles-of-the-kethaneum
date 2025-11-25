@@ -5,6 +5,7 @@
 
 import type { GameState } from '../game/state';
 import type { AudioSettings } from '../core/config';
+import type { StoryProgressState } from '../story/types';
 
 export interface SavedProgress {
   completedPuzzles: number;
@@ -26,10 +27,17 @@ export interface SavedProgress {
   completedPuzzlesByGenre?: { [genre: string]: string[] }; // Arrays instead of Sets for JSON
   kethaneumRevealed?: boolean;
   genreExhausted?: boolean;
+  // Story progress system fields
+  storyProgress?: StoryProgressState;
 }
 
 /**
  * Save game progress to local storage
+ *
+ * @deprecated Use `saveProgress` from `unifiedSaveSystem` instead. This legacy
+ * format is ~3-5x larger and only maintained for backward compatibility.
+ *
+ * @see {@link unifiedSaveSystem.saveProgress}
  */
 export function saveGameProgress(state: GameState): void {
   try {
@@ -74,6 +82,8 @@ export function saveGameProgress(state: GameState): void {
       completedPuzzlesByGenre: Object.keys(completedPuzzlesByGenre).length > 0 ? completedPuzzlesByGenre : undefined,
       kethaneumRevealed: state.kethaneumRevealed || undefined,
       genreExhausted: state.genreExhausted || undefined,
+      // Story progress system fields
+      storyProgress: state.storyProgress ? JSON.parse(JSON.stringify(state.storyProgress)) : undefined,
     };
 
     // Save to localStorage
@@ -86,6 +96,11 @@ export function saveGameProgress(state: GameState): void {
 
 /**
  * Load game progress from local storage
+ *
+ * @deprecated Use `loadProgress` from `unifiedSaveSystem` instead. This function
+ * is only maintained for backward compatibility with old save formats.
+ *
+ * @see {@link unifiedSaveSystem.loadProgress}
  */
 export function loadGameProgress(): SavedProgress | null {
   try {

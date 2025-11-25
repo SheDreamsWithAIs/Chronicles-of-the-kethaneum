@@ -33,8 +33,6 @@ export function selectNextPuzzle(
   config: PuzzleSelectionConfig = defaultPuzzleSelectionConfig
 ): PuzzleSelectionResult {
   try {
-    console.log(`[PuzzleSelector] Selecting next puzzle. Selected genre: "${state.selectedGenre}", Puzzles since last Kethaneum: ${state.puzzlesSinceLastKethaneum}/${state.nextKethaneumInterval}`);
-
     // Validate state
     if (!state) {
       throw new Error('Game state is null or undefined');
@@ -67,17 +65,14 @@ export function selectNextPuzzle(
     const shouldInsertKethaneum = checkIfTimeForKethaneum(newState, config);
 
     if (shouldInsertKethaneum) {
-      console.log('[PuzzleSelector] Time for Kethaneum puzzle!');
       const kethaneumResult = selectKethaneumPuzzle(newState, config);
 
       if (kethaneumResult.puzzle) {
         // Successfully got a Kethaneum puzzle
         return kethaneumResult;
-      } else {
-        // No more Kethaneum puzzles available, continue with regular genre
-        console.log('[PuzzleSelector] No Kethaneum puzzles available, continuing with regular genre');
-        // Fall through to select from chosen genre
       }
+      // No more Kethaneum puzzles available, continue with regular genre
+      // Fall through to select from chosen genre
     }
 
     // Select from the player's chosen genre
@@ -165,8 +160,6 @@ function selectKethaneumPuzzle(
       throw new Error(`Kethaneum puzzle at index ${state.nextKethaneumIndex} is missing required fields`);
     }
 
-    console.log(`[Kethaneum] Selecting puzzle ${state.nextKethaneumIndex + 1}/${kethaneumPuzzles.length}: "${puzzle.title}"`);
-
     const newState = { ...state };
 
     // Update state for next selection
@@ -230,11 +223,7 @@ function selectNewBook(uncompletedPuzzles: PuzzleData[], selectedGenre: string):
   // Randomly select from these starting points
   const startingPuzzles = Object.values(bookStartPoints);
   const randomIndex = Math.floor(Math.random() * startingPuzzles.length);
-  const puzzle = startingPuzzles[randomIndex];
-
-  console.log(`[Genre: ${selectedGenre}] Selected new book from ${startingPuzzles.length} options: "${puzzle.title}" (Part ${puzzle.storyPart ?? 0})`);
-
-  return puzzle;
+  return startingPuzzles[randomIndex];
 }
 
 /**
@@ -293,7 +282,6 @@ function selectGenrePuzzle(
           });
 
           puzzle = lowestPart;
-          console.log(`[Genre: ${selectedGenre}] Continuing current book "${state.currentBook}": "${puzzle.title}" (Part ${puzzle.storyPart ?? 0})`);
         } else {
           // Current book is complete, select a new book
           puzzle = selectNewBook(uncompletedPuzzles, selectedGenre);
@@ -311,7 +299,6 @@ function selectGenrePuzzle(
       // Select a random puzzle
       const randomIndex = Math.floor(Math.random() * genrePuzzles.length);
       puzzle = genrePuzzles[randomIndex];
-      console.log(`[Genre: ${selectedGenre}] Genre exhausted! Restarting with puzzle: "${puzzle.title}"`);
     }
 
     // Validate puzzle has required fields
@@ -387,7 +374,6 @@ export function markPuzzleCompleted(
 
     // Mark this puzzle as completed
     newState.completedPuzzlesByGenre[genre].add(puzzle.title);
-    console.log(`[PuzzleSelector] Marked puzzle "${puzzle.title}" as completed in genre "${genre}"`);
 
     // Increment global completed counter
     newState.completedPuzzles += 1;
