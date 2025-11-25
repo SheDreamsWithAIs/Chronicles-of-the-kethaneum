@@ -1,8 +1,8 @@
 /**
- * Story Progress Manager
+ * Story Blurb Manager
  *
- * Manages the player's story progression through the Kethaneum narrative.
- * Handles loading blurbs, checking trigger conditions, and updating progress state.
+ * Manages narrative blurbs (story text moments) that display as the player progresses.
+ * Handles loading blurbs, checking trigger conditions, and unlocking narrative moments.
  */
 
 import {
@@ -27,9 +27,10 @@ interface MinimalGameState {
 }
 
 /**
- * StoryProgressManager singleton class
+ * StoryBlurbManager singleton class
+ * Manages narrative blurbs that appear based on game progress triggers
  */
-class StoryProgressManagerClass {
+class StoryBlurbManagerClass {
   private blurbs: StoryBlurb[] = [];
   private blurbsById: Map<string, StoryBlurb> = new Map();
   private blurbsByTrigger: Map<StoryTrigger, StoryBlurb[]> = new Map();
@@ -383,7 +384,7 @@ class StoryProgressManagerClass {
 }
 
 // Export singleton instance
-export const storyProgressManager = new StoryProgressManagerClass();
+export const storyBlurbManager = new StoryBlurbManagerClass();
 
 // Export class for testing
-export { StoryProgressManagerClass };
+export { StoryBlurbManagerClass };

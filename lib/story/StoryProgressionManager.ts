@@ -114,12 +114,23 @@ export class StoryProgressionManager {
     // 3. Load new character groups (if configured)
     await this.loadCharacterGroups(newBeat);
 
-    // 4. Emit event for other systems
+    // 4. Emit event for other systems (including blurb system)
     this.emit('storyProgressionChanged', {
       previousBeat,
       newBeat,
       timestamp: new Date().toISOString(),
     });
+
+    // 5. Emit beat-specific trigger for blurb system
+    // This allows story blurbs with triggers like 'story_beat_first_plot_point' to fire
+    const beatTrigger = `story_beat_${newBeat}`;
+    this.emit('beatTrigger', {
+      trigger: beatTrigger,
+      beat: newBeat,
+      timestamp: new Date().toISOString(),
+    });
+
+    this.log(`Emitted beat trigger: ${beatTrigger}`);
   }
 
   /**

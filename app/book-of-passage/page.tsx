@@ -6,7 +6,7 @@ import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { useGameState } from '@/hooks/useGameState';
 import { useStoryProgress, useInitializeStoryProgress } from '@/hooks/useStoryProgress';
 import { bookRegistry } from '@/lib/book/bookRegistry';
-import { storyProgressManager } from '@/lib/story';
+import { storyBlurbManager } from '@/lib/story';
 import styles from './book-of-passage.module.css';
 
 // ============================================================================
@@ -56,7 +56,7 @@ export default function BookOfPassageScreen() {
 
   // Initialize story progress with first blurb if not already done
   useEffect(() => {
-    if (!storyReady || !storyProgressManager.isLoaded()) return;
+    if (!storyReady || !storyBlurbManager.isLoaded()) return;
 
     // Check if story progress needs initialization (no blurbs unlocked yet)
     if (state.storyProgress && state.storyProgress.unlockedBlurbs.length === 0) {

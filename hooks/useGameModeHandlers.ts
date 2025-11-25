@@ -6,7 +6,7 @@
 import { useCallback, useRef, useEffect } from 'react';
 import type { GameState, PuzzleData } from '@/lib/game/state';
 import { recordPuzzleStats, incrementTotalWords } from '@/lib/game/stats';
-import { storyProgressManager } from '@/lib/story';
+import { storyBlurbManager } from '@/lib/story';
 import { markPuzzleCompleted } from '@/lib/game/puzzleSelector';
 
 interface UseGameModeHandlersProps {
@@ -134,11 +134,11 @@ export function useGameModeHandlers({
 
         // Check for story progress triggers
         // Pass previous state to detect transitions (e.g., 0 → 1 books discovered)
-        if (storyProgressManager.isLoaded()) {
-          const triggerResult = storyProgressManager.checkTriggerConditions(updatedState, previousState);
+        if (storyBlurbManager.isLoaded()) {
+          const triggerResult = storyBlurbManager.checkTriggerConditions(updatedState, previousState);
 
           if (triggerResult.shouldTrigger && triggerResult.blurb) {
-            const updatedProgress = storyProgressManager.unlockBlurb(
+            const updatedProgress = storyBlurbManager.unlockBlurb(
               triggerResult.blurb.id,
               updatedState.storyProgress
             );

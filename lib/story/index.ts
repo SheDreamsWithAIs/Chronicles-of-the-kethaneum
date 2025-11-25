@@ -9,7 +9,7 @@
 export * from './types';
 
 // Story Blurb System (displays narrative text)
-export { storyProgressManager, StoryProgressManagerClass } from './storyProgressManager';
+export { storyBlurbManager, StoryBlurbManagerClass } from './storyBlurbManager';
 
 // Story Progression System (advances storybeats)
 export { storyProgressionManager, StoryProgressionManager } from './StoryProgressionManager';

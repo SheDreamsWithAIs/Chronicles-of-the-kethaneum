@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
-  storyProgressManager,
+  storyBlurbManager,
   StoryBlurb,
   StoryProgressState,
   DEFAULT_STORY_PROGRESS,
@@ -67,14 +67,14 @@ export function useStoryProgress(
 
   // Load story blurbs on mount
   useEffect(() => {
-    if (loadingRef.current || storyProgressManager.isLoaded()) {
+    if (loadingRef.current || storyBlurbManager.isLoaded()) {
       setIsReady(true);
       return;
     }
 
     loadingRef.current = true;
 
-    storyProgressManager
+    storyBlurbManager
       .loadBlurbs()
       .then(() => {
         setIsReady(true);
@@ -91,18 +91,18 @@ export function useStoryProgress(
   // Memoize current blurb
   const currentBlurb = useMemo(() => {
     if (!isReady) return null;
-    return storyProgressManager.getCurrentBlurb(progress);
+    return storyBlurbManager.getCurrentBlurb(progress);
   }, [isReady, progress]);
 
   // Memoize story history
   const storyHistory = useMemo(() => {
     if (!isReady) return [];
-    return storyProgressManager.getStoryHistory(progress);
+    return storyBlurbManager.getStoryHistory(progress);
   }, [isReady, progress]);
 
   // Check if there's any history
   const hasHistory = useMemo(() => {
-    return storyProgressManager.hasStoryHistory(progress);
+    return storyBlurbManager.hasStoryHistory(progress);
   }, [progress]);
 
   // Check triggers and return updated progress if a trigger fired
@@ -110,11 +110,11 @@ export function useStoryProgress(
     (state: GameState, previousState?: GameState): StoryProgressState | null => {
       if (!isReady) return null;
 
-      const result = storyProgressManager.checkTriggerConditions(state, previousState);
+      const result = storyBlurbManager.checkTriggerConditions(state, previousState);
 
       if (result.shouldTrigger && result.blurb) {
         const currentProgress = state.storyProgress || DEFAULT_STORY_PROGRESS;
-        return storyProgressManager.unlockBlurb(result.blurb.id, currentProgress);
+        return storyBlurbManager.unlockBlurb(result.blurb.id, currentProgress);
       }
 
       return null;
@@ -125,7 +125,7 @@ export function useStoryProgress(
   // Unlock a specific blurb
   const unlockBlurb = useCallback(
     (blurbId: string, currentProgress: StoryProgressState): StoryProgressState => {
-      return storyProgressManager.unlockBlurb(blurbId, currentProgress);
+      return storyBlurbManager.unlockBlurb(blurbId, currentProgress);
     },
     []
   );
@@ -133,21 +133,21 @@ export function useStoryProgress(
   // Advance story beat
   const advanceStoryBeat = useCallback(
     (currentProgress: StoryProgressState, newBeat: StoryBeat): StoryProgressState => {
-      return storyProgressManager.advanceStoryBeat(currentProgress, newBeat);
+      return storyBlurbManager.advanceStoryBeat(currentProgress, newBeat);
     },
     []
   );
 
   // Initialize progress
   const initializeProgress = useCallback((): StoryProgressState => {
-    return storyProgressManager.initializeProgress();
+    return storyBlurbManager.initializeProgress();
   }, []);
 
   // Get blurb by ID
   const getBlurbById = useCallback(
     (id: string): StoryBlurb | null => {
       if (!isReady) return null;
-      return storyProgressManager.getBlurbById(id);
+      return storyBlurbManager.getBlurbById(id);
     },
     [isReady]
   );
@@ -181,14 +181,14 @@ export function useInitializeStoryProgress(): {
       }
 
       // Trigger game_start to unlock first blurb
-      const blurb = storyProgressManager.getBlurbForTrigger(
+      const blurb = storyBlurbManager.getBlurbForTrigger(
         'game_start',
         currentProgress.currentStoryBeat,
         currentProgress.firedTriggers
       );
 
       if (blurb) {
-        return storyProgressManager.unlockBlurb(blurb.id, currentProgress);
+        return storyBlurbManager.unlockBlurb(blurb.id, currentProgress);
       }
 
       return currentProgress;
