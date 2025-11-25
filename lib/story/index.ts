@@ -1,9 +1,15 @@
 /**
- * Story Progress System
+ * Story System
  *
- * This module provides the story progression system for Chronicles of the Kethaneum.
- * It tracks the player's journey through narrative blurbs that update as they progress.
+ * This module provides two complementary story systems:
+ * 1. Story Blurb System - Displays narrative moments based on triggers
+ * 2. Story Progression System - Advances storybeats based on game metrics
  */
 
 export * from './types';
+
+// Story Blurb System (displays narrative text)
 export { storyProgressManager, StoryProgressManagerClass } from './storyProgressManager';
+
+// Story Progression System (advances storybeats)
+export { storyProgressionManager, StoryProgressionManager } from './StoryProgressionManager';
