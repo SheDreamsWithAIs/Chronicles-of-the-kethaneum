@@ -64,6 +64,7 @@ export default function LibraryScreen() {
       const hasValidPuzzleIndex = prevState.currentPuzzleIndex !== undefined &&
                                    prevState.currentPuzzleIndex >= 0;
       let shouldClearCurrentState = true;
+      let shouldPreserveBook = false;
 
       if (isSameGenre && hasValidPuzzleIndex && prevState.puzzles[genre]) {
         const currentPuzzle = prevState.puzzles[genre][prevState.currentPuzzleIndex];
@@ -77,7 +78,11 @@ export default function LibraryScreen() {
           shouldClearCurrentState = false;
           console.log('[selectGenre] Keeping current puzzle state - puzzle incomplete, will restore same puzzle');
         } else {
-          console.log('[selectGenre] Clearing state - puzzle completed, will load next puzzle');
+          // Puzzle is completed - preserve currentBook so selector can continue the book series
+          // Clear puzzleIndex and storyPart so restore logic doesn't trigger
+          shouldClearCurrentState = false;
+          shouldPreserveBook = true;
+          console.log('[selectGenre] Puzzle completed - preserving currentBook to continue book series');
         }
       } else {
         console.log('[selectGenre] Clearing state - different genre or no saved puzzle');
@@ -92,11 +97,19 @@ export default function LibraryScreen() {
         selectedCells: [],
         gameOver: false,
         ...(shouldClearCurrentState ? {
+          // Different genre or no saved puzzle - clear everything
           currentGenre: '',
           currentBook: '',
           currentPuzzleIndex: -1,
           currentStoryPart: -1,
-        } : {}),
+        } : shouldPreserveBook ? {
+          // Completed puzzle + same genre - preserve book, clear puzzle index and story part
+          currentPuzzleIndex: -1,
+          currentStoryPart: -1,
+          // currentBook and currentGenre are preserved from updatedState
+        } : {
+          // Incomplete puzzle - preserve everything (no clearing needed)
+        }),
       };
 
       console.log('[selectGenre] Cleared grid, navigating to puzzle page');
