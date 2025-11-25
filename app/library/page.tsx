@@ -76,16 +76,12 @@ export default function LibraryScreen() {
         if (!isCompleted) {
           // Puzzle is incomplete - keep current state so restore logic can load same puzzle
           shouldClearCurrentState = false;
-          console.log('[selectGenre] Keeping current puzzle state - puzzle incomplete, will restore same puzzle');
         } else {
           // Puzzle is completed - preserve currentBook so selector can continue the book series
           // Clear puzzleIndex and storyPart so restore logic doesn't trigger
           shouldClearCurrentState = false;
           shouldPreserveBook = true;
-          console.log('[selectGenre] Puzzle completed - preserving currentBook to continue book series');
         }
-      } else {
-        console.log('[selectGenre] Clearing state - different genre or no saved puzzle');
       }
 
       // Clear the grid to force puzzle page to load a new puzzle
@@ -112,7 +108,6 @@ export default function LibraryScreen() {
         }),
       };
 
-      console.log('[selectGenre] Cleared grid, navigating to puzzle page');
       return clearedState;
     });
 

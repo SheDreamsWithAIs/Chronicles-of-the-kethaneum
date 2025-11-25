@@ -38,21 +38,11 @@ export function usePuzzleLoading({
 }: UsePuzzleLoadingProps) {
   
   const loadPuzzleForMode = useCallback(async (): Promise<{ genreComplete?: boolean } | void> => {
-    console.log('[loadPuzzleForMode] CALLED - isReady:', isReady, 'grid.length:', state.grid?.length);
-
     // Don't try to load until state restoration is complete
-    if (!isReady) {
-      console.log('[loadPuzzleForMode] Returning early - not ready');
-      return;
-    }
+    if (!isReady) return;
 
-    if (state.grid && state.grid.length > 0) {
-      console.log('[loadPuzzleForMode] Returning early - grid already loaded');
-      return; // Already loaded
-    }
+    if (state.grid && state.grid.length > 0) return; // Already loaded
 
-    console.log('[loadPuzzleForMode] Proceeding to load puzzle...');
-    
     // Wait a moment to ensure state restoration from localStorage has completed
     await new Promise(resolve => setTimeout(resolve, 50));
     
@@ -150,8 +140,6 @@ export function usePuzzleLoading({
           // Verify it matches the saved book and story part
           if ((!bookToLoad || puzzleToRestore.book === bookToLoad) &&
               (state.currentStoryPart === undefined || puzzleToRestore.storyPart === state.currentStoryPart)) {
-            console.log('[loadPuzzleForMode] Restoring incomplete puzzle:', puzzleToRestore.title);
-
             setState(prevState => ({
               ...prevState,
               currentGenre: genreToLoad,
@@ -167,11 +155,7 @@ export function usePuzzleLoading({
               return;
             }
           }
-        } else {
-          console.log('[loadPuzzleForMode] Puzzle completed, loading next puzzle instead');
         }
-      } else {
-        console.log('[loadPuzzleForMode] Loading fresh puzzle - new genre or no saved state');
       }
 
       // Load new puzzle using the selection system
