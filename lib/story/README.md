@@ -1,15 +1,48 @@
-# Story Progression System
+# Story System
 
 **A configurable narrative engine for Chronicles of the Kethaneum**
 
 ## 🎯 Overview
 
-The Story Progression System is the "conductor" that coordinates all narrative elements in your game. It monitors player progress, advances the story at the right moments, and orchestrates dialogue, music, and events - all through **configuration files**, not code.
+The Story System consists of **two complementary managers** that work together to create a dynamic narrative experience:
+
+### 1. **StoryProgressionManager** - The Conductor
+Automatically advances the story based on player progress (puzzles completed, books discovered). It:
+- ✅ Monitors game metrics
+- ✅ Checks progression rules
+- ✅ Advances storybeats when conditions are met
+- ✅ Triggers music changes, events, and character loading
+
+### 2. **StoryBlurbManager** - The Narrator
+Displays narrative text moments (blurbs) when specific triggers fire. It:
+- ✅ Shows story moments as player progresses
+- ✅ Tracks which blurbs have been seen
+- ✅ Provides story history for Book of Passage
+- ✅ Responds to both game events and storybeat changes
+
+### How They Work Together
+
+```
+Player completes puzzle
+         ↓
+    Game Logic
+         ↓
+StoryProgressionManager ← Checks progression rules
+         ↓
+    Advances storybeat
+         ↓
+    Emits beatTrigger event
+         ↓
+StoryBlurbManager ← Checks for matching blurbs
+         ↓
+    Shows narrative moment
+```
 
 ### Design Philosophy
 
 - **Configurable**: All rules defined in JSON files
 - **Modular**: Systems remain independent
+- **Coordinated**: Managers communicate via events
 - **Reusable**: Clone repo + swap config = new game
 
 ## 🏗️ Architecture
@@ -21,28 +54,33 @@ Player Action (puzzle completed)
          ↓
   StoryProgressionManager ← Checks progression rules
          ↓
-    ┌────┴────┬─────────┬──────────┐
-    ↓         ↓         ↓          ↓
-Dialogue  StoryBeats  Music   Characters
-Manager     Events   System   Loading
+    ┌────┴────┬─────────┬──────────┬──────────────┐
+    ↓         ↓         ↓          ↓              ↓
+Dialogue  StoryBeats  Music   Characters   StoryBlurbManager
+Manager     Events   System   Loading      (narrative text)
 ```
 
 ## 📁 File Structure
 
 ```
 lib/story/
-├── StoryProgressionManager.ts  # Core manager (singleton)
-├── types.ts                     # TypeScript definitions
+├── StoryProgressionManager.ts  # Advances storybeats (The Conductor)
+├── storyBlurbManager.ts        # Displays narrative blurbs (The Narrator)
+├── types.ts                     # TypeScript definitions for both systems
+├── index.ts                     # Exports both managers
 └── README.md                    # This file
 
 public/data/
-└── story-progression-config.json  # ⭐ YOUR GAME RULES
+├── story-progression-config.json  # ⭐ Storybeat progression rules
+└── story-progress.json            # ⭐ Narrative blurbs and triggers
 
 hooks/story/
-└── useStoryProgression.ts       # React hook
+├── useStoryProgression.ts         # React hook for StoryProgressionManager
+├── useStoryProgress.ts            # React hook for StoryBlurbManager
+└── useStorySystemIntegration.ts   # ⭐ Coordinates both systems
 
 lib/audio/
-└── initializeAudio.ts           # Audio setup utility
+└── initializeAudio.ts             # Audio setup utility
 ```
 
 ## ⚙️ Configuration
@@ -138,22 +176,55 @@ Load character groups at specific storybeats:
 
 ```typescript
 import { dialogueManager } from '@/lib/dialogue/DialogueManager';
-import { storyProgressionManager } from '@/lib/story/StoryProgressionManager';
+import { storyProgressionManager, storyBlurbManager } from '@/lib/story';
 import { initializeAudioSystem } from '@/lib/audio/initializeAudio';
 
 async function initializeGame() {
   // 1. Initialize audio system (playlists)
   await initializeAudioSystem();
 
-  // 2. Initialize dialogue manager
+  // 2. Initialize dialogue manager (characters)
   await dialogueManager.initialize();
 
-  // 3. Initialize story progression manager
+  // 3. Initialize story blurb manager (narrative moments)
+  await storyBlurbManager.loadBlurbs();
+
+  // 4. Initialize story progression manager (beat advancement)
   await storyProgressionManager.initialize();
 
-  console.log('Game systems ready!');
+  console.log('✅ All story systems ready!');
 }
 ```
+
+### Coordinate Both Systems
+
+Use the integration hook to ensure both systems work together:
+
+```typescript
+import { useStorySystemIntegration } from '@/hooks/story/useStorySystemIntegration';
+import { useGameState } from '@/hooks/useGameState';
+
+function YourGameComponent() {
+  const { state } = useGameState();
+
+  // This hook coordinates StoryProgressionManager + StoryBlurbManager
+  useStorySystemIntegration({
+    state,
+    onBlurbTriggered: (blurbId, trigger) => {
+      console.log('New story moment unlocked:', blurbId);
+      // Show notification, update UI, etc.
+    }
+  });
+
+  return <YourGameUI />;
+}
+```
+
+**What this does:**
+1. Listens for storybeat changes from `StoryProgressionManager`
+2. When a beat advances, checks `StoryBlurbManager` for matching blurbs
+3. Calls `onBlurbTriggered` when a new narrative moment should show
+4. Keeps both systems perfectly synchronized
 
 ### In React Components
 
