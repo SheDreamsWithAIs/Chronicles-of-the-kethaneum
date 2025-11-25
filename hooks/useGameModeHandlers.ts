@@ -45,9 +45,6 @@ export function useGameModeHandlers({
   }, []);
   
   const handleWin = useCallback(() => {
-    console.log('[useGameModeHandlers.handleWin] ★★★ VERSION_DEBUG_2024_11_24_v2 ★★★');
-    console.log('[useGameModeHandlers.handleWin] Win handler called');
-
     // Use stateRef.current instead of state prop to get the latest state
     // This is updated synchronously in checkWord before calling onWin
     const currentState = stateRef.current;
@@ -57,9 +54,7 @@ export function useGameModeHandlers({
     const timeTaken = puzzleStartTime ? Math.floor((Date.now() - puzzleStartTime) / 1000) : 0;
     const wordsFound = currentState.wordList.filter((w: { found: boolean }) => w.found).length;
     const totalWords = currentState.wordList.length;
-    
-    console.log('[useGameModeHandlers.handleWin] Current state - gameMode:', currentState.gameMode, 'runStartTime:', currentState.runStartTime, 'runDuration:', currentState.runDuration, 'gameOver:', currentState.gameOver, 'timer:', currentState.timer ? 'exists' : 'null');
-    
+
     // If runStartTime is null but we're in beat-the-clock mode, log warning
     if (currentState.gameMode === 'beat-the-clock' && !currentState.runStartTime) {
       console.warn('[useGameModeHandlers.handleWin] runStartTime is null in beat-the-clock mode - this should not happen. State:', currentState);
@@ -96,41 +91,34 @@ export function useGameModeHandlers({
       );
       
       // Calculate run time remaining (not puzzle time)
-      const runTimeElapsed = currentState.runStartTime 
+      const runTimeElapsed = currentState.runStartTime
         ? Math.floor((Date.now() - currentState.runStartTime) / 1000)
         : 0;
       const runTimeRemaining = currentState.runDuration - runTimeElapsed;
-      
-      console.log('[useGameModeHandlers.handleWin] Beat-the-clock - runTimeElapsed:', runTimeElapsed, 'runTimeRemaining:', runTimeRemaining, 'runStartTime:', currentState.runStartTime, 'runDuration:', currentState.runDuration);
-      
+
       // Update stats first
       setState({
         ...currentState,
         sessionStats: updatedStats,
       });
-      
+
       // Check if run time is still remaining
       // Note: gameOver won't be set for puzzle completion in beat-the-clock mode
       // It's only set when the run timer expires
       if (currentState.runStartTime && runTimeRemaining > 0) {
-        console.log('[useGameModeHandlers.handleWin] Run time remaining (' + runTimeRemaining + 's), loading next puzzle');
         // Load next puzzle immediately
         // Note: We need to set a flag to prevent timer restart during transition
         // This will be handled by the parent component's isTransitioningRef
         loadBeatTheClock().then(() => {
-          console.log('[useGameModeHandlers.handleWin] Next puzzle loaded, resetting puzzle start time');
           setPuzzleStartTime(Date.now());
         });
       } else {
-        console.log('[useGameModeHandlers.handleWin] Run time expired or no runStartTime, showing modal. runTimeRemaining:', runTimeRemaining);
         // Run ended (time expired), show stats modal
         setStatsModalIsWin(true);
         setShowStatsModal(true);
       }
     } else {
       // Story Mode: Show win modal to let player choose when to continue
-      console.log('[useGameModeHandlers.handleWin] Story mode - showing win modal');
-
       try {
         // Start with current state
         let updatedState = currentState;
@@ -138,47 +126,31 @@ export function useGameModeHandlers({
         // Mark the puzzle as completed for the new selection system
         if (currentState.currentGenre && currentState.puzzles[currentState.currentGenre]) {
           const currentPuzzle = currentState.puzzles[currentState.currentGenre][currentState.currentPuzzleIndex];
-          console.log('[useGameModeHandlers.handleWin] currentPuzzle:', currentPuzzle ? `${currentPuzzle.title}` : 'null');
 
           if (currentPuzzle) {
-            console.log('[useGameModeHandlers.handleWin] Marking puzzle as completed:', currentPuzzle.title);
             updatedState = markPuzzleCompleted(updatedState, currentPuzzle);
-            console.log('[useGameModeHandlers.handleWin] Puzzle marked as completed');
           }
         }
 
         // Check for story progress triggers
         // Pass previous state to detect transitions (e.g., 0 → 1 books discovered)
-        console.log('[useGameModeHandlers.handleWin] Checking story triggers...');
-        console.log('[useGameModeHandlers.handleWin] Manager loaded:', storyProgressManager.isLoaded());
-        console.log('[useGameModeHandlers.handleWin] Current books:', updatedState.discoveredBooks?.size || 0);
-        console.log('[useGameModeHandlers.handleWin] Previous books:', previousState.discoveredBooks?.size || 0);
-
         if (storyProgressManager.isLoaded()) {
           const triggerResult = storyProgressManager.checkTriggerConditions(updatedState, previousState);
-          console.log('[useGameModeHandlers.handleWin] Trigger result:', triggerResult);
 
           if (triggerResult.shouldTrigger && triggerResult.blurb) {
-            console.log('[useGameModeHandlers.handleWin] Story trigger fired:', triggerResult.trigger, '-', triggerResult.blurb.title);
             const updatedProgress = storyProgressManager.unlockBlurb(
               triggerResult.blurb.id,
               updatedState.storyProgress
             );
-            console.log('[useGameModeHandlers.handleWin] Updated progress:', updatedProgress);
             updatedState = {
               ...updatedState,
               storyProgress: updatedProgress,
             };
-          } else {
-            console.log('[useGameModeHandlers.handleWin] No trigger fired');
           }
-        } else {
-          console.log('[useGameModeHandlers.handleWin] Story progress manager not loaded yet');
         }
 
         // Apply all state updates in a single setState call
         if (updatedState !== currentState) {
-          console.log('[useGameModeHandlers.handleWin] Applying combined state updates');
           setState(updatedState);
         }
       } catch (error) {
@@ -224,16 +196,11 @@ export function useGameModeHandlers({
   
   // Handle run timer expiration for beat-the-clock mode
   const handleRunTimerExpired = useCallback(() => {
-    console.log('[useGameModeHandlers.handleRunTimerExpired] Run timer expired callback called');
-    
     // Get current state - use the state prop directly to avoid stale ref issues
     stateRef.current = state;
     const currentState = state;
-    
-    console.log('[useGameModeHandlers.handleRunTimerExpired] Current state - gameMode:', currentState.gameMode, 'gameOver:', currentState.gameOver);
-    
+
     if (currentState.gameMode === 'beat-the-clock') {
-      console.log('[useGameModeHandlers.handleRunTimerExpired] Showing win modal');
       // Run timer expired - show win modal with final stats
       setStatsModalIsWin(true);
       setShowStatsModal(true);

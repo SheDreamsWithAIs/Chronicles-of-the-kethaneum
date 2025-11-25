@@ -85,7 +85,6 @@ class StoryProgressManagerClass {
       }
 
       this.loaded = true;
-      console.log(`[StoryProgressManager] Loaded ${this.blurbs.length} story blurbs`);
     } catch (error) {
       console.error('[StoryProgressManager] Failed to load blurbs:', error);
       // Initialize with empty data to prevent repeated failures
@@ -303,7 +302,6 @@ class StoryProgressManagerClass {
       lastUpdated: Date.now(),
     };
 
-    console.log(`[StoryProgressManager] Unlocked blurb: ${blurb.title} (${blurbId})`);
     return newProgress;
   }
 
