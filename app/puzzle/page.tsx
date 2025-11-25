@@ -120,7 +120,8 @@ export default function PuzzleScreen() {
 
   // Load puzzle if not already loaded
   useEffect(() => {
-    console.log('[puzzle.page] useEffect triggered - grid.length:', state.grid?.length, 'isReady:', isReady);
+    console.log('[puzzle.page] useEffect triggered - grid.length:', state.grid?.length,
+      'isReady:', isReady, 'selectedGenre:', state.selectedGenre, 'currentGenre:', state.currentGenre);
     if (!state.grid || state.grid.length === 0) {
       console.log('[puzzle.page] Calling loadPuzzleForMode...');
       loadPuzzleForMode().then((result) => {
@@ -131,7 +132,7 @@ export default function PuzzleScreen() {
     } else {
       console.log('[puzzle.page] Skipping load - grid already exists');
     }
-  }, [isReady, state.currentGenre, state.currentPuzzleIndex, state.grid?.length, loadPuzzleForMode]); // Re-run when ready, genre, puzzle index, or grid changes
+  }, [isReady, state.currentGenre, state.currentPuzzleIndex, state.grid?.length, state.selectedGenre, loadPuzzleForMode]); // Re-run when ready, genre, puzzle index, selectedGenre, or grid changes
 
   // Start timer when puzzle is loaded
   useEffect(() => {

@@ -127,8 +127,13 @@ export function usePuzzleLoading({
     } else {
       // Story Mode: Use new puzzle selection system with Kethaneum weaving
 
+      // Only restore if selectedGenre matches currentGenre (page refresh scenario)
+      // If they differ, we're selecting a new genre and should load fresh puzzle
+      const isPageRefresh = state.selectedGenre === genreToLoad ||
+                            (!state.selectedGenre && genreToLoad);
+
       // First, try to restore exact puzzle if we're refreshing the page
-      if (genreToLoad && puzzleIndex !== undefined && puzzleIndex >= 0 &&
+      if (isPageRefresh && genreToLoad && puzzleIndex !== undefined && puzzleIndex >= 0 &&
           state.puzzles && state.puzzles[genreToLoad] &&
           state.puzzles[genreToLoad][puzzleIndex]) {
         // Restore the exact puzzle we were on
@@ -155,6 +160,8 @@ export function usePuzzleLoading({
             return;
           }
         }
+      } else if (!isPageRefresh) {
+        console.log('[loadPuzzleForMode] Skipping restore - new genre selection detected');
       }
 
       // Load new puzzle using the selection system

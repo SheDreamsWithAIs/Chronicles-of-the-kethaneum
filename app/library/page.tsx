@@ -61,13 +61,15 @@ export default function LibraryScreen() {
 
       // Clear the grid to force puzzle page to load a new puzzle
       // This ensures loadPuzzleForMode doesn't return early due to existing grid
-      return {
+      const clearedState = {
         ...updatedState,
         grid: [],
         wordList: [],
         selectedCells: [],
         gameOver: false,
       };
+      console.log('[selectGenre] Cleared grid, navigating to puzzle page');
+      return clearedState;
     });
 
     // Wait for state update, then navigate
