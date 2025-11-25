@@ -17,6 +17,7 @@ import {
   isBookCompleted,
 } from '../book/progressBitmap';
 import type { GameState } from '../game/state';
+import type { StoryProgressState } from '../story/types';
 
 // ============================================================================
 // Types - Optimized Storage Format
@@ -43,6 +44,8 @@ export interface OptimizedProgress {
   c?: OptimizedCurrentState;
   /** Puzzle selection state (optional) */
   s?: OptimizedSelectionState;
+  /** Story progress (optional) */
+  sp?: StoryProgressState;
 }
 
 /**
@@ -119,6 +122,7 @@ export interface DecodedProgress {
     kethaneumRevealed: boolean;
     genreExhausted: boolean;
   };
+  storyProgress?: StoryProgressState;
 }
 
 // ============================================================================
@@ -245,6 +249,11 @@ export async function saveOptimizedProgress(state: GameState): Promise<void> {
       };
     }
 
+    // Add story progress
+    if (state.storyProgress) {
+      optimized.sp = state.storyProgress;
+    }
+
     // Save to localStorage
     localStorage.setItem(STORAGE_KEY, JSON.stringify(optimized));
   } catch (error) {
@@ -351,6 +360,11 @@ export async function decodeOptimizedProgress(
     };
   }
 
+  // Decode story progress
+  if (data.sp) {
+    decoded.storyProgress = data.sp;
+  }
+
   return decoded;
 }
 
@@ -382,6 +396,7 @@ export async function convertToGameStateFormat(
   nextKethaneumInterval: number;
   kethaneumRevealed: boolean;
   genreExhausted: boolean;
+  storyProgress?: StoryProgressState;
 }> {
   const books: { [title: string]: boolean[] | { complete?: boolean } } = {};
   const discoveredBooks = new Set<string>();
@@ -433,6 +448,7 @@ export async function convertToGameStateFormat(
     nextKethaneumInterval: decoded.selectionState?.nextKethaneumInterval || 3,
     kethaneumRevealed: decoded.selectionState?.kethaneumRevealed || false,
     genreExhausted: decoded.selectionState?.genreExhausted || false,
+    storyProgress: decoded.storyProgress,
   };
 }
 
