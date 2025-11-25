@@ -120,12 +120,16 @@ export default function PuzzleScreen() {
 
   // Load puzzle if not already loaded
   useEffect(() => {
+    console.log('[puzzle.page] useEffect triggered - grid.length:', state.grid?.length, 'isReady:', isReady);
     if (!state.grid || state.grid.length === 0) {
+      console.log('[puzzle.page] Calling loadPuzzleForMode...');
       loadPuzzleForMode().then((result) => {
         if (result?.genreComplete) {
           setShowGenreCompletionModal(true);
         }
       });
+    } else {
+      console.log('[puzzle.page] Skipping load - grid already exists');
     }
   }, [isReady, state.currentGenre, state.currentPuzzleIndex, state.grid?.length, loadPuzzleForMode]); // Re-run when ready, genre, puzzle index, or grid changes
 

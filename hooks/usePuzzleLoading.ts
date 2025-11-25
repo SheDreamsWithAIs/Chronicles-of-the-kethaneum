@@ -38,10 +38,20 @@ export function usePuzzleLoading({
 }: UsePuzzleLoadingProps) {
   
   const loadPuzzleForMode = useCallback(async (): Promise<{ genreComplete?: boolean } | void> => {
+    console.log('[loadPuzzleForMode] CALLED - isReady:', isReady, 'grid.length:', state.grid?.length);
+
     // Don't try to load until state restoration is complete
-    if (!isReady) return;
-    
-    if (state.grid && state.grid.length > 0) return; // Already loaded
+    if (!isReady) {
+      console.log('[loadPuzzleForMode] Returning early - not ready');
+      return;
+    }
+
+    if (state.grid && state.grid.length > 0) {
+      console.log('[loadPuzzleForMode] Returning early - grid already loaded');
+      return; // Already loaded
+    }
+
+    console.log('[loadPuzzleForMode] Proceeding to load puzzle...');
     
     // Wait a moment to ensure state restoration from localStorage has completed
     await new Promise(resolve => setTimeout(resolve, 50));
