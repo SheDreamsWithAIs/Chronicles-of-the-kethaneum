@@ -127,41 +127,51 @@ export function usePuzzleLoading({
     } else {
       // Story Mode: Use new puzzle selection system with Kethaneum weaving
 
-      // Only restore if selectedGenre matches currentGenre (page refresh scenario)
-      // If they differ, we're selecting a new genre and should load fresh puzzle
-      const isPageRefresh = state.selectedGenre === genreToLoad ||
-                            (!state.selectedGenre && genreToLoad);
+      // Determine if we should restore the same puzzle
+      // Restore if:
+      // 1. We have a valid currentGenre/puzzleIndex (saved state)
+      // 2. selectedGenre matches currentGenre (same genre)
+      // 3. The puzzle at that index is NOT completed (incomplete puzzle - user wants to continue)
+      const shouldRestore = genreToLoad &&
+                            puzzleIndex !== undefined &&
+                            puzzleIndex >= 0 &&
+                            state.selectedGenre === genreToLoad &&
+                            state.puzzles &&
+                            state.puzzles[genreToLoad] &&
+                            state.puzzles[genreToLoad][puzzleIndex];
 
-      // First, try to restore exact puzzle if we're refreshing the page
-      if (isPageRefresh && genreToLoad && puzzleIndex !== undefined && puzzleIndex >= 0 &&
-          state.puzzles && state.puzzles[genreToLoad] &&
-          state.puzzles[genreToLoad][puzzleIndex]) {
-        // Restore the exact puzzle we were on
+      if (shouldRestore) {
         const puzzleToRestore = state.puzzles[genreToLoad][puzzleIndex];
+        const completedSet = state.completedPuzzlesByGenre?.[genreToLoad];
+        const isCompleted = completedSet && completedSet.has(puzzleToRestore.title);
 
-        // Verify it matches the saved book and story part
-        if ((!bookToLoad || puzzleToRestore.book === bookToLoad) &&
-            (state.currentStoryPart === undefined || puzzleToRestore.storyPart === state.currentStoryPart)) {
-          // Initialize the puzzle - it will preserve currentGenre and currentPuzzleIndex from state
-          // But we need to ensure they're set before calling initialize
-          setState(prevState => ({
-            ...prevState,
-            currentGenre: genreToLoad,
-            currentPuzzleIndex: puzzleIndex,
-            currentBook: puzzleToRestore.book,
-            currentStoryPart: puzzleToRestore.storyPart !== undefined ? puzzleToRestore.storyPart : 0
-          }));
+        // Only restore if puzzle is NOT completed (user wants to continue same puzzle)
+        if (!isCompleted) {
+          // Verify it matches the saved book and story part
+          if ((!bookToLoad || puzzleToRestore.book === bookToLoad) &&
+              (state.currentStoryPart === undefined || puzzleToRestore.storyPart === state.currentStoryPart)) {
+            console.log('[loadPuzzleForMode] Restoring incomplete puzzle:', puzzleToRestore.title);
 
-          // Wait for state update, then initialize
-          await new Promise(resolve => setTimeout(resolve, 0));
+            setState(prevState => ({
+              ...prevState,
+              currentGenre: genreToLoad,
+              currentPuzzleIndex: puzzleIndex,
+              currentBook: puzzleToRestore.book,
+              currentStoryPart: puzzleToRestore.storyPart !== undefined ? puzzleToRestore.storyPart : 0
+            }));
 
-          const success = initialize(puzzleToRestore);
-          if (success) {
-            return;
+            await new Promise(resolve => setTimeout(resolve, 0));
+
+            const success = initialize(puzzleToRestore);
+            if (success) {
+              return;
+            }
           }
+        } else {
+          console.log('[loadPuzzleForMode] Puzzle completed, loading next puzzle instead');
         }
-      } else if (!isPageRefresh) {
-        console.log('[loadPuzzleForMode] Skipping restore - new genre selection detected');
+      } else {
+        console.log('[loadPuzzleForMode] Loading fresh puzzle - new genre or no saved state');
       }
 
       // Load new puzzle using the selection system

@@ -59,6 +59,30 @@ export default function LibraryScreen() {
       const { selectGenre } = require('@/lib/game/puzzleSelector');
       const updatedState = selectGenre(prevState, genre);
 
+      // Check if we're selecting the same genre with an incomplete puzzle
+      const isSameGenre = prevState.currentGenre === genre;
+      const hasValidPuzzleIndex = prevState.currentPuzzleIndex !== undefined &&
+                                   prevState.currentPuzzleIndex >= 0;
+      let shouldClearCurrentState = true;
+
+      if (isSameGenre && hasValidPuzzleIndex && prevState.puzzles[genre]) {
+        const currentPuzzle = prevState.puzzles[genre][prevState.currentPuzzleIndex];
+        const completedSet = prevState.completedPuzzlesByGenre?.[genre];
+        const isCompleted = currentPuzzle &&
+                           completedSet &&
+                           completedSet.has(currentPuzzle.title);
+
+        if (!isCompleted) {
+          // Puzzle is incomplete - keep current state so restore logic can load same puzzle
+          shouldClearCurrentState = false;
+          console.log('[selectGenre] Keeping current puzzle state - puzzle incomplete, will restore same puzzle');
+        } else {
+          console.log('[selectGenre] Clearing state - puzzle completed, will load next puzzle');
+        }
+      } else {
+        console.log('[selectGenre] Clearing state - different genre or no saved puzzle');
+      }
+
       // Clear the grid to force puzzle page to load a new puzzle
       // This ensures loadPuzzleForMode doesn't return early due to existing grid
       const clearedState = {
@@ -67,7 +91,14 @@ export default function LibraryScreen() {
         wordList: [],
         selectedCells: [],
         gameOver: false,
+        ...(shouldClearCurrentState ? {
+          currentGenre: '',
+          currentBook: '',
+          currentPuzzleIndex: -1,
+          currentStoryPart: -1,
+        } : {}),
       };
+
       console.log('[selectGenre] Cleared grid, navigating to puzzle page');
       return clearedState;
     });
