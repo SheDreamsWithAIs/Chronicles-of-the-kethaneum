@@ -127,7 +127,12 @@ export function useGameState() {
         console.log('[useGameState] Saving progress...', {
           storyProgress: state.storyProgress,
           completedPuzzles: state.completedPuzzles,
-          discoveredBooks: state.discoveredBooks.size
+          discoveredBooks: state.discoveredBooks.size,
+          completedPuzzlesByGenre: state.completedPuzzlesByGenre
+            ? Object.fromEntries(
+                Object.entries(state.completedPuzzlesByGenre).map(([k, v]) => [k, Array.from(v)])
+              )
+            : {}
         });
         await saveProgress(state);
         lastSavedState.current = stateHash;

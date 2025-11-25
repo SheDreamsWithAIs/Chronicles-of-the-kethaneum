@@ -271,10 +271,15 @@ function selectGenrePuzzle(
 
     const completedSet = state.completedPuzzlesByGenre[selectedGenre];
 
+    console.log(`[PuzzleSelector] Genre "${selectedGenre}" - Completed puzzles:`, Array.from(completedSet || []));
+    console.log(`[PuzzleSelector] Total puzzles in genre:`, genrePuzzles.length);
+
     // Find uncompleted puzzles
     const uncompletedPuzzles = genrePuzzles.filter(
       (puzzle) => puzzle && puzzle.title && !completedSet.has(puzzle.title)
     );
+
+    console.log(`[PuzzleSelector] Uncompleted puzzles:`, uncompletedPuzzles.map(p => p.title));
 
     let puzzle: PuzzleData;
     let genreExhausted = false;
