@@ -36,12 +36,10 @@ export default function LibraryScreen() {
   };
 
   const handleSelectGenre = async (genre: string) => {
-    console.log('[Library] Genre card clicked:', genre);
     setShowGenreModal(false);
 
     // Ensure puzzles are loaded
     if (!state.puzzles || Object.keys(state.puzzles).length === 0) {
-      console.log('[Library] Puzzles not loaded, loading all...');
       await loadAll();
     }
 
@@ -51,12 +49,6 @@ export default function LibraryScreen() {
 
     // Verify genre exists and update state using the new selection system
     setState(prevState => {
-      console.log('[Library] Setting genre in state. Current completed puzzles:',
-        prevState.completedPuzzlesByGenre?.[genre]
-          ? Array.from(prevState.completedPuzzlesByGenre[genre])
-          : []
-      );
-
       if (!prevState.puzzles || !prevState.puzzles[genre] || prevState.puzzles[genre].length === 0) {
         console.error(`Genre "${genre}" not found. Available genres:`, Object.keys(prevState.puzzles || {}));
         return prevState; // Don't update if genre not found
@@ -65,10 +57,7 @@ export default function LibraryScreen() {
       // Import and use the selectGenre function from puzzle selector
       // Note: This will be a dynamic import since we're in a setState callback
       const { selectGenre } = require('@/lib/game/puzzleSelector');
-      const updatedState = selectGenre(prevState, genre);
-
-      console.log('[Library] Genre selected, navigating to puzzle page...');
-      return updatedState;
+      return selectGenre(prevState, genre);
     });
 
     // Wait for state update, then navigate

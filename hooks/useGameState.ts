@@ -35,16 +35,7 @@ export function useGameState() {
   useEffect(() => {
     async function loadSavedProgress() {
       try {
-        console.log('[useGameState] Loading saved progress...');
         const result = await loadProgress();
-
-        console.log('[useGameState] Load result:', {
-          success: result.success,
-          hasData: !!result.data,
-          storyProgress: result.data?.storyProgress,
-          completedPuzzlesByGenre: result.data?.completedPuzzlesByGenre,
-          error: result.error
-        });
 
         if (result.success && result.data) {
           // Store migration info for debugging/display
@@ -59,16 +50,6 @@ export function useGameState() {
             console.log(`Storage size: ${info.storageSize.formatted}`);
           }
 
-          console.log('[useGameState] Restoring state with data:', {
-            ...result.data,
-            completedPuzzlesByGenre: result.data.completedPuzzlesByGenre
-              ? Object.fromEntries(
-                  Object.entries(result.data.completedPuzzlesByGenre).map(([k, v]) =>
-                    [k, v instanceof Set ? Array.from(v) : v]
-                  )
-                )
-              : undefined
-          });
           setState(prevState => restoreGameState(prevState, result.data as Partial<GameState>));
         } else if (!result.success) {
           // If unified load failed, try legacy as last resort
@@ -134,19 +115,8 @@ export function useGameState() {
     const saveTimeout = setTimeout(async () => {
       isSaving.current = true;
       try {
-        console.log('[useGameState] Saving progress...', {
-          storyProgress: state.storyProgress,
-          completedPuzzles: state.completedPuzzles,
-          discoveredBooks: state.discoveredBooks.size,
-          completedPuzzlesByGenre: state.completedPuzzlesByGenre
-            ? Object.fromEntries(
-                Object.entries(state.completedPuzzlesByGenre).map(([k, v]) => [k, Array.from(v)])
-              )
-            : {}
-        });
         await saveProgress(state);
         lastSavedState.current = stateHash;
-        console.log('[useGameState] Progress saved successfully');
       } catch (error) {
         console.error('Failed to save progress:', error);
       } finally {
