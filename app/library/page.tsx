@@ -57,7 +57,17 @@ export default function LibraryScreen() {
       // Import and use the selectGenre function from puzzle selector
       // Note: This will be a dynamic import since we're in a setState callback
       const { selectGenre } = require('@/lib/game/puzzleSelector');
-      return selectGenre(prevState, genre);
+      const updatedState = selectGenre(prevState, genre);
+
+      // Clear the grid to force puzzle page to load a new puzzle
+      // This ensures loadPuzzleForMode doesn't return early due to existing grid
+      return {
+        ...updatedState,
+        grid: [],
+        wordList: [],
+        selectedCells: [],
+        gameOver: false,
+      };
     });
 
     // Wait for state update, then navigate
