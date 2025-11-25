@@ -1,6 +1,7 @@
 # Story Event Editor Tool - Development Plan
 
 **Created:** 2025-11-23
+**Updated:** 2025-11-25 (Integrated with Story Progress System)
 **Status:** Design Complete - Ready for Implementation
 **Priority:** Medium
 **Estimated Effort:** 2-3 days for MVP
@@ -10,13 +11,14 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Current System Analysis](#current-system-analysis)
-3. [Proposed Solution](#proposed-solution)
-4. [UI Layout & Components](#ui-layout--components)
-5. [Technical Implementation](#technical-implementation)
-6. [User Workflows](#user-workflows)
-7. [Implementation Phases](#implementation-phases)
-8. [Reference Data](#reference-data)
+2. [System Integration](#system-integration)
+3. [Current System Analysis](#current-system-analysis)
+4. [Proposed Solution](#proposed-solution)
+5. [UI Layout & Components](#ui-layout--components)
+6. [Technical Implementation](#technical-implementation)
+7. [User Workflows](#user-workflows)
+8. [Implementation Phases](#implementation-phases)
+9. [Reference Data](#reference-data)
 
 ---
 
@@ -41,7 +43,111 @@ Create a dedicated **Story Event Editor** tool at `/tools/story-event-editor` th
 - Dialogue sequence management with drag-and-drop reordering
 - Live preview of dialogue flow
 - Validation and auto-save
-- Integration with the existing character system
+- Integration with the existing character and story progress systems
+
+---
+
+## System Integration
+
+### Story Systems Overview
+
+As of 2025-11-25, Chronicles of the Kethaneum has **TWO complementary narrative systems**:
+
+#### 1. Story Progress System (Implemented ✅)
+
+**Location:** `lib/story/` and `public/data/story-progress.json`
+
+**Purpose:** Track player progression through narrative blurbs displayed in the Book of Passage
+
+**Key Features:**
+- Narrative text blurbs triggered by game milestones
+- Displayed in Book of Passage (Current Story / Story History tabs)
+- Triggers: `game_start`, `first_puzzle_complete`, `books_discovered_5`, etc.
+- Single manager: `storyProgressManager`
+- Data file: `/public/data/story-progress.json`
+
+**Example Blurb:**
+```json
+{
+  "id": "intro_001",
+  "storyBeat": "hook",
+  "trigger": "game_start",
+  "title": "A New Beginning",
+  "text": "The pages of your Book of Passage shimmer...",
+  "order": 1
+}
+```
+
+#### 2. Story Events System (This Design - Not Yet Implemented ⏳)
+
+**Location:** `lib/dialogue/types.ts` and `public/data/story-events/`
+
+**Purpose:** Character dialogue interactions triggered by specific game events
+
+**Key Features:**
+- Multi-line dialogue sequences with character portraits
+- Emotion-driven character expressions
+- Displayed as dialogue modals/panels during gameplay
+- Triggers: `player-enters-library-first-time`, custom event conditions
+- Manager: Integrated with `DialogueManager`
+- Data files: `/public/data/story-events/[event-name].json`
+
+**Example Event:**
+```json
+{
+  "storyEvent": {
+    "id": "first-visit",
+    "storyBeat": "hook",
+    "triggerCondition": "player-enters-library-first-time"
+  },
+  "dialogue": [
+    {
+      "sequence": 1,
+      "speaker": "archivist-lumina",
+      "text": "Welcome, seeker of knowledge...",
+      "emotion": ["welcoming", "formal"]
+    }
+  ]
+}
+```
+
+### How They Work Together
+
+Both systems share the same **StoryBeat** structure (8 beats: hook → first_plot_point → ... → resolution) but serve different narrative purposes:
+
+| Feature | Story Progress (Blurbs) | Story Events (Dialogue) |
+|---------|------------------------|------------------------|
+| **Content Type** | Narrative prose | Character dialogue |
+| **Display** | Book of Passage | Modal/dialogue panel |
+| **Triggers** | Game milestones | Custom event conditions |
+| **Characters** | None | Multiple characters |
+| **Length** | Short blurb (1-3 paragraphs) | Multi-line conversation |
+| **Emotions** | Not applicable | Emotion-driven |
+| **Purpose** | Omniscient narration | Character interactions |
+
+**Integration Example:**
+1. Player completes 10 puzzles
+2. **Story Progress** unlocks blurb: "Patterns Emerge" (narrative overview)
+3. **Story Event** triggers dialogue with Archivist Lumina (character reaction)
+
+Both enhance the narrative but from different perspectives.
+
+### Shared Components
+
+Both systems use:
+- `StoryBeat` type from `lib/dialogue/types.ts`
+- Story beat progression tracking
+- Trigger-based unlocking
+- Integration with `GameState`
+
+### Implementation Notes
+
+When implementing the Story Event Editor:
+- ✅ Use existing `StoryBeat` type (already defined)
+- ✅ Follow trigger pattern similar to story progress (but with custom strings)
+- ✅ Store events separately in `story-events/` directory
+- ✅ Integrate with `DialogueManager` (not `storyProgressManager`)
+- ✅ Ensure both systems can coexist without conflicts
 
 ---
 
