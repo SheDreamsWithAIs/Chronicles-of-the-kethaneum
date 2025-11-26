@@ -6,6 +6,7 @@ import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { GenreSelectionModal } from '@/components/GenreSelectionModal';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
+import { useStoryNotification } from '@/contexts/StoryNotificationContext';
 import styles from './library.module.css';
 
 export default function LibraryScreen() {
@@ -14,6 +15,12 @@ export default function LibraryScreen() {
   const [showGenreModal, setShowGenreModal] = useState(false);
   const { state, setState } = useGameState();
   const { loadSequential, loadAll } = usePuzzle(state, setState);
+  const { clearNewDialogue } = useStoryNotification();
+
+  // Clear dialogue notification when visiting Library
+  useEffect(() => {
+    clearNewDialogue();
+  }, [clearNewDialogue]);
 
   // Restrict access to Story Mode only
   useEffect(() => {

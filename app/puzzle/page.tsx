@@ -6,6 +6,7 @@ import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { GameStatsModal } from '@/components/GameStatsModal';
 import { GenreCompletionModal } from '@/components/GenreCompletionModal';
 import { BookOfPassageButton } from '@/components/BookOfPassageButton';
+import { LibraryButton } from '@/components/LibraryButton';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
 import { useGameLogic } from '@/hooks/useGameLogic';
@@ -880,13 +881,13 @@ export default function PuzzleScreen() {
                 data-testid="back-to-book-btn"
               />
 
-              <button
+              <LibraryButton
                 className={styles.pauseBtn}
                 onClick={handleBackToLibrary}
                 data-testid="back-to-library-btn"
               >
-                Back to Library
-              </button>
+                Return to Library
+              </LibraryButton>
 
               <button
                 className={styles.pauseBtn}

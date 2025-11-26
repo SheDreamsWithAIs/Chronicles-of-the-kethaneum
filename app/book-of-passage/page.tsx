@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
+import { LibraryButton } from '@/components/LibraryButton';
 import { useGameState } from '@/hooks/useGameState';
 import { useStoryProgress, useInitializeStoryProgress } from '@/hooks/useStoryProgress';
 import { useStoryNotification } from '@/contexts/StoryNotificationContext';
@@ -522,13 +523,13 @@ export default function BookOfPassageScreen() {
 
       <div className={styles.bottomNav}>
         <div className={styles.navOrnament}>
-          <button
+          <LibraryButton
             className={styles.navButton}
             onClick={handleBeginCataloging}
-            data-testid="begin-cataloging-btn"
+            data-testid="enter-library-btn"
           >
-            Begin Cataloging
-          </button>
+            Enter the Library
+          </LibraryButton>
         </div>
       </div>
     </div>

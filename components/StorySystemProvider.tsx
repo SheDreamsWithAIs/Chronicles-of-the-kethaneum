@@ -19,7 +19,7 @@ import { initializeAudioSystem } from '@/lib/audio/initializeAudio';
 
 export function StorySystemProvider({ children }: { children: ReactNode }) {
   const { state } = useGameState();
-  const { setNewStoryAvailable } = useStoryNotification();
+  const { setNewStoryAvailable, setNewDialogueAvailable } = useStoryNotification();
 
   // Initialize all story systems on mount
   useEffect(() => {
@@ -61,6 +61,26 @@ export function StorySystemProvider({ children }: { children: ReactNode }) {
       setNewStoryAvailable();
     },
   });
+
+  // Listen for dialogue events that should trigger library notifications
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleDialogueAvailable = (event: CustomEvent) => {
+      console.log(`[StorySystem] 📚 New dialogue event available:`, event.detail);
+      // Set flag to show glow/pulse on Library buttons
+      setNewDialogueAvailable();
+    };
+
+    // Listen for dialogue events from DialogueManager
+    // TODO: Determine the specific event(s) that should trigger library notifications
+    // Possible events: 'dialogueManager:storyEventAvailable', 'dialogueManager:beatChanged', etc.
+    document.addEventListener('dialogueManager:storyEventAvailable', handleDialogueAvailable as EventListener);
+
+    return () => {
+      document.removeEventListener('dialogueManager:storyEventAvailable', handleDialogueAvailable as EventListener);
+    };
+  }, [setNewDialogueAvailable]);
 
   return <>{children}</>;
 }
