@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { GameStatsModal } from '@/components/GameStatsModal';
 import { GenreCompletionModal } from '@/components/GenreCompletionModal';
+import { BookOfPassageButton } from '@/components/BookOfPassageButton';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
 import { useGameLogic } from '@/hooks/useGameLogic';
@@ -873,13 +874,11 @@ export default function PuzzleScreen() {
                 Resume
               </button>
 
-              <button
+              <BookOfPassageButton
                 className={styles.pauseBtn}
                 onClick={handleBackToBookOfPassage}
                 data-testid="back-to-book-btn"
-              >
-                Back to Book of Passage
-              </button>
+              />
 
               <button
                 className={styles.pauseBtn}

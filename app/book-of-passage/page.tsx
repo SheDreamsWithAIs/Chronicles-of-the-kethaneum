@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { useGameState } from '@/hooks/useGameState';
 import { useStoryProgress, useInitializeStoryProgress } from '@/hooks/useStoryProgress';
+import { useStoryNotification } from '@/contexts/StoryNotificationContext';
 import { bookRegistry } from '@/lib/book/bookRegistry';
 import { storyBlurbManager } from '@/lib/story';
 import styles from './book-of-passage.module.css';
@@ -41,6 +42,7 @@ export default function BookOfPassageScreen() {
   const router = useRouter();
   const { state, setState } = useGameState();
   const [activeTab, setActiveTab] = useState<TabOption>('current-journey');
+  const { clearNewStory } = useStoryNotification();
 
   // Story progress hook
   const {
@@ -53,6 +55,11 @@ export default function BookOfPassageScreen() {
 
   // Initialize story progress hook
   const { initializeWithFirstBlurb } = useInitializeStoryProgress();
+
+  // Clear new story notification when visiting Book of Passage
+  useEffect(() => {
+    clearNewStory();
+  }, [clearNewStory]);
 
   // Initialize story progress with first blurb if not already done
   useEffect(() => {
