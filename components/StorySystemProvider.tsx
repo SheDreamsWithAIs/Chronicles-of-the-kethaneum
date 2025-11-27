@@ -62,23 +62,22 @@ export function StorySystemProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  // Listen for dialogue events that should trigger library notifications
+  // Listen for story event dialogue that should trigger library notifications
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const handleDialogueAvailable = (event: CustomEvent) => {
-      console.log(`[StorySystem] 📚 New dialogue event available:`, event.detail);
+    const handleStoryEventAvailable = (event: CustomEvent) => {
+      console.log(`[StorySystem] 📚 New story event dialogue available:`, event.detail);
       // Set flag to show glow/pulse on Library buttons
       setNewDialogueAvailable();
     };
 
-    // Listen for dialogue events from DialogueManager
-    // TODO: Determine the specific event(s) that should trigger library notifications
-    // Possible events: 'dialogueManager:storyEventAvailable', 'dialogueManager:beatChanged', etc.
-    document.addEventListener('dialogueManager:storyEventAvailable', handleDialogueAvailable as EventListener);
+    // Listen for story event availability from DialogueManager
+    // This fires when checkForAvailableStoryEvent() finds a matching event
+    document.addEventListener('dialogueManager:storyEventAvailable', handleStoryEventAvailable as EventListener);
 
     return () => {
-      document.removeEventListener('dialogueManager:storyEventAvailable', handleDialogueAvailable as EventListener);
+      document.removeEventListener('dialogueManager:storyEventAvailable', handleStoryEventAvailable as EventListener);
     };
   }, [setNewDialogueAvailable]);
 
