@@ -6,6 +6,148 @@ describe('Story Event System - Player Journey', () => {
   });
 
   describe('First Visit Event - Complete Player Flow', () => {
+    it('should display first-visit story event dialogue (not banter) when entering library', () => {
+      // === ACT 1: Player starts new game ===
+      cy.log('🎮 Player starts new game');
+      cy.get('[data-testid="new-game-btn"]').click();
+      cy.get('[data-testid="continue-to-mode-select-btn"]').click();
+
+      // === ACT 2: Player selects Story Mode ===
+      cy.log('📖 Player selects Story Mode');
+      cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
+      cy.contains('Story Mode').click();
+      cy.contains('button', 'Confirm').click();
+
+      // Wait for systems to initialize
+      cy.wait(3000);
+
+      // === ACT 3: Player enters Library ===
+      cy.log('🚪 Player enters the Library for the first time');
+      cy.get('[data-testid="enter-library-btn"]').click();
+      cy.url().should('include', '/library');
+
+      // Wait for dialogue system to process
+      cy.wait(1000);
+
+      // === ACT 4: Click "Start a Conversation" to trigger dialogue ===
+      cy.log('💬 Player clicks Start a Conversation');
+      cy.contains('button', 'Start a Conversation').click();
+
+      // === ACT 5: Verify STORY EVENT dialogue appears (not random banter) ===
+      cy.log('🔍 Verifying first-visit story event dialogue appears');
+      cy.get('[class*="dialogueOverlay"]', { timeout: 5000 }).should('be.visible');
+
+      // Check for specific first-visit dialogue text
+      // This is the FIRST line from first-visit.json
+      cy.get('[class*="dialogueText"]').then(($text) => {
+        const dialogueText = $text.text();
+
+        // Check if it contains the specific first-visit event text
+        const hasFirstVisitText = dialogueText.includes('Ah, you must be our new Assistant Archivist') ||
+                                  dialogueText.includes('I am Lumina, Senior Archivist of Interdimensional Collections');
+
+        if (hasFirstVisitText) {
+          cy.log('✅ SUCCESS: First-visit story event dialogue is displaying!');
+          cy.log(`   Dialogue: ${dialogueText}`);
+        } else {
+          cy.log('⚠️ ISSUE: Not showing first-visit event dialogue');
+          cy.log(`   Current dialogue: ${dialogueText}`);
+          cy.log('   Expected: "Ah, you must be our new Assistant Archivist!"');
+        }
+
+        // Assert that it's the story event dialogue
+        expect(dialogueText).to.satisfy((text: string) => {
+          return text.includes('Ah, you must be our new Assistant Archivist') ||
+                 text.includes('I am Lumina, Senior Archivist of Interdimensional Collections');
+        }, 'Should display first-visit story event dialogue, not random banter');
+      });
+
+      // Check character name
+      cy.get('[class*="characterName"]').then(($name) => {
+        const characterName = $name.text();
+        cy.log(`   Character: ${characterName}`);
+
+        // Should be showing Lumina (first speaker in first-visit event)
+        expect(characterName).to.include('Lumina');
+      });
+    });
+
+    it('should NOT show placeholder/banter dialogue when story event is active', () => {
+      cy.log('🎮 Testing that placeholder dialogue does not appear');
+
+      // Navigate to library
+      cy.get('[data-testid="new-game-btn"]').click();
+      cy.get('[data-testid="continue-to-mode-select-btn"]').click();
+      cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
+      cy.contains('Story Mode').click();
+      cy.contains('button', 'Confirm').click();
+      cy.wait(3000);
+
+      cy.get('[data-testid="enter-library-btn"]').click();
+      cy.wait(1000);
+
+      // Start dialogue
+      cy.contains('button', 'Start a Conversation').click();
+      cy.get('[class*="dialogueOverlay"]').should('be.visible');
+
+      // Verify it's NOT showing the placeholder text
+      cy.get('[class*="dialogueText"]').then(($text) => {
+        const dialogueText = $text.text();
+
+        // These are placeholder texts that should NOT appear when story event is active
+        const hasPlaceholderText = dialogueText.includes('keeper of the western archives') ||
+                                   dialogueText.includes('The Kethaneum has chosen you');
+
+        if (!hasPlaceholderText) {
+          cy.log('✅ SUCCESS: Not showing placeholder dialogue');
+        } else {
+          cy.log('⚠️ ISSUE: Still showing placeholder dialogue instead of story event');
+          cy.log(`   Current: ${dialogueText}`);
+        }
+
+        // Should NOT contain placeholder text
+        expect(dialogueText).to.not.include('keeper of the western archives');
+        expect(dialogueText).to.not.include('The Kethaneum has chosen you');
+      });
+    });
+
+    it('should show dialogue sequence from first-visit event', () => {
+      cy.log('🎬 Testing full dialogue sequence');
+
+      // Navigate to library
+      cy.get('[data-testid="new-game-btn"]').click();
+      cy.get('[data-testid="continue-to-mode-select-btn"]').click();
+      cy.get('[role="dialog"]', { timeout: 10000 }).should('be.visible');
+      cy.contains('Story Mode').click();
+      cy.contains('button', 'Confirm').click();
+      cy.wait(3000);
+
+      cy.get('[data-testid="enter-library-btn"]').click();
+      cy.wait(1000);
+
+      // Start dialogue
+      cy.contains('button', 'Start a Conversation').click();
+      cy.get('[class*="dialogueOverlay"]').should('be.visible');
+
+      // Expected dialogue sequence from first-visit.json:
+      // 1. Lumina: "Ah, you must be our new Assistant Archivist..."
+      // 2. Valdris: "Welcome, young seeker. I am Valdris..."
+      // 3. Lumina: "The knowledge constructs await your attention..."
+      // 4. Valdris: "Do not be overwhelmed by the vastness..."
+
+      cy.log('📝 Checking first dialogue line (Lumina)');
+      cy.get('[class*="characterName"]').should('include.text', 'Lumina');
+      cy.get('[class*="dialogueText"]').should('satisfy', ($el) => {
+        const text = $el.text();
+        return text.includes('Assistant Archivist') ||
+               text.includes('Interdimensional Collections');
+      });
+
+      // TODO: If the dialogue system supports advancing through sequences,
+      // we could test clicking "Continue" and checking subsequent lines
+      // For now, we verify the first line appears correctly
+    });
+
     it('should trigger first-visit event when player enters library for first time', () => {
       // === ACT 1: Player starts new game ===
       cy.log('🎮 Player starts new game');
