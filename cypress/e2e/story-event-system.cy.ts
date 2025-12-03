@@ -81,8 +81,15 @@ describe('Story Event System', () => {
     navigateToLibrary();
 
     // After visiting library, the notification should be cleared
-    // Navigate back to Book of Passage
+    // Navigate back to puzzle by selecting a genre
     cy.get('[data-testid="browse-archives-btn"]').click();
+    
+    // Select genre to get to puzzle
+    cy.get('[role="dialog"]', { timeout: 5000 }).should('be.visible');
+    // Click on any available genre (Natural Wisdom, Fantasy, or Science)
+    cy.contains(/Natural Wisdom|Fantasy|Science/i).click();
+    
+    // Now should be in puzzle
     cy.url().should('include', '/puzzle');
 
     // Pause the game
@@ -236,9 +243,10 @@ describe('Story Event System', () => {
     cy.get('[data-testid="browse-archives-btn"]').click();
     cy.wait(1000);
 
-    // Select a genre (assuming modal appears)
+    // Select a genre (modal should appear)
     cy.get('[role="dialog"]').should('be.visible');
-    cy.get('[role="dialog"]').contains('button', 'mystery').click();
+    // Click on Fantasy genre card (Natural Wisdom, Fantasy, or Science are available)
+    cy.contains('Fantasy').click();
 
     // Should now be in puzzle
     cy.url().should('include', '/puzzle');

@@ -207,10 +207,8 @@ describe('Story Event System - Player Journey', () => {
 
       // Select genre to get to puzzle
       cy.get('[role="dialog"]', { timeout: 5000 }).should('be.visible');
-      // Find and click first available genre button
-      cy.get('[role="dialog"]').within(() => {
-        cy.get('button').contains(/fantasy|mystery|science|romance/i).first().click();
-      });
+      // Click on any available genre (Natural Wisdom, Fantasy, or Science)
+      cy.contains(/Natural Wisdom|Fantasy|Science/i).click();
 
       // Now in puzzle, pause to check buttons
       cy.url().should('include', '/puzzle');
@@ -442,9 +440,8 @@ describe('Story Event System - Player Journey', () => {
       cy.get('[data-testid="browse-archives-btn"]').click();
 
       cy.get('[role="dialog"]', { timeout: 5000 }).should('be.visible');
-      cy.get('[role="dialog"]').within(() => {
-        cy.get('button').contains(/fantasy|mystery|science|romance/i).first().click();
-      });
+      // Click on any available genre (Natural Wisdom, Fantasy, or Science)
+      cy.contains(/Natural Wisdom|Fantasy|Science/i).click();
 
       // Check pause menu library button
       cy.url().should('include', '/puzzle');
