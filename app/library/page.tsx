@@ -7,6 +7,7 @@ import { GenreSelectionModal } from '@/components/GenreSelectionModal';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
 import { useStoryNotification } from '@/contexts/StoryNotificationContext';
+import { dialogueManager } from '@/lib/dialogue/DialogueManager';
 import styles from './library.module.css';
 
 export default function LibraryScreen() {
@@ -21,6 +22,20 @@ export default function LibraryScreen() {
   useEffect(() => {
     clearNewDialogue();
   }, [clearNewDialogue]);
+
+  // Check for available story events when library loads
+  useEffect(() => {
+    // Check for first-visit event when player enters library
+    // This triggers the notification if the event is available
+    const eventId = dialogueManager.checkForAvailableStoryEvent(
+      'player-enters-library-first-time',
+      state.storyProgress?.currentStoryBeat
+    );
+
+    if (eventId) {
+      console.log(`[Library] Found available story event: ${eventId}`);
+    }
+  }, [state.storyProgress?.currentStoryBeat]);
 
   // Restrict access to Story Mode only
   useEffect(() => {
@@ -192,7 +207,11 @@ export default function LibraryScreen() {
         </div>
 
         <div className={styles.libraryActions}>
-          <button className={`${styles.libraryButton} ${styles.primary}`} onClick={handleBrowseArchives}>
+          <button 
+            className={`${styles.libraryButton} ${styles.primary}`} 
+            onClick={handleBrowseArchives}
+            data-testid="browse-archives-btn"
+          >
             Browse the Archives
           </button>
           

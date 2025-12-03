@@ -303,6 +303,15 @@ export class DialogueManager {
 
       console.log(`[DialogueManager] ✅ Loaded ${this.storyEvents.size} story events`);
 
+      // Initialize story event trigger checker index for performance
+      // This indexes events by story beat so we only check relevant events
+      if (typeof window !== 'undefined') {
+        // Dynamic import to avoid circular dependency
+        import('./StoryEventTriggerChecker').then(({ StoryEventTriggerChecker }) => {
+          StoryEventTriggerChecker.initializeIndex();
+        });
+      }
+
       // Emit event that story events are loaded
       this.emit('storyEventsLoaded', {
         count: this.storyEvents.size,
@@ -408,6 +417,21 @@ export class DialogueManager {
    */
   getStoryEvent(eventId: string): any | null {
     return this.storyEvents.get(eventId) || null;
+  }
+
+  /**
+   * Get all loaded story events
+   * Used by StoryEventTriggerChecker to check against state
+   */
+  getAllStoryEvents(): Map<string, any> {
+    return this.storyEvents;
+  }
+
+  /**
+   * Check if DialogueManager is initialized
+   */
+  getInitialized(): boolean {
+    return this.isInitialized;
   }
 
   /**

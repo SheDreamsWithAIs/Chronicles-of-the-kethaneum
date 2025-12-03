@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Story Notification Context
  *
