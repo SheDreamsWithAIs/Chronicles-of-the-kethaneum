@@ -1,8 +1,8 @@
     {
   "genreFiles": [
-    "/data/kethaneumPuzzles.json",
-    "/data/naturePuzzles.json",
-    "/data/testPuzzles.json"
+    "/data/story-puzzles/kethaneumPuzzles.json",
+    "/data/story-puzzles/naturePuzzles.json",
+    "/data/story-puzzles/testPuzzles.json"
   ]
 }
 

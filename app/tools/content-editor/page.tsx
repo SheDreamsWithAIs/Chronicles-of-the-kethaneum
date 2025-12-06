@@ -37,12 +37,12 @@ interface ContentFile {
 const CONTENT_FILES: ContentFile[] = [
   {
     name: 'Backstory',
-    path: '/data/backstory-content.json',
+    path: '/data/game-start-and-end-screen-content/backstory-content.json',
     description: 'Opening story shown when starting the game',
   },
   {
     name: 'Story End',
-    path: '/data/story-end-content.json',
+    path: '/data/game-start-and-end-screen-content/story-end-content.json',
     description: 'Congratulations message shown at game completion',
   },
 ];

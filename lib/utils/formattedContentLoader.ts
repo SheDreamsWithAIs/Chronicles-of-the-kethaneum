@@ -43,8 +43,8 @@ export type ContentType = 'backstory' | 'story-end';
  * Map of content types to their file paths
  */
 const CONTENT_PATHS: Record<ContentType, string> = {
-  'backstory': '/data/backstory-content.json',
-  'story-end': '/data/story-end-content.json',
+  'backstory': '/data/game-start-and-end-screen-content/backstory-content.json',
+  'story-end': '/data/game-start-and-end-screen-content/story-end-content.json',
 };
 
 /**
