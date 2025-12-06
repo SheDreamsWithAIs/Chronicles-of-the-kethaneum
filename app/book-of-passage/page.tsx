@@ -3,10 +3,12 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
+import { LibraryButton } from '@/components/LibraryButton';
 import { useGameState } from '@/hooks/useGameState';
 import { useStoryProgress, useInitializeStoryProgress } from '@/hooks/useStoryProgress';
+import { useStoryNotification } from '@/contexts/StoryNotificationContext';
 import { bookRegistry } from '@/lib/book/bookRegistry';
-import { storyProgressManager } from '@/lib/story';
+import { storyBlurbManager } from '@/lib/story';
 import styles from './book-of-passage.module.css';
 
 // ============================================================================
@@ -41,6 +43,7 @@ export default function BookOfPassageScreen() {
   const router = useRouter();
   const { state, setState } = useGameState();
   const [activeTab, setActiveTab] = useState<TabOption>('current-journey');
+  const { clearNewStory } = useStoryNotification();
 
   // Story progress hook
   const {
@@ -54,9 +57,14 @@ export default function BookOfPassageScreen() {
   // Initialize story progress hook
   const { initializeWithFirstBlurb } = useInitializeStoryProgress();
 
+  // Clear new story notification when visiting Book of Passage
+  useEffect(() => {
+    clearNewStory();
+  }, [clearNewStory]);
+
   // Initialize story progress with first blurb if not already done
   useEffect(() => {
-    if (!storyReady || !storyProgressManager.isLoaded()) return;
+    if (!storyReady || !storyBlurbManager.isLoaded()) return;
 
     // Check if story progress needs initialization (no blurbs unlocked yet)
     if (state.storyProgress && state.storyProgress.unlockedBlurbs.length === 0) {
@@ -515,13 +523,13 @@ export default function BookOfPassageScreen() {
 
       <div className={styles.bottomNav}>
         <div className={styles.navOrnament}>
-          <button
+          <LibraryButton
             className={styles.navButton}
             onClick={handleBeginCataloging}
-            data-testid="begin-cataloging-btn"
+            data-testid="enter-library-btn"
           >
-            Begin Cataloging
-          </button>
+            Enter the Library
+          </LibraryButton>
         </div>
       </div>
     </div>

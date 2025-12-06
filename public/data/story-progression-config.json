@@ -1,0 +1,142 @@
+{
+  "version": "1.0.0",
+  "description": "Story progression rules for Chronicles of the Kethaneum. Defines when to advance storybeats based on player progress.",
+
+  "progressionRules": [
+    {
+      "id": "hook_to_first_plot_point",
+      "fromBeat": "hook",
+      "toBeat": "first_plot_point",
+      "description": "Player has completed the tutorial and shown basic competency",
+      "conditions": {
+        "completedPuzzles": { "min": 3 },
+        "discoveredBooks": { "min": 1 }
+      },
+      "priority": 1
+    },
+    {
+      "id": "first_plot_to_first_pinch",
+      "fromBeat": "first_plot_point",
+      "toBeat": "first_pinch_point",
+      "description": "Player is engaged and making steady progress",
+      "conditions": {
+        "completedPuzzles": { "min": 8 },
+        "discoveredBooks": { "min": 2 }
+      },
+      "priority": 2
+    },
+    {
+      "id": "first_pinch_to_midpoint",
+      "fromBeat": "first_pinch_point",
+      "toBeat": "midpoint",
+      "description": "Player has reached the middle of their journey",
+      "conditions": {
+        "completedPuzzles": { "min": 15 },
+        "discoveredBooks": { "min": 4 }
+      },
+      "priority": 3
+    },
+    {
+      "id": "midpoint_to_second_pinch",
+      "fromBeat": "midpoint",
+      "toBeat": "second_pinch_point",
+      "description": "Player is in the latter half of the story",
+      "conditions": {
+        "completedPuzzles": { "min": 22 },
+        "discoveredBooks": { "min": 5 }
+      },
+      "priority": 4
+    },
+    {
+      "id": "second_pinch_to_second_plot",
+      "fromBeat": "second_pinch_point",
+      "toBeat": "second_plot_point",
+      "description": "Player is approaching the climax",
+      "conditions": {
+        "completedPuzzles": { "min": 28 },
+        "discoveredBooks": { "min": 6 }
+      },
+      "priority": 5
+    },
+    {
+      "id": "second_plot_to_climax",
+      "fromBeat": "second_plot_point",
+      "toBeat": "climax",
+      "description": "Player has reached the final challenges",
+      "conditions": {
+        "completedPuzzles": { "min": 35 },
+        "discoveredBooks": { "min": 7 }
+      },
+      "priority": 6
+    },
+    {
+      "id": "climax_to_resolution",
+      "fromBeat": "climax",
+      "toBeat": "resolution",
+      "description": "Player has completed the main story",
+      "conditions": {
+        "completedPuzzles": { "min": 40 },
+        "discoveredBooks": { "min": 8 }
+      },
+      "priority": 7
+    }
+  ],
+
+  "musicMapping": {
+    "description": "Maps storybeats to music playlists",
+    "beatToPlaylist": {
+      "hook": "act1",
+      "first_plot_point": "act1",
+      "first_pinch_point": "act2",
+      "midpoint": "act2",
+      "second_pinch_point": "act3",
+      "second_plot_point": "act3",
+      "climax": "act3",
+      "resolution": "act3"
+    },
+    "fadeDuration": 2000
+  },
+
+  "storyEventTriggers": {
+    "description": "Story events to trigger when entering specific storybeats",
+    "beatToEvent": {
+      "hook": "first-visit",
+      "first_plot_point": null,
+      "first_pinch_point": null,
+      "midpoint": null,
+      "second_pinch_point": null,
+      "second_plot_point": null,
+      "climax": null,
+      "resolution": null
+    },
+    "onlyTriggerOnce": true
+  },
+
+  "characterGroupLoading": {
+    "description": "When to load character groups based on storybeat",
+    "loadOnBeat": {
+      "hook": ["introduction_characters"],
+      "first_plot_point": ["regular_contacts", "essential_library_staff"],
+      "first_pinch_point": ["extended_library_staff"],
+      "midpoint": ["long_term_scholars", "knowledge_contributors"],
+      "second_pinch_point": ["visiting_scholars"],
+      "second_plot_point": [],
+      "climax": ["visiting_dignitaries"],
+      "resolution": ["special_event_characters"]
+    }
+  },
+
+  "settings": {
+    "enableAutoProgression": true,
+    "allowManualOverride": true,
+    "enableLogging": true,
+    "checkProgressionOnPuzzleComplete": true,
+    "checkProgressionOnBookDiscovered": true
+  },
+
+  "notes": {
+    "customization": "To create a new game, modify the conditions, music mapping, and event triggers to match your narrative structure.",
+    "testing": "Set lower thresholds during testing to see progression faster",
+    "balancing": "Adjust completedPuzzles and discoveredBooks thresholds based on your total content"
+  }
+}

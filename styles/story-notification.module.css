@@ -1,0 +1,41 @@
+/* Story Notification Glow/Pulse Effect */
+
+.storyNotificationGlow {
+  position: relative;
+  animation: storyPulse 2s ease-in-out infinite;
+}
+
+.storyNotificationGlow::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: linear-gradient(
+    45deg,
+    rgba(251, 191, 36, 0.6),
+    rgba(245, 158, 11, 0.6),
+    rgba(217, 119, 6, 0.6)
+  );
+  filter: blur(8px);
+  opacity: 0.8;
+  animation: storyGlow 2s ease-in-out infinite;
+  z-index: -1;
+}
+
+@keyframes storyPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes storyGlow {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}

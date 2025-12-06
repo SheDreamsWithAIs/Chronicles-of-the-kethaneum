@@ -1,6 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { BookOfPassageButton } from '@/components/BookOfPassageButton';
+import { LibraryButton } from '@/components/LibraryButton';
 import type { SessionStats } from '@/lib/game/state';
 import styles from './GameStatsModal.module.css';
 
@@ -147,14 +149,18 @@ export function GameStatsModal({
                 </button>
               )}
               {onBackToBookOfPassage && (
-                <button className={styles.secondaryButton} onClick={onBackToBookOfPassage}>
-                  Back to Book of Passage
-                </button>
+                <BookOfPassageButton
+                  className={styles.secondaryButton}
+                  onClick={onBackToBookOfPassage}
+                />
               )}
               {onBackToLibrary && (
-                <button className={styles.secondaryButton} onClick={onBackToLibrary}>
-                  Back to Library
-                </button>
+                <LibraryButton
+                  className={styles.secondaryButton}
+                  onClick={onBackToLibrary}
+                >
+                  Return to Library
+                </LibraryButton>
               )}
             </>
           )}

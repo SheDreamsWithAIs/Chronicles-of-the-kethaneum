@@ -6,8 +6,10 @@
 import { useCallback, useRef, useEffect } from 'react';
 import type { GameState, PuzzleData } from '@/lib/game/state';
 import { recordPuzzleStats, incrementTotalWords } from '@/lib/game/stats';
-import { storyProgressManager } from '@/lib/story';
+import { storyBlurbManager } from '@/lib/story';
 import { markPuzzleCompleted } from '@/lib/game/puzzleSelector';
+import { dialogueManager } from '@/lib/dialogue/DialogueManager';
+import { StoryEventTriggerChecker } from '@/lib/dialogue/StoryEventTriggerChecker';
 
 interface UseGameModeHandlersProps {
   state: GameState;
@@ -19,6 +21,7 @@ interface UseGameModeHandlersProps {
   setShowStatsModal: (show: boolean) => void;
   markCompleted?: (puzzle: PuzzleData) => void; // Optional callback to mark puzzle as completed
 }
+
 
 export function useGameModeHandlers({
   state,
@@ -134,11 +137,11 @@ export function useGameModeHandlers({
 
         // Check for story progress triggers
         // Pass previous state to detect transitions (e.g., 0 → 1 books discovered)
-        if (storyProgressManager.isLoaded()) {
-          const triggerResult = storyProgressManager.checkTriggerConditions(updatedState, previousState);
+        if (storyBlurbManager.isLoaded()) {
+          const triggerResult = storyBlurbManager.checkTriggerConditions(updatedState, previousState);
 
           if (triggerResult.shouldTrigger && triggerResult.blurb) {
-            const updatedProgress = storyProgressManager.unlockBlurb(
+            const updatedProgress = storyBlurbManager.unlockBlurb(
               triggerResult.blurb.id,
               updatedState.storyProgress
             );
@@ -146,6 +149,27 @@ export function useGameModeHandlers({
               ...updatedState,
               storyProgress: updatedProgress,
             };
+          }
+        }
+
+        // Check for story event dialogue triggers after puzzle completion
+        // Centralized check based on game state (not location-specific)
+        if (dialogueManager.getInitialized()) {
+          const triggeredEventIds = StoryEventTriggerChecker.checkAvailableEvents(
+            updatedState,
+            previousState
+          );
+          
+          // Trigger each available event
+          for (const eventId of triggeredEventIds) {
+            const currentBeat = updatedState.storyProgress?.currentStoryBeat;
+            const eventData = dialogueManager.getStoryEvent(eventId);
+            if (eventData?.storyEvent?.triggerCondition) {
+              dialogueManager.checkForAvailableStoryEvent(
+                eventData.storyEvent.triggerCondition,
+                currentBeat
+              );
+            }
           }
         }
 
