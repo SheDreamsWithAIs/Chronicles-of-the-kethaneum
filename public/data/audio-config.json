@@ -8,8 +8,8 @@
     "tracks": [
       {
         "id": "background-music-1",
-        "src": "/audio/music/background-music.mp3",
-        "title": "Background Music"
+        "src": "/audio/music/Act-1-bg-music/Enchanted Library - Prototype BG Music.mp3",
+        "title": "Enchanted Library - Prototype BG Music"
       }
     ]
   }
