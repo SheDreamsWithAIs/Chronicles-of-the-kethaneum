@@ -37,10 +37,10 @@ export default function StoryEndScreen() {
   };
 
   const moonPhases = [
-    { type: 'new' },
-    { type: 'waxing' },
-    { type: 'full' },
-    { type: 'waning' }
+    { type: 'new', className: styles.moonPhaseNew },
+    { type: 'waxing', className: styles.moonPhaseWaxing },
+    { type: 'full', className: styles.moonPhaseFull },
+    { type: 'waning', className: styles.moonPhaseWaning }
   ];
 
   return (
@@ -85,7 +85,7 @@ export default function StoryEndScreen() {
           <div className={styles.ornamentContainer}>
             <div className={styles.moonPhases}>
               {moonPhases.slice(0, 2).map((moon, index) => (
-                <div key={index} className={`${styles.moonPhase} ${styles[moon.type]}`}></div>
+                <div key={index} className={`${styles.moonPhase} ${moon.className}`}></div>
               ))}
             </div>
 
@@ -100,7 +100,7 @@ export default function StoryEndScreen() {
 
             <div className={styles.moonPhases}>
               {moonPhases.slice(2, 4).map((moon, index) => (
-                <div key={index + 2} className={`${styles.moonPhase} ${styles[moon.type]}`}></div>
+                <div key={index + 2} className={`${styles.moonPhase} ${moon.className}`}></div>
               ))}
             </div>
           </div>

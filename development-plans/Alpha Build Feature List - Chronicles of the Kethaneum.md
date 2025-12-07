@@ -17,9 +17,9 @@
 - [x] Game Logo Area
 
 ### Credits Screen
-- [ ] Credits Text Area
-- [ ] Scrollbar
-- [ ] Back to Title Screen Button
+- [x] Credits Text Area
+- [x] Scrollbar
+- [x] Back to Title Screen Button
 
 ### Backstory Screen
 - [x] Backstory Blurb Area
@@ -161,10 +161,10 @@ ___
 ### Title Screen
 - [x] Start a new Game (Go to Backstory Screen)
 - [x] Load a saved game (Go to Book of Passage)
-- [ ] Navigate to credits screen
+- [x] Navigate to credits screen
 
 ### Credits Screen
-- [ ] Navigate back to title screen
+- [x] Navigate back to title screen
 
 ### Backstory Screen
 - [x] Navigate to Library Screen
@@ -184,9 +184,8 @@ ___
 - [x] Navigate to Title Screen through pause menu
 
 ### Story End Screen
-- [ ] Navigate to Library Screen
-- [ ] Navigate to Book of Passage Screen
-- [ ] Navigate to Title Screen
+- [x] Navigate to Library Screen
+- [x] Navigate to Title Screen
 
 ### Options Menu
 - [ ] Navigate to Title Screen

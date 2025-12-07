@@ -180,18 +180,18 @@
   animation: moonGlow 4s ease-in-out infinite;
 }
 
-.moonPhase.new {
+.moonPhaseNew {
   background: transparent;
   border: 2px solid var(--accent-main);
 }
 
-.moonPhase.waxing {
+.moonPhaseWaxing {
   background: var(--accent-main);
   position: relative;
   overflow: hidden;
 }
 
-.moonPhase.waxing::before {
+.moonPhaseWaxing::before {
   content: '';
   position: absolute;
   top: 0;
@@ -202,18 +202,18 @@
   border-radius: 50%;
 }
 
-.moonPhase.full {
+.moonPhaseFull {
   background: var(--accent-main);
   box-shadow: 0 0 12px rgba(230, 168, 23, 0.5);
 }
 
-.moonPhase.waning {
+.moonPhaseWaning {
   background: var(--accent-main);
   position: relative;
   overflow: hidden;
 }
 
-.moonPhase.waning::before {
+.moonPhaseWaning::before {
   content: '';
   position: absolute;
   top: 0;
@@ -239,7 +239,6 @@
 }
 
 .libraryButton,
-.bookOfPassageButton,
 .mainMenuButton {
   padding: 15px 30px;
   font-family: var(--font-cinzel), serif;
@@ -262,7 +261,6 @@
 }
 
 .libraryButton::before,
-.bookOfPassageButton::before,
 .mainMenuButton::before {
   content: '';
   position: absolute;
@@ -275,24 +273,11 @@
 }
 
 .libraryButton:hover::before,
-.bookOfPassageButton:hover::before,
 .mainMenuButton:hover::before {
   left: 100%;
 }
 
 .libraryButton:hover {
-  background: linear-gradient(135deg, var(--accent-light), var(--accent-main));
-  transform: translateY(-2px);
-  box-shadow: var(--elevation-high);
-}
-
-.bookOfPassageButton {
-  background: linear-gradient(135deg, var(--accent-main), var(--accent-dark));
-  color: var(--primary-dark);
-  box-shadow: var(--elevation-medium);
-}
-
-.bookOfPassageButton:hover {
   background: linear-gradient(135deg, var(--accent-light), var(--accent-main));
   transform: translateY(-2px);
   box-shadow: var(--elevation-high);
