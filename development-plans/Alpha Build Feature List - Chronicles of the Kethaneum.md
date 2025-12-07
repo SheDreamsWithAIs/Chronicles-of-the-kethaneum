@@ -193,39 +193,39 @@ ___
 ## .:: Art ::.
 
 ### Concept Art
-- [ ] Character Concept Art
+- [ ] Character Concept Art (deferred to post Alpha)
 - [x] Title Screen Concept Art
-- [ ] Credits Screen Concept Art
+- [x] Credits Screen Concept Art
 - [x] Backstory Screen Concept Art
 - [x] Book of Passage Concept Art
 - [x] Library Concept Art
 - [x] Word Puzzle Concept Art
-- [ ] Border Designs
+- [ ] Border Designs (deferred to post Alpha)
 
 ### Credits Screen
-- [ ] Border Art placeholders
-- [ ] Twinkling Stars background animation
+- [ ] Border Art placeholders (deferred to post Alpha)
+- [x] Twinkling Stars background animation
 
 ### Title Screen
-- [ ] Border Art placeholders
+- [ ] Border Art placeholders (deferred to post Alpha)
 - [x] Twinkling Stars background animation
 
 ### Backstory Screen
-- [ ] Styled Scrollbar
-- [ ] Border Art placeholders
+- [x] Styled Scrollbar
+- [ ] Border Art placeholders (deferred to post Alpha)
 - [x] Twinkling Stars background animation
 
 ### Library Screen
-- [ ] Library Art Placeholder
+- [ ] Library Art Placeholder (deferred to post Alpha)
 - [x] Twinkling Stars background animation
 
 ### Book of Passage Screen
-- [ ] Styled Scrollbar
-- [ ] Border Art placeholders
+- [x] Styled Scrollbar
+- [ ] Border Art placeholders (deferred to post Alpha)
 - [x] Twinkling Stars background animation
 
 ### Word Puzzle Screen
-- [ ] Border Art placeholders
+- [ ] Border Art placeholders (deferred to post Alpha)
 - [x] Twinkling Stars background animation
 ___
 ## .:: Save System ::.

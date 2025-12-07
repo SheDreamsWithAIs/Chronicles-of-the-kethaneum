@@ -8,8 +8,8 @@
         },
         {
           "text": "Archivist",
-          "color": "#fbbf24",
-          "italic": true
+          "italic": true,
+          "color": "rgb(251, 191, 36)"
         },
         {
           "text": "."
@@ -23,7 +23,7 @@
         },
         {
           "text": "Kethaneum's",
-          "color": "#8b5cf6"
+          "color": "rgb(139, 92, 246)"
         },
         {
           "text": " sacred trust. Through countless puzzles and ancient texts, you have demonstrated not just intellect, but patience, perseverance, and a genuine love for knowledge."
@@ -38,7 +38,7 @@
         {
           "text": "Book of Passage",
           "italic": true,
-          "color": "#fbbf24"
+          "color": "rgb(251, 191, 36)"
         },
         {
           "text": " now brims with the chronicles of your journey—each chapter a testament to the challenges you've overcome and the wisdom you've gained. The cosmic librarians have taken notice, and your name is now inscribed among the honored few."
@@ -57,7 +57,7 @@
         {
           "text": "Until we meet again among the stars and stories...",
           "italic": true,
-          "color": "#60a5fa"
+          "color": "rgb(96, 165, 250)"
         }
       ]
     }
