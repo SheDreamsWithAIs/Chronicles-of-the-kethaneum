@@ -8,7 +8,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 3000;
+  z-index: 2000;
   backdrop-filter: blur(4px);
 }
 
@@ -45,7 +45,7 @@
   margin: 1rem 0;
 }
 
-.controlGroup {
+.section {
   background: linear-gradient(135deg, rgba(173, 81, 190, 0.3) 0%, rgba(121, 51, 133, 0.5) 100%);
   border: 1px solid rgba(254, 243, 199, 0.2);
   border-radius: 8px;
@@ -55,54 +55,61 @@
   gap: 0.75rem;
 }
 
-.controlHeader {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+.sectionTitle {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  color: #fef3c7;
+  margin: 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.controlIcon {
-  font-size: 1.5rem;
-  min-width: 2rem;
+.actionButton {
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid rgba(254, 243, 199, 0.3);
+  border-radius: 6px;
+  background: rgba(254, 243, 199, 0.1);
+  color: #fef3c7;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.actionButton:hover:not(:disabled) {
+  background: rgba(254, 243, 199, 0.2);
+  border-color: rgba(254, 243, 199, 0.5);
+  box-shadow: 0 2px 8px rgba(254, 243, 199, 0.3);
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.statusMessage {
+  margin: 0;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.85rem;
+  color: #10b981;
   text-align: center;
 }
 
-.controlLabel {
-  font-family: 'Cinzel', serif;
-  font-size: 1rem;
-  color: #fef3c7;
-  flex: 1;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+.statusMessageError {
+  margin: 0;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.85rem;
+  color: #ef4444;
+  text-align: center;
 }
 
-.muteButton {
-  background: rgba(254, 243, 199, 0.1);
-  border: 1px solid rgba(254, 243, 199, 0.3);
-  border-radius: 6px;
-  padding: 0.4rem 0.6rem;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.fontSizeControl {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 2.5rem;
-}
-
-.muteButton:hover {
-  background: rgba(254, 243, 199, 0.2);
-  border-color: rgba(254, 243, 199, 0.5);
-  transform: scale(1.05);
-}
-
-.muteButton.muted {
-  background: rgba(255, 0, 0, 0.1);
-  border-color: rgba(255, 0, 0, 0.3);
-}
-
-.muteButton.muted:hover {
-  background: rgba(255, 0, 0, 0.2);
-  border-color: rgba(255, 0, 0, 0.5);
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .sliderContainer {
@@ -165,20 +172,7 @@
               0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
-.slider:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.slider:disabled::-webkit-slider-thumb {
-  cursor: not-allowed;
-}
-
-.slider:disabled::-moz-range-thumb {
-  cursor: not-allowed;
-}
-
-.volumeValue {
+.fontSizeValue {
   font-family: 'Crimson Text', serif;
   font-size: 0.9rem;
   color: #e9d8d0;
@@ -186,7 +180,7 @@
   text-align: right;
 }
 
-.testButton {
+.resetButton {
   font-family: 'Cinzel', serif;
   font-size: 0.8rem;
   padding: 0.4rem 1rem;
@@ -199,67 +193,52 @@
   align-self: flex-end;
 }
 
-.testButton:hover:not(:disabled) {
+.resetButton:hover {
   background: rgba(254, 243, 199, 0.2);
   border-color: rgba(254, 243, 199, 0.5);
   box-shadow: 0 2px 8px rgba(254, 243, 199, 0.3);
 }
 
-.testButton:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.infoText {
-  background: rgba(254, 243, 199, 0.1);
-  border: 1px solid rgba(254, 243, 199, 0.2);
-  border-radius: 8px;
-  padding: 0.75rem;
-  text-align: center;
-}
-
-.infoText p {
-  margin: 0;
-  color: #e9d8d0;
-  font-family: 'Crimson Text', serif;
-  font-size: 0.9rem;
-}
-
-.buttonContainer {
+.navigationContainer {
   display: flex;
-  gap: 1rem;
-  justify-content: center;
+  flex-direction: column;
+  gap: 0.75rem;
   margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(254, 243, 199, 0.2);
 }
 
-.cancelButton,
-.confirmButton {
+.navButton {
   font-family: 'Cinzel', serif;
   font-size: 1rem;
   padding: 0.75rem 2rem;
   border: 2px solid rgba(254, 243, 199, 0.4);
   border-radius: 8px;
-  background: linear-gradient(135deg, #793385 0%, #441648 100%);
   color: #fef3c7;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 120px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.cancelButton:hover {
-  border-color: rgba(254, 243, 199, 0.7);
-  background: linear-gradient(135deg, #441648 0%, #793385 100%);
-  box-shadow: 0 4px 8px rgba(254, 243, 199, 0.3);
-}
-
-.confirmButton {
+.primaryButton {
   background: linear-gradient(135deg, rgba(254, 243, 199, 0.2) 0%, rgba(253, 224, 138, 0.2) 100%);
   border-color: #E6A817;
 }
 
-.confirmButton:hover {
+.primaryButton:hover {
   background: linear-gradient(135deg, rgba(254, 243, 199, 0.3) 0%, rgba(253, 224, 138, 0.3) 100%);
   box-shadow: 0 0 15px rgba(254, 243, 199, 0.4);
+}
+
+.secondaryButton {
+  background: linear-gradient(135deg, #793385 0%, #441648 100%);
+}
+
+.secondaryButton:hover {
+  border-color: rgba(254, 243, 199, 0.7);
+  background: linear-gradient(135deg, #441648 0%, #793385 100%);
+  box-shadow: 0 4px 8px rgba(254, 243, 199, 0.3);
 }
 
 /* Custom scrollbar */
@@ -292,21 +271,16 @@
     font-size: 1.5rem;
   }
 
-  .controlIcon {
-    font-size: 1.2rem;
-    min-width: 1.5rem;
+  .sectionTitle {
+    font-size: 1rem;
   }
 
-  .controlLabel {
-    font-size: 0.9rem;
+  .navigationContainer {
+    gap: 0.5rem;
   }
 
-  .buttonContainer {
-    flex-direction: column;
-  }
-
-  .cancelButton,
-  .confirmButton {
+  .navButton {
     width: 100%;
   }
 }
+

@@ -7,6 +7,7 @@ import { GameStatsModal } from '@/components/GameStatsModal';
 import { GenreCompletionModal } from '@/components/GenreCompletionModal';
 import { BookOfPassageButton } from '@/components/BookOfPassageButton';
 import { LibraryButton } from '@/components/LibraryButton';
+import { OptionsMenu } from '@/components/OptionsMenu';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
 import { useGameLogic } from '@/hooks/useGameLogic';
@@ -27,6 +28,7 @@ export default function PuzzleScreen() {
   const [statsModalIsWin, setStatsModalIsWin] = useState(false);
   const [showGenreCompletionModal, setShowGenreCompletionModal] = useState(false);
   const [puzzleStartTime, setPuzzleStartTime] = useState<number | null>(null);
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   // Track if we're transitioning between puzzles to prevent timer restart
   const isTransitioningRef = useRef(false);
   
@@ -534,8 +536,8 @@ export default function PuzzleScreen() {
   };
 
   const handleOptions = () => {
-    // TODO: Open options modal when implemented
-    console.log('Options clicked');
+    setIsPaused(false); // Close pause menu
+    setShowOptionsMenu(true); // Open options menu
   };
 
   // Stats modal handlers
@@ -898,9 +900,8 @@ export default function PuzzleScreen() {
               </button>
 
               <button
-                className={`${styles.pauseBtn} ${styles.disabled}`}
+                className={styles.pauseBtn}
                 onClick={handleOptions}
-                disabled
                 data-testid="options-btn"
               >
                 Options
@@ -934,6 +935,16 @@ export default function PuzzleScreen() {
         onContinueSameGenre={handleContinueSameGenre}
         onSelectNewGenre={handleSelectNewGenre}
         onClose={handleCloseGenreCompletionModal}
+      />
+
+      {/* Options Menu */}
+      <OptionsMenu
+        isOpen={showOptionsMenu}
+        onClose={() => setShowOptionsMenu(false)}
+        onNavigateToTitle={handleBackToMainMenu}
+        context="puzzle"
+        onResumeGame={handleResume}
+        onReturnToPause={() => setIsPaused(true)}
       />
     </div>
   );

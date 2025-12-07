@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { GenreSelectionModal } from '@/components/GenreSelectionModal';
+import { OptionsMenu } from '@/components/OptionsMenu';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
 import { useStoryNotification } from '@/contexts/StoryNotificationContext';
@@ -14,6 +15,7 @@ export default function LibraryScreen() {
   const router = useRouter();
   const [showDialogue, setShowDialogue] = useState(false);
   const [showGenreModal, setShowGenreModal] = useState(false);
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const { state, setState } = useGameState();
   const { loadSequential, loadAll } = usePuzzle(state, setState);
   const { clearNewDialogue } = useStoryNotification();
@@ -160,8 +162,7 @@ export default function LibraryScreen() {
   };
 
   const handleLibraryOptions = () => {
-    // Disabled for now - will open options modal when implemented
-    console.log('Options menu clicked (disabled)');
+    setShowOptionsMenu(true);
   };
 
   return (
@@ -228,14 +229,24 @@ export default function LibraryScreen() {
           </button>
           
           <button 
-            className={`${styles.libraryButton} ${styles.disabled}`} 
+            className={styles.libraryButton} 
             onClick={handleLibraryOptions}
-            disabled
           >
             Open the Options Menu
           </button>
         </div>
       </div>
+
+      {/* Options Menu */}
+      <OptionsMenu
+        isOpen={showOptionsMenu}
+        onClose={() => setShowOptionsMenu(false)}
+        onNavigateToTitle={() => router.push('/')}
+        context="library"
+        onReturnToLibrary={() => {
+          // Already on library screen, just close menu
+        }}
+      />
     </div>
   );
 }

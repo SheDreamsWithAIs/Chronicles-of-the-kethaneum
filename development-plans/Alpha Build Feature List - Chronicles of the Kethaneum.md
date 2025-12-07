@@ -270,7 +270,7 @@ ___
 - [ ] UI Event Handlers
   - [x] Screen Navigation Events
   - [ ] Button Click Events
-  - [ ] Hover State Events
+  - [x] Hover State Events
 - [x] Narrative Event Triggers
   - [x] Character Dialogue Triggers
   - [x] Story Progression Triggers
