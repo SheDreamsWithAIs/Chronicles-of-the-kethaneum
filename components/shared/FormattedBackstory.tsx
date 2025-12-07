@@ -53,21 +53,15 @@ export function FormattedBackstory({ content, className }: FormattedBackstoryPro
   return (
     <div className={className}>
       {content.paragraphs.map((paragraph, pIndex) => {
-        // Check if paragraph is empty (no segments or all segments are empty)
-        const hasContent = paragraph.segments.some(seg => seg.text.trim() !== '');
-        
+        // Always render the paragraph - CSS white-space: pre-wrap handles whitespace
+        // If paragraph has no segments, render empty paragraph (CSS will preserve it)
         return (
           <p key={pIndex}>
-            {hasContent ? (
-              paragraph.segments.map((segment, sIndex) => (
-                <React.Fragment key={sIndex}>
-                  {renderSegment(segment, sIndex)}
-                </React.Fragment>
-              ))
-            ) : (
-              // Empty paragraph - render non-breaking space to preserve blank line
-              '\u00A0'
-            )}
+            {paragraph.segments.map((segment, sIndex) => (
+              <React.Fragment key={sIndex}>
+                {renderSegment(segment, sIndex)}
+              </React.Fragment>
+            ))}
           </p>
         );
       })}
