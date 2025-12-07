@@ -1,0 +1,17 @@
+{
+  "backgroundMusic": {
+    "playlistId": "background-music",
+    "playlistName": "Background Music",
+    "mode": "REPEAT_ALL",
+    "autoAdvance": true,
+    "fadeDuration": 2000,
+    "tracks": [
+      {
+        "id": "background-music-1",
+        "src": "/audio/music/background-music.mp3",
+        "title": "Background Music"
+      }
+    ]
+  }
+}
+

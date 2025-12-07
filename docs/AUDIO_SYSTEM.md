@@ -60,6 +60,116 @@ public/
 
 **Recommendation**: Use MP3 files at 128-192 kbps for music/ambient, and 96 kbps for SFX/voice.
 
+## Background Music Configuration
+
+The background music playlist is configured via a JSON file, allowing you to update music tracks without code changes.
+
+### Configuration File
+
+Edit `public/data/audio-config.json` to manage your background music playlist:
+
+```json
+{
+  "backgroundMusic": {
+    "playlistId": "background-music",
+    "playlistName": "Background Music",
+    "mode": "REPEAT_ALL",
+    "autoAdvance": true,
+    "fadeDuration": 2000,
+    "tracks": [
+      {
+        "id": "background-music-1",
+        "src": "/audio/music/background-music.mp3",
+        "title": "Background Music"
+      }
+    ]
+  }
+}
+```
+
+### Adding Multiple Tracks
+
+Simply add more entries to the `tracks` array:
+
+```json
+{
+  "backgroundMusic": {
+    "tracks": [
+      {
+        "id": "background-music-1",
+        "src": "/audio/music/background-music.mp3",
+        "title": "Background Music"
+      },
+      {
+        "id": "background-music-2",
+        "src": "/audio/music/background-music-2.mp3",
+        "title": "Background Music 2"
+      },
+      {
+        "id": "background-music-3",
+        "src": "/audio/music/background-music-3.mp3",
+        "title": "Background Music 3"
+      }
+    ]
+  }
+}
+```
+
+### Playlist Modes
+
+- **`REPEAT_ALL`** - Loop through all tracks continuously (default)
+- **`SEQUENTIAL`** - Play tracks in order, stop at end
+- **`SHUFFLE`** - Play tracks in random order
+- **`REPEAT_ONE`** - Repeat the current track indefinitely
+
+### Configuration Options
+
+- **`playlistId`** - Internal identifier for the playlist (don't change unless you know what you're doing)
+- **`playlistName`** - Display name (for debugging/logging)
+- **`mode`** - Playlist playback mode (see above)
+- **`autoAdvance`** - Automatically move to next track when current ends (default: `true`)
+- **`fadeDuration`** - Fade-in time in milliseconds (default: `2000`)
+- **`tracks`** - Array of track objects, each with:
+  - **`id`** - Unique identifier for the track
+  - **`src`** - Path to the audio file (relative to `public/`)
+  - **`title`** - Display name (optional, for debugging)
+
+### File Organization
+
+You can organize your music files however you like:
+
+```
+public/audio/music/
+├── background-music.mp3
+├── background-music-2.mp3
+├── act1/
+│   ├── intro.mp3
+│   └── theme.mp3
+└── act2/
+    ├── adventure.mp3
+    └── exploration.mp3
+```
+
+Then reference them in the config:
+
+```json
+{
+  "tracks": [
+    { "id": "bg-1", "src": "/audio/music/background-music.mp3", "title": "Main Theme" },
+    { "id": "act1-intro", "src": "/audio/music/act1/intro.mp3", "title": "Act 1 Intro" },
+    { "id": "act1-theme", "src": "/audio/music/act1/theme.mp3", "title": "Act 1 Theme" }
+  ]
+}
+```
+
+### Important Notes
+
+- **No code changes needed** - Just edit the JSON file and restart the app
+- **File paths** - Always start with `/audio/` (relative to `public/`)
+- **File must exist** - If a track file doesn't exist, it will be skipped with a warning
+- **Hot reload** - Changes require a page refresh to take effect
+- **Format support** - MP3, OGG, WAV, M4A (MP3 recommended)
+
 ## Usage
 
 ### Basic Setup

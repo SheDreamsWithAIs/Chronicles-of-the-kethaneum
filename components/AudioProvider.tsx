@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
-import { audioManager } from '@/lib/audio/audioManager';
+import { useEffect, useState, useRef } from 'react';
+import { audioManager, AudioCategory, PlaylistMode, type PlaylistTrack } from '@/lib/audio/audioManager';
 import { loadAudioSettings, saveAudioSettings } from '@/lib/save/saveSystem';
 import { getConfig } from '@/lib/core/config';
+import { fetchAsset } from '@/lib/utils/assetPath';
 
 interface AudioProviderProps {
   children: React.ReactNode;
@@ -17,8 +18,54 @@ interface AudioProviderProps {
  * - Initializes the audio manager
  * - Auto-saves audio settings when they change
  * - Handles audio context resume on user interaction
+ * - Loads background music playlist from config file
+ *
+ * To update background music, edit: public/data/audio-config.json
+ * - Add/remove tracks in the "tracks" array
+ * - Change playlist mode: SEQUENTIAL, SHUFFLE, REPEAT_ONE, or REPEAT_ALL
+ * - Adjust fadeDuration (in milliseconds)
+ * - No code changes needed!
  */
+
+interface AudioConfig {
+  backgroundMusic: {
+    playlistId: string;
+    playlistName: string;
+    mode: 'SEQUENTIAL' | 'SHUFFLE' | 'REPEAT_ONE' | 'REPEAT_ALL';
+    autoAdvance: boolean;
+    fadeDuration: number;
+    tracks: Array<{
+      id: string;
+      src: string;
+      title: string;
+    }>;
+  };
+}
+
 export function AudioProvider({ children }: AudioProviderProps) {
+  const [audioConfig, setAudioConfig] = useState<AudioConfig | null>(null);
+  const resumeAudioHandlerRef = useRef<((e: Event) => Promise<void>) | null>(null);
+
+  // Load audio configuration from JSON file
+  useEffect(() => {
+    const loadAudioConfig = async () => {
+      try {
+        const response = await fetchAsset('/data/audio-config.json');
+        if (!response.ok) {
+          console.warn('[Audio] Failed to load audio config, using defaults');
+          return;
+        }
+        const config: AudioConfig = await response.json();
+        setAudioConfig(config);
+      } catch (error) {
+        console.warn('[Audio] Error loading audio config:', error);
+        // Continue without config - background music just won't play
+      }
+    };
+
+    loadAudioConfig();
+  }, []);
+
   useEffect(() => {
     // Load saved audio settings or use defaults from config
     const savedSettings = loadAudioSettings();
@@ -27,6 +74,76 @@ export function AudioProvider({ children }: AudioProviderProps) {
 
     // Initialize audio manager with settings
     audioManager.initialize(settingsToUse);
+
+    // Don't initialize music until config is loaded
+    if (!audioConfig) return;
+
+    // Preload and start background music playlist
+    const initializeBackgroundMusic = async () => {
+      try {
+        const bgMusic = audioConfig.backgroundMusic;
+        
+        // Convert mode string to enum
+        const playlistMode = PlaylistMode[bgMusic.mode as keyof typeof PlaylistMode] || PlaylistMode.REPEAT_ALL;
+        
+        // Convert tracks to PlaylistTrack format
+        const tracks: PlaylistTrack[] = bgMusic.tracks.map(track => ({
+          id: track.id,
+          src: track.src,
+          title: track.title
+        }));
+
+        // Create the background music playlist
+        audioManager.createPlaylist(
+          bgMusic.playlistId,
+          bgMusic.playlistName,
+          tracks,
+          AudioCategory.MUSIC,
+          playlistMode,
+          bgMusic.autoAdvance
+        );
+
+        // Load (preload) all tracks in the playlist
+        await audioManager.loadPlaylist(bgMusic.playlistId);
+
+        // Start playing the playlist with a fade-in
+        // Wait for user interaction first (browser requirement)
+        const startMusic = async () => {
+          try {
+            await audioManager.playPlaylist(bgMusic.playlistId, 0, bgMusic.fadeDuration);
+          } catch (error) {
+            console.warn('[Audio] Failed to start background music:', error);
+          }
+        };
+
+        // Resume audio context and start music on user interaction
+        const resumeAudioHandler = async () => {
+          await audioManager.resumeAudioContext();
+          await startMusic();
+          // Remove listeners after first interaction
+          const handler = resumeAudioHandlerRef.current;
+          if (handler) {
+            document.removeEventListener('click', handler);
+            document.removeEventListener('keydown', handler);
+            document.removeEventListener('touchstart', handler);
+            resumeAudioHandlerRef.current = null;
+          }
+        };
+
+        // Store handler in ref for cleanup
+        resumeAudioHandlerRef.current = resumeAudioHandler;
+
+        // Add event listeners for user interaction
+        document.addEventListener('click', resumeAudioHandler);
+        document.addEventListener('keydown', resumeAudioHandler);
+        document.addEventListener('touchstart', resumeAudioHandler);
+      } catch (error) {
+        console.warn('[Audio] Failed to load background music:', error);
+        // Continue without music if files don't exist
+      }
+    };
+
+    initializeBackgroundMusic();
 
     // Create a function to save settings whenever they change
     const saveSettings = () => {
@@ -38,29 +155,24 @@ export function AudioProvider({ children }: AudioProviderProps) {
     // This is a simple approach - in a production app you might use a more sophisticated method
     const saveInterval = setInterval(saveSettings, 5000); // Save every 5 seconds
 
-    // Resume audio context on user interaction (required by browsers)
-    const resumeAudio = async () => {
-      await audioManager.resumeAudioContext();
-      // Remove listeners after first interaction
-      document.removeEventListener('click', resumeAudio);
-      document.removeEventListener('keydown', resumeAudio);
-      document.removeEventListener('touchstart', resumeAudio);
-    };
-
-    // Add event listeners for user interaction
-    document.addEventListener('click', resumeAudio);
-    document.addEventListener('keydown', resumeAudio);
-    document.addEventListener('touchstart', resumeAudio);
-
     // Cleanup
     return () => {
       clearInterval(saveInterval);
       saveSettings(); // Save one last time on unmount
-      document.removeEventListener('click', resumeAudio);
-      document.removeEventListener('keydown', resumeAudio);
-      document.removeEventListener('touchstart', resumeAudio);
+      // Remove event listeners if they still exist
+      const handler = resumeAudioHandlerRef.current;
+      if (handler) {
+        document.removeEventListener('click', handler);
+        document.removeEventListener('keydown', handler);
+        document.removeEventListener('touchstart', handler);
+        resumeAudioHandlerRef.current = null;
+      }
+      // Stop music playlist on unmount (though this shouldn't happen in a SPA)
+      if (audioConfig) {
+        audioManager.stopPlaylist(1000).catch(() => {});
+      }
     };
-  }, []);
+  }, [audioConfig]);
 
   return <>{children}</>;
 }

@@ -40,11 +40,11 @@
   - [x] Character portrait area
   - [x] Dialogue text display area
   - [x] Dialogue navigation controls
-- [ ] Options Menu Panel
-  - [ ] Menu Title 
-  - [ ] Volume Sliders
-  - [ ] Mute Button
-  - [ ] Back to Library Screen Button
+- [x] Options Menu Panel
+  - [x] Menu Title 
+  - [x] Volume Sliders
+  - [x] Mute Button
+  - [x] Back to Library Screen Button
 
 ### Book of Passage Screen
 - [x] Book of Passage Title
@@ -77,10 +77,10 @@
   - [x] Return to Library Button
   - [x] Quit to Title Screen Button
 - [x] Option Menu Button
-- [ ] Options Menu Panel
-  - [ ] Menu Title 
-  - [ ] Volume Sliders
-  - [ ] Mute Button
+- [x] Options Menu Panel
+  - [x] Menu Title 
+  - [x] Volume Sliders
+  - [x] Mute Button
 
 ### Story End Screen
 - [x] End of Game text Area
@@ -140,7 +140,7 @@ ___
   - [x] Character portrait placeholder system
   - [x] Text display with responsive sizing
   - [x] Continue/advance dialogue controls
-- [ ] Library Screen Integration
+- [x] Library Screen Integration
   - [x] "Start Conversation" button functionality
   - [x] Dialogue panel show/hide management
   - [x] Integration with existing library navigation
@@ -188,7 +188,7 @@ ___
 - [x] Navigate to Title Screen
 
 ### Options Menu
-- [ ] Navigate to Title Screen
+- [x] Navigate to Title Screen
 ___
 ## .:: Art ::.
 
@@ -235,7 +235,7 @@ ___
   - [x] Book part completion status
   - [x] Game state serialization and restoration
 - [x] Auto-save on book/puzzle completion
-- [ ] Manual save through pause menu
+- [x] Manual save through pause menu
 - [ ] Save data integrity validation
 - [x] Incomplete puzzle state preservation
   - [x] Ability to return to puzzles in progress
@@ -246,14 +246,14 @@ ___
   - [x] Sound Effects handler
   - [x] Voice Acting handler
   - [x] Selective Channel Muting
-- [ ] Single Background Music Track
+- [x] Single Background Music Track
 - [ ] Sound Effects Placeholders
   - [ ] Navigation Button Clicks
   - [ ] Menu button Clicks
   - [ ] Button Hover Sound
   - [ ] Puzzle Completion
   - [ ] Puzzle Failure
-- [ ] Voice Acting Placeholders
+- [ ] Voice Acting Placeholders (Deferred until post alpha)
 ___
 ## .:: Character Dialogue System ::.
   - [x] Character Image Handler
@@ -281,4 +281,3 @@ ___
 ## .:: Test Set Up ::.
 - [x] End to End Automated Test
 - [x] Word Search Happy Path Automated Test
-- [ ] Early Playtesting
