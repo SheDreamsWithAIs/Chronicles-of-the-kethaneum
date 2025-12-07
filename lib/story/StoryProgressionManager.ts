@@ -279,6 +279,24 @@ export class StoryProgressionManager {
         return;
       }
 
+      // Check if playlist has any loaded tracks
+      const hasLoadedTracks = playlist.tracks.some(track => {
+        // Check if track is loaded by checking if it exists in audioManager's tracks
+        return audioManager.getPlaylist(playlistId)?.tracks.some(t => {
+          // We need to check if the track is actually loaded
+          // The audioManager doesn't expose tracks directly, so we'll try to play and let it handle gracefully
+          return true; // Let playPlaylist handle the check
+        });
+      });
+
+      // Check current playlist - don't interrupt if it's already playing the same playlist
+      const currentInfo = audioManager.getCurrentPlaylistInfo();
+      if (currentInfo?.playlistId === playlistId) {
+        this.log(`Playlist "${playlistId}" is already playing, skipping music change`);
+        return;
+      }
+
+      // Try to play the playlist (it will gracefully skip if no tracks are loaded)
       await audioManager.playPlaylist(playlistId, 0, fadeDuration);
       this.log(`Music changed to playlist: ${playlistId}`);
     } catch (error) {

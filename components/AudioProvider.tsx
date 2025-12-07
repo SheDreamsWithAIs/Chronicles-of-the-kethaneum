@@ -103,16 +103,53 @@ export function AudioProvider({ children }: AudioProviderProps) {
           bgMusic.autoAdvance
         );
 
-        // Load (preload) all tracks in the playlist
-        await audioManager.loadPlaylist(bgMusic.playlistId);
+        // Also create act-based playlists for story progression system
+        // For now, all acts use the same track(s) - can be updated later with act-specific tracks
+        const actPlaylists = [
+          { id: 'act1', name: 'Act 1 Music' },
+          { id: 'act2', name: 'Act 2 Music' },
+          { id: 'act3', name: 'Act 3 Music' },
+        ];
+
+        actPlaylists.forEach(actPlaylist => {
+          // Only create if it doesn't already exist (initializeAudioSystem might have created it)
+          if (!audioManager.getPlaylist(actPlaylist.id)) {
+            audioManager.createPlaylist(
+              actPlaylist.id,
+              actPlaylist.name,
+              tracks, // Use same tracks for all acts for now
+              AudioCategory.MUSIC,
+              playlistMode,
+              bgMusic.autoAdvance
+            );
+            console.log(`[Audio] Created ${actPlaylist.name} playlist`);
+          }
+        });
+
+        // Load (preload) all tracks in the playlists
+        // Errors are handled gracefully - failed tracks are skipped
+        const playlistsToLoad = [bgMusic.playlistId, ...actPlaylists.map(p => p.id)];
+        for (const playlistId of playlistsToLoad) {
+          await audioManager.loadPlaylist(playlistId).catch((error) => {
+            console.warn(`[Audio] Error loading playlist ${playlistId}, continuing:`, error);
+          });
+        }
 
         // Start playing the playlist with a fade-in
         // Wait for user interaction first (browser requirement)
         const startMusic = async () => {
           try {
+            // Check if playlist has any loaded tracks before trying to play
+            const playlist = audioManager.getPlaylist(bgMusic.playlistId);
+            if (!playlist || playlist.tracks.length === 0) {
+              console.warn('[Audio] Playlist is empty, skipping playback');
+              return;
+            }
+            
             await audioManager.playPlaylist(bgMusic.playlistId, 0, bgMusic.fadeDuration);
           } catch (error) {
             console.warn('[Audio] Failed to start background music:', error);
+            // Continue without music - not a critical error
           }
         };
 

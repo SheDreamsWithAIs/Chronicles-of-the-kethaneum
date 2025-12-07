@@ -166,31 +166,10 @@ export interface PlaylistConfig {
  * Easy to register all at once
  */
 export const ALL_PLAYLISTS: PlaylistConfig[] = [
-  // Music playlists
-  {
-    id: 'act1',
-    name: 'Act 1: The Beginning',
-    tracks: ACT1_PLAYLIST,
-    category: AudioCategory.MUSIC,
-    mode: PlaylistMode.SEQUENTIAL,
-    autoAdvance: true
-  },
-  {
-    id: 'act2',
-    name: 'Act 2: The Journey',
-    tracks: ACT2_PLAYLIST,
-    category: AudioCategory.MUSIC,
-    mode: PlaylistMode.SHUFFLE,
-    autoAdvance: true
-  },
-  {
-    id: 'act3',
-    name: 'Act 3: The Climax',
-    tracks: ACT3_PLAYLIST,
-    category: AudioCategory.MUSIC,
-    mode: PlaylistMode.SEQUENTIAL,
-    autoAdvance: true
-  },
+  // Note: act1, act2, act3 playlists are now managed by AudioProvider from audio-config.json
+  // They are excluded here to prevent conflicts with placeholder MP3 files
+  
+  // Music playlists (examples for future use)
   {
     id: 'menu',
     name: 'Menu Music',
