@@ -37,8 +37,8 @@
 - [ ] Add credits content (placeholder or actual credits)
 
 ### 3. Other Missing Items (from feature list)
-- [ ] Library Screen - Options Menu Panel (partially complete)
-- [ ] Word Puzzle Screen - Options Menu Panel (partially complete)
+- [ ] Library Screen - Settings Menu Panel (partially complete)
+- [ ] Word Puzzle Screen - Settings Menu Panel (partially complete)
 - [ ] Book of Passage - Start Cataloging Button navigation
 
 ## Notes

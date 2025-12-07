@@ -5,9 +5,9 @@ import { useGameState } from '@/hooks/useGameState';
 import { useFontSize } from '@/hooks/useFontSize';
 import { saveProgress } from '@/lib/save/unifiedSaveSystem';
 import { AudioSettingsModal } from './AudioSettingsModal';
-import styles from './OptionsMenu.module.css';
+import styles from './SettingsMenu.module.css';
 
-interface OptionsMenuProps {
+interface SettingsMenuProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigateToTitle: () => void;
@@ -17,7 +17,7 @@ interface OptionsMenuProps {
   onReturnToLibrary?: () => void;
 }
 
-export function OptionsMenu({
+export function SettingsMenu({
   isOpen,
   onClose,
   onNavigateToTitle,
@@ -25,7 +25,7 @@ export function OptionsMenu({
   onResumeGame,
   onReturnToPause,
   onReturnToLibrary,
-}: OptionsMenuProps) {
+}: SettingsMenuProps) {
   const { state } = useGameState();
   const { fontSize, setFontSize, resetFontSize, minFontSize, maxFontSize } = useFontSize();
   const [showAudioSettings, setShowAudioSettings] = useState(false);
@@ -57,8 +57,8 @@ export function OptionsMenu({
   return (
     <>
       <div className={styles.overlay} onClick={onClose}>
-        <div className={styles.panelContent} onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby="options-modal-title">
-          <h2 className={styles.panelTitle} id="options-modal-title">Options</h2>
+        <div className={styles.panelContent} onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby="settings-modal-title">
+          <h2 className={styles.panelTitle} id="settings-modal-title">Settings</h2>
 
           <div className={styles.settingsContainer}>
             {/* Audio Settings Section */}

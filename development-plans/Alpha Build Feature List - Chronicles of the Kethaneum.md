@@ -40,7 +40,7 @@
   - [x] Character portrait area
   - [x] Dialogue text display area
   - [x] Dialogue navigation controls
-- [x] Options Menu Panel
+       - [x] Settings Menu Panel
   - [x] Menu Title 
   - [x] Volume Sliders
   - [x] Mute Button
@@ -76,8 +76,8 @@
   - [x] Restart Puzzle Button
   - [x] Return to Library Button
   - [x] Quit to Title Screen Button
-- [x] Option Menu Button
-- [x] Options Menu Panel
+- [x] Settings Menu Button
+       - [x] Settings Menu Panel
   - [x] Menu Title 
   - [x] Volume Sliders
   - [x] Mute Button
@@ -102,7 +102,7 @@ ___
   - [ ] Sci Fi
   - [ ] Fantasy
   - [ ] Romance
-  - [ ] kethaneum
+  - [ ] kethaneum (there will be fewer than 10 books for this genre, dictated by story needs)
 ___
 ## .:: Narrative Delivery ::.
 - [x] Easy Narrative File Swap Out
@@ -187,7 +187,7 @@ ___
 - [x] Navigate to Library Screen
 - [x] Navigate to Title Screen
 
-### Options Menu
+       ### Settings Menu
 - [x] Navigate to Title Screen
 ___
 ## .:: Art ::.

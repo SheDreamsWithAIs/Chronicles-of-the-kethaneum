@@ -42,37 +42,44 @@ export function AudioSettingsModal({
 
   const handleVolumeChange = (category: 'master' | AudioCategory, value: number) => {
     const newValue = value / 100; // Convert from 0-100 to 0-1
-    setLocalSettings(prev => ({
-      ...prev,
+    const updatedSettings = {
+      ...localSettings,
       [`${category === 'master' ? 'master' : category}Volume`]: newValue
-    }));
+    };
+    setLocalSettings(updatedSettings);
+    // Apply immediately to audio system
+    audio.updateSettings({
+      [`${category === 'master' ? 'master' : category}Volume`]: newValue
+    } as Partial<typeof localSettings>);
   };
 
   const handleMuteToggle = (category: 'master' | AudioCategory) => {
     const muteKey = `${category === 'master' ? 'master' : category}Muted` as keyof typeof localSettings;
-    setLocalSettings(prev => ({
-      ...prev,
-      [muteKey]: !prev[muteKey]
-    }));
+    const newMutedState = !localSettings[muteKey];
+    const updatedSettings = {
+      ...localSettings,
+      [muteKey]: newMutedState
+    };
+    setLocalSettings(updatedSettings);
+    // Apply immediately to audio system
+    audio.updateSettings({
+      [muteKey]: newMutedState
+    } as Partial<typeof localSettings>);
   };
 
   const handleSave = () => {
+    // Settings are already applied immediately, but ensure everything is synced
     audio.updateSettings(localSettings);
     onSave?.();
     onClose();
   };
 
   const handleCancel = () => {
-    setLocalSettings(audio.settings); // Reset to original settings
+    // Revert to original settings
+    const originalSettings = audio.settings;
+    setLocalSettings(originalSettings);
+    audio.updateSettings(originalSettings);
     onClose();
-  };
-
-  const handleTestSound = (category: AudioCategory) => {
-    // Play a test sound for the category
-    // This is a placeholder - you would need to preload test sounds
-    if (category === AudioCategory.SFX) {
-      console.log('Test SFX sound');
-    }
   };
 
   const getVolume = (category: 'master' | AudioCategory): number => {
@@ -119,16 +126,6 @@ export function AudioSettingsModal({
                   {Math.round(getVolume(control.id))}%
                 </span>
               </div>
-
-              {control.id !== 'master' && (
-                <button
-                  className={styles.testButton}
-                  onClick={() => handleTestSound(control.id as AudioCategory)}
-                  disabled={isMuted(control.id) || isMuted('master')}
-                >
-                  Test
-                </button>
-              )}
             </div>
           ))}
         </div>

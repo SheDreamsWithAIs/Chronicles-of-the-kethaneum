@@ -7,7 +7,7 @@ import { GameStatsModal } from '@/components/GameStatsModal';
 import { GenreCompletionModal } from '@/components/GenreCompletionModal';
 import { BookOfPassageButton } from '@/components/BookOfPassageButton';
 import { LibraryButton } from '@/components/LibraryButton';
-import { OptionsMenu } from '@/components/OptionsMenu';
+import { SettingsMenu } from '@/components/SettingsMenu';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
 import { useGameLogic } from '@/hooks/useGameLogic';
@@ -28,7 +28,7 @@ export default function PuzzleScreen() {
   const [statsModalIsWin, setStatsModalIsWin] = useState(false);
   const [showGenreCompletionModal, setShowGenreCompletionModal] = useState(false);
   const [puzzleStartTime, setPuzzleStartTime] = useState<number | null>(null);
-  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   // Track if we're transitioning between puzzles to prevent timer restart
   const isTransitioningRef = useRef(false);
   
@@ -535,9 +535,9 @@ export default function PuzzleScreen() {
     router.push('/');
   };
 
-  const handleOptions = () => {
+  const handleSettings = () => {
     setIsPaused(false); // Close pause menu
-    setShowOptionsMenu(true); // Open options menu
+    setShowSettingsMenu(true); // Open settings menu
   };
 
   // Stats modal handlers
@@ -901,10 +901,10 @@ export default function PuzzleScreen() {
 
               <button
                 className={styles.pauseBtn}
-                onClick={handleOptions}
-                data-testid="options-btn"
+                onClick={handleSettings}
+                data-testid="settings-btn"
               >
-                Options
+                Settings
               </button>
             </div>
           </div>
@@ -937,10 +937,10 @@ export default function PuzzleScreen() {
         onClose={handleCloseGenreCompletionModal}
       />
 
-      {/* Options Menu */}
-      <OptionsMenu
-        isOpen={showOptionsMenu}
-        onClose={() => setShowOptionsMenu(false)}
+      {/* Settings Menu */}
+      <SettingsMenu
+        isOpen={showSettingsMenu}
+        onClose={() => setShowSettingsMenu(false)}
         onNavigateToTitle={handleBackToMainMenu}
         context="puzzle"
         onResumeGame={handleResume}

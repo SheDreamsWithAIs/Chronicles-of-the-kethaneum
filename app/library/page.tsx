@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { GenreSelectionModal } from '@/components/GenreSelectionModal';
-import { OptionsMenu } from '@/components/OptionsMenu';
+import { SettingsMenu } from '@/components/SettingsMenu';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
 import { useStoryNotification } from '@/contexts/StoryNotificationContext';
@@ -15,7 +15,7 @@ export default function LibraryScreen() {
   const router = useRouter();
   const [showDialogue, setShowDialogue] = useState(false);
   const [showGenreModal, setShowGenreModal] = useState(false);
-  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const { state, setState } = useGameState();
   const { loadSequential, loadAll } = usePuzzle(state, setState);
   const { clearNewDialogue } = useStoryNotification();
@@ -161,8 +161,8 @@ export default function LibraryScreen() {
     router.push('/');
   };
 
-  const handleLibraryOptions = () => {
-    setShowOptionsMenu(true);
+  const handleLibrarySettings = () => {
+    setShowSettingsMenu(true);
   };
 
   return (
@@ -230,17 +230,17 @@ export default function LibraryScreen() {
           
           <button 
             className={styles.libraryButton} 
-            onClick={handleLibraryOptions}
+            onClick={handleLibrarySettings}
           >
-            Open the Options Menu
+            Open Settings
           </button>
         </div>
       </div>
 
-      {/* Options Menu */}
-      <OptionsMenu
-        isOpen={showOptionsMenu}
-        onClose={() => setShowOptionsMenu(false)}
+      {/* Settings Menu */}
+      <SettingsMenu
+        isOpen={showSettingsMenu}
+        onClose={() => setShowSettingsMenu(false)}
         onNavigateToTitle={() => router.push('/')}
         context="library"
         onReturnToLibrary={() => {
