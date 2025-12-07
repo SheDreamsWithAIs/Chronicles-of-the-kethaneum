@@ -62,7 +62,7 @@
 - [x] Story and Progress Navigation Buttons (Get to different sections in the Book of Passage)
 - [x] Scrollbar
 - [ ] Start Cataloging Button
-- [x] Return to Library Button (still named start cataloging but it goes to the library)
+- [x] Enter the Library Button
 
 
 ### Word Puzzle Screen
@@ -83,11 +83,10 @@
   - [ ] Mute Button
 
 ### Story End Screen
-- [ ] End of Game text Area
-- [ ] Scrollbar
-- [ ] Return to Library Button
-- [ ] Return to Book of Passage Button
-- [ ] Return to Title Screen Button
+- [x] End of Game text Area
+- [x] Scrollbar
+- [x] Return to Library Button
+- [x] Return to Title Screen Button
 ___
 ## .:: Word Puzzle ::.
 
@@ -155,12 +154,7 @@ ___
 - [x] Word Puzzle Excerpt Text Content (especially Kethaneum related)
 
 ### Story End Screen
-- [ ] End of Game Placeholder Content
-
-### Tutorial Screens (Will probably get deferred to the beta build)
-- [ ] Tutorial Library Screen (deactivated until tutorial system implementation)
-- [ ] Tutorial Book of Passage Screen (deactivated until tutorial system implementation)
-- [ ] Tutorial Word Puzzle Screen (deactivated until tutorial system implementation)
+- [x] End of Game Placeholder Content
 ___
 ## .:: Navigation ::.
 
@@ -243,7 +237,6 @@ ___
   - [x] Game state serialization and restoration
 - [x] Auto-save on book/puzzle completion
 - [ ] Manual save through pause menu
-- [ ] Manual save through options menu
 - [ ] Save data integrity validation
 - [x] Incomplete puzzle state preservation
   - [x] Ability to return to puzzles in progress

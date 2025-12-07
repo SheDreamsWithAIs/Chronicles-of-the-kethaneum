@@ -120,8 +120,8 @@ export default function TitleScreen() {
                 </button>
 
                 <button
-                  className={`${styles.gameButton} ${styles.secondary} ${styles.disabled}`}
-                  disabled
+                  className={`${styles.gameButton} ${styles.secondary}`}
+                  onClick={() => router.push('/credits')}
                   data-testid="credits-btn"
                 >
                   Credits

@@ -47,6 +47,17 @@
   flex-shrink: 0;
 }
 
+.bookSpine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 5px;
+  right: 5px;
+  bottom: 0;
+  background: linear-gradient(180deg, var(--accent-light), var(--accent-main));
+  border-radius: 2px;
+}
+
 .spineTitle {
   position: absolute;
   top: 50%;

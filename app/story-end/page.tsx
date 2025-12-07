@@ -36,7 +36,12 @@ export default function StoryEndScreen() {
     router.push('/library');
   };
 
-  const starSymbols = ['✦', '✧', '★', '☆'];
+  const moonPhases = [
+    { type: 'new' },
+    { type: 'waxing' },
+    { type: 'full' },
+    { type: 'waning' }
+  ];
 
   return (
     <div className={`${styles.storyEndContainer} ${isVisible ? styles.visible : ''}`} data-testid="story-end-screen">
@@ -78,9 +83,9 @@ export default function StoryEndScreen() {
       <div className={styles.buttonContainer}>
         <div className={styles.buttonOrnament}>
           <div className={styles.ornamentContainer}>
-            <div className={styles.starSymbols}>
-              {starSymbols.slice(0, 2).map((star, index) => (
-                <div key={index} className={styles.starSymbol}>{star}</div>
+            <div className={styles.moonPhases}>
+              {moonPhases.slice(0, 2).map((moon, index) => (
+                <div key={index} className={`${styles.moonPhase} ${styles[moon.type]}`}></div>
               ))}
             </div>
 
@@ -93,9 +98,9 @@ export default function StoryEndScreen() {
               </button>
             </div>
 
-            <div className={styles.starSymbols}>
-              {starSymbols.slice(2, 4).map((star, index) => (
-                <div key={index + 2} className={styles.starSymbol}>{star}</div>
+            <div className={styles.moonPhases}>
+              {moonPhases.slice(2, 4).map((moon, index) => (
+                <div key={index + 2} className={`${styles.moonPhase} ${styles[moon.type]}`}></div>
               ))}
             </div>
           </div>
