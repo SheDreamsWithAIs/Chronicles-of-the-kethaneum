@@ -46,6 +46,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
   const [audioConfig, setAudioConfig] = useState<AudioConfig | null>(null);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const resumeAudioHandlerRef = useRef<((e: Event) => Promise<void>) | null>(null);
+  const [lastMuteState, setLastMuteState] = useState<{ master: boolean; music: boolean } | null>(null);
 
   // Load audio configuration from JSON file
   useEffect(() => {
@@ -78,6 +79,11 @@ export function AudioProvider({ children }: AudioProviderProps) {
         if (result.audioSettings) {
           audioManager.initialize(result.audioSettings);
           setSettingsLoaded(true);
+          // Store initial mute state
+          setLastMuteState({
+            master: result.audioSettings.masterMuted,
+            music: result.audioSettings.musicMuted,
+          });
           return;
         }
       } catch (error) {
@@ -93,6 +99,12 @@ export function AudioProvider({ children }: AudioProviderProps) {
       // Initialize audio manager with settings
       audioManager.initialize(settingsToUse);
       setSettingsLoaded(true);
+      
+      // Store initial mute state
+      setLastMuteState({
+        master: settingsToUse.masterMuted,
+        music: settingsToUse.musicMuted,
+      });
     };
     
     loadAudioFromUnifiedSave();
@@ -266,6 +278,50 @@ export function AudioProvider({ children }: AudioProviderProps) {
       }
     };
   }, [audioConfig, settingsLoaded]);
+
+  // Watch for mute state changes and start music when unmuted
+  useEffect(() => {
+    if (!audioConfig || !settingsLoaded || !lastMuteState) return;
+
+    // Check mute state periodically to detect changes
+    const checkMuteState = () => {
+      const currentMasterMuted = audioManager.isMuted('master');
+      const currentMusicMuted = audioManager.isMuted(AudioCategory.MUSIC);
+      
+      // Check if music was muted but is now unmuted
+      const wasMuted = lastMuteState.master || lastMuteState.music;
+      const isNowUnmuted = !currentMasterMuted && !currentMusicMuted;
+      
+      if (wasMuted && isNowUnmuted) {
+        // Music was muted but is now unmuted - check if we should start playing
+        const currentPlaylistInfo = audioManager.getCurrentPlaylistInfo();
+        if (!currentPlaylistInfo) {
+          // No music playing, try to start it
+          const bgMusic = audioConfig.backgroundMusic;
+          const playlist = audioManager.getPlaylist(bgMusic.playlistId);
+          if (playlist && playlist.tracks.length > 0) {
+            console.log('[Audio] Music unmuted, starting playback');
+            audioManager.resumeAudioContext().then(() => {
+              audioManager.playPlaylist(bgMusic.playlistId, 0, bgMusic.fadeDuration).catch((error) => {
+                console.warn('[Audio] Failed to start music after unmute:', error);
+              });
+            });
+          }
+        }
+      }
+      
+      // Update last known state
+      setLastMuteState({
+        master: currentMasterMuted,
+        music: currentMusicMuted,
+      });
+    };
+
+    // Check every 500ms for mute state changes
+    const interval = setInterval(checkMuteState, 500);
+
+    return () => clearInterval(interval);
+  }, [audioConfig, settingsLoaded, lastMuteState]);
 
   return <>{children}</>;
 }
