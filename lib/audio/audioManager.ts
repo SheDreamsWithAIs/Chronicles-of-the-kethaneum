@@ -110,13 +110,27 @@ export class AudioManager {
    * Initialize the audio manager with saved settings
    */
   public initialize(settings?: Partial<AudioSettings>): void {
-    if (this.initialized) return;
+    if (this.initialized) {
+      // If already initialized, only update settings if provided
+      if (settings) {
+        this.settings = { ...this.settings, ...settings };
+        this.updateAllVolumes();
+      }
+      return;
+    }
 
     if (settings) {
       this.settings = { ...this.settings, ...settings };
     }
 
     this.initialized = true;
+  }
+
+  /**
+   * Check if audio manager is initialized
+   */
+  public getInitialized(): boolean {
+    return this.initialized;
   }
 
   /**
@@ -168,11 +182,20 @@ export class AudioManager {
     }
 
     this.currentMusic = id;
+    
+    // Check mute state BEFORE playing
+    this.updateVolume(track.audio, AudioCategory.MUSIC);
+    
+    // If muted, don't play at all
+    if (this.isMuted('master') || this.isMuted(AudioCategory.MUSIC)) {
+      return;
+    }
+
     track.audio.volume = 0;
 
     try {
       await track.audio.play();
-      await this.fadeIn(track.audio, fadeDuration);
+      await this.fadeIn(track.audio, fadeDuration, AudioCategory.MUSIC);
       this.updateVolume(track.audio, AudioCategory.MUSIC);
     } catch (e) {
       console.error(`Failed to play music: ${id}`, e);
@@ -415,6 +438,7 @@ export class AudioManager {
 
   /**
    * Load (preload) all tracks in a playlist
+   * Gracefully handles failed tracks - continues loading other tracks even if some fail
    */
   public async loadPlaylist(playlistId: string): Promise<void> {
     const playlist = this.playlists.get(playlistId);
@@ -424,11 +448,45 @@ export class AudioManager {
     }
 
     // Preload all tracks in the playlist
-    const promises = playlist.tracks.map(track =>
-      this.preload(track.id, track.src, playlist.category, false)
-    );
+    // Use allSettled so failed tracks don't stop the whole playlist
+    const promises = playlist.tracks.map(async (track) => {
+      try {
+        // URL encode the path to handle spaces and special characters
+        // Split by '/', encode each segment (but keep slashes), then rejoin
+        const pathParts = track.src.split('/');
+        const encodedSrc = pathParts.map((segment) => {
+          // Keep empty segments (for leading/trailing slashes in absolute paths)
+          if (segment === '') {
+            return segment;
+          }
+          // Encode the segment (filename/path part) to handle spaces and special chars
+          return encodeURIComponent(segment);
+        }).join('/');
+        
+        await this.preload(track.id, encodedSrc, playlist.category, false);
+        return { track, success: true };
+      } catch (error) {
+        console.warn(`[Audio] Failed to load track "${track.title || track.id}" from "${track.src}":`, error);
+        return { track, success: false, error };
+      }
+    });
 
-    await Promise.all(promises);
+    const results = await Promise.allSettled(promises);
+    
+    // Log summary
+    const successful = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
+    const failed = results.length - successful;
+    
+    if (failed > 0) {
+      console.warn(`[Audio] Playlist "${playlistId}": ${successful} track(s) loaded successfully, ${failed} track(s) failed to load`);
+    } else {
+      console.log(`[Audio] Playlist "${playlistId}": All ${successful} track(s) loaded successfully`);
+    }
+    
+    // If no tracks loaded successfully, warn but don't throw
+    if (successful === 0) {
+      console.warn(`[Audio] No tracks loaded for playlist "${playlistId}". Playlist will be empty.`);
+    }
   }
 
   /**
@@ -441,25 +499,42 @@ export class AudioManager {
   ): Promise<void> {
     const playlist = this.playlists.get(playlistId);
     if (!playlist) {
-      console.warn(`Playlist not found: ${playlistId}`);
+      console.warn(`[Audio] Playlist not found: ${playlistId}`);
       return;
     }
 
     if (playlist.tracks.length === 0) {
-      console.warn(`Playlist is empty: ${playlistId}`);
+      console.warn(`[Audio] Playlist is empty: ${playlistId}`);
       return;
+    }
+
+    // Check if any tracks in the playlist are actually loaded
+    const hasLoadedTracks = playlist.tracks.some(track => this.tracks.has(track.id));
+    if (!hasLoadedTracks) {
+      console.warn(`[Audio] No tracks loaded for playlist "${playlistId}". Skipping playback.`);
+      return;
+    }
+
+    // Find the first loaded track starting from startIndex
+    let firstLoadedIndex = startIndex;
+    for (let i = 0; i < playlist.tracks.length; i++) {
+      const checkIndex = (startIndex + i) % playlist.tracks.length;
+      if (this.tracks.has(playlist.tracks[checkIndex].id)) {
+        firstLoadedIndex = checkIndex;
+        break;
+      }
     }
 
     // Set as current playlist
     this.currentPlaylist = playlistId;
-    this.currentTrackIndex = startIndex;
+    this.currentTrackIndex = firstLoadedIndex;
 
     // Initialize shuffle if needed
     if (playlist.mode === PlaylistMode.SHUFFLE) {
       this.initializeShuffle(playlist.tracks.length);
     }
 
-    // Play the first track
+    // Play the first loaded track
     await this.playPlaylistTrack(fadeDuration);
   }
 
@@ -478,10 +553,27 @@ export class AudioManager {
     const nextIndex = this.getNextTrackIndex(playlist);
     if (nextIndex !== null) {
       this.currentTrackIndex = nextIndex;
-      await this.playPlaylistTrack(fadeDuration);
+      try {
+        await this.playPlaylistTrack(fadeDuration);
+      } catch (e) {
+        // Handle AbortError gracefully (play was interrupted)
+        if (e instanceof DOMException && e.name === 'AbortError') {
+          return; // Silently handle interruption
+        }
+        console.error('Failed to play next track:', e);
+      }
     } else {
       // End of playlist
-      await this.stopMusic(fadeDuration);
+      try {
+        await this.stopMusic(fadeDuration);
+      } catch (e) {
+        // Handle errors gracefully
+        if (e instanceof DOMException && e.name === 'AbortError') {
+          // Silently handle interruption
+        } else {
+          console.error('Failed to stop music at end of playlist:', e);
+        }
+      }
       this.currentPlaylist = null;
     }
   }
@@ -589,7 +681,7 @@ export class AudioManager {
   /**
    * Play the current track in the active playlist
    */
-  private async playPlaylistTrack(fadeDuration: number): Promise<void> {
+  private async playPlaylistTrack(fadeDuration: number, skipCount = 0): Promise<void> {
     if (!this.currentPlaylist) return;
 
     const playlist = this.playlists.get(this.currentPlaylist);
@@ -598,35 +690,99 @@ export class AudioManager {
     const track = playlist.tracks[this.currentTrackIndex];
     if (!track) return;
 
-    // Stop current music
-    if (this.currentMusic) {
+    // Prevent infinite loops when skipping unloaded tracks
+    if (skipCount >= playlist.tracks.length) {
+      console.warn(`[Audio] No loaded tracks found in playlist "${playlist.id}"`);
+      return;
+    }
+
+    // Stop current music (only if it's a different track)
+    // If we're playing the same track (e.g., REPEAT_ALL with one track), skip stopping
+    if (this.currentMusic && this.currentMusic !== track.id) {
       await this.stopMusic(fadeDuration);
+    } else if (this.currentMusic === track.id) {
+      // Same track - just reset position and continue
+      const currentTrack = this.tracks.get(this.currentMusic);
+      if (currentTrack) {
+        currentTrack.audio.currentTime = 0;
+      }
     }
 
     // Play the track
     const audioTrack = this.tracks.get(track.id);
     if (!audioTrack) {
-      console.warn(`Track not loaded: ${track.id}`);
+      // Track not loaded - try to find next available track in playlist
+      console.warn(`[Audio] Track not loaded: ${track.id}, skipping to next available track...`);
+      
+      // Try to advance to next track if available
+      if (playlist.tracks.length > 1) {
+        const nextIndex = this.getNextTrackIndex(playlist);
+        if (nextIndex !== null && nextIndex !== this.currentTrackIndex) {
+          this.currentTrackIndex = nextIndex;
+          // Recursively try to play the next track (increment skip count to prevent loops)
+          await this.playPlaylistTrack(fadeDuration, skipCount + 1);
+        }
+      }
       return;
     }
 
     this.currentMusic = track.id;
-    audioTrack.audio.volume = 0;
+    
+    // Check mute state BEFORE playing - set volume to 0 immediately if muted
+    // This prevents any audio from playing even briefly
+    this.updateVolume(audioTrack.audio, playlist.category);
+    
+    // If muted, don't play at all
+    const isMuted = this.isMuted('master') || this.isMuted(playlist.category);
+    if (isMuted) {
+      // Don't play if muted - just set up the track for when unmuted
+      return;
+    }
 
     // Set up event listener for track end
     if (playlist.autoAdvance) {
       const handleTrackEnd = async () => {
         audioTrack.audio.removeEventListener('ended', handleTrackEnd);
 
+        // Check if we're still supposed to be playing this playlist
+        // (might have been stopped/changed during the transition)
+        if (this.currentPlaylist !== playlist.id) {
+          return; // Playlist changed, don't auto-advance
+        }
+
+        // Check mute state before auto-advancing
+        if (this.isMuted('master') || this.isMuted(playlist.category)) {
+          return; // Don't advance if muted
+        }
+
         // Auto-advance to next track
         if (playlist.mode === PlaylistMode.REPEAT_ONE) {
           // Replay the same track
           audioTrack.audio.currentTime = 0;
-          await audioTrack.audio.play();
-          audioTrack.audio.addEventListener('ended', handleTrackEnd);
+          try {
+            // Check mute before replaying
+            if (!this.isMuted('master') && !this.isMuted(playlist.category)) {
+              await audioTrack.audio.play();
+              audioTrack.audio.addEventListener('ended', handleTrackEnd);
+            }
+          } catch (e) {
+            // Handle AbortError gracefully (play was interrupted)
+            if (e instanceof DOMException && e.name === 'AbortError') {
+              return; // Silently handle interruption
+            }
+            console.error(`Failed to replay track: ${track.id}`, e);
+          }
         } else {
           // Move to next track
-          await this.nextTrack(fadeDuration);
+          try {
+            await this.nextTrack(fadeDuration);
+          } catch (e) {
+            // Handle errors gracefully during track transition
+            if (e instanceof DOMException && e.name === 'AbortError') {
+              return; // Silently handle interruption
+            }
+            console.error(`Failed to advance to next track:`, e);
+          }
         }
       };
 
@@ -634,10 +790,21 @@ export class AudioManager {
     }
 
     try {
+      // Set initial volume to 0 for fade-in (only if not muted)
+      audioTrack.audio.volume = 0;
       await audioTrack.audio.play();
-      await this.fadeIn(audioTrack.audio, fadeDuration);
+      // Pass category to fadeIn so it can check mute state during fade
+      await this.fadeIn(audioTrack.audio, fadeDuration, playlist.category);
+      // Final volume update after fade (respects mute state)
       this.updateVolume(audioTrack.audio, playlist.category);
     } catch (e) {
+      // AbortError is expected when transitioning tracks (pause interrupts play)
+      // Only log other errors
+      if (e instanceof DOMException && e.name === 'AbortError') {
+        // This is expected - the play() was interrupted by pause() during track transition
+        // Silently handle it
+        return;
+      }
       console.error(`Failed to play track: ${track.id}`, e);
     }
   }
@@ -756,12 +923,30 @@ export class AudioManager {
     });
   }
 
-  private async fadeIn(audio: HTMLAudioElement, duration: number): Promise<void> {
+  private async fadeIn(audio: HTMLAudioElement, duration: number, category?: AudioCategory): Promise<void> {
     const startVolume = 0;
     const steps = 20;
     const stepDuration = duration / steps;
 
+    // Get the category from the track if not provided
+    let audioCategory = category;
+    if (!audioCategory) {
+      // Try to find the category from the tracks map
+      for (const [id, track] of this.tracks.entries()) {
+        if (track.audio === audio) {
+          audioCategory = track.category;
+          break;
+        }
+      }
+    }
+
     for (let i = 0; i <= steps; i++) {
+      // Check mute state during fade - if muted, keep volume at 0
+      if (audioCategory && (this.isMuted('master') || this.isMuted(audioCategory))) {
+        audio.volume = 0;
+        // If muted, stop the fade and keep volume at 0
+        break;
+      }
       audio.volume = startVolume + (i / steps);
       await new Promise(resolve => setTimeout(resolve, stepDuration));
     }

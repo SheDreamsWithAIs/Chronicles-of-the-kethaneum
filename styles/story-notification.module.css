@@ -12,14 +12,42 @@
   border-radius: inherit;
   background: linear-gradient(
     45deg,
-    rgba(251, 191, 36, 0.6),
-    rgba(245, 158, 11, 0.6),
-    rgba(217, 119, 6, 0.6)
+    rgba(255, 251, 235, 0.8), /* amber-50 */
+    rgba(255, 251, 235, 0.9), /* amber-50 */
+    rgba(255, 251, 235, 0.8)  /* amber-50 */
   );
   filter: blur(8px);
   opacity: 0.8;
   animation: storyGlow 2s ease-in-out infinite;
   z-index: -1;
+}
+
+/* External glow variant - simplified to pulse and color change only */
+.storyNotificationGlowExternal {
+  position: relative;
+  border-color: rgba(255, 251, 235, 0.6) !important;
+  animation: storyPulseExternal 2s ease-in-out infinite, storyColorPulse 2s ease-in-out infinite;
+  transition: border-color 0.3s ease;
+}
+
+@keyframes storyPulseExternal {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+@keyframes storyColorPulse {
+  0%, 100% {
+    border-color: rgba(255, 251, 235, 0.6);
+    box-shadow: 0 0 10px rgba(255, 251, 235, 0.3);
+  }
+  50% {
+    border-color: rgba(255, 251, 235, 1);
+    box-shadow: 0 0 20px rgba(255, 251, 235, 0.6);
+  }
 }
 
 @keyframes storyPulse {

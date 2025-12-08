@@ -7,6 +7,7 @@ import { GameStatsModal } from '@/components/GameStatsModal';
 import { GenreCompletionModal } from '@/components/GenreCompletionModal';
 import { BookOfPassageButton } from '@/components/BookOfPassageButton';
 import { LibraryButton } from '@/components/LibraryButton';
+import { SettingsMenu } from '@/components/SettingsMenu';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
 import { useGameLogic } from '@/hooks/useGameLogic';
@@ -27,6 +28,7 @@ export default function PuzzleScreen() {
   const [statsModalIsWin, setStatsModalIsWin] = useState(false);
   const [showGenreCompletionModal, setShowGenreCompletionModal] = useState(false);
   const [puzzleStartTime, setPuzzleStartTime] = useState<number | null>(null);
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   // Track if we're transitioning between puzzles to prevent timer restart
   const isTransitioningRef = useRef(false);
   
@@ -533,9 +535,9 @@ export default function PuzzleScreen() {
     router.push('/');
   };
 
-  const handleOptions = () => {
-    // TODO: Open options modal when implemented
-    console.log('Options clicked');
+  const handleSettings = () => {
+    setIsPaused(false); // Close pause menu
+    setShowSettingsMenu(true); // Open settings menu
   };
 
   // Stats modal handlers
@@ -898,12 +900,11 @@ export default function PuzzleScreen() {
               </button>
 
               <button
-                className={`${styles.pauseBtn} ${styles.disabled}`}
-                onClick={handleOptions}
-                disabled
-                data-testid="options-btn"
+                className={styles.pauseBtn}
+                onClick={handleSettings}
+                data-testid="settings-btn"
               >
-                Options
+                Settings
               </button>
             </div>
           </div>
@@ -934,6 +935,16 @@ export default function PuzzleScreen() {
         onContinueSameGenre={handleContinueSameGenre}
         onSelectNewGenre={handleSelectNewGenre}
         onClose={handleCloseGenreCompletionModal}
+      />
+
+      {/* Settings Menu */}
+      <SettingsMenu
+        isOpen={showSettingsMenu}
+        onClose={() => setShowSettingsMenu(false)}
+        onNavigateToTitle={handleBackToMainMenu}
+        context="puzzle"
+        onResumeGame={handleResume}
+        onReturnToPause={() => setIsPaused(true)}
       />
     </div>
   );

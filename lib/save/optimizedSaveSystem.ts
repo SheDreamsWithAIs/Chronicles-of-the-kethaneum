@@ -18,6 +18,8 @@ import {
 } from '../book/progressBitmap';
 import type { GameState } from '../game/state';
 import type { StoryProgressState } from '../story/types';
+import type { AudioSettings } from '../audio/audioManager';
+import { audioManager } from '../audio/audioManager';
 
 // ============================================================================
 // Types - Optimized Storage Format
@@ -46,6 +48,8 @@ export interface OptimizedProgress {
   s?: OptimizedSelectionState;
   /** Story progress (optional) */
   sp?: StoryProgressState;
+  /** Audio settings (optional) */
+  a?: OptimizedAudioSettings;
 }
 
 /**
@@ -78,6 +82,32 @@ export interface OptimizedSelectionState {
   r: boolean;
   /** Genre exhausted */
   e: boolean;
+}
+
+/**
+ * Compact audio settings
+ */
+export interface OptimizedAudioSettings {
+  /** Master volume (0-1) */
+  mv: number;
+  /** Music volume (0-1) */
+  mu: number;
+  /** Ambient volume (0-1) */
+  av: number;
+  /** SFX volume (0-1) */
+  sv: number;
+  /** Voice volume (0-1) */
+  vv: number;
+  /** Master muted */
+  mm: boolean;
+  /** Music muted */
+  mum: boolean;
+  /** Ambient muted */
+  am: boolean;
+  /** SFX muted */
+  sm: boolean;
+  /** Voice muted */
+  vm: boolean;
 }
 
 // ============================================================================
@@ -238,9 +268,11 @@ export async function saveOptimizedProgress(state: GameState): Promise<void> {
     }
 
     // Add selection state
-    if (state.selectedGenre || state.nextKethaneumIndex > 0 || state.kethaneumRevealed) {
+    // Always save selection state if we have a currentGenre or selectedGenre
+    // This ensures we preserve genre information even if selectedGenre is empty
+    if (state.selectedGenre || state.currentGenre || state.nextKethaneumIndex > 0 || state.kethaneumRevealed) {
       optimized.s = {
-        g: state.selectedGenre || '',
+        g: state.selectedGenre || state.currentGenre || '', // Fallback to currentGenre if selectedGenre is empty
         k: state.nextKethaneumIndex || 0,
         p: state.puzzlesSinceLastKethaneum || 0,
         i: state.nextKethaneumInterval || 3,
@@ -253,6 +285,21 @@ export async function saveOptimizedProgress(state: GameState): Promise<void> {
     if (state.storyProgress) {
       optimized.sp = state.storyProgress;
     }
+
+    // Add audio settings
+    const audioSettings = audioManager.getSettings();
+    optimized.a = {
+      mv: audioSettings.masterVolume,
+      mu: audioSettings.musicVolume,
+      av: audioSettings.ambientVolume,
+      sv: audioSettings.sfxVolume,
+      vv: audioSettings.voiceVolume,
+      mm: audioSettings.masterMuted,
+      mum: audioSettings.musicMuted,
+      am: audioSettings.ambientMuted,
+      sm: audioSettings.sfxMuted,
+      vm: audioSettings.voiceMuted,
+    };
 
     // Save to localStorage
     localStorage.setItem(STORAGE_KEY, JSON.stringify(optimized));
@@ -365,6 +412,22 @@ export async function decodeOptimizedProgress(
     decoded.storyProgress = data.sp;
   }
 
+  // Decode audio settings
+  if (data.a) {
+    decoded.audioSettings = {
+      masterVolume: data.a.mv,
+      musicVolume: data.a.mu,
+      ambientVolume: data.a.av,
+      sfxVolume: data.a.sv,
+      voiceVolume: data.a.vv,
+      masterMuted: data.a.mm,
+      musicMuted: data.a.mum,
+      ambientMuted: data.a.am,
+      sfxMuted: data.a.sm,
+      voiceMuted: data.a.vm,
+    };
+  }
+
   return decoded;
 }
 
@@ -397,6 +460,7 @@ export async function convertToGameStateFormat(
   kethaneumRevealed: boolean;
   genreExhausted: boolean;
   storyProgress?: StoryProgressState;
+  audioSettings?: AudioSettings;
 }> {
   const books: { [title: string]: boolean[] | { complete?: boolean } } = {};
   const discoveredBooks = new Set<string>();
@@ -430,6 +494,31 @@ export async function convertToGameStateFormat(
     completedPuzzlesByGenre[genre] = titles;
   }
 
+  // Extract values from decoded progress
+  const currentGenre = decoded.currentState?.genre || '';
+  let selectedGenre = decoded.selectionState?.selectedGenre || '';
+  
+  // Fallback: If selectedGenre is empty but currentGenre exists, use currentGenre
+  // This handles old save files that don't have selectedGenre saved
+  if (!selectedGenre && currentGenre) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Save System] selectedGenre is empty, falling back to currentGenre:', currentGenre);
+    }
+    selectedGenre = currentGenre;
+  }
+  
+  // Debug logging in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Save System] Loading game state:', {
+      currentGenre,
+      selectedGenre: decoded.selectionState?.selectedGenre || '(empty)',
+      selectedGenreAfterFallback: selectedGenre,
+      hasSelectionState: !!decoded.selectionState,
+      hasCurrentState: !!decoded.currentState,
+      completedPuzzles: decoded.completedPuzzlesCount,
+    });
+  }
+
   return {
     books,
     discoveredBooks,
@@ -437,12 +526,12 @@ export async function convertToGameStateFormat(
     completedPuzzlesByGenre,
     completedBooks: decoded.discoveredBooks.size,
     completedPuzzles: decoded.completedPuzzlesCount,
-    currentGenre: decoded.currentState?.genre || '',
+    currentGenre,
     currentBook: decoded.currentState?.bookTitle || '',
     currentStoryPart: decoded.currentState?.part ?? -1,
     currentPuzzleIndex: decoded.currentState?.puzzleIndex ?? -1,
     gameMode: decoded.gameMode,
-    selectedGenre: decoded.selectionState?.selectedGenre || '',
+    selectedGenre,
     nextKethaneumIndex: decoded.selectionState?.nextKethaneumIndex || 0,
     puzzlesSinceLastKethaneum: decoded.selectionState?.puzzlesSinceLastKethaneum || 0,
     nextKethaneumInterval: decoded.selectionState?.nextKethaneumInterval || 3,

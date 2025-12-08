@@ -12,6 +12,8 @@
 
 import type { GameState } from '../game/state';
 import type { SavedProgress } from './saveSystem';
+import type { AudioSettings } from '../audio/audioManager';
+import { audioManager } from '../audio/audioManager';
 import {
   saveOptimizedProgress,
   loadOptimizedProgress,
@@ -37,6 +39,7 @@ import { loadGameProgress as loadLegacyProgress } from './saveSystem';
 export interface UnifiedLoadResult {
   success: boolean;
   data: Partial<GameState> | null;
+  audioSettings?: AudioSettings;
   wasMigrated: boolean;
   version: number;
   error?: string;
@@ -113,6 +116,7 @@ export async function loadProgress(): Promise<UnifiedLoadResult> {
       return {
         success: true,
         data: gameStateData,
+        audioSettings: gameStateData.audioSettings,
         wasMigrated: false,
         version: 2,
       };

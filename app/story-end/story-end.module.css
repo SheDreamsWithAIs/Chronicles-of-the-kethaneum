@@ -116,15 +116,14 @@
   line-height: 1.8;
   color: var(--neutral-dark);
   text-align: justify;
+  white-space: pre-wrap;
+  tab-size: 4;
 }
 
 .storyContent p {
-  margin-bottom: 20px;
-  text-indent: 30px;
-}
-
-.storyContent p:first-child {
-  text-indent: 0;
+  margin-bottom: 0;
+  white-space: pre-wrap;
+  tab-size: 4;
 }
 
 .storyContent em {
@@ -165,31 +164,71 @@
   z-index: 2;
 }
 
-.starSymbols {
+.moonPhases {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-.starSymbol {
-  color: var(--accent-main);
-  font-size: 20px;
+.moonPhase {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  position: relative;
   opacity: 0.9;
-  animation: starGlow 3s ease-in-out infinite;
+  animation: moonGlow 4s ease-in-out infinite;
 }
 
-.starSymbol:nth-child(2) {
-  animation-delay: 0.5s;
+.moonPhaseNew {
+  background: transparent;
+  border: 2px solid var(--accent-main);
 }
 
-@keyframes starGlow {
+.moonPhaseWaxing {
+  background: var(--accent-main);
+  position: relative;
+  overflow: hidden;
+}
+
+.moonPhaseWaxing::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 8px;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-dark);
+  border-radius: 50%;
+}
+
+.moonPhaseFull {
+  background: var(--accent-main);
+  box-shadow: 0 0 12px rgba(230, 168, 23, 0.5);
+}
+
+.moonPhaseWaning {
+  background: var(--accent-main);
+  position: relative;
+  overflow: hidden;
+}
+
+.moonPhaseWaning::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 8px;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-dark);
+  border-radius: 50%;
+}
+
+@keyframes moonGlow {
   0%, 100% {
     transform: scale(1);
-    opacity: 0.7;
   }
   50% {
-    transform: scale(1.1);
-    opacity: 1;
+    transform: scale(1.05);
   }
 }
 
@@ -297,7 +336,7 @@
     font-size: 14px;
   }
 
-  .starSymbols {
+  .moonPhases {
     display: none;
   }
 }

@@ -39,6 +39,39 @@ audio/
 - Keep file sizes reasonable for web delivery
 - Name files descriptively (e.g., `button-click-soft.mp3`)
 
+## Background Music Configuration
+
+**No code changes needed!** Background music is configured via a JSON file.
+
+Edit `public/data/audio-config.json` to add, remove, or reorder music tracks:
+
+```json
+{
+  "backgroundMusic": {
+    "playlistId": "background-music",
+    "playlistName": "Background Music",
+    "mode": "REPEAT_ALL",
+    "autoAdvance": true,
+    "fadeDuration": 2000,
+    "tracks": [
+      {
+        "id": "background-music-1",
+        "src": "/audio/music/background-music.mp3",
+        "title": "Background Music"
+      }
+    ]
+  }
+}
+```
+
+**To add more tracks**, simply add more entries to the `tracks` array. The playlist will automatically play through all tracks and loop continuously.
+
+**Playlist modes:**
+- `REPEAT_ALL` - Loop through all tracks continuously (default)
+- `SEQUENTIAL` - Play tracks in order, stop at end
+- `SHUFFLE` - Play tracks in random order
+- `REPEAT_ONE` - Repeat the current track indefinitely
+
 ## Usage
 
 See `/docs/AUDIO_SYSTEM.md` for complete documentation on how to use the audio system in your code.

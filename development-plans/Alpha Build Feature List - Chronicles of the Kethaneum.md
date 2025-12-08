@@ -17,9 +17,9 @@
 - [x] Game Logo Area
 
 ### Credits Screen
-- [ ] Credits Text Area
-- [ ] Scrollbar
-- [ ] Back to Title Screen Button
+- [x] Credits Text Area
+- [x] Scrollbar
+- [x] Back to Title Screen Button
 
 ### Backstory Screen
 - [x] Backstory Blurb Area
@@ -40,11 +40,11 @@
   - [x] Character portrait area
   - [x] Dialogue text display area
   - [x] Dialogue navigation controls
-- [ ] Options Menu Panel
-  - [ ] Menu Title 
-  - [ ] Volume Sliders
-  - [ ] Mute Button
-  - [ ] Back to Library Screen Button
+       - [x] Settings Menu Panel
+  - [x] Menu Title 
+  - [x] Volume Sliders
+  - [x] Mute Button
+  - [x] Back to Library Screen Button
 
 ### Book of Passage Screen
 - [x] Book of Passage Title
@@ -61,8 +61,8 @@
     - [x] In Progress Books
 - [x] Story and Progress Navigation Buttons (Get to different sections in the Book of Passage)
 - [x] Scrollbar
-- [ ] Start Cataloging Button
-- [x] Return to Library Button (still named start cataloging but it goes to the library)
+- [x] Return to Books Button
+- [x] Enter the Library Button
 
 
 ### Word Puzzle Screen
@@ -76,18 +76,17 @@
   - [x] Restart Puzzle Button
   - [x] Return to Library Button
   - [x] Quit to Title Screen Button
-- [x] Option Menu Button
-- [ ] Options Menu Panel
-  - [ ] Menu Title 
-  - [ ] Volume Sliders
-  - [ ] Mute Button
+- [x] Settings Menu Button
+       - [x] Settings Menu Panel
+  - [x] Menu Title 
+  - [x] Volume Sliders
+  - [x] Mute Button
 
 ### Story End Screen
-- [ ] End of Game text Area
-- [ ] Scrollbar
-- [ ] Return to Library Button
-- [ ] Return to Book of Passage Button
-- [ ] Return to Title Screen Button
+- [x] End of Game text Area
+- [x] Scrollbar
+- [x] Return to Library Button
+- [x] Return to Title Screen Button
 ___
 ## .:: Word Puzzle ::.
 
@@ -99,11 +98,11 @@ ___
 - [x] Win and Lose State Management
 - [x] Puzzle Caching for loading
 - [x] Timer System
-- [ ] 4 Genres and 10 books for each Genre:
+- [ ] 4 Genres and 10 books for each Genre (Content creation - deferred to post-alpha):
   - [ ] Sci Fi
   - [ ] Fantasy
   - [ ] Romance
-  - [ ] kethaneum
+  - [ ] kethaneum (there will be fewer than 10 books for this genre, dictated by story needs)
 ___
 ## .:: Narrative Delivery ::.
 - [x] Easy Narrative File Swap Out
@@ -141,7 +140,7 @@ ___
   - [x] Character portrait placeholder system
   - [x] Text display with responsive sizing
   - [x] Continue/advance dialogue controls
-- [ ] Library Screen Integration
+- [x] Library Screen Integration
   - [x] "Start Conversation" button functionality
   - [x] Dialogue panel show/hide management
   - [x] Integration with existing library navigation
@@ -155,22 +154,17 @@ ___
 - [x] Word Puzzle Excerpt Text Content (especially Kethaneum related)
 
 ### Story End Screen
-- [ ] End of Game Placeholder Content
-
-### Tutorial Screens (Will probably get deferred to the beta build)
-- [ ] Tutorial Library Screen (deactivated until tutorial system implementation)
-- [ ] Tutorial Book of Passage Screen (deactivated until tutorial system implementation)
-- [ ] Tutorial Word Puzzle Screen (deactivated until tutorial system implementation)
+- [x] End of Game Placeholder Content
 ___
 ## .:: Navigation ::.
 
 ### Title Screen
 - [x] Start a new Game (Go to Backstory Screen)
 - [x] Load a saved game (Go to Book of Passage)
-- [ ] Navigate to credits screen
+- [x] Navigate to credits screen
 
 ### Credits Screen
-- [ ] Navigate back to title screen
+- [x] Navigate back to title screen
 
 ### Backstory Screen
 - [x] Navigate to Library Screen
@@ -181,7 +175,7 @@ ___
 - [x] Navigate to Title Screen
 
 ### Book of Passage Screen
-- [ ] Navigate to word puzzle screen through start cataloging button
+- [x] Navigate to word puzzle screen through Return to Books button
 - [x] Navigate to library screen
 
 ### Word Puzzle Screen
@@ -190,49 +184,48 @@ ___
 - [x] Navigate to Title Screen through pause menu
 
 ### Story End Screen
-- [ ] Navigate to Library Screen
-- [ ] Navigate to Book of Passage Screen
-- [ ] Navigate to Title Screen
+- [x] Navigate to Library Screen
+- [x] Navigate to Title Screen
 
-### Options Menu
-- [ ] Navigate to Title Screen
+       ### Settings Menu
+- [x] Navigate to Title Screen
 ___
 ## .:: Art ::.
 
 ### Concept Art
-- [ ] Character Concept Art
+- [ ] Character Concept Art (deferred to post Alpha)
 - [x] Title Screen Concept Art
-- [ ] Credits Screen Concept Art
+- [x] Credits Screen Concept Art
 - [x] Backstory Screen Concept Art
 - [x] Book of Passage Concept Art
 - [x] Library Concept Art
 - [x] Word Puzzle Concept Art
-- [ ] Border Designs
+- [ ] Border Designs (deferred to post Alpha)
 
 ### Credits Screen
-- [ ] Border Art placeholders
-- [ ] Twinkling Stars background animation
+- [ ] Border Art placeholders (deferred to post Alpha)
+- [x] Twinkling Stars background animation
 
 ### Title Screen
-- [ ] Border Art placeholders
+- [ ] Border Art placeholders (deferred to post Alpha)
 - [x] Twinkling Stars background animation
 
 ### Backstory Screen
-- [ ] Styled Scrollbar
-- [ ] Border Art placeholders
+- [x] Styled Scrollbar
+- [ ] Border Art placeholders (deferred to post Alpha)
 - [x] Twinkling Stars background animation
 
 ### Library Screen
-- [ ] Library Art Placeholder
+- [ ] Library Art Placeholder (deferred to post Alpha)
 - [x] Twinkling Stars background animation
 
 ### Book of Passage Screen
-- [ ] Styled Scrollbar
-- [ ] Border Art placeholders
+- [x] Styled Scrollbar
+- [ ] Border Art placeholders (deferred to post Alpha)
 - [x] Twinkling Stars background animation
 
 ### Word Puzzle Screen
-- [ ] Border Art placeholders
+- [ ] Border Art placeholders (deferred to post Alpha)
 - [x] Twinkling Stars background animation
 ___
 ## .:: Save System ::.
@@ -242,9 +235,8 @@ ___
   - [x] Book part completion status
   - [x] Game state serialization and restoration
 - [x] Auto-save on book/puzzle completion
-- [ ] Manual save through pause menu
-- [ ] Manual save through options menu
-- [ ] Save data integrity validation
+- [x] Manual save through pause menu
+- [ ] Save data integrity validation (Deferred until post alpha)
 - [x] Incomplete puzzle state preservation
   - [x] Ability to return to puzzles in progress
 - [x] Historical Book completion tracking
@@ -254,14 +246,14 @@ ___
   - [x] Sound Effects handler
   - [x] Voice Acting handler
   - [x] Selective Channel Muting
-- [ ] Single Background Music Track
-- [ ] Sound Effects Placeholders
-  - [ ] Navigation Button Clicks
-  - [ ] Menu button Clicks
-  - [ ] Button Hover Sound
-  - [ ] Puzzle Completion
-  - [ ] Puzzle Failure
-- [ ] Voice Acting Placeholders
+- [x] Single Background Music Track
+- [ ] Sound Effects Placeholders (Deferred until post alpha)
+  - [ ] Navigation Button Clicks (Deferred until post alpha)
+  - [ ] Menu button Clicks (Deferred until post alpha)
+  - [ ] Button Hover Sound (Deferred until post alpha)
+  - [ ] Puzzle Completion (Deferred until post alpha)
+  - [ ] Puzzle Failure (Deferred until post alpha)
+- [ ] Voice Acting Placeholders (Deferred until post alpha)
 ___
 ## .:: Character Dialogue System ::.
   - [x] Character Image Handler
@@ -277,16 +269,15 @@ ___
   - [x] Book Completion Events
 - [ ] UI Event Handlers
   - [x] Screen Navigation Events
-  - [ ] Button Click Events
-  - [ ] Hover State Events
+  - [ ] Button Click Events (Deferred until post alpha)
+  - [x] Hover State Events
 - [x] Narrative Event Triggers
   - [x] Character Dialogue Triggers
   - [x] Story Progression Triggers
-- [ ] Audio Event Triggers
-  - [ ] Music Change Events
-  - [ ] Sound Effect Events
+- [ ] Audio Event Triggers (Deferred until post alpha)
+  - [ ] Music Change Events (Deferred until post alpha)
+  - [ ] Sound Effect Events (Deferred until post alpha)
 ___
 ## .:: Test Set Up ::.
 - [x] End to End Automated Test
 - [x] Word Search Happy Path Automated Test
-- [ ] Early Playtesting

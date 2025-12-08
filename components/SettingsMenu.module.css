@@ -1,0 +1,286 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+}
+
+.panelContent {
+  background: linear-gradient(135deg, #793385 0%, #441648 100%);
+  border: 2px solid rgba(254, 243, 199, 0.4);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+              0 0 40px rgba(254, 243, 199, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.panelTitle {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  color: #fef3c7;
+  text-align: center;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.settingsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 1rem 0;
+}
+
+.section {
+  background: linear-gradient(135deg, rgba(173, 81, 190, 0.3) 0%, rgba(121, 51, 133, 0.5) 100%);
+  border: 1px solid rgba(254, 243, 199, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sectionTitle {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  color: #fef3c7;
+  margin: 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.actionButton {
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid rgba(254, 243, 199, 0.3);
+  border-radius: 6px;
+  background: rgba(254, 243, 199, 0.1);
+  color: #fef3c7;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.actionButton:hover:not(:disabled) {
+  background: rgba(254, 243, 199, 0.2);
+  border-color: rgba(254, 243, 199, 0.5);
+  box-shadow: 0 2px 8px rgba(254, 243, 199, 0.3);
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.statusMessage {
+  margin: 0;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.85rem;
+  color: #10b981;
+  text-align: center;
+}
+
+.statusMessageError {
+  margin: 0;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.85rem;
+  color: #ef4444;
+  text-align: center;
+}
+
+.fontSizeControl {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sliderContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 0.5rem;
+}
+
+.slider {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right,
+    rgba(74, 56, 112, 0.8) 0%,
+    rgba(254, 243, 199, 0.6) 100%);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fef3c7;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(254, 243, 199, 0.5),
+              0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  background: #ffc107;
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(254, 243, 199, 0.8),
+              0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fef3c7;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 8px rgba(254, 243, 199, 0.5),
+              0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.slider::-moz-range-thumb:hover {
+  background: #ffc107;
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(254, 243, 199, 0.8),
+              0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.fontSizeValue {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9rem;
+  color: #e9d8d0;
+  min-width: 3rem;
+  text-align: right;
+}
+
+.resetButton {
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  padding: 0.4rem 1rem;
+  border: 1px solid rgba(254, 243, 199, 0.3);
+  border-radius: 6px;
+  background: rgba(254, 243, 199, 0.1);
+  color: #fef3c7;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-self: flex-end;
+}
+
+.resetButton:hover {
+  background: rgba(254, 243, 199, 0.2);
+  border-color: rgba(254, 243, 199, 0.5);
+  box-shadow: 0 2px 8px rgba(254, 243, 199, 0.3);
+}
+
+.navigationContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(254, 243, 199, 0.2);
+}
+
+.navButton {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  padding: 0.75rem 2rem;
+  border: 2px solid rgba(254, 243, 199, 0.4);
+  border-radius: 8px;
+  color: #fef3c7;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.primaryButton {
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.2) 0%, rgba(253, 224, 138, 0.2) 100%);
+  border-color: #E6A817;
+}
+
+.primaryButton:hover {
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.3) 0%, rgba(253, 224, 138, 0.3) 100%);
+  box-shadow: 0 0 15px rgba(254, 243, 199, 0.4);
+}
+
+.secondaryButton {
+  background: linear-gradient(135deg, #793385 0%, #441648 100%);
+}
+
+.secondaryButton:hover {
+  border-color: rgba(254, 243, 199, 0.7);
+  background: linear-gradient(135deg, #441648 0%, #793385 100%);
+  box-shadow: 0 4px 8px rgba(254, 243, 199, 0.3);
+}
+
+/* Custom scrollbar */
+.panelContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+.panelContent::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.panelContent::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.4), rgba(253, 224, 138, 0.4));
+  border-radius: 4px;
+}
+
+.panelContent::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.6), rgba(253, 224, 138, 0.6));
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .panelContent {
+    padding: 1.5rem;
+    width: 95%;
+  }
+
+  .panelTitle {
+    font-size: 1.5rem;
+  }
+
+  .sectionTitle {
+    font-size: 1rem;
+  }
+
+  .navigationContainer {
+    gap: 0.5rem;
+  }
+
+  .navButton {
+    width: 100%;
+  }
+}
+

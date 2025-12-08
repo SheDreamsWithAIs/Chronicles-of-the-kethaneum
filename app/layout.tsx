@@ -3,6 +3,7 @@ import { Crimson_Text, Dancing_Script, Cinzel } from "next/font/google";
 import { AudioProvider } from "@/components/AudioProvider";
 import { StoryNotificationProvider } from "@/contexts/StoryNotificationContext";
 import { StorySystemProvider } from "@/components/StorySystemProvider";
+import { FontSizeInitializer } from "@/components/FontSizeInitializer";
 import "./globals.css";
 
 const crimsonText = Crimson_Text({
@@ -39,6 +40,7 @@ export default function RootLayout({
       <body
         className={`${crimsonText.variable} ${dancingScript.variable} ${cinzel.variable} antialiased`}
       >
+        <FontSizeInitializer />
         <AudioProvider>
           <StoryNotificationProvider>
             <StorySystemProvider>

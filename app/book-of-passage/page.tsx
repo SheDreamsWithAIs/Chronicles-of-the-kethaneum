@@ -41,7 +41,7 @@ type TabOption = 'current-journey' | 'story-history' | 'discovered-books';
 
 export default function BookOfPassageScreen() {
   const router = useRouter();
-  const { state, setState } = useGameState();
+  const { state, setState, isReady: gameStateReady } = useGameState();
   const [activeTab, setActiveTab] = useState<TabOption>('current-journey');
   const { clearNewStory } = useStoryNotification();
 
@@ -224,6 +224,76 @@ export default function BookOfPassageScreen() {
   const handleBeginCataloging = () => {
     router.push('/library');
   };
+
+  const handleStartCataloguing = () => {
+    // Ensure selectedGenre is set before navigating
+    // Use selectedGenre if available, otherwise fall back to currentGenre
+    const activeGenre = (state.selectedGenre && state.selectedGenre.trim() !== '') 
+      ? state.selectedGenre 
+      : (state.currentGenre && state.currentGenre.trim() !== '' ? state.currentGenre : '');
+    
+    if (activeGenre && activeGenre !== state.selectedGenre) {
+      // Set selectedGenre to currentGenre if it's not already set
+      // This ensures the puzzle screen can use it properly
+      setState(prevState => ({
+        ...prevState,
+        selectedGenre: activeGenre,
+      }));
+    }
+    
+    // Navigate directly to puzzle screen
+    // The puzzle screen will use state.selectedGenre automatically
+    router.push('/puzzle');
+  };
+
+  // Check if "Start Cataloguing" button should be visible
+  // Only check after save data has loaded to ensure we have the correct values
+  const shouldShowStartCataloguing = useMemo(() => {
+    // Don't show button until save data has loaded
+    if (!gameStateReady) {
+      return false;
+    }
+    
+    // Use selectedGenre if available, otherwise fall back to currentGenre
+    // This handles cases where old save data might not have selectedGenre set
+    const activeGenre = (state.selectedGenre && state.selectedGenre.trim() !== '') 
+      ? state.selectedGenre 
+      : (state.currentGenre && state.currentGenre.trim() !== '' ? state.currentGenre : '');
+    
+    const hasGenre = activeGenre !== '';
+    
+    // Check if player has started their first puzzle
+    // This means they've gone through the initial flow (selected genre, loaded puzzle)
+    // We check: has a genre AND (has completed puzzles OR has a current puzzle loaded OR has completed puzzles in their genre)
+    const hasCompletedPuzzles = state.completedPuzzles > 0;
+    const hasPuzzleLoaded = state.currentGenre && state.currentGenre.trim() !== '' && state.currentPuzzleIndex >= 0;
+    const hasCompletedPuzzlesInGenre = activeGenre && 
+      state.completedPuzzlesByGenre?.[activeGenre] && 
+      state.completedPuzzlesByGenre[activeGenre].size > 0;
+    
+    const hasStartedPuzzle = hasGenre && (hasCompletedPuzzles || hasPuzzleLoaded || hasCompletedPuzzlesInGenre);
+    
+    // Debug logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Book of Passage] Button visibility check:', {
+        gameStateReady,
+        selectedGenre: state.selectedGenre,
+        currentGenre: state.currentGenre,
+        activeGenre,
+        hasGenre,
+        completedPuzzles: state.completedPuzzles,
+        currentPuzzleIndex: state.currentPuzzleIndex,
+        hasCompletedPuzzles,
+        hasPuzzleLoaded,
+        hasCompletedPuzzlesInGenre,
+        completedPuzzlesByGenre: activeGenre ? (state.completedPuzzlesByGenre?.[activeGenre]?.size || 0) : 0,
+        hasStartedPuzzle,
+        shouldShow: hasStartedPuzzle,
+      });
+    }
+    
+    return hasStartedPuzzle;
+  }, [gameStateReady, state.selectedGenre, state.currentGenre, state.completedPuzzles, state.currentPuzzleIndex]);
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -523,13 +593,24 @@ export default function BookOfPassageScreen() {
 
       <div className={styles.bottomNav}>
         <div className={styles.navOrnament}>
-          <LibraryButton
-            className={styles.navButton}
-            onClick={handleBeginCataloging}
-            data-testid="enter-library-btn"
-          >
-            Enter the Library
-          </LibraryButton>
+          <div className={styles.navButtonGroup}>
+            {shouldShowStartCataloguing && (
+              <button
+                className={styles.navButton}
+                onClick={handleStartCataloguing}
+                data-testid="start-cataloguing-btn"
+              >
+                Return to the Books
+              </button>
+            )}
+            <LibraryButton
+              className={styles.navButton}
+              onClick={handleBeginCataloging}
+              data-testid="enter-library-btn"
+            >
+              Enter the Library
+            </LibraryButton>
+          </div>
         </div>
       </div>
     </div>

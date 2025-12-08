@@ -17,6 +17,7 @@ import {
 } from '@/lib/save/unifiedSaveSystem';
 // Keep legacy import as fallback
 import { loadGameProgress as loadLegacyProgress } from '@/lib/save/saveSystem';
+import { audioManager } from '@/lib/audio/audioManager';
 
 export function useGameState() {
   const [state, setState] = useState<GameState>(() => initializeGameState());
@@ -51,6 +52,11 @@ export function useGameState() {
           }
 
           setState(prevState => restoreGameState(prevState, result.data as Partial<GameState>));
+          
+          // Apply audio settings if loaded
+          if (result.audioSettings) {
+            audioManager.updateSettings(result.audioSettings);
+          }
         } else if (!result.success) {
           // If unified load failed, try legacy as last resort
           console.warn('Unified load failed, trying legacy...', result.error);

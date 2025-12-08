@@ -15,7 +15,7 @@
 
 import { fetchAsset } from '@/lib/utils/assetPath';
 import { dialogueManager } from '@/lib/dialogue/DialogueManager';
-import { audioManager } from '@/lib/audio/audioManager';
+import { audioManager, AudioCategory } from '@/lib/audio/audioManager';
 import type { StoryBeat, LoadingGroup } from '@/lib/dialogue/types';
 import type {
   StoryProgressionConfig,
@@ -53,6 +53,8 @@ export class StoryProgressionManager {
       this.log('Story Progression Manager initialized successfully');
 
       // Initial music setup for current beat
+      // Only update music if it's not already playing the correct playlist
+      // This prevents music from restarting when navigating between screens
       this.updateMusic(this.currentBeat);
 
       return true;
@@ -279,6 +281,30 @@ export class StoryProgressionManager {
         return;
       }
 
+      // Check if playlist has any loaded tracks
+      const hasLoadedTracks = playlist.tracks.some(track => {
+        // Check if track is loaded by checking if it exists in audioManager's tracks
+        return audioManager.getPlaylist(playlistId)?.tracks.some(t => {
+          // We need to check if the track is actually loaded
+          // The audioManager doesn't expose tracks directly, so we'll try to play and let it handle gracefully
+          return true; // Let playPlaylist handle the check
+        });
+      });
+
+      // Check current playlist - don't interrupt if it's already playing the same playlist
+      const currentInfo = audioManager.getCurrentPlaylistInfo();
+      if (currentInfo?.playlistId === playlistId) {
+        this.log(`Playlist "${playlistId}" is already playing, skipping music change`);
+        return;
+      }
+
+      // Check mute state before playing - don't play if muted
+      if (audioManager.isMuted('master') || audioManager.isMuted(AudioCategory.MUSIC)) {
+        this.log(`Music is muted, skipping playlist playback`);
+        return;
+      }
+
+      // Try to play the playlist (it will gracefully skip if no tracks are loaded)
       await audioManager.playPlaylist(playlistId, 0, fadeDuration);
       this.log(`Music changed to playlist: ${playlistId}`);
     } catch (error) {

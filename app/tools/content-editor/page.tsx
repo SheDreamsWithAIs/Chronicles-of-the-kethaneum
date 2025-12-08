@@ -69,7 +69,11 @@ const PRESET_COLORS = [
 function contentToHtml(content: FormattedContent): string {
   return content.paragraphs.map(para => {
     const segments = para.segments.map(seg => {
-      let html = seg.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      // Convert newlines to <br> tags for display
+      let html = seg.text
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\n/g, '<br>');
 
       if (seg.bold) {
         html = `<strong>${html}</strong>`;
@@ -84,8 +88,9 @@ function contentToHtml(content: FormattedContent): string {
       return html;
     }).join('');
 
-    return segments;
-  }).join('\n\n');
+    // Wrap each paragraph in a div so browser preserves paragraph breaks
+    return `<div>${segments}</div>`;
+  }).join('');
 }
 
 /**
@@ -96,7 +101,9 @@ function parseNode(node: Node, inheritedStyles: { bold: boolean; italic: boolean
 
   if (node.nodeType === Node.TEXT_NODE) {
     const text = node.textContent || '';
-    if (text) {
+    // Preserve all text including whitespace-only strings (newlines, tabs, spaces)
+    // Empty string check: only skip if truly empty, not if it contains whitespace
+    if (text !== '') {
       const segment: TextSegment = { text };
       if (inheritedStyles.bold) segment.bold = true;
       if (inheritedStyles.italic) segment.italic = true;
@@ -106,6 +113,16 @@ function parseNode(node: Node, inheritedStyles: { bold: boolean; italic: boolean
   } else if (node.nodeType === Node.ELEMENT_NODE) {
     const element = node as HTMLElement;
     const tagName = element.tagName.toLowerCase();
+
+    // Handle <br> tags as line breaks
+    if (tagName === 'br') {
+      const segment: TextSegment = { text: '\n' };
+      if (inheritedStyles.bold) segment.bold = true;
+      if (inheritedStyles.italic) segment.italic = true;
+      if (inheritedStyles.color) segment.color = inheritedStyles.color;
+      segments.push(segment);
+      return segments;
+    }
 
     // Update inherited styles based on element
     const newStyles = { ...inheritedStyles };
@@ -134,6 +151,14 @@ function parseNode(node: Node, inheritedStyles: { bold: boolean; italic: boolean
 }
 
 /**
+ * Normalize newlines in text - replace 3+ consecutive newlines with 2
+ */
+function normalizeNewlines(text: string): string {
+  // Replace 3 or more consecutive newlines with exactly 2 (for paragraph breaks)
+  return text.replace(/\n{3,}/g, '\n\n');
+}
+
+/**
  * Merge adjacent segments with the same formatting
  */
 function mergeSegments(segments: TextSegment[]): TextSegment[] {
@@ -158,9 +183,9 @@ function mergeSegments(segments: TextSegment[]): TextSegment[] {
   }
   merged.push(current);
 
-  // Clean up undefined properties
+  // Clean up undefined properties and normalize newlines
   return merged.map(seg => {
-    const clean: TextSegment = { text: seg.text };
+    const clean: TextSegment = { text: normalizeNewlines(seg.text) };
     if (seg.bold) clean.bold = true;
     if (seg.italic) clean.italic = true;
     if (seg.color) clean.color = seg.color;
@@ -176,32 +201,74 @@ function htmlToContent(html: string, title: string): FormattedContent {
   const container = document.createElement('div');
   container.innerHTML = html;
 
-  // Split by double newlines (paragraph breaks)
-  // First, normalize the content - replace <br> with newlines
-  let text = container.innerHTML
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/div><div>/gi, '\n')
-    .replace(/<div>/gi, '\n')
-    .replace(/<\/div>/gi, '');
+  const paragraphs: Paragraph[] = [];
+  const childNodes = Array.from(container.childNodes);
 
-  // Split into paragraphs by double newlines
-  const paragraphTexts = text.split(/\n\n+/);
+  // Process each top-level element
+  // Each <div> represents a paragraph (from contentToHtml or browser's Enter key)
+  for (const node of childNodes) {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const element = node as HTMLElement;
+      const tagName = element.tagName.toLowerCase();
+      
+      // Handle <div> and <p> elements as paragraphs
+      if (tagName === 'div' || tagName === 'p') {
+        // Parse this element's content - preserve all whitespace including newlines and tabs
+        const segments = parseNode(element, { bold: false, italic: false, color: '' });
+        const mergedSegments = mergeSegments(segments);
+        
+        // Always add as a paragraph, even if empty (represents paragraph break)
+        // Filter only segments that are completely empty strings
+        const validSegments = mergedSegments.filter(seg => seg.text !== '');
+        
+        if (validSegments.length > 0) {
+          paragraphs.push({ segments: validSegments });
+        } else {
+          // Empty paragraph (intentional break)
+          paragraphs.push({ segments: [{ text: '' }] });
+        }
+      } else {
+        // For other elements, parse normally
+        const segments = parseNode(element, { bold: false, italic: false, color: '' });
+        const mergedSegments = mergeSegments(segments);
+        const validSegments = mergedSegments.filter(s => s.text !== '');
 
-  const paragraphs: Paragraph[] = paragraphTexts
-    .map(pText => {
-      // Create a temp element to parse this paragraph's HTML
-      const pContainer = document.createElement('div');
-      pContainer.innerHTML = pText.replace(/\n/g, ' ');
+        if (validSegments.length > 0) {
+          paragraphs.push({ segments: validSegments });
+        }
+      }
+    } else if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent || '';
+      // Preserve whitespace including newlines and tabs
+      if (text) {
+        // Handle standalone text nodes
+        const segments = parseNode(node, { bold: false, italic: false, color: '' });
+        const mergedSegments = mergeSegments(segments);
+        const validSegments = mergedSegments.filter(s => s.text !== '');
 
-      const segments = parseNode(pContainer, { bold: false, italic: false, color: '' });
-      const mergedSegments = mergeSegments(segments);
+        if (validSegments.length > 0) {
+          paragraphs.push({ segments: validSegments });
+        }
+      }
+    }
+  }
 
-      // Filter out empty segments
-      const nonEmpty = mergedSegments.filter(s => s.text.trim() !== '');
-
-      return { segments: nonEmpty.length > 0 ? nonEmpty : [{ text: '' }] };
-    })
-    .filter(p => p.segments.some(s => s.text.trim() !== ''));
+  // If we still have no paragraphs, the content might be in a single div
+  // or the structure is different - try parsing the whole container as one paragraph
+  if (paragraphs.length === 0) {
+    const segments = parseNode(container, { bold: false, italic: false, color: '' });
+    const mergedSegments = mergeSegments(segments);
+    
+    // Filter out completely empty segments but preserve whitespace
+    const validSegments = mergedSegments.filter(seg => seg.text !== '');
+    
+    if (validSegments.length > 0) {
+      paragraphs.push({ segments: validSegments });
+    } else {
+      // Empty content - add empty paragraph
+      paragraphs.push({ segments: [{ text: '' }] });
+    }
+  }
 
   return {
     title,
@@ -213,7 +280,7 @@ function htmlToContent(html: string, title: string): FormattedContent {
 // MAIN COMPONENT
 // ============================================================================
 
-const AUTOSAVE_DELAY = 2000; // 2 seconds
+const AUTOSAVE_DELAY = 60000; // 1 minute
 
 export default function ContentEditorPage() {
   const [selectedFile, setSelectedFile] = useState<ContentFile | null>(null);
@@ -555,8 +622,25 @@ export default function ContentEditorPage() {
                     ref={editorRef}
                     contentEditable
                     onInput={handleEditorChange}
+                    onKeyDown={(e) => {
+                      // Handle Tab key - insert tab character instead of moving focus
+                      if (e.key === 'Tab') {
+                        e.preventDefault();
+                        const selection = window.getSelection();
+                        if (selection && selection.rangeCount > 0) {
+                          const range = selection.getRangeAt(0);
+                          const tabNode = document.createTextNode('\t');
+                          range.insertNode(tabNode);
+                          range.setStartAfter(tabNode);
+                          range.collapse(true);
+                          selection.removeAllRanges();
+                          selection.addRange(range);
+                          handleEditorChange();
+                        }
+                      }
+                    }}
                     className="w-full min-h-[300px] max-h-[500px] overflow-y-auto px-4 py-3 bg-[#f4e8f0] border border-[var(--primary-light)] rounded-lg text-[var(--neutral-dark)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-main)] leading-relaxed"
-                    style={{ whiteSpace: 'pre-wrap' }}
+                    style={{ whiteSpace: 'pre-wrap', tabSize: 4 }}
                     suppressContentEditableWarning
                   />
                 </div>
@@ -615,7 +699,7 @@ export default function ContentEditorPage() {
                   </div>
 
                   <p className="text-xs text-[var(--text-medium)] mt-4">
-                    Changes are automatically saved after 2 seconds of inactivity.
+                    Changes are automatically saved after 1 minute of inactivity.
                   </p>
                 </div>
               </div>
