@@ -530,10 +530,27 @@ export class AudioManager {
     const nextIndex = this.getNextTrackIndex(playlist);
     if (nextIndex !== null) {
       this.currentTrackIndex = nextIndex;
-      await this.playPlaylistTrack(fadeDuration);
+      try {
+        await this.playPlaylistTrack(fadeDuration);
+      } catch (e) {
+        // Handle AbortError gracefully (play was interrupted)
+        if (e instanceof DOMException && e.name === 'AbortError') {
+          return; // Silently handle interruption
+        }
+        console.error('Failed to play next track:', e);
+      }
     } else {
       // End of playlist
-      await this.stopMusic(fadeDuration);
+      try {
+        await this.stopMusic(fadeDuration);
+      } catch (e) {
+        // Handle errors gracefully
+        if (e instanceof DOMException && e.name === 'AbortError') {
+          // Silently handle interruption
+        } else {
+          console.error('Failed to stop music at end of playlist:', e);
+        }
+      }
       this.currentPlaylist = null;
     }
   }
@@ -656,9 +673,16 @@ export class AudioManager {
       return;
     }
 
-    // Stop current music
-    if (this.currentMusic) {
+    // Stop current music (only if it's a different track)
+    // If we're playing the same track (e.g., REPEAT_ALL with one track), skip stopping
+    if (this.currentMusic && this.currentMusic !== track.id) {
       await this.stopMusic(fadeDuration);
+    } else if (this.currentMusic === track.id) {
+      // Same track - just reset position and continue
+      const currentTrack = this.tracks.get(this.currentMusic);
+      if (currentTrack) {
+        currentTrack.audio.currentTime = 0;
+      }
     }
 
     // Play the track
@@ -687,15 +711,37 @@ export class AudioManager {
       const handleTrackEnd = async () => {
         audioTrack.audio.removeEventListener('ended', handleTrackEnd);
 
+        // Check if we're still supposed to be playing this playlist
+        // (might have been stopped/changed during the transition)
+        if (this.currentPlaylist !== playlist.id) {
+          return; // Playlist changed, don't auto-advance
+        }
+
         // Auto-advance to next track
         if (playlist.mode === PlaylistMode.REPEAT_ONE) {
           // Replay the same track
           audioTrack.audio.currentTime = 0;
-          await audioTrack.audio.play();
-          audioTrack.audio.addEventListener('ended', handleTrackEnd);
+          try {
+            await audioTrack.audio.play();
+            audioTrack.audio.addEventListener('ended', handleTrackEnd);
+          } catch (e) {
+            // Handle AbortError gracefully (play was interrupted)
+            if (e instanceof DOMException && e.name === 'AbortError') {
+              return; // Silently handle interruption
+            }
+            console.error(`Failed to replay track: ${track.id}`, e);
+          }
         } else {
           // Move to next track
-          await this.nextTrack(fadeDuration);
+          try {
+            await this.nextTrack(fadeDuration);
+          } catch (e) {
+            // Handle errors gracefully during track transition
+            if (e instanceof DOMException && e.name === 'AbortError') {
+              return; // Silently handle interruption
+            }
+            console.error(`Failed to advance to next track:`, e);
+          }
         }
       };
 
@@ -707,6 +753,13 @@ export class AudioManager {
       await this.fadeIn(audioTrack.audio, fadeDuration);
       this.updateVolume(audioTrack.audio, playlist.category);
     } catch (e) {
+      // AbortError is expected when transitioning tracks (pause interrupts play)
+      // Only log other errors
+      if (e instanceof DOMException && e.name === 'AbortError') {
+        // This is expected - the play() was interrupted by pause() during track transition
+        // Silently handle it
+        return;
+      }
       console.error(`Failed to play track: ${track.id}`, e);
     }
   }

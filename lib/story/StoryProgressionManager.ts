@@ -53,6 +53,8 @@ export class StoryProgressionManager {
       this.log('Story Progression Manager initialized successfully');
 
       // Initial music setup for current beat
+      // Only update music if it's not already playing the correct playlist
+      // This prevents music from restarting when navigating between screens
       this.updateMusic(this.currentBeat);
 
       return true;

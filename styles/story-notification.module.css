@@ -12,9 +12,9 @@
   border-radius: inherit;
   background: linear-gradient(
     45deg,
-    rgba(251, 191, 36, 0.6),
-    rgba(245, 158, 11, 0.6),
-    rgba(217, 119, 6, 0.6)
+    rgba(255, 251, 235, 0.8), /* amber-50 */
+    rgba(255, 251, 235, 0.9), /* amber-50 */
+    rgba(255, 251, 235, 0.8)  /* amber-50 */
   );
   filter: blur(8px);
   opacity: 0.8;

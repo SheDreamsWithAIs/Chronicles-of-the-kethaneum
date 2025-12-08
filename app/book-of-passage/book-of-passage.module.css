@@ -524,6 +524,20 @@
   z-index: 20;
 }
 
+.navOrnament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navButtonGroup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
 .navButton {
   padding: 12px 25px;
   font-family: var(--font-cinzel), serif;
@@ -687,6 +701,18 @@
 
   .historyEntryMeta {
     padding-left: 0;
+  }
+
+  .navButtonGroup {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    padding: 0 20px;
+  }
+
+  .navButton {
+    width: 100%;
+    max-width: 300px;
   }
 
   .blurbTitle {

@@ -238,9 +238,11 @@ export async function saveOptimizedProgress(state: GameState): Promise<void> {
     }
 
     // Add selection state
-    if (state.selectedGenre || state.nextKethaneumIndex > 0 || state.kethaneumRevealed) {
+    // Always save selection state if we have a currentGenre or selectedGenre
+    // This ensures we preserve genre information even if selectedGenre is empty
+    if (state.selectedGenre || state.currentGenre || state.nextKethaneumIndex > 0 || state.kethaneumRevealed) {
       optimized.s = {
-        g: state.selectedGenre || '',
+        g: state.selectedGenre || state.currentGenre || '', // Fallback to currentGenre if selectedGenre is empty
         k: state.nextKethaneumIndex || 0,
         p: state.puzzlesSinceLastKethaneum || 0,
         i: state.nextKethaneumInterval || 3,
@@ -430,6 +432,31 @@ export async function convertToGameStateFormat(
     completedPuzzlesByGenre[genre] = titles;
   }
 
+  // Extract values from decoded progress
+  const currentGenre = decoded.currentState?.genre || '';
+  let selectedGenre = decoded.selectionState?.selectedGenre || '';
+  
+  // Fallback: If selectedGenre is empty but currentGenre exists, use currentGenre
+  // This handles old save files that don't have selectedGenre saved
+  if (!selectedGenre && currentGenre) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Save System] selectedGenre is empty, falling back to currentGenre:', currentGenre);
+    }
+    selectedGenre = currentGenre;
+  }
+  
+  // Debug logging in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Save System] Loading game state:', {
+      currentGenre,
+      selectedGenre: decoded.selectionState?.selectedGenre || '(empty)',
+      selectedGenreAfterFallback: selectedGenre,
+      hasSelectionState: !!decoded.selectionState,
+      hasCurrentState: !!decoded.currentState,
+      completedPuzzles: decoded.completedPuzzlesCount,
+    });
+  }
+
   return {
     books,
     discoveredBooks,
@@ -437,12 +464,12 @@ export async function convertToGameStateFormat(
     completedPuzzlesByGenre,
     completedBooks: decoded.discoveredBooks.size,
     completedPuzzles: decoded.completedPuzzlesCount,
-    currentGenre: decoded.currentState?.genre || '',
+    currentGenre,
     currentBook: decoded.currentState?.bookTitle || '',
     currentStoryPart: decoded.currentState?.part ?? -1,
     currentPuzzleIndex: decoded.currentState?.puzzleIndex ?? -1,
     gameMode: decoded.gameMode,
-    selectedGenre: decoded.selectionState?.selectedGenre || '',
+    selectedGenre,
     nextKethaneumIndex: decoded.selectionState?.nextKethaneumIndex || 0,
     puzzlesSinceLastKethaneum: decoded.selectionState?.puzzlesSinceLastKethaneum || 0,
     nextKethaneumInterval: decoded.selectionState?.nextKethaneumInterval || 3,
