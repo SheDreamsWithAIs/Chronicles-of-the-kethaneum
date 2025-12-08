@@ -10,6 +10,7 @@ import { usePuzzle } from '@/hooks/usePuzzle';
 import { useStoryNotification } from '@/contexts/StoryNotificationContext';
 import { dialogueManager } from '@/lib/dialogue/DialogueManager';
 import styles from './library.module.css';
+import notificationStyles from '@/styles/story-notification.module.css';
 
 export default function LibraryScreen() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function LibraryScreen() {
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const { state, setState } = useGameState();
   const { loadSequential, loadAll } = usePuzzle(state, setState);
-  const { clearNewDialogue } = useStoryNotification();
+  const { hasNewDialogue, clearNewDialogue } = useStoryNotification();
 
   // Clear dialogue notification when visiting Library
   useEffect(() => {
@@ -216,7 +217,11 @@ export default function LibraryScreen() {
             Browse the Archives
           </button>
           
-          <button className={styles.libraryButton} onClick={handleStartConversation}>
+          <button 
+            className={`${styles.libraryButton} ${hasNewDialogue ? notificationStyles.storyNotificationGlowExternal : ''}`}
+            onClick={handleStartConversation}
+            title={hasNewDialogue ? 'New story event waiting!' : undefined}
+          >
             Start a Conversation
           </button>
           

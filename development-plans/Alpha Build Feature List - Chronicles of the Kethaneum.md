@@ -61,7 +61,7 @@
     - [x] In Progress Books
 - [x] Story and Progress Navigation Buttons (Get to different sections in the Book of Passage)
 - [x] Scrollbar
-- [ ] Start Cataloging Button
+- [x] Return to Books Button
 - [x] Enter the Library Button
 
 
@@ -98,7 +98,7 @@ ___
 - [x] Win and Lose State Management
 - [x] Puzzle Caching for loading
 - [x] Timer System
-- [ ] 4 Genres and 10 books for each Genre:
+- [ ] 4 Genres and 10 books for each Genre (Content creation - deferred to post-alpha):
   - [ ] Sci Fi
   - [ ] Fantasy
   - [ ] Romance
@@ -175,7 +175,7 @@ ___
 - [x] Navigate to Title Screen
 
 ### Book of Passage Screen
-- [ ] Navigate to word puzzle screen through start cataloging button
+- [x] Navigate to word puzzle screen through Return to Books button
 - [x] Navigate to library screen
 
 ### Word Puzzle Screen
@@ -236,7 +236,7 @@ ___
   - [x] Game state serialization and restoration
 - [x] Auto-save on book/puzzle completion
 - [x] Manual save through pause menu
-- [ ] Save data integrity validation
+- [ ] Save data integrity validation (Deferred until post alpha)
 - [x] Incomplete puzzle state preservation
   - [x] Ability to return to puzzles in progress
 - [x] Historical Book completion tracking
@@ -247,12 +247,12 @@ ___
   - [x] Voice Acting handler
   - [x] Selective Channel Muting
 - [x] Single Background Music Track
-- [ ] Sound Effects Placeholders
-  - [ ] Navigation Button Clicks
-  - [ ] Menu button Clicks
-  - [ ] Button Hover Sound
-  - [ ] Puzzle Completion
-  - [ ] Puzzle Failure
+- [ ] Sound Effects Placeholders (Deferred until post alpha)
+  - [ ] Navigation Button Clicks (Deferred until post alpha)
+  - [ ] Menu button Clicks (Deferred until post alpha)
+  - [ ] Button Hover Sound (Deferred until post alpha)
+  - [ ] Puzzle Completion (Deferred until post alpha)
+  - [ ] Puzzle Failure (Deferred until post alpha)
 - [ ] Voice Acting Placeholders (Deferred until post alpha)
 ___
 ## .:: Character Dialogue System ::.
@@ -269,14 +269,14 @@ ___
   - [x] Book Completion Events
 - [ ] UI Event Handlers
   - [x] Screen Navigation Events
-  - [ ] Button Click Events
+  - [ ] Button Click Events (Deferred until post alpha)
   - [x] Hover State Events
 - [x] Narrative Event Triggers
   - [x] Character Dialogue Triggers
   - [x] Story Progression Triggers
-- [ ] Audio Event Triggers
-  - [ ] Music Change Events
-  - [ ] Sound Effect Events
+- [ ] Audio Event Triggers (Deferred until post alpha)
+  - [ ] Music Change Events (Deferred until post alpha)
+  - [ ] Sound Effect Events (Deferred until post alpha)
 ___
 ## .:: Test Set Up ::.
 - [x] End to End Automated Test

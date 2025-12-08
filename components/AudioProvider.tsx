@@ -187,6 +187,21 @@ export function AudioProvider({ children }: AudioProviderProps) {
         // Resume audio context and start music on user interaction
         const resumeAudioHandler = async () => {
           await audioManager.resumeAudioContext();
+          
+          // Double-check mute state right before playing (in case settings changed)
+          if (audioManager.isMuted('master') || audioManager.isMuted(AudioCategory.MUSIC)) {
+            console.log('[Audio] Music is muted, skipping playback on user interaction');
+            // Still remove listeners even if muted
+            const handler = resumeAudioHandlerRef.current;
+            if (handler) {
+              document.removeEventListener('click', handler);
+              document.removeEventListener('keydown', handler);
+              document.removeEventListener('touchstart', handler);
+              resumeAudioHandlerRef.current = null;
+            }
+            return;
+          }
+          
           await startMusic();
           // Remove listeners after first interaction
           const handler = resumeAudioHandlerRef.current;
