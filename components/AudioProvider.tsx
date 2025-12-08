@@ -185,25 +185,18 @@ export function AudioProvider({ children }: AudioProviderProps) {
         };
 
         // Resume audio context and start music on user interaction
-        const resumeAudioHandler = async () => {
-          await audioManager.resumeAudioContext();
-          
-          // Double-check mute state right before playing (in case settings changed)
-          if (audioManager.isMuted('master') || audioManager.isMuted(AudioCategory.MUSIC)) {
-            console.log('[Audio] Music is muted, skipping playback on user interaction');
-            // Still remove listeners even if muted
-            const handler = resumeAudioHandlerRef.current;
-            if (handler) {
-              document.removeEventListener('click', handler);
-              document.removeEventListener('keydown', handler);
-              document.removeEventListener('touchstart', handler);
-              resumeAudioHandlerRef.current = null;
-            }
+        // Only trigger on the FIRST user interaction, then remove listeners
+        let hasHandledFirstInteraction = false;
+        const resumeAudioHandler = async (e: Event) => {
+          // If we've already handled the first interaction, don't do anything
+          if (hasHandledFirstInteraction) {
             return;
           }
           
-          await startMusic();
-          // Remove listeners after first interaction
+          // Mark as handled immediately to prevent multiple triggers
+          hasHandledFirstInteraction = true;
+          
+          // Remove listeners immediately to prevent further triggers
           const handler = resumeAudioHandlerRef.current;
           if (handler) {
             document.removeEventListener('click', handler);
@@ -211,6 +204,23 @@ export function AudioProvider({ children }: AudioProviderProps) {
             document.removeEventListener('touchstart', handler);
             resumeAudioHandlerRef.current = null;
           }
+
+          // Check if music is already playing - if so, don't restart
+          const currentPlaylistInfo = audioManager.getCurrentPlaylistInfo();
+          if (currentPlaylistInfo) {
+            console.log('[Audio] Music playlist is already active, skipping restart');
+            return;
+          }
+
+          await audioManager.resumeAudioContext();
+          
+          // Double-check mute state right before playing (in case settings changed)
+          if (audioManager.isMuted('master') || audioManager.isMuted(AudioCategory.MUSIC)) {
+            console.log('[Audio] Music is muted, skipping playback on user interaction');
+            return;
+          }
+          
+          await startMusic();
         };
 
         // Store handler in ref for cleanup
