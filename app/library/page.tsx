@@ -19,26 +19,53 @@ export default function LibraryScreen() {
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const { state, setState } = useGameState();
   const { loadSequential, loadAll } = usePuzzle(state, setState);
-  const { hasNewDialogue, clearNewDialogue } = useStoryNotification();
+  const { hasNewDialogue, clearNewDialogue, setNewDialogueAvailable } = useStoryNotification();
 
-  // Clear dialogue notification when visiting Library
+  // Check for available story events when library loads (including after refresh)
+  // This restores the notification state after page refresh
   useEffect(() => {
-    clearNewDialogue();
-  }, [clearNewDialogue]);
+    // Wait for game state to be ready before checking
+    if (!state.storyProgress) return;
 
-  // Check for available story events when library loads
-  useEffect(() => {
-    // Check for first-visit event when player enters library
-    // This triggers the notification if the event is available
-    const eventId = dialogueManager.checkForAvailableStoryEvent(
+    // Check for all available story events that match current game state
+    // This ensures the notification persists after page refresh
+    const currentBeat = state.storyProgress.currentStoryBeat;
+    
+    // Get all story events that match the current beat
+    const beatMatchedEvents = dialogueManager.getAvailableStoryEvents(currentBeat);
+    
+    // Check each event to see if its trigger condition matches current state
+    // We'll check common trigger conditions that might be available
+    const triggerConditionsToCheck = [
       'player-enters-library-first-time',
-      state.storyProgress?.currentStoryBeat
-    );
+      // Add other trigger conditions as needed
+    ];
 
-    if (eventId) {
-      console.log(`[Library] Found available story event: ${eventId}`);
+    let foundAvailableEvent = false;
+    
+    for (const triggerCondition of triggerConditionsToCheck) {
+      const eventId = dialogueManager.checkForAvailableStoryEvent(triggerCondition, currentBeat);
+      if (eventId) {
+        console.log(`[Library] Found available story event on load: ${eventId}`);
+        foundAvailableEvent = true;
+        // The checkForAvailableStoryEvent call will emit the event and trigger the notification
+        break; // Found one, that's enough to show the notification
+      }
     }
-  }, [state.storyProgress?.currentStoryBeat]);
+
+    // If no specific trigger matched, check if there are any beat-matched events
+    // that might be available (for events without specific trigger conditions)
+    if (!foundAvailableEvent && beatMatchedEvents.length > 0) {
+      // Manually trigger notification if we have events available for this beat
+      // This handles cases where events are available but don't have trigger conditions checked yet
+      setNewDialogueAvailable();
+      console.log(`[Library] Found ${beatMatchedEvents.length} story event(s) available for current beat`);
+    }
+  }, [state.storyProgress?.currentStoryBeat, setNewDialogueAvailable]);
+
+  // Note: We don't clear the notification when visiting the library anymore
+  // The notification will persist until the player actually starts the conversation
+  // This ensures it survives page refreshes
 
   // Restrict access to Story Mode only
   useEffect(() => {
@@ -152,6 +179,8 @@ export default function LibraryScreen() {
 
   const handleStartConversation = () => {
     setShowDialogue(true);
+    // Clear the notification when player starts the conversation
+    clearNewDialogue();
   };
 
   const handleBookOfPassage = () => {
