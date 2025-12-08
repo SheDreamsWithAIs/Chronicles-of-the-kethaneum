@@ -14,8 +14,9 @@ export async function initializeAudioSystem(): Promise<boolean> {
   try {
     console.log('[Audio] Initializing audio system...');
 
-    // Initialize the audio manager
-    audioManager.initialize();
+    // Don't call initialize() here - AudioProvider handles initialization with saved settings
+    // This function only registers playlists, not audio settings
+    // If audio manager isn't initialized yet, AudioProvider will initialize it with saved settings
 
     // Register all playlists
     console.log(`[Audio] Registering ${ALL_PLAYLISTS.length} playlists...`);

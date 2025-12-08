@@ -110,13 +110,27 @@ export class AudioManager {
    * Initialize the audio manager with saved settings
    */
   public initialize(settings?: Partial<AudioSettings>): void {
-    if (this.initialized) return;
+    if (this.initialized) {
+      // If already initialized, only update settings if provided
+      if (settings) {
+        this.settings = { ...this.settings, ...settings };
+        this.updateAllVolumes();
+      }
+      return;
+    }
 
     if (settings) {
       this.settings = { ...this.settings, ...settings };
     }
 
     this.initialized = true;
+  }
+
+  /**
+   * Check if audio manager is initialized
+   */
+  public getInitialized(): boolean {
+    return this.initialized;
   }
 
   /**
