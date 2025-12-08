@@ -18,6 +18,8 @@ import {
 } from '../book/progressBitmap';
 import type { GameState } from '../game/state';
 import type { StoryProgressState } from '../story/types';
+import type { AudioSettings } from '../audio/audioManager';
+import { audioManager } from '../audio/audioManager';
 
 // ============================================================================
 // Types - Optimized Storage Format
@@ -46,6 +48,8 @@ export interface OptimizedProgress {
   s?: OptimizedSelectionState;
   /** Story progress (optional) */
   sp?: StoryProgressState;
+  /** Audio settings (optional) */
+  a?: OptimizedAudioSettings;
 }
 
 /**
@@ -78,6 +82,32 @@ export interface OptimizedSelectionState {
   r: boolean;
   /** Genre exhausted */
   e: boolean;
+}
+
+/**
+ * Compact audio settings
+ */
+export interface OptimizedAudioSettings {
+  /** Master volume (0-1) */
+  mv: number;
+  /** Music volume (0-1) */
+  mu: number;
+  /** Ambient volume (0-1) */
+  av: number;
+  /** SFX volume (0-1) */
+  sv: number;
+  /** Voice volume (0-1) */
+  vv: number;
+  /** Master muted */
+  mm: boolean;
+  /** Music muted */
+  mum: boolean;
+  /** Ambient muted */
+  am: boolean;
+  /** SFX muted */
+  sm: boolean;
+  /** Voice muted */
+  vm: boolean;
 }
 
 // ============================================================================
@@ -256,6 +286,21 @@ export async function saveOptimizedProgress(state: GameState): Promise<void> {
       optimized.sp = state.storyProgress;
     }
 
+    // Add audio settings
+    const audioSettings = audioManager.getSettings();
+    optimized.a = {
+      mv: audioSettings.masterVolume,
+      mu: audioSettings.musicVolume,
+      av: audioSettings.ambientVolume,
+      sv: audioSettings.sfxVolume,
+      vv: audioSettings.voiceVolume,
+      mm: audioSettings.masterMuted,
+      mum: audioSettings.musicMuted,
+      am: audioSettings.ambientMuted,
+      sm: audioSettings.sfxMuted,
+      vm: audioSettings.voiceMuted,
+    };
+
     // Save to localStorage
     localStorage.setItem(STORAGE_KEY, JSON.stringify(optimized));
   } catch (error) {
@@ -367,6 +412,22 @@ export async function decodeOptimizedProgress(
     decoded.storyProgress = data.sp;
   }
 
+  // Decode audio settings
+  if (data.a) {
+    decoded.audioSettings = {
+      masterVolume: data.a.mv,
+      musicVolume: data.a.mu,
+      ambientVolume: data.a.av,
+      sfxVolume: data.a.sv,
+      voiceVolume: data.a.vv,
+      masterMuted: data.a.mm,
+      musicMuted: data.a.mum,
+      ambientMuted: data.a.am,
+      sfxMuted: data.a.sm,
+      voiceMuted: data.a.vm,
+    };
+  }
+
   return decoded;
 }
 
@@ -399,6 +460,7 @@ export async function convertToGameStateFormat(
   kethaneumRevealed: boolean;
   genreExhausted: boolean;
   storyProgress?: StoryProgressState;
+  audioSettings?: AudioSettings;
 }> {
   const books: { [title: string]: boolean[] | { complete?: boolean } } = {};
   const discoveredBooks = new Set<string>();

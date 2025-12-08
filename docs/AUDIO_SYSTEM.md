@@ -495,22 +495,35 @@ Default settings:
 
 ## Persistence
 
-Audio settings are automatically saved to localStorage and restored on app load. The save system uses the key `kethaneumAudioSettings`.
+Audio settings are automatically saved and restored with your game progress. The system uses a unified save format that includes audio settings alongside game state.
 
-Manual save/load:
+### How It Works
+
+1. **Automatic Saving**: Audio settings are saved automatically when you save your game progress (via the Settings Menu's "Save Game" button or automatic saves during gameplay).
+
+2. **Automatic Loading**: When the app loads (including on the title screen), audio settings are restored from your saved game progress. If no saved game exists, it falls back to separate localStorage storage.
+
+3. **Unified Storage**: Audio settings are stored in the same optimized save file as your game progress, ensuring they're always in sync.
+
+### Manual Save/Load (Legacy Support)
+
+For backward compatibility, the legacy save/load functions still work:
+
 ```typescript
 import { saveAudioSettings, loadAudioSettings } from '@/lib/save/saveSystem';
 
-// Save
+// Save (legacy - now integrated into unified save)
 const settings = audio.getSettings();
 saveAudioSettings(settings);
 
-// Load
+// Load (legacy - used as fallback)
 const savedSettings = loadAudioSettings();
 if (savedSettings) {
   audio.updateSettings(savedSettings);
 }
 ```
+
+**Note**: The unified save system takes precedence. Legacy functions are only used as a fallback if no unified save exists.
 
 ## Example: Complete Integration
 

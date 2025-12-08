@@ -168,11 +168,20 @@ export class AudioManager {
     }
 
     this.currentMusic = id;
+    
+    // Check mute state BEFORE playing
+    this.updateVolume(track.audio, AudioCategory.MUSIC);
+    
+    // If muted, don't play at all
+    if (this.isMuted('master') || this.isMuted(AudioCategory.MUSIC)) {
+      return;
+    }
+
     track.audio.volume = 0;
 
     try {
       await track.audio.play();
-      await this.fadeIn(track.audio, fadeDuration);
+      await this.fadeIn(track.audio, fadeDuration, AudioCategory.MUSIC);
       this.updateVolume(track.audio, AudioCategory.MUSIC);
     } catch (e) {
       console.error(`Failed to play music: ${id}`, e);
@@ -704,7 +713,17 @@ export class AudioManager {
     }
 
     this.currentMusic = track.id;
-    audioTrack.audio.volume = 0;
+    
+    // Check mute state BEFORE playing - set volume to 0 immediately if muted
+    // This prevents any audio from playing even briefly
+    this.updateVolume(audioTrack.audio, playlist.category);
+    
+    // If muted, don't play at all
+    const isMuted = this.isMuted('master') || this.isMuted(playlist.category);
+    if (isMuted) {
+      // Don't play if muted - just set up the track for when unmuted
+      return;
+    }
 
     // Set up event listener for track end
     if (playlist.autoAdvance) {
@@ -717,13 +736,21 @@ export class AudioManager {
           return; // Playlist changed, don't auto-advance
         }
 
+        // Check mute state before auto-advancing
+        if (this.isMuted('master') || this.isMuted(playlist.category)) {
+          return; // Don't advance if muted
+        }
+
         // Auto-advance to next track
         if (playlist.mode === PlaylistMode.REPEAT_ONE) {
           // Replay the same track
           audioTrack.audio.currentTime = 0;
           try {
-            await audioTrack.audio.play();
-            audioTrack.audio.addEventListener('ended', handleTrackEnd);
+            // Check mute before replaying
+            if (!this.isMuted('master') && !this.isMuted(playlist.category)) {
+              await audioTrack.audio.play();
+              audioTrack.audio.addEventListener('ended', handleTrackEnd);
+            }
           } catch (e) {
             // Handle AbortError gracefully (play was interrupted)
             if (e instanceof DOMException && e.name === 'AbortError') {
@@ -749,8 +776,12 @@ export class AudioManager {
     }
 
     try {
+      // Set initial volume to 0 for fade-in (only if not muted)
+      audioTrack.audio.volume = 0;
       await audioTrack.audio.play();
-      await this.fadeIn(audioTrack.audio, fadeDuration);
+      // Pass category to fadeIn so it can check mute state during fade
+      await this.fadeIn(audioTrack.audio, fadeDuration, playlist.category);
+      // Final volume update after fade (respects mute state)
       this.updateVolume(audioTrack.audio, playlist.category);
     } catch (e) {
       // AbortError is expected when transitioning tracks (pause interrupts play)
@@ -878,12 +909,30 @@ export class AudioManager {
     });
   }
 
-  private async fadeIn(audio: HTMLAudioElement, duration: number): Promise<void> {
+  private async fadeIn(audio: HTMLAudioElement, duration: number, category?: AudioCategory): Promise<void> {
     const startVolume = 0;
     const steps = 20;
     const stepDuration = duration / steps;
 
+    // Get the category from the track if not provided
+    let audioCategory = category;
+    if (!audioCategory) {
+      // Try to find the category from the tracks map
+      for (const [id, track] of this.tracks.entries()) {
+        if (track.audio === audio) {
+          audioCategory = track.category;
+          break;
+        }
+      }
+    }
+
     for (let i = 0; i <= steps; i++) {
+      // Check mute state during fade - if muted, keep volume at 0
+      if (audioCategory && (this.isMuted('master') || this.isMuted(audioCategory))) {
+        audio.volume = 0;
+        // If muted, stop the fade and keep volume at 0
+        break;
+      }
       audio.volume = startVolume + (i / steps);
       await new Promise(resolve => setTimeout(resolve, stepDuration));
     }

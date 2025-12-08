@@ -54,6 +54,15 @@ export function SettingsMenu({
     setShowAudioSettings(false);
   };
 
+  const handleAudioSettingsSave = async () => {
+    // Save game progress to persist audio settings
+    try {
+      await saveProgress(state);
+    } catch (error) {
+      console.error('Failed to save audio settings:', error);
+    }
+  };
+
   return (
     <>
       <div className={styles.overlay} onClick={onClose}>
@@ -169,12 +178,11 @@ export function SettingsMenu({
       </div>
 
       {/* Audio Settings Modal */}
-      {showAudioSettings && (
-        <AudioSettingsModal
-          isOpen={showAudioSettings}
-          onClose={handleAudioSettingsClose}
-        />
-      )}
+      <AudioSettingsModal
+        isOpen={showAudioSettings}
+        onClose={handleAudioSettingsClose}
+        onSave={handleAudioSettingsSave}
+      />
     </>
   );
 }

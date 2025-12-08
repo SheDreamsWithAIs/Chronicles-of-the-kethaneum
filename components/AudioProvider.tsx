@@ -44,6 +44,7 @@ interface AudioConfig {
 
 export function AudioProvider({ children }: AudioProviderProps) {
   const [audioConfig, setAudioConfig] = useState<AudioConfig | null>(null);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const resumeAudioHandlerRef = useRef<((e: Event) => Promise<void>) | null>(null);
 
   // Load audio configuration from JSON file
@@ -66,17 +67,41 @@ export function AudioProvider({ children }: AudioProviderProps) {
     loadAudioConfig();
   }, []);
 
+  // Load audio settings FIRST (before initializing music)
   useEffect(() => {
-    // Load saved audio settings or use defaults from config
-    const savedSettings = loadAudioSettings();
-    const configSettings = getConfig().audio;
-    const settingsToUse = savedSettings || configSettings;
+    // Try loading audio settings from unified save system first
+    // This ensures audio settings are synced with game progress
+    const loadAudioFromUnifiedSave = async () => {
+      try {
+        const { loadProgress } = await import('@/lib/save/unifiedSaveSystem');
+        const result = await loadProgress();
+        if (result.audioSettings) {
+          audioManager.initialize(result.audioSettings);
+          setSettingsLoaded(true);
+          return;
+        }
+      } catch (error) {
+        // Fall back to separate localStorage if unified save fails
+        console.warn('[Audio] Failed to load from unified save, using fallback');
+      }
+      
+      // Fallback: Load from separate localStorage or use defaults from config
+      const savedSettings = loadAudioSettings();
+      const configSettings = getConfig().audio;
+      const settingsToUse = savedSettings || configSettings;
+      
+      // Initialize audio manager with settings
+      audioManager.initialize(settingsToUse);
+      setSettingsLoaded(true);
+    };
+    
+    loadAudioFromUnifiedSave();
+  }, []);
 
-    // Initialize audio manager with settings
-    audioManager.initialize(settingsToUse);
-
-    // Don't initialize music until config is loaded
-    if (!audioConfig) return;
+  // Initialize music ONLY after both config AND settings are loaded
+  useEffect(() => {
+    // Don't initialize music until both config AND settings are loaded
+    if (!audioConfig || !settingsLoaded) return;
 
     // Preload and start background music playlist
     const initializeBackgroundMusic = async () => {
@@ -146,6 +171,12 @@ export function AudioProvider({ children }: AudioProviderProps) {
               return;
             }
             
+            // Check mute state before playing - don't play if muted
+            if (audioManager.isMuted('master') || audioManager.isMuted(AudioCategory.MUSIC)) {
+              console.log('[Audio] Music is muted, skipping playback');
+              return;
+            }
+            
             await audioManager.playPlaylist(bgMusic.playlistId, 0, bgMusic.fadeDuration);
           } catch (error) {
             console.warn('[Audio] Failed to start background music:', error);
@@ -209,7 +240,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
         audioManager.stopPlaylist(1000).catch(() => {});
       }
     };
-  }, [audioConfig]);
+  }, [audioConfig, settingsLoaded]);
 
   return <>{children}</>;
 }

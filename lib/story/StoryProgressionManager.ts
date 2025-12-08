@@ -15,7 +15,7 @@
 
 import { fetchAsset } from '@/lib/utils/assetPath';
 import { dialogueManager } from '@/lib/dialogue/DialogueManager';
-import { audioManager } from '@/lib/audio/audioManager';
+import { audioManager, AudioCategory } from '@/lib/audio/audioManager';
 import type { StoryBeat, LoadingGroup } from '@/lib/dialogue/types';
 import type {
   StoryProgressionConfig,
@@ -295,6 +295,12 @@ export class StoryProgressionManager {
       const currentInfo = audioManager.getCurrentPlaylistInfo();
       if (currentInfo?.playlistId === playlistId) {
         this.log(`Playlist "${playlistId}" is already playing, skipping music change`);
+        return;
+      }
+
+      // Check mute state before playing - don't play if muted
+      if (audioManager.isMuted('master') || audioManager.isMuted(AudioCategory.MUSIC)) {
+        this.log(`Music is muted, skipping playlist playback`);
         return;
       }
 

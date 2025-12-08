@@ -54,14 +54,38 @@ The new format uses compact encoding:
     "N001": 3,
     "K001": 1
   },
-  "g": "nature",
-  "m": {
-    "b": "N001",
-    "i": 2
+  "g": {
+    "nature": ["N001", "N002"]
   },
+  "m": "s",
   "n": 5,
-  "c": true,
-  "s": 1500
+  "c": {
+    "g": "nature",
+    "b": "N001",
+    "p": 2,
+    "i": 0
+  },
+  "s": {
+    "g": "nature",
+    "k": 0,
+    "p": 3,
+    "i": 5,
+    "r": false,
+    "e": false
+  },
+  "sp": { ... },
+  "a": {
+    "mv": 0.7,
+    "mu": 0.8,
+    "av": 0.6,
+    "sv": 0.7,
+    "vv": 1.0,
+    "mm": false,
+    "mum": false,
+    "am": false,
+    "sm": false,
+    "vm": false
+  }
 }
 ```
 
@@ -71,13 +95,33 @@ The new format uses compact encoding:
 | `v` | - | Format version |
 | `d` | `discoveredBooks` | Comma-separated book IDs |
 | `p` | `completedParts` | Book ID to bitmap mapping |
-| `g` | `currentPuzzle.genre` | Current genre |
-| `m` | `currentPuzzle` | Current puzzle metadata |
-| `m.b` | `currentPuzzle.bookTitle` | Current book ID |
-| `m.i` | `currentPuzzle.partIndex` | Current part index |
-| `n` | `puzzlesCompleted` | Total puzzles completed |
-| `c` | `puzzleCompleted` | Current puzzle complete flag |
-| `s` | `score` | Player score |
+| `g` | `completedPuzzlesByGenre` | Completed puzzle IDs by genre |
+| `m` | `gameMode` | Game mode ('s'=story, 'p'=puzzle-only, 'b'=beat-the-clock) |
+| `n` | `completedPuzzles` | Total puzzles completed |
+| `c` | `currentState` | Current puzzle state (optional) |
+| `c.g` | `currentGenre` | Current genre |
+| `c.b` | `currentBook` | Current book ID |
+| `c.p` | `currentStoryPart` | Current story part index |
+| `c.i` | `currentPuzzleIndex` | Current puzzle index |
+| `s` | `selectionState` | Puzzle selection state (optional) |
+| `s.g` | `selectedGenre` | Selected genre |
+| `s.k` | `nextKethaneumIndex` | Next Kethaneum index |
+| `s.p` | `puzzlesSinceLastKethaneum` | Puzzles since last Kethaneum |
+| `s.i` | `nextKethaneumInterval` | Next Kethaneum interval |
+| `s.r` | `kethaneumRevealed` | Kethaneum revealed flag |
+| `s.e` | `genreExhausted` | Genre exhausted flag |
+| `sp` | `storyProgress` | Story progression state (optional) |
+| `a` | `audioSettings` | Audio settings (optional) |
+| `a.mv` | `masterVolume` | Master volume (0-1) |
+| `a.mu` | `musicVolume` | Music volume (0-1) |
+| `a.av` | `ambientVolume` | Ambient volume (0-1) |
+| `a.sv` | `sfxVolume` | SFX volume (0-1) |
+| `a.vv` | `voiceVolume` | Voice volume (0-1) |
+| `a.mm` | `masterMuted` | Master muted flag |
+| `a.mum` | `musicMuted` | Music muted flag |
+| `a.am` | `ambientMuted` | Ambient muted flag |
+| `a.sm` | `sfxMuted` | SFX muted flag |
+| `a.vm` | `voiceMuted` | Voice muted flag |
 
 ## Book Registry System
 
@@ -366,10 +410,30 @@ function GameComponent() {
 
 | Key | Description |
 |-----|-------------|
-| `kethaneumProgress` | Main save data (v1 or v2 format) |
+| `kethaneumProgress` | Main save data (v1 or v2 format) - includes audio settings in v2 |
 | `kethaneumProgress_backup_v1` | Backup of v1 save before migration |
 | `kethaneumProgress_backup_timestamp` | When backup was created |
-| `kethaneumAudioSettings` | Audio preferences (separate) |
+| `kethaneumAudioSettings` | Audio preferences (legacy fallback, now integrated into unified save) |
+
+## Audio Settings Integration
+
+Audio settings are now saved as part of the unified save system (v2 format). This ensures:
+
+- **Persistent Settings**: Audio preferences (volume levels, mute states) are saved with your game progress
+- **Title Screen Loading**: Settings are restored immediately when the app loads, including on the title screen
+- **Automatic Sync**: When you save your game, audio settings are automatically included
+- **Backward Compatibility**: If no unified save exists, the system falls back to the legacy `kethaneumAudioSettings` key
+
+### How It Works
+
+1. **On Save**: When game progress is saved (manual or automatic), current audio settings from `AudioManager` are included in the optimized save format.
+
+2. **On Load**: When the app initializes (via `AudioProvider` in the root layout), it:
+   - First tries to load audio settings from the unified save system
+   - Falls back to legacy `kethaneumAudioSettings` if no unified save exists
+   - Falls back to default config values if neither exists
+
+3. **Settings Persistence**: Audio settings persist across sessions, including when you mute the game on the title screen.
 
 ## Best Practices
 
