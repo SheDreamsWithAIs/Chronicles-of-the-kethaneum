@@ -4,6 +4,14 @@
 
 The Story Events system manages dialogue sequences that trigger based on game conditions. Story events are displayed in the Library and trigger visual notifications on Library buttons when available.
 
+**Key Behaviors:**
+- Story events **prioritize** over character banter when available
+- Each click of "Start a Conversation" plays **one** story event, then the conversation ends
+- If multiple story events are unlocked, the player must click "Start a Conversation" repeatedly to play each event sequentially
+- Once a story event is played, it is marked as complete and won't replay
+- Notifications persist until **all unlocked story events for the current story beat** have been completed
+- After all unlocked story events are completed, the system reverts to random character banter
+
 ---
 
 ## Quick Reference
@@ -13,11 +21,16 @@ The Story Events system manages dialogue sequences that trigger based on game co
 - **Story Event Files**: `/public/data/story-events/*.json`
 - **Event Manifest**: `/public/data/story-events/event-manifest.json`
 - **DialogueManager**: `/lib/dialogue/DialogueManager.ts`
+- **StoryEventTriggerChecker**: `/lib/dialogue/StoryEventTriggerChecker.ts` - Centralized trigger condition evaluation
+- **StoryEventPlayer**: `/lib/dialogue/StoryEventPlayer.ts` - Handles story event dialogue playback
 - **Notification System**: `/contexts/StoryNotificationContext.tsx`
+- **Library Page**: `/app/library/page.tsx` - Main integration point
 
 ### Trigger Conditions
 
-Trigger conditions are stored **inside each story event JSON file** in the `triggerCondition` field:
+Trigger conditions are stored **inside each story event JSON file** in the `triggerCondition` field. These conditions are **evaluated against game state** by `StoryEventTriggerChecker`, not just matched as strings.
+
+**Important:** Trigger conditions must be implemented in `StoryEventTriggerChecker.ts` to actually work. The checker evaluates game state transitions (e.g., puzzle completion, book discovery) to determine if an event should trigger.
 
 ```json
 {
@@ -29,6 +42,16 @@ Trigger conditions are stored **inside each story event JSON file** in the `trig
   }
 }
 ```
+
+**Available Trigger Conditions:**
+- `first-puzzle-complete` - Triggers when player completes their first puzzle
+- `first-kethaneum-puzzle-complete` - Triggers when player completes their first Kethaneum puzzle
+- `puzzle-milestone-{N}` - Triggers when player reaches N total puzzles completed
+- `kethaneum-puzzle-milestone-{N}` - Triggers when player reaches N Kethaneum puzzles completed
+- `first-book-complete` - Triggers when player completes their first book
+- `books-complete-{N}` - Triggers when player reaches N total books completed
+- `kethaneum-book-complete-{bookTitle}` - Triggers when all puzzles in a specific Kethaneum book are completed
+- `player-enters-library-first-time` - Special case: checked manually in Library page on first visit
 
 ---
 
@@ -103,12 +126,24 @@ if (eventId) {
 
 ### 4. Automatic Notification Flow
 
-When `checkForAvailableStoryEvent()` finds a matching event:
+**When Puzzle Completes:**
+1. `useGameModeHandlers.ts` calls `StoryEventTriggerChecker.checkAvailableEvents()`
+2. Trigger conditions are evaluated against game state transitions
+3. For each matching event, `dialogueManager.checkForAvailableStoryEvent()` is called
+4. DialogueManager emits `dialogueManager:storyEventAvailable` event
+5. StorySystemProvider catches the event and calls `setNewDialogueAvailable()`
+6. Library buttons start glowing with amber animation
 
-1. DialogueManager emits `dialogueManager:storyEventAvailable` event
-2. StorySystemProvider catches the event
-3. Library buttons start glowing with amber animation
-4. Notification clears when player visits Library
+**When Library Page Loads:**
+1. Library page `useEffect` calls `StoryEventTriggerChecker.checkAvailableEvents(state, undefined)`
+2. Available events are filtered to exclude completed ones
+3. If any available events exist, `setNewDialogueAvailable()` is called
+4. Notification persists until **all unlocked story events for the current beat** are completed
+
+**Notification Persistence:**
+- Notifications **do not** clear when player visits Library
+- Notifications persist until all unlocked story events for the current story beat are completed
+- This ensures notifications survive page refreshes and multiple visits
 
 ---
 
@@ -182,28 +217,21 @@ Update `/public/data/story-events/event-manifest.json`:
 ]
 ```
 
-### Step 3: Trigger in Game Logic
+### Step 3: Implement Trigger Condition (if new)
 
-In your game code, check for the trigger when appropriate:
+If you're using a new trigger condition, add it to `StoryEventTriggerChecker.ts`:
 
 ```typescript
-// Example: After player completes first puzzle
-function handlePuzzleComplete() {
-  // ... existing puzzle completion logic ...
-
-  if (isFirstPuzzleCompleted) {
-    const eventId = dialogueManager.checkForAvailableStoryEvent(
-      'player-completes-first-puzzle',
-      state.storyProgress?.currentBeat
-    );
-
-    if (eventId) {
-      // Show the event dialogue to the player
-      showStoryEventDialogue(eventId);
-    }
-  }
+// In StoryEventTriggerChecker.matchesTriggerCondition()
+if (triggerCondition === 'your-new-trigger-condition') {
+  // Evaluate game state to determine if condition is met
+  const currentValue = currentState.someProperty;
+  const prevValue = previousState?.someProperty || 0;
+  return currentValue === desiredValue && prevValue !== desiredValue;
 }
 ```
+
+**Note:** Story events are automatically checked after puzzle completion via `useGameModeHandlers.ts`. You don't need to manually trigger them unless you're adding a new trigger type that isn't checked automatically.
 
 ---
 
@@ -308,40 +336,85 @@ Both systems work together to tell your story!
 
 ## Examples
 
-### Example 1: First Library Visit
+### Example 1: Library Page Load Check
 
 ```typescript
-// In Library page component
+// In app/library/page.tsx
 useEffect(() => {
-  const eventId = dialogueManager.checkForAvailableStoryEvent(
-    'player-enters-library-first-time',
-    state.storyProgress?.currentBeat
+  if (!state.storyProgress || !dialogueManager.getInitialized()) return;
+
+  // Use StoryEventTriggerChecker to properly evaluate trigger conditions
+  const triggeredEventIds = StoryEventTriggerChecker.checkAvailableEvents(
+    state,
+    undefined  // Check current state, not transitions
+  );
+  
+  // Filter out completed events
+  const completedEvents = state.dialogue?.completedStoryEvents || [];
+  const availableEventIds = triggeredEventIds.filter(
+    eventId => !completedEvents.includes(eventId)
   );
 
-  if (eventId && !hasSeenEvent(eventId)) {
-    // Show the first visit dialogue
-    setCurrentDialogueEvent(eventId);
-    setShowDialogue(true);
-    markEventAsSeen(eventId);
+  if (availableEventIds.length > 0) {
+    setNewDialogueAvailable();  // Show notification
+  } else {
+    clearNewDialogue();  // Clear if all events completed
   }
-}, []);
+}, [state.storyProgress?.currentStoryBeat, state.dialogue?.completedStoryEvents]);
 ```
 
-### Example 2: Milestone Achievement
+### Example 2: Playing Story Events (Library Page)
 
 ```typescript
-// After significant game milestone
-function onMilestoneReached(milestoneName: string) {
-  const eventId = dialogueManager.checkForAvailableStoryEvent(
-    `milestone-${milestoneName}`,
-    state.storyProgress?.currentBeat
+// In handleStartConversation (app/library/page.tsx)
+const handleStartConversation = async () => {
+  // Clear queue to prevent old panels from persisting
+  dialogueQueueRef.current?.clear();
+  
+  setConversationActive(true);
+  
+  const currentBeat = state.storyProgress?.currentStoryBeat || 'hook';
+  const completedEvents = completedEventsRef.current.length > 0
+    ? completedEventsRef.current
+    : (state.dialogue?.completedStoryEvents || []);
+  
+  // Get ONE available event (filtering completed ones)
+  const availableEvent = dialogueManager.getAvailableStoryEvent(
+    currentBeat,
+    completedEvents
   );
-
-  if (eventId) {
-    // Queue the event to show next time player visits Library
-    queueStoryEvent(eventId);
+  
+  if (availableEvent) {
+    // Play story event
+    const player = new StoryEventPlayer(dialogueManager);
+    const eventId = availableEvent.storyEvent.id;
+    currentEventIdRef.current = eventId;
+    
+    // Set up completion callback
+    player.onCompleted(async () => {
+      // Mark event as completed
+      completedEventsRef.current.push(eventId);
+      setState(prevState => ({
+        ...prevState,
+        dialogue: {
+          ...prevState.dialogue,
+          completedStoryEvents: [...prevState.dialogue.completedStoryEvents, eventId],
+        },
+      }));
+      
+      // End conversation
+      dialogueQueueRef.current?.clear();
+      setConversationActive(false);
+    });
+    
+    await player.loadStoryEvent(eventId);
+    eventPlayerRef.current = player;
+  } else {
+    // No story events - play banter instead
+    const banter = dialogueManager.getRandomBanter(currentBeat);
+    // ... play banter ...
   }
-}
+};
 ```
 
 ---
@@ -416,3 +489,31 @@ When adding a new story event:
 - **Story Progression System**: `/lib/story/README.md`
 - **Dialogue Config**: `/public/data/README.md`
 - **Notification System**: `/contexts/StoryNotificationContext.tsx`
+- **StoryEventTriggerChecker**: `/lib/dialogue/StoryEventTriggerChecker.ts` - Trigger condition evaluation
+- **StoryEventPlayer**: `/lib/dialogue/StoryEventPlayer.ts` - Story event dialogue playback
+- **DialogueManager**: `/lib/dialogue/DialogueManager.ts` - Central dialogue management
+- **Library Page**: `/app/library/page.tsx` - Main integration point for story events and banter
+
+## Technical Notes
+
+### State Management
+
+- **Completed Events Tracking:** Uses both `state.dialogue.completedStoryEvents` (persistent) and `completedEventsRef` (immediate) to handle React's asynchronous state updates
+- **Event Completion:** Events are marked complete immediately via ref, then synced to state to ensure next click correctly filters them out
+
+### Trigger Condition Evaluation
+
+- Trigger conditions are evaluated against **game state transitions**, not just current state
+- `StoryEventTriggerChecker.checkAvailableEvents(currentState, previousState)` compares states to detect transitions
+- For page load checks, pass `undefined` as `previousState` to check current state
+
+### Queue Management
+
+- Dialogue queue is cleared at the start of each new conversation to prevent old panels from persisting
+- Queue is also cleared when a story event completes or banter conversation ends
+
+### Notification Persistence
+
+- Notifications persist across page refreshes and multiple Library visits
+- Notifications only clear when **all unlocked story events for the current story beat** are completed
+- This ensures players don't miss story events even if they visit Library multiple times
