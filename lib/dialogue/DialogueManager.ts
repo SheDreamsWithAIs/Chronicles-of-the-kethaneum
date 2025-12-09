@@ -420,6 +420,67 @@ export class DialogueManager {
   }
 
   /**
+   * Get character data by character ID
+   */
+  getCharacterById(characterId: string): CharacterData | null {
+    return this.characters.get(characterId) || null;
+  }
+
+  /**
+   * Get dialogue configuration
+   */
+  getConfig(): DialogueConfig | null {
+    return this.config;
+  }
+
+  /**
+   * Get first available story event for current beat
+   * Filters out completed events if game state is provided
+   */
+  getAvailableStoryEvent(currentBeat?: StoryBeat, completedEvents?: string[]): any | null {
+    try {
+      const availableEvents = this.getAvailableStoryEvents(currentBeat);
+      
+      if (availableEvents.length === 0) {
+        return null;
+      }
+
+      // Validate completedEvents is an array if provided
+      if (completedEvents !== undefined && !Array.isArray(completedEvents)) {
+        console.error('[DialogueManager] completedEvents is not an array:', completedEvents);
+        completedEvents = [];
+      }
+
+      // Filter out completed events if provided
+      const filteredEvents = completedEvents && completedEvents.length > 0
+        ? availableEvents.filter((eventId) => !completedEvents.includes(eventId))
+        : availableEvents;
+
+      if (filteredEvents.length === 0) {
+        return null;
+      }
+
+      // Return first available event (full StoryEvent object)
+      const eventId = filteredEvents[0];
+      const event = this.getStoryEvent(eventId);
+      
+      // Critical validation: ensure we're not returning a completed event
+      if (event && completedEvents?.includes(eventId)) {
+        console.error('[DialogueManager] CRITICAL: Returning completed event!', {
+          eventId,
+          completedEvents,
+        });
+        return null;
+      }
+      
+      return event;
+    } catch (error) {
+      console.error('[DialogueManager] Error in getAvailableStoryEvent:', error);
+      return null;
+    }
+  }
+
+  /**
    * Get all loaded story events
    * Used by StoryEventTriggerChecker to check against state
    */

@@ -48,6 +48,8 @@ export interface OptimizedProgress {
   s?: OptimizedSelectionState;
   /** Story progress (optional) */
   sp?: StoryProgressState;
+  /** Dialogue/completed story events (optional) */
+  dl?: string[];
   /** Audio settings (optional) */
   a?: OptimizedAudioSettings;
 }
@@ -144,6 +146,7 @@ export interface DecodedProgress {
     part: number;
     puzzleIndex: number;
   };
+  completedStoryEvents?: string[];
   selectionState?: {
     selectedGenre: string;
     nextKethaneumIndex: number;
@@ -286,6 +289,11 @@ export async function saveOptimizedProgress(state: GameState): Promise<void> {
       optimized.sp = state.storyProgress;
     }
 
+    // Add dialogue state (completed story events)
+    if (state.dialogue?.completedStoryEvents && state.dialogue.completedStoryEvents.length > 0) {
+      optimized.dl = state.dialogue.completedStoryEvents;
+    }
+
     // Add audio settings
     const audioSettings = audioManager.getSettings();
     optimized.a = {
@@ -412,6 +420,11 @@ export async function decodeOptimizedProgress(
     decoded.storyProgress = data.sp;
   }
 
+  // Decode dialogue state (completed story events)
+  if (data.dl && Array.isArray(data.dl)) {
+    decoded.completedStoryEvents = data.dl;
+  }
+
   // Decode audio settings
   if (data.a) {
     decoded.audioSettings = {
@@ -460,6 +473,9 @@ export async function convertToGameStateFormat(
   kethaneumRevealed: boolean;
   genreExhausted: boolean;
   storyProgress?: StoryProgressState;
+  dialogue?: {
+    completedStoryEvents: string[];
+  };
   audioSettings?: AudioSettings;
 }> {
   const books: { [title: string]: boolean[] | { complete?: boolean } } = {};
@@ -538,6 +554,9 @@ export async function convertToGameStateFormat(
     kethaneumRevealed: decoded.selectionState?.kethaneumRevealed || false,
     genreExhausted: decoded.selectionState?.genreExhausted || false,
     storyProgress: decoded.storyProgress,
+    dialogue: decoded.completedStoryEvents
+      ? { completedStoryEvents: decoded.completedStoryEvents }
+      : undefined,
   };
 }
 

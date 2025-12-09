@@ -84,6 +84,16 @@ export interface GameState {
   genreExhausted: boolean; // Whether current selected genre has no more new puzzles
   // Story progress tracking
   storyProgress: StoryProgressState; // Player's story journey progress
+  // Dialogue state
+  dialogue?: {
+    completedStoryEvents: string[]; // Array of completed story event IDs
+    conversationHistory?: Array<{
+      timestamp: number;
+      characterId: string;
+      dialogueId: string;
+      wasStoryEvent: boolean;
+    }>;
+  };
 }
 
 export interface PuzzleData {

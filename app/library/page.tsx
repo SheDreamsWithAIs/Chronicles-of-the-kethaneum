@@ -1,67 +1,113 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
+import { PageLoader } from '@/components/shared/PageLoader';
 import { GenreSelectionModal } from '@/components/GenreSelectionModal';
 import { SettingsMenu } from '@/components/SettingsMenu';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
 import { useStoryNotification } from '@/contexts/StoryNotificationContext';
+import { useDialogue } from '@/hooks/dialogue/useDialogue';
+import { usePageLoader } from '@/hooks/usePageLoader';
 import { dialogueManager } from '@/lib/dialogue/DialogueManager';
+import { DialogueQueue, DialogueQueueRef, DialogueEntry } from '@/components/dialogue/DialogueQueue';
+import { DialogueControls } from '@/components/dialogue/DialogueControls';
+import { StoryEventPlayer } from '@/lib/dialogue/StoryEventPlayer';
 import styles from './library.module.css';
+import dialogueStyles from '@/components/dialogue/dialogue.module.css';
 import notificationStyles from '@/styles/story-notification.module.css';
 
 export default function LibraryScreen() {
   const router = useRouter();
-  const [showDialogue, setShowDialogue] = useState(false);
+  
+  // Page loading state management - initialize FIRST to show loader immediately
+  const { isLoading: pageLoading, setLoading } = usePageLoader({
+    minDisplayTime: 500,
+  });
+
+  const [conversationActive, setConversationActive] = useState(false);
   const [showGenreModal, setShowGenreModal] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
-  const { state, setState } = useGameState();
+  const { state, setState, isReady: gameStateReady } = useGameState();
   const { loadSequential, loadAll } = usePuzzle(state, setState);
   const { hasNewDialogue, clearNewDialogue, setNewDialogueAvailable } = useStoryNotification();
+  const { isInitialized, initialize } = useDialogue();
+  const dialogueQueueRef = useRef<DialogueQueueRef | null>(null);
+  const eventPlayerRef = useRef<StoryEventPlayer | null>(null);
+  const currentEventIdRef = useRef<string | null>(null);
+  // Track completed events immediately via ref to avoid React state timing issues
+  const completedEventsRef = useRef<string[]>([]);
+
+  // Track loading conditions - use useEffect but set immediately
+  useEffect(() => {
+    setLoading('gameState', !gameStateReady);
+  }, [gameStateReady, setLoading]);
+
+  useEffect(() => {
+    setLoading('dialogue', !isInitialized);
+  }, [isInitialized, setLoading]);
+
+  useEffect(() => {
+    // Only check puzzles if state exists
+    if (state) {
+      const puzzlesLoaded = state.puzzles && Object.keys(state.puzzles).length > 0;
+      setLoading('puzzles', !puzzlesLoaded);
+    } else {
+      setLoading('puzzles', true);
+    }
+  }, [state, state?.puzzles, setLoading]);
+
+  useEffect(() => {
+    // Check if storyProgress exists and has required properties
+    if (state) {
+      const storyProgressReady = state.storyProgress && 
+        typeof state.storyProgress === 'object' && 
+        'currentStoryBeat' in state.storyProgress;
+      setLoading('storyProgress', !storyProgressReady);
+    } else {
+      setLoading('storyProgress', true);
+    }
+  }, [state, state?.storyProgress, setLoading]);
+
+  // Sync completed events ref with state when state loads/changes
+  useEffect(() => {
+    if (state.dialogue?.completedStoryEvents) {
+      completedEventsRef.current = state.dialogue.completedStoryEvents;
+    }
+  }, [state.dialogue?.completedStoryEvents]);
 
   // Check for available story events when library loads (including after refresh)
   // This restores the notification state after page refresh
+  // Uses StoryEventTriggerChecker to properly check if events are available based on game state
   useEffect(() => {
     // Wait for game state to be ready before checking
-    if (!state.storyProgress) return;
+    if (!state.storyProgress || !dialogueManager.getInitialized()) return;
 
-    // Check for all available story events that match current game state
-    // This ensures the notification persists after page refresh
-    const currentBeat = state.storyProgress.currentStoryBeat;
+    // Use StoryEventTriggerChecker to check if any events are actually available
+    // This properly evaluates trigger conditions against current game state
+    // Pass undefined as previousState to check current state (not transitions)
+    const triggeredEventIds = StoryEventTriggerChecker.checkAvailableEvents(state, undefined);
     
-    // Get all story events that match the current beat
-    const beatMatchedEvents = dialogueManager.getAvailableStoryEvents(currentBeat);
+    // Filter out completed events
+    const completedEvents = completedEventsRef.current.length > 0
+      ? completedEventsRef.current
+      : (state.dialogue?.completedStoryEvents || []);
     
-    // Check each event to see if its trigger condition matches current state
-    // We'll check common trigger conditions that might be available
-    const triggerConditionsToCheck = [
-      'player-enters-library-first-time',
-      // Add other trigger conditions as needed
-    ];
+    const availableEventIds = triggeredEventIds.filter(
+      eventId => !completedEvents.includes(eventId)
+    );
 
-    let foundAvailableEvent = false;
-    
-    for (const triggerCondition of triggerConditionsToCheck) {
-      const eventId = dialogueManager.checkForAvailableStoryEvent(triggerCondition, currentBeat);
-      if (eventId) {
-        console.log(`[Library] Found available story event on load: ${eventId}`);
-        foundAvailableEvent = true;
-        // The checkForAvailableStoryEvent call will emit the event and trigger the notification
-        break; // Found one, that's enough to show the notification
-      }
-    }
-
-    // If no specific trigger matched, check if there are any beat-matched events
-    // that might be available (for events without specific trigger conditions)
-    if (!foundAvailableEvent && beatMatchedEvents.length > 0) {
-      // Manually trigger notification if we have events available for this beat
-      // This handles cases where events are available but don't have trigger conditions checked yet
+    if (availableEventIds.length > 0) {
+      console.log(`[Library] Found ${availableEventIds.length} available story event(s) on load:`, availableEventIds);
       setNewDialogueAvailable();
-      console.log(`[Library] Found ${beatMatchedEvents.length} story event(s) available for current beat`);
+    } else {
+      // No available events - clear notification if it exists
+      clearNewDialogue();
+      console.log(`[Library] No available story events - all events completed or none triggered`);
     }
-  }, [state.storyProgress?.currentStoryBeat, setNewDialogueAvailable]);
+  }, [state.storyProgress?.currentStoryBeat, state.dialogue?.completedStoryEvents, state.completedPuzzlesByGenre, setNewDialogueAvailable, clearNewDialogue]);
 
   // Note: We don't clear the notification when visiting the library anymore
   // The notification will persist until the player actually starts the conversation
@@ -74,6 +120,13 @@ export default function LibraryScreen() {
       router.push('/puzzle');
     }
   }, [state.gameMode, router]);
+
+  // Initialize dialogue system
+  useEffect(() => {
+    if (!isInitialized) {
+      initialize();
+    }
+  }, [isInitialized, initialize]);
 
   // Load puzzles on mount if not already loaded
   useEffect(() => {
@@ -177,10 +230,407 @@ export default function LibraryScreen() {
     genre => state.puzzles[genre] && state.puzzles[genre].length > 0
   );
 
-  const handleStartConversation = () => {
-    setShowDialogue(true);
-    // Clear the notification when player starts the conversation
-    clearNewDialogue();
+  const handleStartConversation = async () => {
+    console.log('[Library] handleStartConversation called');
+    
+    if (!dialogueManager) {
+      console.error('[Library] Dialogue system not ready');
+      return;
+    }
+
+    console.log('[Library] Setting conversationActive=true');
+    setConversationActive(true);
+    
+    // Wait for DialogueQueue to mount and ref to be available
+    // Use multiple requestAnimationFrame calls and a small timeout to ensure React has rendered
+    let retries = 0;
+    while (!dialogueQueueRef.current && retries < 10) {
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      retries++;
+    }
+    
+    // Final check with a small timeout as fallback
+    if (!dialogueQueueRef.current) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    
+    if (!dialogueQueueRef.current) {
+      console.error('DialogueQueue ref not available after waiting');
+      setConversationActive(false);
+      return;
+    }
+    
+    // CRITICAL: Clear the queue before starting any new conversation (story event or banter)
+    // This ensures old panels from previous conversations don't persist
+    try {
+      dialogueQueueRef.current.clear();
+      console.log('[Library] Cleared dialogue queue before starting new conversation');
+    } catch (error) {
+      console.error('[Library] Error clearing dialogue queue:', error);
+      // Continue anyway - better to have stale panels than to fail completely
+    }
+    // Don't clear notification here - it should only clear when ALL unlocked story events are completed
+
+    const currentBeat = state.storyProgress?.currentStoryBeat || 'hook';
+
+    try {
+      // Check for available story events first (filter out completed ones)
+      // Use ref for immediate tracking, fallback to state for initial load
+      const completedEvents = completedEventsRef.current.length > 0 
+        ? completedEventsRef.current 
+        : (state.dialogue?.completedStoryEvents || []);
+      const allEventsForBeat = dialogueManager.getAvailableStoryEvents(currentBeat);
+      
+      console.log('[Library] Checking for available story events:', {
+        currentBeat,
+        completedEvents,
+        completedEventsType: Array.isArray(completedEvents) ? 'array' : typeof completedEvents,
+        completedEventsLength: Array.isArray(completedEvents) ? completedEvents.length : 'N/A',
+        totalEventsForBeat: allEventsForBeat.length,
+        allEventIds: allEventsForBeat,
+      });
+      
+      // Validate completedEvents is an array
+      if (!Array.isArray(completedEvents)) {
+        console.error('[Library] completedEvents is not an array:', completedEvents);
+        throw new Error('completedEvents must be an array');
+      }
+      
+      // Get available event, filtering out completed ones
+      let availableEvent: any = null;
+      try {
+        availableEvent = dialogueManager.getAvailableStoryEvent(currentBeat, completedEvents);
+        
+        // Log detailed filtering information
+        if (availableEvent) {
+          const eventId = availableEvent.storyEvent?.id;
+          const isCompleted = completedEvents.includes(eventId);
+          console.log('[Library] Found available event:', {
+            eventId,
+            isCompleted,
+            completedEvents,
+            warning: isCompleted ? 'ERROR: Event is marked as completed but was returned!' : null,
+          });
+          
+          if (isCompleted) {
+            console.error('[Library] CRITICAL: Event is in completedEvents but was returned by getAvailableStoryEvent!', {
+              eventId,
+              completedEvents,
+              currentBeat,
+            });
+            // Don't proceed with a completed event
+            availableEvent = null;
+          }
+        } else {
+          console.log('[Library] No available story events - all completed or none exist for this beat', {
+            allEventsForBeat,
+            completedEvents,
+            filtered: allEventsForBeat.filter(id => !completedEvents.includes(id)),
+          });
+        }
+      } catch (error) {
+        console.error('[Library] Error calling getAvailableStoryEvent:', error);
+        throw error;
+      }
+
+      if (availableEvent) {
+        console.log('[Library] Creating StoryEventPlayer and setting up callbacks');
+        // Play story event sequence
+        const player = new StoryEventPlayer(dialogueManager);
+        const eventId = availableEvent.storyEvent.id;
+        currentEventIdRef.current = eventId;
+
+        // Set up dialogue callback BEFORE loading/starting
+        player.onDialogue((entry: DialogueEntry) => {
+          try {
+            console.log('[Library] onDialogue callback received entry:', {
+              id: entry.id,
+              character: entry.character.name,
+              hasRef: !!dialogueQueueRef.current,
+            });
+            
+            if (!entry || !entry.id) {
+              console.error('[Library] Invalid dialogue entry received:', entry);
+              return;
+            }
+            
+            if (dialogueQueueRef.current) {
+              dialogueQueueRef.current.addDialogue(entry);
+            } else {
+              console.error('[Library] dialogueQueueRef.current is null when trying to add dialogue!');
+              // Try to recover - end conversation if ref is lost
+              setConversationActive(false);
+            }
+          } catch (error) {
+            console.error('[Library] Error in onDialogue callback:', error);
+            // End conversation on error to prevent stuck state
+            setConversationActive(false);
+          }
+        });
+
+        player.onCompleted(async () => {
+          try {
+            console.log('[Library] Story event onCompleted callback triggered');
+            
+            // Mark event as completed in game state immediately
+            if (!currentEventIdRef.current) {
+              console.error('[Library] onCompleted called but currentEventIdRef is null!');
+              setConversationActive(false);
+              return;
+            }
+            
+            const completedId = currentEventIdRef.current;
+            console.log(`[Library] Processing completion for event: ${completedId}`, {
+              refBeforeUpdate: completedEventsRef.current,
+              stateBeforeUpdate: state.dialogue?.completedStoryEvents,
+            });
+              
+              // Mark event as completed and check for remaining events
+              try {
+                setState((prevState) => {
+                  const completedEvents = prevState.dialogue?.completedStoryEvents || [];
+                  
+                  // Validate completedEvents is an array
+                  if (!Array.isArray(completedEvents)) {
+                    console.error('[Library] prevState.dialogue.completedStoryEvents is not an array:', completedEvents);
+                    return prevState; // Return previous state on error
+                  }
+                  
+                  const wasAlreadyCompleted = completedEvents.includes(completedId);
+                  
+                  // Calculate updated completed events list
+                  const updatedCompletedEvents = wasAlreadyCompleted 
+                    ? completedEvents 
+                    : [...completedEvents, completedId];
+                  
+                  // Get current beat (may have changed if story progressed)
+                  const updatedCurrentBeat = prevState.storyProgress?.currentStoryBeat || currentBeat;
+                  
+                  try {
+                    const allUnlockedEvents = dialogueManager.getAvailableStoryEvents(updatedCurrentBeat);
+                    const remainingEvents = allUnlockedEvents.filter(id => !updatedCompletedEvents.includes(id));
+                    
+                    // Clear notification if all unlocked events are done
+                    if (remainingEvents.length === 0) {
+                      setTimeout(() => {
+                        try {
+                          clearNewDialogue();
+                        } catch (error) {
+                          console.error('[Library] Error clearing notification:', error);
+                        }
+                      }, 0);
+                    }
+                  } catch (error) {
+                    console.error('[Library] Error checking remaining events:', error);
+                  }
+                  
+                  // Update ref immediately for synchronous access
+                  completedEventsRef.current = updatedCompletedEvents;
+                  
+                  console.log(`[Library] Updated completedEventsRef:`, {
+                    completedId,
+                    updatedCompletedEvents,
+                    wasAlreadyCompleted,
+                  });
+                  
+                  // Return updated state
+                  if (!wasAlreadyCompleted) {
+                    return {
+                      ...prevState,
+                      dialogue: {
+                        ...prevState.dialogue,
+                        completedStoryEvents: updatedCompletedEvents,
+                      },
+                    };
+                  }
+                  return prevState;
+                });
+                
+                // Wait for state to propagate
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                // Verify ref was updated
+                if (!completedEventsRef.current.includes(completedId)) {
+                  console.error('[Library] CRITICAL: completedEventsRef was not updated!', {
+                    completedId,
+                    refValue: completedEventsRef.current,
+                  });
+                }
+                
+              } catch (error) {
+                console.error('[Library] Error updating state:', error);
+                throw error;
+              }
+              
+              // Wait a moment for state update and to ensure dialogue has been displayed
+              await new Promise(resolve => setTimeout(resolve, 200));
+              
+              console.log(`[Library] Story event completed: ${completedId}, clearing queue and ending conversation`);
+              
+              // Clear the dialogue queue
+              try {
+                if (dialogueQueueRef.current) {
+                  dialogueQueueRef.current.clear();
+                }
+              } catch (error) {
+                console.error('[Library] Error clearing dialogue queue:', error);
+              }
+              
+              // Clean up and end conversation
+              currentEventIdRef.current = null;
+              eventPlayerRef.current = null;
+              
+              // Small delay before ending conversation to prevent race conditions
+              await new Promise(resolve => setTimeout(resolve, 50));
+              setConversationActive(false);
+          } catch (error) {
+            console.error('[Library] Error in onCompleted callback:', error);
+            // Ensure conversation ends even on error
+            setConversationActive(false);
+            currentEventIdRef.current = null;
+            eventPlayerRef.current = null;
+          }
+        });
+
+        await player.loadStoryEvent(eventId);
+        eventPlayerRef.current = player;
+        
+        // Ensure ref is still available before starting
+        if (!dialogueQueueRef.current) {
+          console.error('[Library] DialogueQueue ref lost before starting player');
+          setConversationActive(false);
+          return;
+        }
+        
+        // Verify story event has dialogue entries before starting
+        if (!availableEvent.dialogue || availableEvent.dialogue.length === 0) {
+          console.error('[Library] Story event has no dialogue entries:', eventId);
+          setConversationActive(false);
+          currentEventIdRef.current = null;
+          eventPlayerRef.current = null;
+          return;
+        }
+        
+        // Start the player immediately - this will emit the first dialogue via emitNextDialogue()
+        // The callback will add it to the queue, making the panel appear right away
+        player.start();
+        
+        // Preload portraits in the background (non-blocking) - portraits will appear when ready
+        player.preloadPortraits().catch((error) => {
+          console.error('[Library] Error preloading portraits:', error);
+          // Don't block dialogue if portraits fail to load
+        });
+        
+        // Give the dialogue time to be added to the queue
+        // The callback should fire synchronously, but give it a moment to process
+        await new Promise(resolve => setTimeout(resolve, 150));
+        
+        // Verify dialogue was added (debugging)
+        if (!dialogueQueueRef.current) {
+          console.warn('[Library] DialogueQueue ref lost after starting player');
+          setConversationActive(false);
+          currentEventIdRef.current = null;
+          eventPlayerRef.current = null;
+        }
+      } else {
+        // Show random character banter
+        try {
+          console.log('[Library] No story events available, showing banter');
+          const banter = dialogueManager.getRandomBanter(currentBeat);
+          
+          if (!banter || !banter.success || !banter.dialogue) {
+            console.error('[Library] Failed to get banter:', banter?.error || 'Unknown error');
+            setConversationActive(false);
+            return;
+          }
+          
+          const characterData = dialogueManager.getCharacterById(banter.dialogue.characterId);
+          if (!characterData) {
+            console.error(`[Library] Character ${banter.dialogue.characterId} not found for banter`);
+            setConversationActive(false);
+            return;
+          }
+          
+          // Simple chunking for banter (single chunk for now)
+          const entry: DialogueEntry = {
+            id: `banter-${Date.now()}`,
+            character: {
+              id: characterData.character.id,
+              name: characterData.character.name,
+              title: characterData.character.title,
+              portraitFile: characterData.character.portraitFile,
+            },
+            text: banter.dialogue.text,
+            emotion: banter.dialogue.emotion[0],
+            chunks: [banter.dialogue.text],
+            currentChunk: 0,
+          };
+          
+          console.log('[Library] Adding banter dialogue to queue:', entry.id);
+          
+          if (dialogueQueueRef.current) {
+            dialogueQueueRef.current.addDialogue(entry);
+            
+            // Give dialogue time to be added to queue
+            await new Promise(resolve => setTimeout(resolve, 100));
+          } else {
+            console.error('[Library] DialogueQueue ref is null when trying to add banter');
+            setConversationActive(false);
+            return;
+          }
+        } catch (error) {
+          console.error('[Library] Error showing banter:', error);
+          setConversationActive(false);
+        }
+      }
+    } catch (error) {
+      console.error('[Library] Error starting conversation:', error);
+      // Clean up on error
+      setConversationActive(false);
+      currentEventIdRef.current = null;
+      eventPlayerRef.current = null;
+      // Try to clear queue if ref is available
+      try {
+        dialogueQueueRef.current?.clear();
+      } catch (clearError) {
+        console.error('[Library] Error clearing queue on error:', clearError);
+      }
+    }
+  };
+
+  const handleContinueDialogue = () => {
+    if (!eventPlayerRef.current) {
+      // No event player means this is banter - just end the conversation and clear queue
+      console.log('[Library] handleContinueDialogue: No event player (banter), ending conversation');
+      dialogueQueueRef.current?.clear();
+      setConversationActive(false);
+      return;
+    }
+
+    // CRITICAL: Always call advance() - it will trigger onComplete() when next() returns null
+    // The previous check for isComplete() was preventing onComplete() from being called
+    // because isComplete() becomes true after the last dialogue is returned, but we still
+    // need to call advance() one more time to trigger the completion callback
+    const currentSeq = eventPlayerRef.current.getCurrentSequence();
+    const isCompleteBefore = eventPlayerRef.current.isComplete();
+    
+    console.log('[Library] handleContinueDialogue:', {
+      currentSeq,
+      isCompleteBefore,
+      hasPlayer: !!eventPlayerRef.current,
+    });
+
+    // Call advance() - this will call emitNextDialogue(), which calls next()
+    // When next() returns null (no more dialogue), emitNextDialogue() calls onComplete()
+    eventPlayerRef.current.advance();
+  };
+
+  const handleEndConversation = () => {
+    console.log('[Library] handleEndConversation called');
+    setConversationActive(false);
+    dialogueQueueRef.current?.clear();
+    eventPlayerRef.current = null;
+    currentEventIdRef.current = null;
   };
 
   const handleBookOfPassage = () => {
@@ -197,6 +647,11 @@ export default function LibraryScreen() {
 
   return (
     <div className={styles.libraryContainer}>
+      <PageLoader
+        isLoading={pageLoading}
+        variant="library"
+        message="Loading the Library Archives..."
+      />
       <CosmicBackground variant="library" starCount={300} particleCount={25} />
       
       <GenreSelectionModal
@@ -207,24 +662,27 @@ export default function LibraryScreen() {
         kethaneumRevealed={state.kethaneumRevealed}
       />
 
-      {showDialogue && (
-        <div className={styles.dialogueOverlay} onClick={() => setShowDialogue(false)}>
-          <div className={styles.dialoguePanel} onClick={(e) => e.stopPropagation()}>
-            <button className={styles.dialogueClose} onClick={() => setShowDialogue(false)}>×</button>
-            <div className={styles.characterPortrait}>Portrait</div>
-            <div className={styles.dialogueContent}>
-              <div className={styles.characterName}>Archivist Lumina</div>
-              <div className={styles.dialogueText}>
-                Welcome, new Assistant Archivist! I am Lumina, keeper of the western archives. The Kethaneum has chosen you for reasons that may not yet be clear, but I sense great potential within you.
-              </div>
-              <div className={styles.dialogueControls}>
-                <button className={styles.dialogueButton} onClick={() => setShowDialogue(false)}>
-                  Continue
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Always render DialogueQueue so ref is available, control visibility with isActive */}
+      <DialogueQueue
+        ref={dialogueQueueRef}
+        isActive={conversationActive}
+        onQueueEmpty={handleEndConversation}
+        onContinue={handleContinueDialogue}
+      />
+      {conversationActive && (
+        <>
+          <div 
+            className={dialogueStyles.dialogueOverlay} 
+            onClick={handleEndConversation}
+            data-testid="dialogue-overlay"
+          />
+          <DialogueControls
+            onContinue={() => {
+              dialogueQueueRef.current?.handleContinue();
+            }}
+            disabled={!dialogueQueueRef.current}
+          />
+        </>
       )}
 
       <div className={styles.libraryScreen}>
