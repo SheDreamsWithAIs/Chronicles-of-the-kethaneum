@@ -50,6 +50,8 @@ export interface OptimizedProgress {
   sp?: StoryProgressState;
   /** Dialogue/completed story events (optional) */
   dl?: string[];
+  /** Dialogue: has visited library (optional) */
+  dlv?: boolean;
   /** Audio settings (optional) */
   a?: OptimizedAudioSettings;
 }
@@ -147,6 +149,7 @@ export interface DecodedProgress {
     puzzleIndex: number;
   };
   completedStoryEvents?: string[];
+  hasVisitedLibrary?: boolean;
   selectionState?: {
     selectedGenre: string;
     nextKethaneumIndex: number;
@@ -294,6 +297,11 @@ export async function saveOptimizedProgress(state: GameState): Promise<void> {
       optimized.dl = state.dialogue.completedStoryEvents;
     }
 
+    // Add hasVisitedLibrary flag
+    if (state.dialogue?.hasVisitedLibrary) {
+      optimized.dlv = true;
+    }
+
     // Add audio settings
     const audioSettings = audioManager.getSettings();
     optimized.a = {
@@ -425,6 +433,11 @@ export async function decodeOptimizedProgress(
     decoded.completedStoryEvents = data.dl;
   }
 
+  // Decode hasVisitedLibrary flag
+  if (data.dlv === true) {
+    decoded.hasVisitedLibrary = true;
+  }
+
   // Decode audio settings
   if (data.a) {
     decoded.audioSettings = {
@@ -554,8 +567,11 @@ export async function convertToGameStateFormat(
     kethaneumRevealed: decoded.selectionState?.kethaneumRevealed || false,
     genreExhausted: decoded.selectionState?.genreExhausted || false,
     storyProgress: decoded.storyProgress,
-    dialogue: decoded.completedStoryEvents
-      ? { completedStoryEvents: decoded.completedStoryEvents }
+    dialogue: decoded.completedStoryEvents || decoded.hasVisitedLibrary !== undefined
+      ? {
+          completedStoryEvents: decoded.completedStoryEvents ?? [],
+          hasVisitedLibrary: decoded.hasVisitedLibrary ?? false,
+        }
       : undefined,
   };
 }

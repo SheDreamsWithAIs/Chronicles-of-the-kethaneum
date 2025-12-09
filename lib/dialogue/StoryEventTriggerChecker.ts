@@ -197,6 +197,50 @@ export class StoryEventTriggerChecker {
     
     return triggeredEvents;
   }
+
+  /**
+   * Check which events are currently available based on current state (not transitions)
+   * Used for page load checks - verifies if trigger conditions are currently satisfied
+   * 
+   * OPTIMIZED: Only checks events for current story beat
+   */
+  static checkCurrentlyAvailableEvents(
+    currentState: GameState
+  ): string[] {
+    // Ensure index is built
+    if (!indexBuilt) {
+      this.initializeIndex();
+    }
+    
+    if (!eventIndex) {
+      console.warn('[StoryEventTriggerChecker] Event index not initialized');
+      return [];
+    }
+    
+    const availableEvents: string[] = [];
+    const currentBeat = currentState.storyProgress?.currentStoryBeat || 'hook';
+    
+    // OPTIMIZATION: Only check events relevant to current beat
+    const relevantEvents = eventIndex.getEventsForBeat(currentBeat);
+    
+    // Early exit if no relevant events
+    if (relevantEvents.length === 0) {
+      return [];
+    }
+    
+    // Check only relevant events
+    for (const indexedEvent of relevantEvents) {
+      // Check if trigger condition is currently satisfied (not a transition check)
+      if (this.isTriggerConditionCurrentlySatisfied(
+        indexedEvent.triggerCondition,
+        currentState
+      )) {
+        availableEvents.push(indexedEvent.eventId);
+      }
+    }
+    
+    return availableEvents;
+  }
   
   /**
    * Check if a trigger condition string matches current state transition
@@ -284,6 +328,79 @@ export class StoryEventTriggerChecker {
     
     // Context-specific triggers (should be checked manually)
     // "player-enters-library-first-time" - checked in library page
+    
+    return false;
+  }
+
+  /**
+   * Check if a trigger condition is currently satisfied (not a transition check)
+   * Used for page load checks to see if events should be available
+   */
+  private static isTriggerConditionCurrentlySatisfied(
+    triggerCondition: string,
+    currentState: GameState
+  ): boolean {
+    const patterns = EventIndex.getPatterns();
+    
+    // Pattern: "first-puzzle-complete" - check if exactly 1 puzzle completed
+    if (triggerCondition === 'first-puzzle-complete') {
+      return currentState.completedPuzzles === 1;
+    }
+    
+    // Pattern: "puzzle-milestone-{N}" - check if milestone reached
+    const milestoneMatch = triggerCondition.match(patterns.puzzleMilestone);
+    if (milestoneMatch) {
+      const milestone = parseInt(milestoneMatch[1], 10);
+      return currentState.completedPuzzles >= milestone;
+    }
+    
+    // Pattern: "first-kethaneum-puzzle-complete" - check if exactly 1 Kethaneum puzzle completed
+    if (triggerCondition === 'first-kethaneum-puzzle-complete') {
+      const kethaneumGenre = defaultPuzzleSelectionConfig.kethaneumGenreName;
+      const currentKethaneum = currentState.completedPuzzlesByGenre?.[kethaneumGenre]?.size || 0;
+      return currentKethaneum === 1;
+    }
+    
+    // Pattern: "kethaneum-puzzle-milestone-{N}" - check if milestone reached
+    const kethaneumMilestoneMatch = triggerCondition.match(patterns.kethaneumMilestone);
+    if (kethaneumMilestoneMatch) {
+      const milestone = parseInt(kethaneumMilestoneMatch[1], 10);
+      const kethaneumGenre = defaultPuzzleSelectionConfig.kethaneumGenreName;
+      const currentKethaneum = currentState.completedPuzzlesByGenre?.[kethaneumGenre]?.size || 0;
+      return currentKethaneum >= milestone;
+    }
+    
+    // Pattern: "first-book-complete" - check if exactly 1 book completed
+    if (triggerCondition === 'first-book-complete') {
+      return currentState.completedBooks === 1;
+    }
+    
+    // Pattern: "books-complete-{N}" - check if milestone reached
+    const booksCompleteMatch = triggerCondition.match(patterns.booksComplete);
+    if (booksCompleteMatch) {
+      const milestone = parseInt(booksCompleteMatch[1], 10);
+      return currentState.completedBooks >= milestone;
+    }
+    
+    // Pattern: "kethaneum-book-complete-{bookTitle}" - check if all puzzles in book completed
+    const kethaneumBookMatch = triggerCondition.match(patterns.kethaneumBook);
+    if (kethaneumBookMatch) {
+      const bookTitle = kethaneumBookMatch[1];
+      const kethaneumGenre = defaultPuzzleSelectionConfig.kethaneumGenreName;
+      const kethaneumPuzzles = currentState.puzzles?.[kethaneumGenre] || [];
+      const completedKethaneum = currentState.completedPuzzlesByGenre?.[kethaneumGenre] || new Set();
+      
+      // Find all puzzles for this book
+      const bookPuzzles = kethaneumPuzzles.filter(p => p.book === bookTitle);
+      // Check if all puzzles in this book are completed
+      return bookPuzzles.length > 0 && 
+             bookPuzzles.every(p => completedKethaneum.has(p.title));
+    }
+    
+    // Pattern: "player-enters-library-first-time" - check if Library not visited yet
+    if (triggerCondition === 'player-enters-library-first-time') {
+      return !currentState.dialogue?.hasVisitedLibrary;
+    }
     
     return false;
   }

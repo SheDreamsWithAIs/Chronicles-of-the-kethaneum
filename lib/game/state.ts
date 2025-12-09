@@ -87,6 +87,7 @@ export interface GameState {
   // Dialogue state
   dialogue?: {
     completedStoryEvents: string[]; // Array of completed story event IDs
+    hasVisitedLibrary?: boolean; // Track if player has visited Library
     conversationHistory?: Array<{
       timestamp: number;
       characterId: string;

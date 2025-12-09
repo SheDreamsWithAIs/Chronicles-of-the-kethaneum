@@ -12,6 +12,7 @@ import { useStoryNotification } from '@/contexts/StoryNotificationContext';
 import { useDialogue } from '@/hooks/dialogue/useDialogue';
 import { usePageLoader } from '@/hooks/usePageLoader';
 import { dialogueManager } from '@/lib/dialogue/DialogueManager';
+import { StoryEventTriggerChecker } from '@/lib/dialogue/StoryEventTriggerChecker';
 import { DialogueQueue, DialogueQueueRef, DialogueEntry } from '@/components/dialogue/DialogueQueue';
 import { DialogueControls } from '@/components/dialogue/DialogueControls';
 import { StoryEventPlayer } from '@/lib/dialogue/StoryEventPlayer';
@@ -85,10 +86,9 @@ export default function LibraryScreen() {
     // Wait for game state to be ready before checking
     if (!state.storyProgress || !dialogueManager.getInitialized()) return;
 
-    // Use StoryEventTriggerChecker to check if any events are actually available
-    // This properly evaluates trigger conditions against current game state
-    // Pass undefined as previousState to check current state (not transitions)
-    const triggeredEventIds = StoryEventTriggerChecker.checkAvailableEvents(state, undefined);
+    // Use StoryEventTriggerChecker to check if any events are currently available
+    // This checks if trigger conditions are currently satisfied (not transitions)
+    const triggeredEventIds = StoryEventTriggerChecker.checkCurrentlyAvailableEvents(state);
     
     // Filter out completed events
     const completedEvents = completedEventsRef.current.length > 0
@@ -279,15 +279,12 @@ export default function LibraryScreen() {
       const completedEvents = completedEventsRef.current.length > 0 
         ? completedEventsRef.current 
         : (state.dialogue?.completedStoryEvents || []);
-      const allEventsForBeat = dialogueManager.getAvailableStoryEvents(currentBeat);
       
       console.log('[Library] Checking for available story events:', {
         currentBeat,
         completedEvents,
         completedEventsType: Array.isArray(completedEvents) ? 'array' : typeof completedEvents,
         completedEventsLength: Array.isArray(completedEvents) ? completedEvents.length : 'N/A',
-        totalEventsForBeat: allEventsForBeat.length,
-        allEventIds: allEventsForBeat,
       });
       
       // Validate completedEvents is an array
@@ -297,9 +294,10 @@ export default function LibraryScreen() {
       }
       
       // Get available event, filtering out completed ones
+      // Now uses StoryEventTriggerChecker internally to verify trigger conditions
       let availableEvent: any = null;
       try {
-        availableEvent = dialogueManager.getAvailableStoryEvent(currentBeat, completedEvents);
+        availableEvent = dialogueManager.getAvailableStoryEvent(state, completedEvents);
         
         // Log detailed filtering information
         if (availableEvent) {
@@ -322,10 +320,9 @@ export default function LibraryScreen() {
             availableEvent = null;
           }
         } else {
-          console.log('[Library] No available story events - all completed or none exist for this beat', {
-            allEventsForBeat,
+          console.log('[Library] No available story events - all completed or trigger conditions not met', {
             completedEvents,
-            filtered: allEventsForBeat.filter(id => !completedEvents.includes(id)),
+            currentBeat,
           });
         }
       } catch (error) {
@@ -403,12 +400,19 @@ export default function LibraryScreen() {
                     ? completedEvents 
                     : [...completedEvents, completedId];
                   
-                  // Get current beat (may have changed if story progressed)
-                  const updatedCurrentBeat = prevState.storyProgress?.currentStoryBeat || currentBeat;
+                  // Build updated state for checking remaining events
+                  // Use prevState from setState callback which has the latest state
+                  const updatedStateForCheck = {
+                    ...prevState,
+                    dialogue: {
+                      ...prevState.dialogue,
+                      completedStoryEvents: updatedCompletedEvents,
+                    },
+                  };
                   
                   try {
-                    const allUnlockedEvents = dialogueManager.getAvailableStoryEvents(updatedCurrentBeat);
-                    const remainingEvents = allUnlockedEvents.filter(id => !updatedCompletedEvents.includes(id));
+                    // Get remaining events (already filtered by completion and trigger conditions)
+                    const remainingEvents = dialogueManager.getAvailableStoryEvents(updatedStateForCheck, updatedCompletedEvents);
                     
                     // Clear notification if all unlocked events are done
                     if (remainingEvents.length === 0) {
@@ -440,6 +444,10 @@ export default function LibraryScreen() {
                       dialogue: {
                         ...prevState.dialogue,
                         completedStoryEvents: updatedCompletedEvents,
+                        // Mark library as visited when first-visit completes
+                        hasVisitedLibrary: completedId === 'first-visit' 
+                          ? true 
+                          : prevState.dialogue?.hasVisitedLibrary ?? false,
                       },
                     };
                   }

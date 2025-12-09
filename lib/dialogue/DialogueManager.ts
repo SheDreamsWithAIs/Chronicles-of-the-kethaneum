@@ -5,6 +5,8 @@
  */
 
 import { fetchAsset } from '@/lib/utils/assetPath';
+import type { GameState } from '@/lib/game/state';
+import { StoryEventTriggerChecker } from './StoryEventTriggerChecker';
 import type {
   StoryBeat,
   LoadingGroup,
@@ -434,44 +436,21 @@ export class DialogueManager {
   }
 
   /**
-   * Get first available story event for current beat
-   * Filters out completed events if game state is provided
+   * Get first available story event
+   * Checks trigger conditions and filters out completed events
+   * Requires GameState to properly evaluate trigger conditions
    */
-  getAvailableStoryEvent(currentBeat?: StoryBeat, completedEvents?: string[]): any | null {
+  getAvailableStoryEvent(currentState: GameState, completedEvents?: string[]): any | null {
     try {
-      const availableEvents = this.getAvailableStoryEvents(currentBeat);
+      const availableEvents = this.getAvailableStoryEvents(currentState, completedEvents);
       
       if (availableEvents.length === 0) {
         return null;
       }
 
-      // Validate completedEvents is an array if provided
-      if (completedEvents !== undefined && !Array.isArray(completedEvents)) {
-        console.error('[DialogueManager] completedEvents is not an array:', completedEvents);
-        completedEvents = [];
-      }
-
-      // Filter out completed events if provided
-      const filteredEvents = completedEvents && completedEvents.length > 0
-        ? availableEvents.filter((eventId) => !completedEvents.includes(eventId))
-        : availableEvents;
-
-      if (filteredEvents.length === 0) {
-        return null;
-      }
-
       // Return first available event (full StoryEvent object)
-      const eventId = filteredEvents[0];
+      const eventId = availableEvents[0];
       const event = this.getStoryEvent(eventId);
-      
-      // Critical validation: ensure we're not returning a completed event
-      if (event && completedEvents?.includes(eventId)) {
-        console.error('[DialogueManager] CRITICAL: Returning completed event!', {
-          eventId,
-          completedEvents,
-        });
-        return null;
-      }
       
       return event;
     } catch (error) {
@@ -527,23 +506,30 @@ export class DialogueManager {
 
   /**
    * Get all available story events for current conditions
+   * Uses StoryEventTriggerChecker to verify trigger conditions are satisfied
+   * Filters out completed events if provided
    */
-  getAvailableStoryEvents(currentBeat?: StoryBeat): string[] {
-    const available: string[] = [];
-
-    for (const [eventId, eventData] of this.storyEvents.entries()) {
-      const event = eventData.storyEvent;
-
-      // Check if story beat matches (if specified)
-      if (event.storyBeat && currentBeat && event.storyBeat === currentBeat) {
-        available.push(eventId);
-      } else if (!event.storyBeat) {
-        // Events without beat restriction are always available
-        available.push(eventId);
+  getAvailableStoryEvents(currentState: GameState, completedEvents?: string[]): string[] {
+    try {
+      // Use StoryEventTriggerChecker to get events that satisfy trigger conditions
+      const triggerCheckedEvents = StoryEventTriggerChecker.checkCurrentlyAvailableEvents(currentState);
+      
+      // Validate completedEvents is an array if provided
+      if (completedEvents !== undefined && !Array.isArray(completedEvents)) {
+        console.error('[DialogueManager] completedEvents is not an array:', completedEvents);
+        completedEvents = [];
       }
-    }
 
-    return available;
+      // Filter out completed events if provided
+      const filteredEvents = completedEvents && completedEvents.length > 0
+        ? triggerCheckedEvents.filter((eventId) => !completedEvents.includes(eventId))
+        : triggerCheckedEvents;
+
+      return filteredEvents;
+    } catch (error) {
+      console.error('[DialogueManager] Error in getAvailableStoryEvents:', error);
+      return [];
+    }
   }
 
   /**
