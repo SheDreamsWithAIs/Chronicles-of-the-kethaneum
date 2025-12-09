@@ -452,10 +452,22 @@ export class DialogueManager {
       const eventId = availableEvents[0];
       const event = this.getStoryEvent(eventId);
       
+      // Validate that the returned event matches the requested ID
+      if (!event) {
+        throw new Error(`Story event not found: ${eventId}`);
+      }
+      
+      const returnedEventId = event.storyEvent?.id;
+      if (returnedEventId !== eventId) {
+        throw new Error(
+          `Event ID mismatch in getAvailableStoryEvent: requested '${eventId}' but got '${returnedEventId}'`
+        );
+      }
+      
       return event;
     } catch (error) {
       console.error('[DialogueManager] Error in getAvailableStoryEvent:', error);
-      return null;
+      throw error; // Re-throw to allow caller to handle
     }
   }
 
@@ -514,6 +526,12 @@ export class DialogueManager {
       // Use StoryEventTriggerChecker to get events that satisfy trigger conditions
       const triggerCheckedEvents = StoryEventTriggerChecker.checkCurrentlyAvailableEvents(currentState);
       
+      console.log('[DialogueManager] Trigger-checked events:', {
+        count: triggerCheckedEvents.length,
+        events: triggerCheckedEvents,
+        currentBeat: currentState.storyProgress?.currentStoryBeat,
+      });
+      
       // Validate completedEvents is an array if provided
       if (completedEvents !== undefined && !Array.isArray(completedEvents)) {
         console.error('[DialogueManager] completedEvents is not an array:', completedEvents);
@@ -524,6 +542,13 @@ export class DialogueManager {
       const filteredEvents = completedEvents && completedEvents.length > 0
         ? triggerCheckedEvents.filter((eventId) => !completedEvents.includes(eventId))
         : triggerCheckedEvents;
+
+      console.log('[DialogueManager] Filtered events (after removing completed):', {
+        completedEvents: completedEvents || [],
+        beforeFilter: triggerCheckedEvents.length,
+        afterFilter: filteredEvents.length,
+        filtered: filteredEvents,
+      });
 
       return filteredEvents;
     } catch (error) {

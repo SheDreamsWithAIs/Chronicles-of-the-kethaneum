@@ -231,13 +231,30 @@ export class StoryEventTriggerChecker {
     // Check only relevant events
     for (const indexedEvent of relevantEvents) {
       // Check if trigger condition is currently satisfied (not a transition check)
-      if (this.isTriggerConditionCurrentlySatisfied(
+      const isSatisfied = this.isTriggerConditionCurrentlySatisfied(
         indexedEvent.triggerCondition,
         currentState
-      )) {
+      );
+      
+      if (isSatisfied) {
         availableEvents.push(indexedEvent.eventId);
+        console.log(`[StoryEventTriggerChecker] Event '${indexedEvent.eventId}' trigger satisfied:`, {
+          triggerCondition: indexedEvent.triggerCondition,
+          eventId: indexedEvent.eventId,
+        });
+      } else {
+        console.log(`[StoryEventTriggerChecker] Event '${indexedEvent.eventId}' trigger NOT satisfied:`, {
+          triggerCondition: indexedEvent.triggerCondition,
+          eventId: indexedEvent.eventId,
+        });
       }
     }
+    
+    console.log('[StoryEventTriggerChecker] Available events after trigger check:', {
+      count: availableEvents.length,
+      events: availableEvents,
+      currentBeat,
+    });
     
     return availableEvents;
   }
@@ -357,8 +374,18 @@ export class StoryEventTriggerChecker {
     // Pattern: "first-kethaneum-puzzle-complete" - check if exactly 1 Kethaneum puzzle completed
     if (triggerCondition === 'first-kethaneum-puzzle-complete') {
       const kethaneumGenre = defaultPuzzleSelectionConfig.kethaneumGenreName;
-      const currentKethaneum = currentState.completedPuzzlesByGenre?.[kethaneumGenre]?.size || 0;
-      return currentKethaneum === 1;
+      const completedKethaneum = currentState.completedPuzzlesByGenre?.[kethaneumGenre];
+      const currentKethaneum = completedKethaneum?.size || 0;
+      const result = currentKethaneum === 1;
+      
+      console.log('[StoryEventTriggerChecker] Checking first-kethaneum-puzzle-complete:', {
+        kethaneumGenre,
+        completedKethaneum: completedKethaneum ? Array.from(completedKethaneum) : 'undefined',
+        currentKethaneum,
+        result,
+      });
+      
+      return result;
     }
     
     // Pattern: "kethaneum-puzzle-milestone-{N}" - check if milestone reached

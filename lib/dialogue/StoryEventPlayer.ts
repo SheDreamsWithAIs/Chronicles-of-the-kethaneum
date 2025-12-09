@@ -29,6 +29,15 @@ export class StoryEventPlayer {
     if (!event) {
       throw new Error(`Story event not found: ${eventId}`);
     }
+    
+    // Validate that the loaded event ID matches the requested ID
+    const loadedEventId = event.storyEvent?.id;
+    if (loadedEventId !== eventId) {
+      throw new Error(
+        `Event ID mismatch in loadStoryEvent: requested '${eventId}' but loaded '${loadedEventId}'`
+      );
+    }
+    
     this.storyEvent = event;
     this.currentSequence = 0;
     this.isPaused = false;

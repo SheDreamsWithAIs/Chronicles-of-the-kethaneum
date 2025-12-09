@@ -73,9 +73,47 @@ export default function LibraryScreen() {
   }, [state, state?.storyProgress, setLoading]);
 
   // Sync completed events ref with state when state loads/changes
+  // Always sync, even if array is empty, to ensure ref is up-to-date
+  // This ensures the ref has the latest state value for synchronous access
   useEffect(() => {
-    if (state.dialogue?.completedStoryEvents) {
-      completedEventsRef.current = state.dialogue.completedStoryEvents;
+    const stateCompleted = state.dialogue?.completedStoryEvents || [];
+    // Only update if different to avoid unnecessary updates
+    if (completedEventsRef.current.length !== stateCompleted.length ||
+        !stateCompleted.every(id => completedEventsRef.current.includes(id)) ||
+        !completedEventsRef.current.every(id => stateCompleted.includes(id))) {
+      completedEventsRef.current = stateCompleted;
+    }
+  }, [state.dialogue?.completedStoryEvents]);
+
+  // Validate state updates match ref - detect when state doesn't persist
+  // This helps catch cases where state updates fail or are reset
+  useEffect(() => {
+    const stateCompleted = state.dialogue?.completedStoryEvents || [];
+    const refCompleted = completedEventsRef.current || [];
+    
+    // If ref has more events than state, state update may have failed
+    if (refCompleted.length > stateCompleted.length) {
+      const missingInState = refCompleted.filter(id => !stateCompleted.includes(id));
+      if (missingInState.length > 0) {
+        console.error('[Library] State validation failed: ref has completed events not in state', {
+          refCompleted,
+          stateCompleted,
+          missingInState,
+        });
+      }
+    }
+    
+    // If state has events not in ref, sync ref (state is authoritative)
+    if (stateCompleted.length > refCompleted.length) {
+      const missingInRef = stateCompleted.filter(id => !refCompleted.includes(id));
+      if (missingInRef.length > 0) {
+        console.warn('[Library] State has events not in ref, syncing ref', {
+          stateCompleted,
+          refCompleted,
+          missingInRef,
+        });
+        completedEventsRef.current = [...stateCompleted];
+      }
     }
   }, [state.dialogue?.completedStoryEvents]);
 
@@ -275,10 +313,28 @@ export default function LibraryScreen() {
 
     try {
       // Check for available story events first (filter out completed ones)
-      // Use ref for immediate tracking, fallback to state for initial load
-      const completedEvents = completedEventsRef.current.length > 0 
-        ? completedEventsRef.current 
-        : (state.dialogue?.completedStoryEvents || []);
+      // State is the source of truth (persisted), but ref may have more recent updates
+      // Use union of both to ensure we don't miss any completed events
+      const stateCompleted = state.dialogue?.completedStoryEvents || [];
+      const refCompleted = completedEventsRef.current || [];
+      
+      // If ref has more events than state, it means state hasn't updated yet
+      // In this case, use ref as source of truth (it was updated synchronously)
+      // Otherwise, use state (it's persisted and authoritative)
+      const allCompleted = Array.from(new Set([...stateCompleted, ...refCompleted]));
+      
+      // Update ref to match state if state has more (state is authoritative for persistence)
+      // But don't overwrite ref if it has more recent data (state update pending)
+      if (stateCompleted.length >= refCompleted.length) {
+        // State has equal or more - state is authoritative, sync ref
+        completedEventsRef.current = [...stateCompleted];
+      } else {
+        // Ref has more - state update is pending, keep ref but it will sync via useEffect
+        // Don't overwrite ref here, let useEffect handle it when state catches up
+      }
+      
+      // Use the union to ensure we don't miss any completed events
+      const completedEvents = allCompleted.length > 0 ? allCompleted : stateCompleted;
       
       console.log('[Library] Checking for available story events:', {
         currentBeat,
@@ -297,44 +353,59 @@ export default function LibraryScreen() {
       // Now uses StoryEventTriggerChecker internally to verify trigger conditions
       let availableEvent: any = null;
       try {
+        // Defensive check: ensure completedEvents is valid before querying
+        if (!Array.isArray(completedEvents)) {
+          throw new Error(`completedEvents must be an array, got: ${typeof completedEvents}`);
+        }
+
+        // Log what we're filtering by
+        if (completedEvents.length > 0) {
+          console.log('[Library] Filtering out completed events:', completedEvents);
+        }
+
         availableEvent = dialogueManager.getAvailableStoryEvent(state, completedEvents);
         
-        // Log detailed filtering information
+        // Validate event structure if one was returned
         if (availableEvent) {
           const eventId = availableEvent.storyEvent?.id;
-          const isCompleted = completedEvents.includes(eventId);
-          console.log('[Library] Found available event:', {
-            eventId,
-            isCompleted,
-            completedEvents,
-            warning: isCompleted ? 'ERROR: Event is marked as completed but was returned!' : null,
-          });
-          
-          if (isCompleted) {
-            console.error('[Library] CRITICAL: Event is in completedEvents but was returned by getAvailableStoryEvent!', {
-              eventId,
-              completedEvents,
-              currentBeat,
-            });
-            // Don't proceed with a completed event
-            availableEvent = null;
+          if (!eventId) {
+            throw new Error('Available event missing storyEvent.id');
           }
+          
+          // CRITICAL: Double-check that returned event is not completed
+          const isCompleted = completedEvents.includes(eventId);
+          if (isCompleted) {
+            const error = new Error(
+              `Event '${eventId}' is marked as completed (in: ${JSON.stringify(completedEvents)}) but was returned by getAvailableStoryEvent. This should never happen.`
+            );
+            console.error('[Library] CRITICAL ERROR:', error);
+            // Clean up and end conversation on error
+            setConversationActive(false);
+            throw error;
+          }
+
+          console.log('[Library] Found available event:', eventId);
         } else {
-          console.log('[Library] No available story events - all completed or trigger conditions not met', {
-            completedEvents,
-            currentBeat,
-          });
+          console.log('[Library] No available story events (all completed or trigger conditions not met)');
         }
       } catch (error) {
-        console.error('[Library] Error calling getAvailableStoryEvent:', error);
+        console.error('[Library] Error getting available story event:', error);
+        // Clean up and end conversation on error
+        setConversationActive(false);
         throw error;
       }
 
       if (availableEvent) {
         console.log('[Library] Creating StoryEventPlayer and setting up callbacks');
+        
+        // Validate event structure before proceeding
+        const eventId = availableEvent.storyEvent?.id;
+        if (!eventId) {
+          throw new Error('Available event missing storyEvent.id');
+        }
+        
         // Play story event sequence
         const player = new StoryEventPlayer(dialogueManager);
-        const eventId = availableEvent.storyEvent.id;
         currentEventIdRef.current = eventId;
 
         // Set up dialogue callback BEFORE loading/starting
@@ -377,35 +448,60 @@ export default function LibraryScreen() {
             }
             
             const completedId = currentEventIdRef.current;
+            const refBeforeUpdate = [...completedEventsRef.current];
+            const stateBeforeUpdate = state.dialogue?.completedStoryEvents 
+              ? [...state.dialogue.completedStoryEvents] 
+              : undefined;
+            
             console.log(`[Library] Processing completion for event: ${completedId}`, {
-              refBeforeUpdate: completedEventsRef.current,
-              stateBeforeUpdate: state.dialogue?.completedStoryEvents,
+              refBeforeUpdate,
+              stateBeforeUpdate,
             });
               
-              // Mark event as completed and check for remaining events
-              try {
-                setState((prevState) => {
-                  const completedEvents = prevState.dialogue?.completedStoryEvents || [];
+            // Mark event as completed and check for remaining events
+            try {
+              // Validate completedId is valid
+              if (!completedId || typeof completedId !== 'string') {
+                throw new Error(`Invalid completedId: ${completedId}`);
+              }
+
+              setState((prevState) => {
+                try {
+                  // Ensure dialogue object exists
+                  const prevDialogue = prevState.dialogue || {};
+                  const completedEvents = prevDialogue.completedStoryEvents || [];
                   
                   // Validate completedEvents is an array
                   if (!Array.isArray(completedEvents)) {
-                    console.error('[Library] prevState.dialogue.completedStoryEvents is not an array:', completedEvents);
-                    return prevState; // Return previous state on error
+                    const error = new Error(
+                      `prevState.dialogue.completedStoryEvents is not an array: ${typeof completedEvents}, value: ${JSON.stringify(completedEvents)}`
+                    );
+                    console.error('[Library] State validation error:', error);
+                    // Return previous state on error to prevent corruption
+                    return prevState;
                   }
                   
+                  // Check if already completed (shouldn't happen, but defensive)
                   const wasAlreadyCompleted = completedEvents.includes(completedId);
+                  if (wasAlreadyCompleted) {
+                    console.warn(`[Library] Event '${completedId}' was already marked as completed, skipping update`);
+                    return prevState;
+                  }
                   
                   // Calculate updated completed events list
-                  const updatedCompletedEvents = wasAlreadyCompleted 
-                    ? completedEvents 
-                    : [...completedEvents, completedId];
+                  const updatedCompletedEvents = [...completedEvents, completedId];
+                  
+                  // Validate the updated array
+                  if (!Array.isArray(updatedCompletedEvents)) {
+                    throw new Error('Failed to create updated completed events array');
+                  }
                   
                   // Build updated state for checking remaining events
                   // Use prevState from setState callback which has the latest state
                   const updatedStateForCheck = {
                     ...prevState,
                     dialogue: {
-                      ...prevState.dialogue,
+                      ...prevDialogue,
                       completedStoryEvents: updatedCompletedEvents,
                     },
                   };
@@ -426,6 +522,7 @@ export default function LibraryScreen() {
                     }
                   } catch (error) {
                     console.error('[Library] Error checking remaining events:', error);
+                    // Don't throw - this is non-critical
                   }
                   
                   // Update ref immediately for synchronous access
@@ -437,38 +534,62 @@ export default function LibraryScreen() {
                     wasAlreadyCompleted,
                   });
                   
-                  // Return updated state
-                  if (!wasAlreadyCompleted) {
-                    return {
-                      ...prevState,
-                      dialogue: {
-                        ...prevState.dialogue,
-                        completedStoryEvents: updatedCompletedEvents,
-                        // Mark library as visited when first-visit completes
-                        hasVisitedLibrary: completedId === 'first-visit' 
-                          ? true 
-                          : prevState.dialogue?.hasVisitedLibrary ?? false,
-                      },
-                    };
+                  // Always return updated state to ensure persistence
+                  // Initialize dialogue object if it doesn't exist
+                  const newState = {
+                    ...prevState,
+                    dialogue: {
+                      ...prevDialogue,
+                      completedStoryEvents: updatedCompletedEvents,
+                      // Mark library as visited when first-visit completes
+                      hasVisitedLibrary: completedId === 'first-visit' 
+                        ? true 
+                        : prevDialogue.hasVisitedLibrary ?? false,
+                    },
+                  };
+                  
+                  // Validate new state structure
+                  if (!newState.dialogue || !Array.isArray(newState.dialogue.completedStoryEvents)) {
+                    throw new Error('Failed to create valid new state with dialogue');
                   }
-                  return prevState;
-                });
-                
-                // Wait for state to propagate
-                await new Promise(resolve => setTimeout(resolve, 100));
-                
-                // Verify ref was updated
-                if (!completedEventsRef.current.includes(completedId)) {
-                  console.error('[Library] CRITICAL: completedEventsRef was not updated!', {
+                  
+                  console.log('[Library] Returning updated state from setState:', {
                     completedId,
-                    refValue: completedEventsRef.current,
+                    prevDialogue,
+                    newDialogue: newState.dialogue,
+                    updatedCompletedEvents,
                   });
+                  
+                  return newState;
+                } catch (error) {
+                  console.error('[Library] Error in setState callback:', error);
+                  // Return previous state on error to prevent corruption
+                  return prevState;
                 }
-                
-              } catch (error) {
-                console.error('[Library] Error updating state:', error);
+              });
+              
+              // Wait for state to propagate and save
+              await new Promise(resolve => setTimeout(resolve, 100));
+              
+              // Verify ref was updated
+              if (!completedEventsRef.current.includes(completedId)) {
+                const error = new Error(
+                  `completedEventsRef was not updated! Expected '${completedId}' in ${JSON.stringify(completedEventsRef.current)}`
+                );
+                console.error('[Library] CRITICAL:', error);
                 throw error;
               }
+              
+              console.log('[Library] State update completed successfully', {
+                completedId,
+                refAfterUpdate: completedEventsRef.current,
+              });
+                
+            } catch (error) {
+              console.error('[Library] Error updating state:', error);
+              // Re-throw to ensure error is handled upstream
+              throw error;
+            }
               
               // Wait a moment for state update and to ensure dialogue has been displayed
               await new Promise(resolve => setTimeout(resolve, 200));
@@ -500,13 +621,28 @@ export default function LibraryScreen() {
           }
         });
 
-        await player.loadStoryEvent(eventId);
-        eventPlayerRef.current = player;
+        // Load and validate event with error handling
+        try {
+          await player.loadStoryEvent(eventId);
+          // loadStoryEvent() validates the event ID internally and throws if mismatch
+          eventPlayerRef.current = player;
+        } catch (error) {
+          console.error('[Library] Error loading story event:', error);
+          // Clean up state on error
+          currentEventIdRef.current = null;
+          eventPlayerRef.current = null;
+          setConversationActive(false);
+          
+          // Re-throw to prevent further execution
+          throw error;
+        }
         
         // Ensure ref is still available before starting
         if (!dialogueQueueRef.current) {
           console.error('[Library] DialogueQueue ref lost before starting player');
           setConversationActive(false);
+          currentEventIdRef.current = null;
+          eventPlayerRef.current = null;
           return;
         }
         
@@ -521,7 +657,15 @@ export default function LibraryScreen() {
         
         // Start the player immediately - this will emit the first dialogue via emitNextDialogue()
         // The callback will add it to the queue, making the panel appear right away
-        player.start();
+        try {
+          player.start();
+        } catch (error) {
+          console.error('[Library] Error starting story event player:', error);
+          setConversationActive(false);
+          currentEventIdRef.current = null;
+          eventPlayerRef.current = null;
+          throw error;
+        }
         
         // Preload portraits in the background (non-blocking) - portraits will appear when ready
         player.preloadPortraits().catch((error) => {
