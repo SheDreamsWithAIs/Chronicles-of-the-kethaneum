@@ -3,8 +3,10 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
+import { PageLoader } from '@/components/shared/PageLoader';
 import { LibraryButton } from '@/components/LibraryButton';
 import { useGameState } from '@/hooks/useGameState';
+import { usePageLoader } from '@/hooks/usePageLoader';
 import { useStoryProgress, useInitializeStoryProgress } from '@/hooks/useStoryProgress';
 import { useStoryNotification } from '@/contexts/StoryNotificationContext';
 import { bookRegistry } from '@/lib/book/bookRegistry';
@@ -41,6 +43,13 @@ type TabOption = 'current-journey' | 'story-history' | 'discovered-books';
 
 export default function BookOfPassageScreen() {
   const router = useRouter();
+  
+  // Page loading state management - initialize FIRST to show loader immediately
+  const { isLoading: pageLoading, setLoading } = usePageLoader({
+    minDisplayTime: 500,
+    dependencies: [],
+  });
+
   const { state, setState, isReady: gameStateReady } = useGameState();
   const [activeTab, setActiveTab] = useState<TabOption>('current-journey');
   const { clearNewStory } = useStoryNotification();
@@ -56,6 +65,16 @@ export default function BookOfPassageScreen() {
 
   // Initialize story progress hook
   const { initializeWithFirstBlurb } = useInitializeStoryProgress();
+
+  // Filter & Search State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterGenre, setFilterGenre] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<SortOption>('title');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Registry state
+  const [registryLoaded, setRegistryLoaded] = useState(false);
+  const [availableGenres, setAvailableGenres] = useState<string[]>([]);
 
   // Clear new story notification when visiting Book of Passage
   useEffect(() => {
@@ -75,15 +94,18 @@ export default function BookOfPassageScreen() {
     }
   }, [storyReady, state, setState, initializeWithFirstBlurb]);
 
-  // Filter & Search State
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterGenre, setFilterGenre] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<SortOption>('title');
-  const [currentPage, setCurrentPage] = useState(1);
+  // Track loading conditions
+  useEffect(() => {
+    setLoading('gameState', !gameStateReady);
+  }, [gameStateReady, setLoading]);
 
-  // Registry state
-  const [registryLoaded, setRegistryLoaded] = useState(false);
-  const [availableGenres, setAvailableGenres] = useState<string[]>([]);
+  useEffect(() => {
+    setLoading('storyProgress', !storyReady);
+  }, [storyReady, setLoading]);
+
+  useEffect(() => {
+    setLoading('registry', !registryLoaded);
+  }, [registryLoaded, setLoading]);
 
   // Restrict access to Story Mode only
   useEffect(() => {
@@ -339,6 +361,11 @@ export default function BookOfPassageScreen() {
 
   return (
     <div className={styles.bookPassageContainer} data-testid="book-of-passage-screen">
+      <PageLoader
+        isLoading={pageLoading}
+        variant="book"
+        message="Loading your Book of Passage..."
+      />
       <CosmicBackground variant="book" starCount={200} particleCount={30} />
 
       <div className={styles.bookPassageScreen}>

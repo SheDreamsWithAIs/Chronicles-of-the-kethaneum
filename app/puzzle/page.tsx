@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
+import { PageLoader } from '@/components/shared/PageLoader';
 import { GameStatsModal } from '@/components/GameStatsModal';
 import { GenreCompletionModal } from '@/components/GenreCompletionModal';
 import { BookOfPassageButton } from '@/components/BookOfPassageButton';
@@ -10,6 +11,7 @@ import { LibraryButton } from '@/components/LibraryButton';
 import { SettingsMenu } from '@/components/SettingsMenu';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
+import { usePageLoader } from '@/hooks/usePageLoader';
 import { useGameLogic } from '@/hooks/useGameLogic';
 import { useGameModeHandlers } from '@/hooks/useGameModeHandlers';
 import { usePuzzleLoading } from '@/hooks/usePuzzleLoading';
@@ -21,6 +23,12 @@ import styles from './puzzle.module.css';
 
 export default function PuzzleScreen() {
   const router = useRouter();
+  
+  // Page loading state management - initialize FIRST to show loader immediately
+  const { isLoading: pageLoading, setLoading } = usePageLoader({
+    minDisplayTime: 500,
+  });
+
   const { state, setState, isReady } = useGameState();
   const { loadSequential, loadAll, initialize, loadRandom, restorePuzzleOnly, loadBeatTheClock, loadWithSelection, markCompleted } = usePuzzle(state, setState);
   const config = getConfig();
@@ -108,6 +116,22 @@ export default function PuzzleScreen() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ row: number; col: number } | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const [puzzleLoadingComplete, setPuzzleLoadingComplete] = useState(false);
+
+  // Track loading conditions
+  useEffect(() => {
+    setLoading('gameState', !isReady);
+  }, [isReady, setLoading]);
+
+  useEffect(() => {
+    if (state) {
+      const puzzleLoaded = state.grid && state.grid.length > 0;
+      setLoading('puzzle', !puzzleLoaded);
+      setPuzzleLoadingComplete(puzzleLoaded);
+    } else {
+      setLoading('puzzle', true);
+    }
+  }, [state, state?.grid, setLoading]);
 
   // Use refs to track selection during drag without causing re-renders
   const selectedCellsRef = useRef<Set<string>>(new Set());
@@ -125,11 +149,17 @@ export default function PuzzleScreen() {
   // Load puzzle if not already loaded
   useEffect(() => {
     if (!state.grid || state.grid.length === 0) {
+      setPuzzleLoadingComplete(false);
       loadPuzzleForMode().then((result) => {
         if (result?.genreComplete) {
           setShowGenreCompletionModal(true);
         }
+        setPuzzleLoadingComplete(true);
+      }).catch(() => {
+        setPuzzleLoadingComplete(true);
       });
+    } else {
+      setPuzzleLoadingComplete(true);
     }
   }, [isReady, state.currentGenre, state.currentPuzzleIndex, state.grid?.length, state.selectedGenre, loadPuzzleForMode]); // Re-run when ready, genre, puzzle index, selectedGenre, or grid changes
 
@@ -673,6 +703,11 @@ export default function PuzzleScreen() {
 
   return (
     <div className={styles.puzzleContainer} data-testid="puzzle-screen">
+      <PageLoader
+        isLoading={pageLoading}
+        variant="puzzle"
+        message="Loading puzzle..."
+      />
       <CosmicBackground variant="puzzle" starCount={450} particleCount={0} />
       
       {/* Timer display - Story Mode shows decorative full bar, others show countdown */}

@@ -84,6 +84,17 @@ export interface GameState {
   genreExhausted: boolean; // Whether current selected genre has no more new puzzles
   // Story progress tracking
   storyProgress: StoryProgressState; // Player's story journey progress
+  // Dialogue state
+  dialogue?: {
+    completedStoryEvents: string[]; // Array of completed story event IDs
+    hasVisitedLibrary?: boolean; // Track if player has visited Library
+    conversationHistory?: Array<{
+      timestamp: number;
+      characterId: string;
+      dialogueId: string;
+      wasStoryEvent: boolean;
+    }>;
+  };
 }
 
 export interface PuzzleData {
@@ -238,6 +249,25 @@ export function restoreGameState(state: GameState, savedState: Partial<GameState
         (restored as any)[key] = (savedState as any)[key];
       }
     }
+    // Handle optional properties that aren't in baseState
+    // Special handling for dialogue (optional property)
+    if ('dialogue' in savedState) {
+      const savedDialogue = (savedState as any).dialogue;
+      if (savedDialogue && typeof savedDialogue === 'object') {
+        restored.dialogue = {
+          completedStoryEvents: Array.isArray(savedDialogue.completedStoryEvents)
+            ? savedDialogue.completedStoryEvents
+            : [],
+          hasVisitedLibrary: savedDialogue.hasVisitedLibrary === true,
+          conversationHistory: Array.isArray(savedDialogue.conversationHistory)
+            ? savedDialogue.conversationHistory
+            : undefined,
+        };
+      } else if (savedDialogue === null || savedDialogue === undefined) {
+        // Explicitly set to undefined if saved as null/undefined
+        restored.dialogue = undefined;
+      }
+    }
   }
 
   // Ensure discoveredBooks is a Set
@@ -256,6 +286,13 @@ export function restoreGameState(state: GameState, savedState: Partial<GameState
   // Ensure storyProgress exists with default values
   if (!restored.storyProgress || typeof restored.storyProgress !== 'object') {
     restored.storyProgress = { ...DEFAULT_STORY_PROGRESS };
+  }
+
+  // Ensure dialogue state is properly structured if it exists
+  if (restored.dialogue && typeof restored.dialogue === 'object') {
+    if (!Array.isArray(restored.dialogue.completedStoryEvents)) {
+      restored.dialogue.completedStoryEvents = [];
+    }
   }
 
   // Fallback: If selectedGenre is empty but currentGenre exists, use currentGenre

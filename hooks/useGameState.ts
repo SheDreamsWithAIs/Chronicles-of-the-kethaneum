@@ -97,6 +97,11 @@ export function useGameState() {
     if (!isReady || isSaving.current) return;
 
     // Create a simple hash of the state to detect actual changes
+    const dialogueState = state.dialogue ? {
+      completedStoryEvents: state.dialogue.completedStoryEvents || [],
+      hasVisitedLibrary: state.dialogue.hasVisitedLibrary || false,
+    } : undefined;
+
     const stateHash = JSON.stringify({
       books: state.books,
       discoveredBooks: Array.from(state.discoveredBooks || []),
@@ -112,10 +117,31 @@ export function useGameState() {
         : {},
       // Include story progress in save detection
       storyProgress: state.storyProgress,
+      // Include dialogue state (completed story events) in save detection
+      dialogue: dialogueState,
     });
 
     // Skip if nothing meaningful changed
-    if (stateHash === lastSavedState.current) return;
+    if (stateHash === lastSavedState.current) {
+      return;
+    }
+
+    // Log when dialogue state changes trigger a save
+    if (dialogueState && dialogueState.completedStoryEvents.length > 0) {
+      const prevDialogue = lastSavedState.current 
+        ? JSON.parse(lastSavedState.current)?.dialogue 
+        : undefined;
+      const dialogueChanged = !prevDialogue || 
+        JSON.stringify(prevDialogue.completedStoryEvents || []) !== 
+        JSON.stringify(dialogueState.completedStoryEvents);
+      
+      if (dialogueChanged) {
+        console.log('[useGameState] Dialogue state changed, triggering save', {
+          completedEvents: dialogueState.completedStoryEvents,
+          hasVisitedLibrary: dialogueState.hasVisitedLibrary,
+        });
+      }
+    }
 
     // Debounce saves
     const saveTimeout = setTimeout(async () => {
@@ -124,14 +150,14 @@ export function useGameState() {
         await saveProgress(state);
         lastSavedState.current = stateHash;
       } catch (error) {
-        console.error('Failed to save progress:', error);
+        console.error('[useGameState] Failed to save progress:', error);
       } finally {
         isSaving.current = false;
       }
     }, 100); // Small debounce to batch rapid changes
 
     return () => clearTimeout(saveTimeout);
-  }, [state, isReady]);
+  }, [state, isReady, state.dialogue?.completedStoryEvents, state.dialogue?.hasVisitedLibrary]);
 
   // Update state helper
   const updateState = useCallback((updates: Partial<GameState>) => {

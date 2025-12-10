@@ -1,0 +1,1830 @@
+forward-logs-shared.ts:95 Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
+forward-logs-shared.ts:95 [HMR] connected
+StorySystemProvider.tsx:28 [StorySystem] Initializing all story systems...
+initializeAudio.ts:15 [Audio] Initializing audio system...
+initializeAudio.ts:22 [Audio] Registering 4 playlists...
+initializeAudio.ts:32 [Audio] Registered playlist: Menu Music (menu)
+initializeAudio.ts:32 [Audio] Registered playlist: Puzzle Music (puzzle)
+initializeAudio.ts:32 [Audio] Registered playlist: Library Ambience (library-ambient)
+initializeAudio.ts:32 [Audio] Registered playlist: Cosmic Ambience (cosmic-ambient)
+initializeAudio.ts:46 [Audio] Audio system initialized successfully
+useStorySystemIntegration.ts:117 [StorySystemIntegration] Event listeners registered
+StorySystemProvider.tsx:32 [StorySystem] ✅ Audio system initialized
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: '', selectedGenre: '(empty)', selectedGenreAfterFallback: '', hasSelectionState: false, hasCurrentState: false, …}
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: '', selectedGenre: '(empty)', selectedGenreAfterFallback: '', hasSelectionState: false, hasCurrentState: false, …}
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: '', selectedGenre: '(empty)', selectedGenreAfterFallback: '', hasSelectionState: false, hasCurrentState: false, …}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: '', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: '', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: '', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: '', completedPuzzles: 0}
+useStorySystemIntegration.ts:122 [StorySystemIntegration] Event listeners cleaned up
+useGameState.ts:139 [useGameState] Dialogue state changed, triggering save {completedEvents: Array(1), hasVisitedLibrary: true}
+useGameState.ts:139 [useGameState] Dialogue state changed, triggering save {completedEvents: Array(1), hasVisitedLibrary: true}
+useStorySystemIntegration.ts:117 [StorySystemIntegration] Event listeners registered
+AudioProvider.tsx:162 [Audio] Created Act 1 Music playlist
+AudioProvider.tsx:162 [Audio] Created Act 2 Music playlist
+AudioProvider.tsx:162 [Audio] Created Act 3 Music playlist
+audioManager.ts:483 [Audio] Playlist "background-music": All 1 track(s) loaded successfully
+audioManager.ts:483 [Audio] Playlist "act1": All 1 track(s) loaded successfully
+audioManager.ts:483 [Audio] Playlist "act2": All 1 track(s) loaded successfully
+audioManager.ts:483 [Audio] Playlist "act3": All 1 track(s) loaded successfully
+StorySystemProvider.tsx:36 [StorySystem] ✅ Dialogue manager initialized
+StorySystemProvider.tsx:40 [StorySystem] ✅ Story blurb manager initialized
+StoryProgressionManager.ts:429 [StoryProgressionManager] Configuration loaded: {version: '1.0.0', description: 'Story progression rules for Chronicles of the Keth…n to advance storybeats based on player progress.', progressionRules: Array(7), musicMapping: {…}, storyEventTriggers: {…}, …}
+StoryProgressionManager.ts:429 [StoryProgressionManager] Story Progression Manager initialized successfully
+StorySystemProvider.tsx:44 [StorySystem] ✅ Story progression manager initialized
+StorySystemProvider.tsx:46 [StorySystem] 🎉 All story systems ready!
+AudioProvider.tsx:223 [Audio] Music playlist is already active, skipping restart
+StoryProgressionManager.ts:429 [StoryProgressionManager] Music changed to playlist: act1
+forward-logs-shared.ts:95 [Fast Refresh] rebuilding
+forward-logs-shared.ts:95 [Fast Refresh] done in 1065ms
+usePageLoader.ts:60 [usePageLoader] size=0, allLoaded=true, isLoading=true, conditions: 
+StoryNotificationContext.tsx:45 [StoryNotification] Story notification cleared
+usePageLoader.ts:60 [usePageLoader] size=0, allLoaded=true, isLoading=true, conditions: 
+StoryNotificationContext.tsx:45 [StoryNotification] Story notification cleared
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: '', selectedGenre: '(empty)', selectedGenreAfterFallback: '', hasSelectionState: false, hasCurrentState: false, …}
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: '', selectedGenre: '(empty)', selectedGenreAfterFallback: '', hasSelectionState: false, hasCurrentState: false, …}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: '', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: '', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: '', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: '', completedPuzzles: 0}
+page.tsx:300 [Book of Passage] Button visibility check: {gameStateReady: true, selectedGenre: '', currentGenre: '', activeGenre: '', hasGenre: false, …}
+page.tsx:300 [Book of Passage] Button visibility check: {gameStateReady: true, selectedGenre: '', currentGenre: '', activeGenre: '', hasGenre: false, …}
+usePageLoader.ts:60 [usePageLoader] size=3, allLoaded=false, isLoading=true, conditions: gameState: loading, storyProgress: loading, registry: loading
+useGameState.ts:139 [useGameState] Dialogue state changed, triggering save {completedEvents: Array(1), hasVisitedLibrary: true}
+usePageLoader.ts:60 [usePageLoader] size=3, allLoaded=true, isLoading=true, conditions: gameState: ready, storyProgress: ready, registry: ready
+useGameState.ts:139 [useGameState] Dialogue state changed, triggering save {completedEvents: Array(1), hasVisitedLibrary: true}
+forward-logs-shared.ts:95 [Fast Refresh] rebuilding
+forward-logs-shared.ts:95 [Fast Refresh] done in 1130ms
+usePageLoader.ts:60 [usePageLoader] size=0, allLoaded=true, isLoading=true, conditions: 
+StoryNotificationContext.tsx:50 [StoryNotification] New dialogue event available!
+usePageLoader.ts:60 [usePageLoader] size=0, allLoaded=true, isLoading=true, conditions: 
+StoryNotificationContext.tsx:50 [StoryNotification] New dialogue event available!
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: '', selectedGenre: '(empty)', selectedGenreAfterFallback: '', hasSelectionState: false, hasCurrentState: false, …}
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: '', selectedGenre: '(empty)', selectedGenreAfterFallback: '', hasSelectionState: false, hasCurrentState: false, …}
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: '', selectedGenre: '(empty)', selectedGenreAfterFallback: '', hasSelectionState: false, hasCurrentState: false, …}
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: '', selectedGenre: '(empty)', selectedGenreAfterFallback: '', hasSelectionState: false, hasCurrentState: false, …}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: '', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: '', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: '', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: '', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: '', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: '', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: '', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: '', completedPuzzles: 0}
+useStorySystemIntegration.ts:122 [StorySystemIntegration] Event listeners cleaned up
+useGameState.ts:139 [useGameState] Dialogue state changed, triggering save {completedEvents: Array(1), hasVisitedLibrary: true}
+usePageLoader.ts:60 [usePageLoader] size=4, allLoaded=false, isLoading=true, conditions: gameState: loading, dialogue: loading, puzzles: loading, storyProgress: ready
+useGameState.ts:139 [useGameState] Dialogue state changed, triggering save {completedEvents: Array(1), hasVisitedLibrary: true}
+StoryNotificationContext.tsx:55 [StoryNotification] Dialogue notification cleared
+useStorySystemIntegration.ts:117 [StorySystemIntegration] Event listeners registered
+useStorySystemIntegration.ts:122 [StorySystemIntegration] Event listeners cleaned up
+usePageLoader.ts:60 [usePageLoader] size=4, allLoaded=false, isLoading=true, conditions: gameState: ready, dialogue: loading, puzzles: loading, storyProgress: ready
+useStorySystemIntegration.ts:117 [StorySystemIntegration] Event listeners registered
+StoryNotificationContext.tsx:50 [StoryNotification] New dialogue event available!
+useStorySystemIntegration.ts:122 [StorySystemIntegration] Event listeners cleaned up
+usePageLoader.ts:60 [usePageLoader] size=4, allLoaded=false, isLoading=true, conditions: gameState: ready, dialogue: loading, puzzles: ready, storyProgress: ready
+useStorySystemIntegration.ts:117 [StorySystemIntegration] Event listeners registered
+usePageLoader.ts:60 [usePageLoader] size=4, allLoaded=false, isLoading=true, conditions: gameState: ready, dialogue: loading, puzzles: ready, storyProgress: ready
+usePageLoader.ts:60 [usePageLoader] size=4, allLoaded=true, isLoading=true, conditions: gameState: ready, dialogue: ready, puzzles: ready, storyProgress: ready
+forward-logs-shared.ts:95 [Fast Refresh] rebuilding
+forward-logs-shared.ts:95 [Fast Refresh] done in 130ms
+forward-logs-shared.ts:95 [Fast Refresh] rebuilding
+forward-logs-shared.ts:95 [Fast Refresh] done in 1423ms
+lumina-portrait.svg:1  GET http://localhost:3000/images/portraits/lumina-portrait.svg 404 (Not Found)
+Image
+(anonymous) @ StoryEventPlayer.ts:207
+(anonymous) @ StoryEventPlayer.ts:203
+preloadPortraits @ StoryEventPlayer.ts:202
+handleStartConversation @ page.tsx:615
+await in handleStartConversation
+executeDispatch @ react-dom-client.development.js:20447
+runWithFiberInDEV @ react-dom-client.development.js:984
+processDispatchQueue @ react-dom-client.development.js:20497
+(anonymous) @ react-dom-client.development.js:21068
+batchedUpdates$1 @ react-dom-client.development.js:3375
+dispatchEventForPluginEventSystem @ react-dom-client.development.js:20651
+dispatchEvent @ react-dom-client.development.js:25580
+dispatchDiscreteEvent @ react-dom-client.development.js:25548
+valdris-portrait.svg:1  GET http://localhost:3000/images/portraits/valdris-portrait.svg 404 (Not Found)
+Image
+(anonymous) @ StoryEventPlayer.ts:207
+(anonymous) @ StoryEventPlayer.ts:203
+preloadPortraits @ StoryEventPlayer.ts:202
+handleStartConversation @ page.tsx:615
+await in handleStartConversation
+executeDispatch @ react-dom-client.development.js:20447
+runWithFiberInDEV @ react-dom-client.development.js:984
+processDispatchQueue @ react-dom-client.development.js:20497
+(anonymous) @ react-dom-client.development.js:21068
+batchedUpdates$1 @ react-dom-client.development.js:3375
+dispatchEventForPluginEventSystem @ react-dom-client.development.js:20651
+dispatchEvent @ react-dom-client.development.js:25580
+dispatchDiscreteEvent @ react-dom-client.development.js:25548
+forward-logs-shared.ts:95 [Fast Refresh] rebuilding
+valdris-portrait.svg:1  GET http://localhost:3000/images/portraits/valdris-portrait.svg 404 (Not Found)
+Image
+commitMount @ react-dom-client.development.js:23494
+runWithFiberInDEV @ react-dom-client.development.js:984
+commitHostMount @ react-dom-client.development.js:13961
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15019
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14983
+flushLayoutEffects @ react-dom-client.development.js:19474
+commitRoot @ react-dom-client.development.js:19239
+commitRootWhenReady @ react-dom-client.development.js:18082
+performWorkOnRoot @ react-dom-client.development.js:17958
+performSyncWorkOnRoot @ react-dom-client.development.js:20303
+flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:20145
+processRootScheduleInMicrotask @ react-dom-client.development.js:20184
+(anonymous) @ react-dom-client.development.js:20322
+<img>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:342
+DialoguePanel @ DialoguePanel.tsx:70
+react_stack_bottom_frame @ react-dom-client.development.js:27925
+renderWithHooksAgain @ react-dom-client.development.js:8072
+renderWithHooks @ react-dom-client.development.js:7984
+updateFunctionComponent @ react-dom-client.development.js:10480
+beginWork @ react-dom-client.development.js:12092
+runWithFiberInDEV @ react-dom-client.development.js:984
+performUnitOfWork @ react-dom-client.development.js:18901
+workLoopSync @ react-dom-client.development.js:18729
+renderRootSync @ react-dom-client.development.js:18710
+performWorkOnRoot @ react-dom-client.development.js:17740
+performSyncWorkOnRoot @ react-dom-client.development.js:20303
+flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:20145
+processRootScheduleInMicrotask @ react-dom-client.development.js:20184
+(anonymous) @ react-dom-client.development.js:20322
+<DialoguePanel>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:342
+(anonymous) @ DialogueQueue.tsx:292
+DialogueQueue @ DialogueQueue.tsx:285
+react_stack_bottom_frame @ react-dom-client.development.js:27925
+renderWithHooksAgain @ react-dom-client.development.js:8072
+renderWithHooks @ react-dom-client.development.js:7984
+updateForwardRef @ react-dom-client.development.js:10038
+beginWork @ react-dom-client.development.js:12431
+runWithFiberInDEV @ react-dom-client.development.js:984
+performUnitOfWork @ react-dom-client.development.js:18901
+workLoopSync @ react-dom-client.development.js:18729
+renderRootSync @ react-dom-client.development.js:18710
+performWorkOnRoot @ react-dom-client.development.js:17740
+performSyncWorkOnRoot @ react-dom-client.development.js:20303
+flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:20145
+processRootScheduleInMicrotask @ react-dom-client.development.js:20184
+(anonymous) @ react-dom-client.development.js:20322
+forward-logs-shared.ts:95 [Fast Refresh] done in 358ms
+forward-logs-shared.ts:95 [Fast Refresh] rebuilding
+forward-logs-shared.ts:95 [Fast Refresh] done in 224ms
+forward-logs-shared.ts:95 [Fast Refresh] rebuilding
+forward-logs-shared.ts:95 [Fast Refresh] done in 394ms
+valdris-portrait.svg:1  GET http://localhost:3000/images/portraits/valdris-portrait.svg 404 (Not Found)
+Image
+commitMount @ react-dom-client.development.js:23494
+runWithFiberInDEV @ react-dom-client.development.js:984
+commitHostMount @ react-dom-client.development.js:13961
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15019
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14983
+flushLayoutEffects @ react-dom-client.development.js:19474
+commitRoot @ react-dom-client.development.js:19239
+commitRootWhenReady @ react-dom-client.development.js:18082
+performWorkOnRoot @ react-dom-client.development.js:17958
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:20288
+performWorkUntilDeadline @ scheduler.development.js:45
+<img>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:342
+DialoguePanel @ DialoguePanel.tsx:70
+react_stack_bottom_frame @ react-dom-client.development.js:27925
+renderWithHooksAgain @ react-dom-client.development.js:8072
+renderWithHooks @ react-dom-client.development.js:7984
+updateFunctionComponent @ react-dom-client.development.js:10480
+beginWork @ react-dom-client.development.js:12092
+runWithFiberInDEV @ react-dom-client.development.js:984
+performUnitOfWork @ react-dom-client.development.js:18901
+workLoopSync @ react-dom-client.development.js:18729
+renderRootSync @ react-dom-client.development.js:18710
+performWorkOnRoot @ react-dom-client.development.js:17740
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:20288
+performWorkUntilDeadline @ scheduler.development.js:45
+<DialoguePanel>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:342
+(anonymous) @ DialogueQueue.tsx:292
+DialogueQueue @ DialogueQueue.tsx:285
+react_stack_bottom_frame @ react-dom-client.development.js:27925
+renderWithHooksAgain @ react-dom-client.development.js:8072
+renderWithHooks @ react-dom-client.development.js:7984
+updateForwardRef @ react-dom-client.development.js:10038
+beginWork @ react-dom-client.development.js:12431
+runWithFiberInDEV @ react-dom-client.development.js:984
+performUnitOfWork @ react-dom-client.development.js:18901
+workLoopSync @ react-dom-client.development.js:18729
+renderRootSync @ react-dom-client.development.js:18710
+performWorkOnRoot @ react-dom-client.development.js:17740
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:20288
+performWorkUntilDeadline @ scheduler.development.js:45
+lumina-portrait.svg:1  GET http://localhost:3000/images/portraits/lumina-portrait.svg 404 (Not Found)
+Image
+commitMount @ react-dom-client.development.js:23494
+runWithFiberInDEV @ react-dom-client.development.js:984
+commitHostMount @ react-dom-client.development.js:13961
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15019
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14983
+flushLayoutEffects @ react-dom-client.development.js:19474
+commitRoot @ react-dom-client.development.js:19239
+commitRootWhenReady @ react-dom-client.development.js:18082
+performWorkOnRoot @ react-dom-client.development.js:17958
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:20288
+performWorkUntilDeadline @ scheduler.development.js:45
+<img>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:342
+DialoguePanel @ DialoguePanel.tsx:70
+react_stack_bottom_frame @ react-dom-client.development.js:27925
+renderWithHooksAgain @ react-dom-client.development.js:8072
+renderWithHooks @ react-dom-client.development.js:7984
+updateFunctionComponent @ react-dom-client.development.js:10480
+beginWork @ react-dom-client.development.js:12092
+runWithFiberInDEV @ react-dom-client.development.js:984
+performUnitOfWork @ react-dom-client.development.js:18901
+workLoopSync @ react-dom-client.development.js:18729
+renderRootSync @ react-dom-client.development.js:18710
+performWorkOnRoot @ react-dom-client.development.js:17740
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:20288
+performWorkUntilDeadline @ scheduler.development.js:45
+<DialoguePanel>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:342
+(anonymous) @ DialogueQueue.tsx:292
+DialogueQueue @ DialogueQueue.tsx:285
+react_stack_bottom_frame @ react-dom-client.development.js:27925
+renderWithHooksAgain @ react-dom-client.development.js:8072
+renderWithHooks @ react-dom-client.development.js:7984
+updateForwardRef @ react-dom-client.development.js:10038
+beginWork @ react-dom-client.development.js:12431
+runWithFiberInDEV @ react-dom-client.development.js:984
+performUnitOfWork @ react-dom-client.development.js:18901
+workLoopSync @ react-dom-client.development.js:18729
+renderRootSync @ react-dom-client.development.js:18710
+performWorkOnRoot @ react-dom-client.development.js:17740
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:20288
+performWorkUntilDeadline @ scheduler.development.js:45
+forward-logs-shared.ts:95 [Fast Refresh] rebuilding
+useGameState.ts:139 [useGameState] Dialogue state changed, triggering save {completedEvents: Array(1), hasVisitedLibrary: true}
+StoryNotificationContext.tsx:55 [StoryNotification] Dialogue notification cleared
+StoryNotificationContext.tsx:55 [StoryNotification] Dialogue notification cleared
+StoryNotificationContext.tsx:55 [StoryNotification] Dialogue notification cleared
+lumina-portrait.svg:1  GET http://localhost:3000/images/portraits/lumina-portrait.svg 404 (Not Found)
+Image
+commitMount @ react-dom-client.development.js:23494
+runWithFiberInDEV @ react-dom-client.development.js:984
+commitHostMount @ react-dom-client.development.js:13961
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15019
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14983
+flushLayoutEffects @ react-dom-client.development.js:19474
+commitRoot @ react-dom-client.development.js:19239
+commitRootWhenReady @ react-dom-client.development.js:18082
+performWorkOnRoot @ react-dom-client.development.js:17958
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:20288
+performWorkUntilDeadline @ scheduler.development.js:45
+<img>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:342
+DialoguePanel @ DialoguePanel.tsx:70
+react_stack_bottom_frame @ react-dom-client.development.js:27925
+renderWithHooksAgain @ react-dom-client.development.js:8072
+renderWithHooks @ react-dom-client.development.js:7984
+updateFunctionComponent @ react-dom-client.development.js:10480
+beginWork @ react-dom-client.development.js:12092
+runWithFiberInDEV @ react-dom-client.development.js:984
+performUnitOfWork @ react-dom-client.development.js:18901
+workLoopSync @ react-dom-client.development.js:18729
+renderRootSync @ react-dom-client.development.js:18710
+performWorkOnRoot @ react-dom-client.development.js:17740
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:20288
+performWorkUntilDeadline @ scheduler.development.js:45
+<DialoguePanel>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:342
+(anonymous) @ DialogueQueue.tsx:292
+DialogueQueue @ DialogueQueue.tsx:285
+react_stack_bottom_frame @ react-dom-client.development.js:27925
+renderWithHooksAgain @ react-dom-client.development.js:8072
+renderWithHooks @ react-dom-client.development.js:7984
+updateForwardRef @ react-dom-client.development.js:10038
+beginWork @ react-dom-client.development.js:12431
+runWithFiberInDEV @ react-dom-client.development.js:984
+performUnitOfWork @ react-dom-client.development.js:18901
+workLoopSync @ react-dom-client.development.js:18729
+renderRootSync @ react-dom-client.development.js:18710
+performWorkOnRoot @ react-dom-client.development.js:17740
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:20288
+performWorkUntilDeadline @ scheduler.development.js:45
+valdris-portrait.svg:1  GET http://localhost:3000/images/portraits/valdris-portrait.svg 404 (Not Found)
+Image
+commitMount @ react-dom-client.development.js:23494
+runWithFiberInDEV @ react-dom-client.development.js:984
+commitHostMount @ react-dom-client.development.js:13961
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15019
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14983
+flushLayoutEffects @ react-dom-client.development.js:19474
+commitRoot @ react-dom-client.development.js:19239
+commitRootWhenReady @ react-dom-client.development.js:18082
+performWorkOnRoot @ react-dom-client.development.js:17958
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:20288
+performWorkUntilDeadline @ scheduler.development.js:45
+<img>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:342
+DialoguePanel @ DialoguePanel.tsx:70
+react_stack_bottom_frame @ react-dom-client.development.js:27925
+renderWithHooksAgain @ react-dom-client.development.js:8072
+renderWithHooks @ react-dom-client.development.js:7984
+updateFunctionComponent @ react-dom-client.development.js:10480
+beginWork @ react-dom-client.development.js:12092
+runWithFiberInDEV @ react-dom-client.development.js:984
+performUnitOfWork @ react-dom-client.development.js:18901
+workLoopSync @ react-dom-client.development.js:18729
+renderRootSync @ react-dom-client.development.js:18710
+performWorkOnRoot @ react-dom-client.development.js:17740
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:20288
+performWorkUntilDeadline @ scheduler.development.js:45
+<DialoguePanel>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:342
+(anonymous) @ DialogueQueue.tsx:292
+DialogueQueue @ DialogueQueue.tsx:285
+react_stack_bottom_frame @ react-dom-client.development.js:27925
+renderWithHooksAgain @ react-dom-client.development.js:8072
+renderWithHooks @ react-dom-client.development.js:7984
+updateForwardRef @ react-dom-client.development.js:10038
+beginWork @ react-dom-client.development.js:12431
+runWithFiberInDEV @ react-dom-client.development.js:984
+performUnitOfWork @ react-dom-client.development.js:18901
+workLoopSync @ react-dom-client.development.js:18729
+renderRootSync @ react-dom-client.development.js:18710
+performWorkOnRoot @ react-dom-client.development.js:17740
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:20288
+performWorkUntilDeadline @ scheduler.development.js:45
+forward-logs-shared.ts:95 [Fast Refresh] done in 906ms
+useStorySystemIntegration.ts:122 [StorySystemIntegration] Event listeners cleaned up
+usePageLoader.ts:60 [usePageLoader] size=4, allLoaded=true, isLoading=false, conditions: gameState: ready, dialogue: ready, puzzles: ready, storyProgress: ready
+useStorySystemIntegration.ts:117 [StorySystemIntegration] Event listeners registered
+page.tsx:634 [Library] No story events available, showing banter
+forward-logs-shared.ts:95 [Fast Refresh] rebuilding
+forward-logs-shared.ts:95 [Fast Refresh] done in 215ms
+valdris-portrait.svg:1  GET http://localhost:3000/images/portraits/valdris-portrait.svg 404 (Not Found)
+Image
+commitMount @ react-dom-client.development.js:23494
+runWithFiberInDEV @ react-dom-client.development.js:984
+commitHostMount @ react-dom-client.development.js:13961
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15019
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14983
+flushLayoutEffects @ react-dom-client.development.js:19474
+commitRoot @ react-dom-client.development.js:19239
+commitRootWhenReady @ react-dom-client.development.js:18082
+performWorkOnRoot @ react-dom-client.development.js:17958
+performSyncWorkOnRoot @ react-dom-client.development.js:20303
+flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:20145
+processRootScheduleInMicrotask @ react-dom-client.development.js:20184
+(anonymous) @ react-dom-client.development.js:20322
+<img>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:342
+DialoguePanel @ DialoguePanel.tsx:70
+react_stack_bottom_frame @ react-dom-client.development.js:27925
+renderWithHooksAgain @ react-dom-client.development.js:8072
+renderWithHooks @ react-dom-client.development.js:7984
+updateFunctionComponent @ react-dom-client.development.js:10480
+beginWork @ react-dom-client.development.js:12092
+runWithFiberInDEV @ react-dom-client.development.js:984
+performUnitOfWork @ react-dom-client.development.js:18901
+workLoopSync @ react-dom-client.development.js:18729
+renderRootSync @ react-dom-client.development.js:18710
+performWorkOnRoot @ react-dom-client.development.js:17740
+performSyncWorkOnRoot @ react-dom-client.development.js:20303
+flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:20145
+processRootScheduleInMicrotask @ react-dom-client.development.js:20184
+(anonymous) @ react-dom-client.development.js:20322
+<DialoguePanel>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:342
+(anonymous) @ DialogueQueue.tsx:292
+DialogueQueue @ DialogueQueue.tsx:285
+react_stack_bottom_frame @ react-dom-client.development.js:27925
+renderWithHooksAgain @ react-dom-client.development.js:8072
+renderWithHooks @ react-dom-client.development.js:7984
+updateForwardRef @ react-dom-client.development.js:10038
+beginWork @ react-dom-client.development.js:12431
+runWithFiberInDEV @ react-dom-client.development.js:984
+performUnitOfWork @ react-dom-client.development.js:18901
+workLoopSync @ react-dom-client.development.js:18729
+renderRootSync @ react-dom-client.development.js:18710
+performWorkOnRoot @ react-dom-client.development.js:17740
+performSyncWorkOnRoot @ react-dom-client.development.js:20303
+flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:20145
+processRootScheduleInMicrotask @ react-dom-client.development.js:20184
+(anonymous) @ react-dom-client.development.js:20322
+usePageLoader.ts:60 [usePageLoader] size=4, allLoaded=true, isLoading=false, conditions: gameState: ready, dialogue: ready, puzzles: ready, storyProgress: ready
+forward-logs-shared.ts:95 [Fast Refresh] rebuilding
+forward-logs-shared.ts:95 [Fast Refresh] done in 1031ms
+usePageLoader.ts:60 [usePageLoader] size=0, allLoaded=true, isLoading=true, conditions: 
+usePageLoader.ts:60 [usePageLoader] size=0, allLoaded=true, isLoading=true, conditions: 
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: '', selectedGenre: 'nature', selectedGenreAfterFallback: 'nature', hasSelectionState: true, hasCurrentState: false, …}
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: '', selectedGenre: 'nature', selectedGenreAfterFallback: 'nature', hasSelectionState: true, hasCurrentState: false, …}
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: '', selectedGenre: 'nature', selectedGenreAfterFallback: 'nature', hasSelectionState: true, hasCurrentState: false, …}
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: '', selectedGenre: 'nature', selectedGenreAfterFallback: 'nature', hasSelectionState: true, hasCurrentState: false, …}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: 'nature', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: 'nature', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: 'nature', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: 'nature', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: 'nature', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: 'nature', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: 'nature', completedPuzzles: 0}
+state.ts:309 [Game State] Restored state: {currentGenre: '', selectedGenre: 'nature', completedPuzzles: 0}
+useGameState.ts:139 [useGameState] Dialogue state changed, triggering save {completedEvents: Array(1), hasVisitedLibrary: true}
+usePageLoader.ts:60 [usePageLoader] size=2, allLoaded=false, isLoading=true, conditions: gameState: loading, puzzle: loading
+useGameState.ts:139 [useGameState] Dialogue state changed, triggering save {completedEvents: Array(1), hasVisitedLibrary: true}
+usePageLoader.ts:60 [usePageLoader] size=2, allLoaded=false, isLoading=true, conditions: gameState: ready, puzzle: loading
+usePageLoader.ts:60 [usePageLoader] size=2, allLoaded=true, isLoading=true, conditions: gameState: ready, puzzle: ready
+usePageLoader.ts:60 [usePageLoader] size=2, allLoaded=true, isLoading=false, conditions: gameState: ready, puzzle: ready
+usePageLoader.ts:60 [usePageLoader] size=2, allLoaded=true, isLoading=false, conditions: gameState: ready, puzzle: ready
+usePageLoader.ts:60 [usePageLoader] size=2, allLoaded=true, isLoading=false, conditions: gameState: ready, puzzle: ready
+usePageLoader.ts:60 [usePageLoader] size=2, allLoaded=true, isLoading=false, conditions: gameState: ready, puzzle: ready
+usePageLoader.ts:60 [usePageLoader] size=2, allLoaded=true, isLoading=false, conditions: gameState: ready, puzzle: ready
+usePageLoader.ts:60 [usePageLoader] size=2, allLoaded=true, isLoading=false, conditions: gameState: ready, puzzle: ready
+page.tsx:575 [puzzle.page.handleNextPuzzle] Closing modal and loading next puzzle
+usePageLoader.ts:60 [usePageLoader] size=2, allLoaded=true, isLoading=false, conditions: gameState: ready, puzzle: ready
+usePageLoader.ts:60 [usePageLoader] size=2, allLoaded=true, isLoading=false, conditions: gameState: ready, puzzle: ready
+usePageLoader.ts:60 [usePageLoader] size=2, allLoaded=true, isLoading=false, conditions: gameState: ready, puzzle: ready
+usePageLoader.ts:60 [usePageLoader] size=2, allLoaded=true, isLoading=false, conditions: gameState: ready, puzzle: ready
+usePageLoader.ts:60 [usePageLoader] size=2, allLoaded=true, isLoading=false, conditions: gameState: ready, puzzle: ready
+StoryProgressionManager.ts:429 [StoryProgressionManager] Storybeat changed: hook → first_plot_point
+StoryProgressionManager.ts:429 [StoryProgressionManager] Processing storybeat change to: first_plot_point
+StoryProgressionManager.ts:429 [StoryProgressionManager] Playlist "act1" is already playing, skipping music change
+StoryProgressionManager.ts:429 [StoryProgressionManager] Story advanced: first_plot_point → first_plot_point
+logic.ts:178 [Story Progression] Player has completed the tutorial and shown basic competency
+logic.ts:179 [Story Progression] Advanced to: first_plot_point
+StoryProgressionManager.ts:429 [StoryProgressionManager] No story event configured for beat: first_plot_point
+usePageLoader.ts:60 [usePageLoader] size=2, allLoaded=true, isLoading=false, conditions: gameState: ready, puzzle: ready
+StoryProgressionManager.ts:429 [StoryProgressionManager] Loaded character group: regular_contacts
+StoryProgressionManager.ts:429 [StoryProgressionManager] Loaded character group: essential_library_staff
+useStorySystemIntegration.ts:98 [StorySystemIntegration] Story progression: hook → first_plot_point
+useStorySystemIntegration.ts:69 [StorySystemIntegration] Beat advanced to: first_plot_point, trigger: story_beat_first_plot_point
+useStorySystemIntegration.ts:79 [StorySystemIntegration] Found blurb for trigger story_beat_first_plot_point: first_plot_004
+StorySystemProvider.tsx:59 [StorySystem] 🎭 New story moment unlocked: first_plot_004 (trigger: story_beat_first_plot_point)
+StoryNotificationContext.tsx:40 [StoryNotification] New story moment available!
+StoryProgressionManager.ts:429 [StoryProgressionManager] Emitted beat trigger: story_beat_first_plot_point
+useStorySystemIntegration.ts:122 [StorySystemIntegration] Event listeners cleaned up
+useStorySystemIntegration.ts:117 [StorySystemIntegration] Event listeners registered
+usePageLoader.ts:60 [usePageLoader] size=0, allLoaded=true, isLoading=true, conditions: 
+StoryNotificationContext.tsx:45 [StoryNotification] Story notification cleared
+usePageLoader.ts:60 [usePageLoader] size=0, allLoaded=true, isLoading=true, conditions: 
+StoryNotificationContext.tsx:45 [StoryNotification] Story notification cleared
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: 'nature', selectedGenre: 'nature', selectedGenreAfterFallback: 'nature', hasSelectionState: true, hasCurrentState: true, …}
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: 'nature', selectedGenre: 'nature', selectedGenreAfterFallback: 'nature', hasSelectionState: true, hasCurrentState: true, …}
+state.ts:309 [Game State] Restored state: {currentGenre: 'nature', selectedGenre: 'nature', completedPuzzles: 4}
+state.ts:309 [Game State] Restored state: {currentGenre: 'nature', selectedGenre: 'nature', completedPuzzles: 4}
+state.ts:309 [Game State] Restored state: {currentGenre: 'nature', selectedGenre: 'nature', completedPuzzles: 4}
+state.ts:309 [Game State] Restored state: {currentGenre: 'nature', selectedGenre: 'nature', completedPuzzles: 4}
+page.tsx:300 [Book of Passage] Button visibility check: {gameStateReady: true, selectedGenre: 'nature', currentGenre: 'nature', activeGenre: 'nature', hasGenre: true, …}
+page.tsx:300 [Book of Passage] Button visibility check: {gameStateReady: true, selectedGenre: 'nature', currentGenre: 'nature', activeGenre: 'nature', hasGenre: true, …}
+useStorySystemIntegration.ts:122 [StorySystemIntegration] Event listeners cleaned up
+usePageLoader.ts:60 [usePageLoader] size=3, allLoaded=false, isLoading=true, conditions: gameState: loading, storyProgress: loading, registry: loading
+useGameState.ts:139 [useGameState] Dialogue state changed, triggering save {completedEvents: Array(1), hasVisitedLibrary: true}
+useStorySystemIntegration.ts:117 [StorySystemIntegration] Event listeners registered
+usePageLoader.ts:60 [usePageLoader] size=3, allLoaded=true, isLoading=true, conditions: gameState: ready, storyProgress: ready, registry: ready
+forward-logs-shared.ts:95 [Fast Refresh] rebuilding
+forward-logs-shared.ts:95 [Fast Refresh] done in 137ms
+usePageLoader.ts:60 [usePageLoader] size=0, allLoaded=true, isLoading=true, conditions: 
+StoryNotificationContext.tsx:50 [StoryNotification] New dialogue event available!
+usePageLoader.ts:60 [usePageLoader] size=0, allLoaded=true, isLoading=true, conditions: 
+StoryNotificationContext.tsx:50 [StoryNotification] New dialogue event available!
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: 'nature', selectedGenre: 'nature', selectedGenreAfterFallback: 'nature', hasSelectionState: true, hasCurrentState: true, …}
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: 'nature', selectedGenre: 'nature', selectedGenreAfterFallback: 'nature', hasSelectionState: true, hasCurrentState: true, …}
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: 'nature', selectedGenre: 'nature', selectedGenreAfterFallback: 'nature', hasSelectionState: true, hasCurrentState: true, …}
+optimizedSaveSystem.ts:541 [Save System] Loading game state: {currentGenre: 'nature', selectedGenre: 'nature', selectedGenreAfterFallback: 'nature', hasSelectionState: true, hasCurrentState: true, …}
+state.ts:309 [Game State] Restored state: {currentGenre: 'nature', selectedGenre: 'nature', completedPuzzles: 4}
+state.ts:309 [Game State] Restored state: {currentGenre: 'nature', selectedGenre: 'nature', completedPuzzles: 4}
+state.ts:309 [Game State] Restored state: {currentGenre: 'nature', selectedGenre: 'nature', completedPuzzles: 4}
+state.ts:309 [Game State] Restored state: {currentGenre: 'nature', selectedGenre: 'nature', completedPuzzles: 4}
+state.ts:309 [Game State] Restored state: {currentGenre: 'nature', selectedGenre: 'nature', completedPuzzles: 4}
+state.ts:309 [Game State] Restored state: {currentGenre: 'nature', selectedGenre: 'nature', completedPuzzles: 4}
+state.ts:309 [Game State] Restored state: {currentGenre: 'nature', selectedGenre: 'nature', completedPuzzles: 4}
+state.ts:309 [Game State] Restored state: {currentGenre: 'nature', selectedGenre: 'nature', completedPuzzles: 4}
+useStorySystemIntegration.ts:122 [StorySystemIntegration] Event listeners cleaned up
+useGameState.ts:139 [useGameState] Dialogue state changed, triggering save {completedEvents: Array(1), hasVisitedLibrary: true}
+usePageLoader.ts:60 [usePageLoader] size=4, allLoaded=false, isLoading=true, conditions: gameState: loading, dialogue: loading, puzzles: ready, storyProgress: ready
+useGameState.ts:139 [useGameState] Dialogue state changed, triggering save {completedEvents: Array(1), hasVisitedLibrary: true}
+StoryNotificationContext.tsx:55 [StoryNotification] Dialogue notification cleared
+useStorySystemIntegration.ts:117 [StorySystemIntegration] Event listeners registered
+useStorySystemIntegration.ts:122 [StorySystemIntegration] Event listeners cleaned up
+usePageLoader.ts:60 [usePageLoader] size=4, allLoaded=false, isLoading=true, conditions: gameState: ready, dialogue: loading, puzzles: ready, storyProgress: ready
+useStorySystemIntegration.ts:117 [StorySystemIntegration] Event listeners registered
+usePageLoader.ts:60 [usePageLoader] size=4, allLoaded=true, isLoading=true, conditions: gameState: ready, dialogue: ready, puzzles: ready, storyProgress: ready
+page.tsx:634 [Library] No story events available, showing banter
+forward-logs-shared.ts:95 [Fast Refresh] rebuilding
+forward-logs-shared.ts:95 [Fast Refresh] done in 218ms
+valdris-portrait.svg:1  GET http://localhost:3000/images/portraits/valdris-portrait.svg 404 (Not Found)
+Image
+commitMount @ react-dom-client.development.js:23494
+runWithFiberInDEV @ react-dom-client.development.js:984
+commitHostMount @ react-dom-client.development.js:13961
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15019
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14983
+flushLayoutEffects @ react-dom-client.development.js:19474
+commitRoot @ react-dom-client.development.js:19239
+commitRootWhenReady @ react-dom-client.development.js:18082
+performWorkOnRoot @ react-dom-client.development.js:17958
+performSyncWorkOnRoot @ react-dom-client.development.js:20303
+flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:20145
+processRootScheduleInMicrotask @ react-dom-client.development.js:20184
+(anonymous) @ react-dom-client.development.js:20322
+<img>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:342
+DialoguePanel @ DialoguePanel.tsx:70
+react_stack_bottom_frame @ react-dom-client.development.js:27925
+renderWithHooksAgain @ react-dom-client.development.js:8072
+renderWithHooks @ react-dom-client.development.js:7984
+updateFunctionComponent @ react-dom-client.development.js:10480
+beginWork @ react-dom-client.development.js:12092
+runWithFiberInDEV @ react-dom-client.development.js:984
+performUnitOfWork @ react-dom-client.development.js:18901
+workLoopSync @ react-dom-client.development.js:18729
+renderRootSync @ react-dom-client.development.js:18710
+performWorkOnRoot @ react-dom-client.development.js:17740
+performSyncWorkOnRoot @ react-dom-client.development.js:20303
+flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:20145
+processRootScheduleInMicrotask @ react-dom-client.development.js:20184
+(anonymous) @ react-dom-client.development.js:20322
+<DialoguePanel>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:342
+(anonymous) @ DialogueQueue.tsx:292
+DialogueQueue @ DialogueQueue.tsx:285
+react_stack_bottom_frame @ react-dom-client.development.js:27925
+renderWithHooksAgain @ react-dom-client.development.js:8072
+renderWithHooks @ react-dom-client.development.js:7984
+updateForwardRef @ react-dom-client.development.js:10038
+beginWork @ react-dom-client.development.js:12431
+runWithFiberInDEV @ react-dom-client.development.js:984
+performUnitOfWork @ react-dom-client.development.js:18901
+workLoopSync @ react-dom-client.development.js:18729
+renderRootSync @ react-dom-client.development.js:18710
+performWorkOnRoot @ react-dom-client.development.js:17740
+performSyncWorkOnRoot @ react-dom-client.development.js:20303
+flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:20145
+processRootScheduleInMicrotask @ react-dom-client.development.js:20184
+(anonymous) @ react-dom-client.development.js:20322
+page.tsx:634 [Library] No story events available, showing banter
+forward-logs-shared.ts:95 [Fast Refresh] rebuilding
+valdris-portrait.svg:1  GET http://localhost:3000/images/portraits/valdris-portrait.svg 404 (Not Found)
+Image
+commitMount @ react-dom-client.development.js:23494
+runWithFiberInDEV @ react-dom-client.development.js:984
+commitHostMount @ react-dom-client.development.js:13961
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15019
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15017
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14906
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14901
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:15122
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:16275
+commitLayoutEffectOnFiber @ react-dom-client.development.js:14983
+flushLayoutEffects @ react-dom-client.development.js:19474
+commitRoot @ react-dom-client.development.js:19239
+commitRootWhenReady @ react-dom-client.development.js:18082
+performWorkOnRoot @ react-dom-client.development.js:17958
+performSyncWorkOnRoot @ react-dom-client.development.js:20303
+flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:20145
+processRootScheduleInMicrotask @ react-dom-client.development.js:20184
+(anonymous) @ react-dom-client.development.js:20322
+<img>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:342
+DialoguePanel @ DialoguePanel.tsx:70
+react_stack_bottom_frame @ react-dom-client.development.js:27925
+renderWithHooksAgain @ react-dom-client.development.js:8072
+renderWithHooks @ react-dom-client.development.js:7984
+updateFunctionComponent @ react-dom-client.development.js:10480
+beginWork @ react-dom-client.development.js:12092
+runWithFiberInDEV @ react-dom-client.development.js:984
+performUnitOfWork @ react-dom-client.development.js:18901
+workLoopSync @ react-dom-client.development.js:18729
+renderRootSync @ react-dom-client.development.js:18710
+performWorkOnRoot @ react-dom-client.development.js:17740
+performSyncWorkOnRoot @ react-dom-client.development.js:20303
+flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:20145
+processRootScheduleInMicrotask @ react-dom-client.development.js:20184
+(anonymous) @ react-dom-client.development.js:20322
+<DialoguePanel>
+exports.jsxDEV @ react-jsx-dev-runtime.development.js:342
+(anonymous) @ DialogueQueue.tsx:292
+DialogueQueue @ DialogueQueue.tsx:285
+react_stack_bottom_frame @ react-dom-client.development.js:27925
+renderWithHooksAgain @ react-dom-client.development.js:8072
+renderWithHooks @ react-dom-client.development.js:7984
+updateForwardRef @ react-dom-client.development.js:10038
+beginWork @ react-dom-client.development.js:12431
+runWithFiberInDEV @ react-dom-client.development.js:984
+performUnitOfWork @ react-dom-client.development.js:18901
+workLoopSync @ react-dom-client.development.js:18729
+renderRootSync @ react-dom-client.development.js:18710
+performWorkOnRoot @ react-dom-client.development.js:17740
+performSyncWorkOnRoot @ react-dom-client.development.js:20303
+flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:20145
+processRootScheduleInMicrotask @ react-dom-client.development.js:20184
+(anonymous) @ react-dom-client.development.js:20322
+forward-logs-shared.ts:95 [Fast Refresh] done in 275ms
+forward-logs-shared.ts:95 [Fast Refresh] rebuilding
+forward-logs-shared.ts:95 [Fast Refresh] done in 211ms

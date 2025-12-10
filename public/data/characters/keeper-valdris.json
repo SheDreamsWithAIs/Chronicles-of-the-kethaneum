@@ -1,0 +1,57 @@
+{
+    "character": {
+      "id": "keeper-valdris",
+      "name": "Keeper Valdris",
+      "title": "Keeper of the Ancient Texts",
+      "description": "A venerable keeper who guards the most ancient and powerful texts in the Kethaneum. Known for his formal yet warm demeanor, mystical wisdom, and deep understanding of the library's oldest secrets.",
+      "portraitFile": "valdris-portrait.svg",
+      "loadingGroup": "introduction_characters",
+      "retireAfter": "never",
+      "specialties": ["ancient_texts", "mystical_lore", "library_history"]
+    },
+    "banterDialogue": [
+      {
+        "id": "welcome-general",
+        "text": "Welcome, young seeker. The ancient texts sense your presence and respond with anticipation.",
+        "emotion": ["formal", "warm", "mystical"],
+        "category": "general-welcome",
+        "availableFrom": "hook",
+        "availableUntil": "first_plot_point"
+      },
+      {
+        "id": "encouragement-progress",
+        "text": "Your dedication to organizing knowledge honors the traditions of all who have walked these halls before you.",
+        "emotion": ["encouraging", "wise"],
+        "category": "progress-praise",
+        "availableFrom": "first_plot_point"
+      },
+      {
+        "id": "library-lore",
+        "text": "These texts have waited centuries for the right hands to organize them. You are one of those hands.",
+        "emotion": ["mystical", "reassuring"],
+        "category": "lore-sharing",
+        "availableFrom": "hook"
+      },
+      {
+        "id": "casual-wisdom",
+        "text": "Do not be discouraged if some patterns seem elusive. Even the most experienced keepers find new mysteries in familiar texts.",
+        "emotion": ["reassuring", "wise"],
+        "category": "casual-advice",
+        "availableFrom": "first_pinch_point",
+        "availableUntil": "midpoint"
+      },
+      {
+        "id": "appreciation",
+        "text": "The ancient texts sing with renewed purpose when organized by a dedicated archivist. Your work brings harmony to the chaos.",
+        "emotion": ["grateful", "mystical"],
+        "category": "appreciation",
+        "availableFrom": "midpoint"
+      }
+    ],
+    "metadata": {
+      "personalityTraits": ["formal", "wise", "mystical", "reassuring"],
+      "relationshipToPlayer": "mentor-guardian",
+      "availableInScreens": ["library", "tutorial"],
+      "lastUpdated": "2025-12-08"
+    }
+  }

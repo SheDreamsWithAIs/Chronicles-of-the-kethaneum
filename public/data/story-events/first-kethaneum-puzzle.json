@@ -1,0 +1,48 @@
+{
+    "storyEvent": {
+      "id": "first-kethaneum-puzzle",
+      "title": "The First Kethaneum Discovery",
+      "triggerCondition": "first-kethaneum-puzzle-complete",
+      "storyBeat": "hook"
+    },
+    "dialogue": [
+      {
+        "sequence": 1,
+        "speaker": "archivist-lumina",
+        "text": "Remarkable! You've completed your first Kethaneum puzzle. These ancient texts hold secrets that few have ever deciphered.",
+        "emotion": ["impressed", "encouraging"],
+        "pauseAfter": true
+      },
+      {
+        "sequence": 2,
+        "speaker": "keeper-valdris",
+        "text": "The Kethaneum recognizes your dedication. Each completed puzzle strengthens the cosmic library's foundation.",
+        "emotion": ["mystical", "wise"],
+        "pauseAfter": true
+      },
+      {
+        "sequence": 3,
+        "speaker": "archivist-lumina",
+        "text": "You're beginning to understand the deeper patterns. Continue your work, and greater revelations await.",
+        "emotion": ["encouraging", "explanatory"],
+        "pauseAfter": false,
+        "isLastInSequence": true
+      }
+    ],
+    "characters": [
+      {
+        "id": "archivist-lumina",
+        "portraitFile": "lumina-portrait.svg"
+      },
+      {
+        "id": "keeper-valdris",
+        "portraitFile": "valdris-portrait.svg"
+      }
+    ],
+    "metadata": {
+      "estimatedDuration": "short",
+      "storyImportance": "milestone",
+      "unlocks": [],
+      "lastUpdated": "2025-01-27"
+    }
+  }

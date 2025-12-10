@@ -5,6 +5,8 @@
  */
 
 import { fetchAsset } from '@/lib/utils/assetPath';
+import type { GameState } from '@/lib/game/state';
+import { StoryEventTriggerChecker } from './StoryEventTriggerChecker';
 import type {
   StoryBeat,
   LoadingGroup,
@@ -297,11 +299,9 @@ export class DialogueManager {
         const storyEvent = await this.loadAndValidateStoryEventFile(filename);
         if (storyEvent && storyEvent.storyEvent?.id) {
           this.storyEvents.set(storyEvent.storyEvent.id, storyEvent);
-          console.log(`[DialogueManager] Loaded story event: ${storyEvent.storyEvent.id}`);
         }
       }
 
-      console.log(`[DialogueManager] ✅ Loaded ${this.storyEvents.size} story events`);
 
       // Initialize story event trigger checker index for performance
       // This indexes events by story beat so we only check relevant events
@@ -420,6 +420,56 @@ export class DialogueManager {
   }
 
   /**
+   * Get character data by character ID
+   */
+  getCharacterById(characterId: string): CharacterData | null {
+    return this.characters.get(characterId) || null;
+  }
+
+  /**
+   * Get dialogue configuration
+   */
+  getConfig(): DialogueConfig | null {
+    return this.config;
+  }
+
+  /**
+   * Get first available story event
+   * Checks trigger conditions and filters out completed events
+   * Requires GameState to properly evaluate trigger conditions
+   */
+  getAvailableStoryEvent(currentState: GameState, completedEvents?: string[]): any | null {
+    try {
+      const availableEvents = this.getAvailableStoryEvents(currentState, completedEvents);
+      
+      if (availableEvents.length === 0) {
+        return null;
+      }
+
+      // Return first available event (full StoryEvent object)
+      const eventId = availableEvents[0];
+      const event = this.getStoryEvent(eventId);
+      
+      // Validate that the returned event matches the requested ID
+      if (!event) {
+        throw new Error(`Story event not found: ${eventId}`);
+      }
+      
+      const returnedEventId = event.storyEvent?.id;
+      if (returnedEventId !== eventId) {
+        throw new Error(
+          `Event ID mismatch in getAvailableStoryEvent: requested '${eventId}' but got '${returnedEventId}'`
+        );
+      }
+      
+      return event;
+    } catch (error) {
+      console.error('[DialogueManager] Error in getAvailableStoryEvent:', error);
+      throw error; // Re-throw to allow caller to handle
+    }
+  }
+
+  /**
    * Get all loaded story events
    * Used by StoryEventTriggerChecker to check against state
    */
@@ -466,23 +516,32 @@ export class DialogueManager {
 
   /**
    * Get all available story events for current conditions
+   * Uses StoryEventTriggerChecker to verify trigger conditions are satisfied
+   * Filters out completed events if provided
    */
-  getAvailableStoryEvents(currentBeat?: StoryBeat): string[] {
-    const available: string[] = [];
-
-    for (const [eventId, eventData] of this.storyEvents.entries()) {
-      const event = eventData.storyEvent;
-
-      // Check if story beat matches (if specified)
-      if (event.storyBeat && currentBeat && event.storyBeat === currentBeat) {
-        available.push(eventId);
-      } else if (!event.storyBeat) {
-        // Events without beat restriction are always available
-        available.push(eventId);
+  getAvailableStoryEvents(currentState: GameState, completedEvents?: string[]): string[] {
+    try {
+      // Use StoryEventTriggerChecker to get events that satisfy trigger conditions
+      const triggerCheckedEvents = StoryEventTriggerChecker.checkCurrentlyAvailableEvents(currentState);
+      
+      // Validate completedEvents is an array if provided
+      if (completedEvents !== undefined && !Array.isArray(completedEvents)) {
+        console.error('[DialogueManager] completedEvents is not an array:', completedEvents);
+        completedEvents = [];
       }
-    }
 
-    return available;
+      // Filter out completed events if provided
+      const filteredEvents = completedEvents && completedEvents.length > 0
+        ? triggerCheckedEvents.filter((eventId) => !completedEvents.includes(eventId))
+        : triggerCheckedEvents;
+
+      // Filtered events (after removing completed)
+
+      return filteredEvents;
+    } catch (error) {
+      console.error('[DialogueManager] Error in getAvailableStoryEvents:', error);
+      return [];
+    }
   }
 
   /**
