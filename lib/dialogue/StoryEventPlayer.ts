@@ -7,6 +7,7 @@ import type { DialogueManager } from './DialogueManager';
 import type { StoryEvent, StoryEventDialogue, StoryEventCharacter } from './types';
 import type { CharacterData } from './types';
 import type { DialogueEntry } from '@/components/dialogue/DialogueQueue';
+import { chunkText } from './chunkText';
 
 export class StoryEventPlayer {
   private storyEvent: StoryEvent | null = null;
@@ -81,8 +82,19 @@ export class StoryEventPlayer {
     const portraitFile =
       storyEventChar?.portraitFile || fullCharacterData.character.portraitFile;
 
-    // Chunk the text
-    const chunks = this.chunkText(dialogueData.text);
+    // Chunk the text with error handling
+    let chunks: string[];
+    try {
+      chunks = this.chunkText(dialogueData.text);
+      if (!chunks || chunks.length === 0) {
+        console.warn(`[StoryEventPlayer] Chunking returned empty array for sequence ${this.currentSequence}, using original text`);
+        chunks = [dialogueData.text];
+      }
+    } catch (error) {
+      console.error(`[StoryEventPlayer] Error chunking text for sequence ${this.currentSequence}:`, error);
+      // Fallback: use original text as single chunk
+      chunks = [dialogueData.text];
+    }
 
     // Create dialogue entry
     const entry: DialogueEntry = {
@@ -175,60 +187,8 @@ export class StoryEventPlayer {
    * Apply text chunking based on dialogue config
    */
   private chunkText(text: string): string[] {
-    const config = this.dialogueManager.getConfig();
-    if (!config) {
-      // Fallback: no chunking
-      return [text];
-    }
-
-    // Detect device type (simplified - could be enhanced)
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    const isTablet =
-      typeof window !== 'undefined' && window.innerWidth >= 768 && window.innerWidth < 1024;
-
-    const deviceType = isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop';
-    const maxLength = config.display.textLimits[deviceType].maxCharsPerScreen;
-
-    // Split into sentences
-    const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-    const chunks: string[] = [];
-    let currentChunk = '';
-
-    for (const sentence of sentences) {
-      if (currentChunk.length + sentence.length > maxLength) {
-        if (currentChunk) {
-          chunks.push(currentChunk.trim());
-          currentChunk = sentence;
-        } else {
-          // Single sentence exceeds limit - break by words
-          const words = sentence.split(' ');
-          let wordChunk = '';
-          for (const word of words) {
-            if ((wordChunk + word).length > maxLength) {
-              if (wordChunk) {
-                chunks.push(wordChunk.trim());
-                wordChunk = word;
-              } else {
-                // Single word exceeds limit - just add it
-                chunks.push(word);
-                wordChunk = '';
-              }
-            } else {
-              wordChunk += (wordChunk ? ' ' : '') + word;
-            }
-          }
-          if (wordChunk) currentChunk = wordChunk;
-        }
-      } else {
-        currentChunk += sentence;
-      }
-    }
-
-    if (currentChunk.trim()) {
-      chunks.push(currentChunk.trim());
-    }
-
-    return chunks.length > 0 ? chunks : [text];
+    // Use shared chunking utility
+    return chunkText(text);
   }
 
   /**

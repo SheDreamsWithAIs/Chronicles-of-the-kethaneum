@@ -169,7 +169,6 @@ export const DialogueQueue = forwardRef<DialogueQueueRef, DialogueQueueProps>(
           }, ANIMATION_DURATIONS.panelEnter);
         } else {
           // First panel
-          console.log('[DialogueQueue] Adding first panel to empty queue');
           hadDialogueRef.current = true; // Mark that we've had dialogue
           setQueue([entry]);
           setAnimationState(entry.id, 'entering');
@@ -220,12 +219,14 @@ export const DialogueQueue = forwardRef<DialogueQueueRef, DialogueQueueProps>(
     };
 
     const handleContinue = () => {
-      console.log('[DialogueQueue] handleContinue called', {
+      // Handle continue
+      {
         isTransitioning,
         queueLength: queue.length,
       });
       if (isTransitioning || queue.length === 0) {
-        console.log('[DialogueQueue] handleContinue early return', {
+        // Early return
+        {
           isTransitioning,
           queueLength: queue.length,
         });
@@ -233,7 +234,8 @@ export const DialogueQueue = forwardRef<DialogueQueueRef, DialogueQueueProps>(
       }
 
       const bottomPanel = queue[queue.length - 1];
-      console.log('[DialogueQueue] Bottom panel:', {
+      // Bottom panel
+      {
         id: bottomPanel.id,
         hasChunks: !!bottomPanel.chunks,
         currentChunk: bottomPanel.currentChunk,
@@ -245,23 +247,17 @@ export const DialogueQueue = forwardRef<DialogueQueueRef, DialogueQueueProps>(
         const currentChunk = bottomPanel.currentChunk;
         if (currentChunk < bottomPanel.chunks.length - 1) {
           // Show next chunk
-          console.log('[DialogueQueue] Advancing chunk', currentChunk + 1);
           updatePanelChunk(bottomPanel.id, currentChunk + 1);
           return;
         }
       }
 
       // No more chunks, trigger parent to advance dialogue
-      console.log('[DialogueQueue] No more chunks, calling onContinue');
       onContinue?.();
     };
 
     const clear = () => {
-      console.log('[DialogueQueue] clear() called', {
-        queueLength: queue.length,
-        hadDialogue: hadDialogueRef.current,
-        isTransitioning,
-      });
+      // Clear queue
       setQueue([]);
       setAnimationStates(new Map());
       setIsTransitioning(false);
@@ -272,7 +268,8 @@ export const DialogueQueue = forwardRef<DialogueQueueRef, DialogueQueueProps>(
     // Track when queue has had dialogue
     useEffect(() => {
       if (queue.length > 0) {
-        console.log('[DialogueQueue] Queue has content, setting hadDialogue=true', {
+        // Queue has content
+        {
           queueLength: queue.length,
           entryIds: queue.map(e => e.id),
         });
@@ -283,7 +280,7 @@ export const DialogueQueue = forwardRef<DialogueQueueRef, DialogueQueueProps>(
     // Reset hadDialogue when conversation becomes inactive
     useEffect(() => {
       if (!isActive) {
-        console.log('[DialogueQueue] Conversation inactive, resetting hadDialogue');
+        // Conversation inactive, resetting hadDialogue
         hadDialogueRef.current = false;
       }
     }, [isActive]);
@@ -291,7 +288,8 @@ export const DialogueQueue = forwardRef<DialogueQueueRef, DialogueQueueProps>(
     // Check if queue becomes empty and notify parent
     // Only fire if queue had content before becoming empty (prevents firing on initial empty state)
     useEffect(() => {
-      console.log('[DialogueQueue] Queue state check', {
+      // Queue state check
+      {
         isActive,
         queueLength: queue.length,
         isTransitioning,
@@ -299,10 +297,10 @@ export const DialogueQueue = forwardRef<DialogueQueueRef, DialogueQueueProps>(
       });
 
       if (isActive && hadDialogueRef.current && queue.length === 0 && !isTransitioning) {
-        console.log('[DialogueQueue] Queue became empty after having content - calling onQueueEmpty');
+        // Queue became empty after having content - calling onQueueEmpty
         onQueueEmpty?.();
       } else if (isActive && queue.length === 0 && !hadDialogueRef.current && !isTransitioning) {
-        console.log('[DialogueQueue] Queue is empty but never had content - NOT calling onQueueEmpty (preventing premature close)');
+        // Queue is empty but never had content - NOT calling onQueueEmpty (preventing premature close)
       }
     }, [queue.length, isActive, isTransitioning, onQueueEmpty]);
 

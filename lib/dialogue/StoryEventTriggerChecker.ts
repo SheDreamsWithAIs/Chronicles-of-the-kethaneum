@@ -83,7 +83,6 @@ class EventIndex {
       this.byPattern.get(patternType)!.push(indexedEvent);
     }
     
-    console.log(`[StoryEventTriggerChecker] Indexed ${this.allEvents.length} events across ${this.byBeat.size} story beats`);
   }
   
   /**
@@ -238,23 +237,12 @@ export class StoryEventTriggerChecker {
       
       if (isSatisfied) {
         availableEvents.push(indexedEvent.eventId);
-        console.log(`[StoryEventTriggerChecker] Event '${indexedEvent.eventId}' trigger satisfied:`, {
-          triggerCondition: indexedEvent.triggerCondition,
-          eventId: indexedEvent.eventId,
-        });
+        // Trigger satisfied
       } else {
-        console.log(`[StoryEventTriggerChecker] Event '${indexedEvent.eventId}' trigger NOT satisfied:`, {
-          triggerCondition: indexedEvent.triggerCondition,
-          eventId: indexedEvent.eventId,
-        });
+        // Trigger not satisfied
       }
     }
     
-    console.log('[StoryEventTriggerChecker] Available events after trigger check:', {
-      count: availableEvents.length,
-      events: availableEvents,
-      currentBeat,
-    });
     
     return availableEvents;
   }
@@ -378,7 +366,8 @@ export class StoryEventTriggerChecker {
       const currentKethaneum = completedKethaneum?.size || 0;
       const result = currentKethaneum === 1;
       
-      console.log('[StoryEventTriggerChecker] Checking first-kethaneum-puzzle-complete:', {
+      // Checking first-kethaneum-puzzle-complete
+      {
         kethaneumGenre,
         completedKethaneum: completedKethaneum ? Array.from(completedKethaneum) : 'undefined',
         currentKethaneum,

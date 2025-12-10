@@ -299,11 +299,9 @@ export class DialogueManager {
         const storyEvent = await this.loadAndValidateStoryEventFile(filename);
         if (storyEvent && storyEvent.storyEvent?.id) {
           this.storyEvents.set(storyEvent.storyEvent.id, storyEvent);
-          console.log(`[DialogueManager] Loaded story event: ${storyEvent.storyEvent.id}`);
         }
       }
 
-      console.log(`[DialogueManager] ✅ Loaded ${this.storyEvents.size} story events`);
 
       // Initialize story event trigger checker index for performance
       // This indexes events by story beat so we only check relevant events
@@ -526,11 +524,6 @@ export class DialogueManager {
       // Use StoryEventTriggerChecker to get events that satisfy trigger conditions
       const triggerCheckedEvents = StoryEventTriggerChecker.checkCurrentlyAvailableEvents(currentState);
       
-      console.log('[DialogueManager] Trigger-checked events:', {
-        count: triggerCheckedEvents.length,
-        events: triggerCheckedEvents,
-        currentBeat: currentState.storyProgress?.currentStoryBeat,
-      });
       
       // Validate completedEvents is an array if provided
       if (completedEvents !== undefined && !Array.isArray(completedEvents)) {
@@ -543,7 +536,8 @@ export class DialogueManager {
         ? triggerCheckedEvents.filter((eventId) => !completedEvents.includes(eventId))
         : triggerCheckedEvents;
 
-      console.log('[DialogueManager] Filtered events (after removing completed):', {
+      // Filtered events (after removing completed)
+      {
         completedEvents: completedEvents || [],
         beforeFilter: triggerCheckedEvents.length,
         afterFilter: filteredEvents.length,
