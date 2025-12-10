@@ -524,7 +524,6 @@ export class DialogueManager {
       // Use StoryEventTriggerChecker to get events that satisfy trigger conditions
       const triggerCheckedEvents = StoryEventTriggerChecker.checkCurrentlyAvailableEvents(currentState);
       
-      
       // Validate completedEvents is an array if provided
       if (completedEvents !== undefined && !Array.isArray(completedEvents)) {
         console.error('[DialogueManager] completedEvents is not an array:', completedEvents);
@@ -537,12 +536,6 @@ export class DialogueManager {
         : triggerCheckedEvents;
 
       // Filtered events (after removing completed)
-      {
-        completedEvents: completedEvents || [],
-        beforeFilter: triggerCheckedEvents.length,
-        afterFilter: filteredEvents.length,
-        filtered: filteredEvents,
-      });
 
       return filteredEvents;
     } catch (error) {

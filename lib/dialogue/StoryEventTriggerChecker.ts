@@ -365,15 +365,6 @@ export class StoryEventTriggerChecker {
       const completedKethaneum = currentState.completedPuzzlesByGenre?.[kethaneumGenre];
       const currentKethaneum = completedKethaneum?.size || 0;
       const result = currentKethaneum === 1;
-      
-      // Checking first-kethaneum-puzzle-complete
-      {
-        kethaneumGenre,
-        completedKethaneum: completedKethaneum ? Array.from(completedKethaneum) : 'undefined',
-        currentKethaneum,
-        result,
-      });
-      
       return result;
     }
     

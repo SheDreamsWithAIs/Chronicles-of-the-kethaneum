@@ -719,16 +719,6 @@ export default function LibraryScreen() {
     // The previous check for isComplete() was preventing onComplete() from being called
     // because isComplete() becomes true after the last dialogue is returned, but we still
     // need to call advance() one more time to trigger the completion callback
-    const currentSeq = eventPlayerRef.current.getCurrentSequence();
-    const isCompleteBefore = eventPlayerRef.current.isComplete();
-    
-    // Handle continue dialogue
-    {
-      currentSeq,
-      isCompleteBefore,
-      hasPlayer: !!eventPlayerRef.current,
-    });
-
     // Call advance() - this will call emitNextDialogue(), which calls next()
     // When next() returns null (no more dialogue), emitNextDialogue() calls onComplete()
     eventPlayerRef.current.advance();

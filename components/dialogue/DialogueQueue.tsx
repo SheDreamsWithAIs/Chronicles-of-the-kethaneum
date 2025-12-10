@@ -219,28 +219,11 @@ export const DialogueQueue = forwardRef<DialogueQueueRef, DialogueQueueProps>(
     };
 
     const handleContinue = () => {
-      // Handle continue
-      {
-        isTransitioning,
-        queueLength: queue.length,
-      });
       if (isTransitioning || queue.length === 0) {
-        // Early return
-        {
-          isTransitioning,
-          queueLength: queue.length,
-        });
         return;
       }
 
       const bottomPanel = queue[queue.length - 1];
-      // Bottom panel
-      {
-        id: bottomPanel.id,
-        hasChunks: !!bottomPanel.chunks,
-        currentChunk: bottomPanel.currentChunk,
-        chunksLength: bottomPanel.chunks?.length,
-      });
 
       // Check if bottom panel has more chunks
       if (bottomPanel.chunks && bottomPanel.currentChunk !== undefined) {
@@ -268,11 +251,6 @@ export const DialogueQueue = forwardRef<DialogueQueueRef, DialogueQueueProps>(
     // Track when queue has had dialogue
     useEffect(() => {
       if (queue.length > 0) {
-        // Queue has content
-        {
-          queueLength: queue.length,
-          entryIds: queue.map(e => e.id),
-        });
         hadDialogueRef.current = true;
       }
     }, [queue.length]);
@@ -289,12 +267,6 @@ export const DialogueQueue = forwardRef<DialogueQueueRef, DialogueQueueProps>(
     // Only fire if queue had content before becoming empty (prevents firing on initial empty state)
     useEffect(() => {
       // Queue state check
-      {
-        isActive,
-        queueLength: queue.length,
-        isTransitioning,
-        hadDialogue: hadDialogueRef.current,
-      });
 
       if (isActive && hadDialogueRef.current && queue.length === 0 && !isTransitioning) {
         // Queue became empty after having content - calling onQueueEmpty
