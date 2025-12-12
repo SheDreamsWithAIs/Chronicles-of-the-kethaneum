@@ -9,6 +9,7 @@ import { loadReceivingRoomContent, type ReceivingRoomContent } from '@/lib/utils
 import styles from './receiving-room.module.css';
 
 export default function ReceivingRoomScreen() {
+  const storyAreaRef = useRef<HTMLDivElement>(null);
   const [content, setContent] = useState<ReceivingRoomContent | null>(null);
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
@@ -56,6 +57,13 @@ export default function ReceivingRoomScreen() {
 
   const currentSegment = content?.segments[currentSegmentIndex];
 
+  // Reset scroll to top whenever the segment changes
+  useEffect(() => {
+    if (storyAreaRef.current) {
+      storyAreaRef.current.scrollTo({ top: 0, behavior: 'auto' });
+    }
+  }, [currentSegmentIndex]);
+
   if (!content || !currentSegment) {
     return (
       <div className={styles.receivingRoomContainer}>
@@ -83,15 +91,15 @@ export default function ReceivingRoomScreen() {
               </span>
             </div>
           </div>
-        </div>
+      </div>
 
-        {/* Story Text Area */}
-        <div className={styles.storyTextArea}>
-          <div 
-            className={`${styles.textContainer} ${isTransitioning ? styles.fadeOut : styles.fadeIn}`}
-            key={currentSegmentIndex}
-          >
-            <FormattedSegment 
+      {/* Story Text Area */}
+      <div className={styles.storyTextArea} ref={storyAreaRef}>
+        <div 
+          className={`${styles.textContainer} ${isTransitioning ? styles.fadeOut : styles.fadeIn}`}
+          key={currentSegmentIndex}
+        >
+          <FormattedSegment 
               paragraphs={currentSegment.paragraphs}
               className={styles.formattedText}
             />
