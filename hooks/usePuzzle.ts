@@ -106,13 +106,9 @@ export function usePuzzle(state: GameState, setState: (state: GameState) => void
   const loadBeatTheClock = useCallback(async () => {
     try {
       const currentState = stateRef.current;
-      console.log('[usePuzzle.loadBeatTheClock] Starting to load puzzle, current timer:', currentState.timer ? 'exists' : 'null');
       const { success, newState } = await loadBeatTheClockPuzzle(currentState, config);
       if (success) {
-        console.log('[usePuzzle.loadBeatTheClock] Puzzle loaded successfully, new timer:', newState.timer ? 'exists' : 'null', 'gameOver:', newState.gameOver);
         setState(newState);
-      } else {
-        console.log('[usePuzzle.loadBeatTheClock] Puzzle load failed');
       }
       return success;
     } catch (error) {
@@ -176,4 +172,3 @@ export function usePuzzle(state: GameState, setState: (state: GameState) => void
     markCompleted,
   };
 }
-

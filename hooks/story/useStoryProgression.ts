@@ -142,7 +142,6 @@ export function useStoryProgression(): UseStoryProgressionReturn {
     }) as EventListener;
 
     const handleStoryEvent = ((event: CustomEvent) => {
-      console.log('[Story Event Triggered]', event.detail);
     }) as EventListener;
 
     document.addEventListener('storyProgression:storyProgressionChanged', handleProgressionChange);

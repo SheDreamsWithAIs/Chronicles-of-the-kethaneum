@@ -73,12 +73,10 @@ export async function loadProgress(): Promise<UnifiedLoadResult> {
   try {
     // Check if migration is needed
     if (needsMigration()) {
-      console.log('Unified Save: Old format detected, running migration...');
 
       const migrationResult = await autoMigrate();
 
       if (migrationResult && migrationResult.success) {
-        console.log('Unified Save: Migration successful', migrationResult.stats);
 
         // Load the freshly migrated data
         const decoded = await loadOptimizedProgress();

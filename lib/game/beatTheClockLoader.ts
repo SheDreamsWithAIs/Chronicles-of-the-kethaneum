@@ -16,12 +16,9 @@ export async function loadBeatTheClockPuzzle(
   state: GameState,
   config: Config
 ): Promise<{ success: boolean; newState: GameState }> {
-  console.log('[loadBeatTheClockPuzzle] Loading puzzle, current timer:', state.timer ? 'exists' : 'null', 'gameOver:', state.gameOver);
-  
   try {
     // Clear any existing timer before loading new puzzle
     if (state.timer) {
-      console.log('[loadBeatTheClockPuzzle] Clearing existing timer');
       clearInterval(state.timer);
     }
     
@@ -72,8 +69,6 @@ export async function loadBeatTheClockPuzzle(
         throw new Error('Puzzle initialization failed');
       }
       
-      console.log('[loadBeatTheClockPuzzle] Puzzle initialized (first load), new timer:', initResult.newState.timer ? 'exists' : 'null', 'gameOver:', initResult.newState.gameOver);
-      
       return { success: true, newState: initResult.newState };
     } else {
       // Puzzles already loaded, select random one
@@ -102,8 +97,6 @@ export async function loadBeatTheClockPuzzle(
         throw new Error('Puzzle initialization failed');
       }
       
-      console.log('[loadBeatTheClockPuzzle] Puzzle initialized (already loaded), new timer:', initResult.newState.timer ? 'exists' : 'null', 'gameOver:', initResult.newState.gameOver);
-      
       return { success: true, newState: initResult.newState };
     }
   } catch (error) {
@@ -111,4 +104,3 @@ export async function loadBeatTheClockPuzzle(
     return { success: false, newState: state };
   }
 }
-

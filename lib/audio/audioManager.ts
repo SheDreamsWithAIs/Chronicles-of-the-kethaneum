@@ -480,7 +480,6 @@ export class AudioManager {
     if (failed > 0) {
       console.warn(`[Audio] Playlist "${playlistId}": ${successful} track(s) loaded successfully, ${failed} track(s) failed to load`);
     } else {
-      console.log(`[Audio] Playlist "${playlistId}": All ${successful} track(s) loaded successfully`);
     }
     
     // If no tracks loaded successfully, warn but don't throw

@@ -43,17 +43,14 @@ export default function PuzzleScreen() {
   // Wrapper for loadBeatTheClock that sets transition flag
   const loadBeatTheClockWithTransition = useCallback(async () => {
     isTransitioningRef.current = true;
-    console.log('[puzzle.page] Setting transition flag - loading puzzle');
     try {
       const result = await loadBeatTheClock();
       // Wait a tick for state to update before clearing flag
       await new Promise(resolve => setTimeout(resolve, 0));
       isTransitioningRef.current = false;
-      console.log('[puzzle.page] Clearing transition flag - puzzle loaded');
       return result;
     } catch (error) {
       isTransitioningRef.current = false;
-      console.log('[puzzle.page] Clearing transition flag - error loading puzzle');
       throw error;
     }
   }, [loadBeatTheClock]);
@@ -572,7 +569,6 @@ export default function PuzzleScreen() {
 
   // Stats modal handlers
   const handleNextPuzzle = useCallback(async () => {
-    console.log('[puzzle.page.handleNextPuzzle] Closing modal and loading next puzzle');
     setShowStatsModal(false);
     if (state.gameMode === 'puzzle-only') {
       // Clear timer before loading new puzzle to prevent stale callbacks
@@ -610,7 +606,6 @@ export default function PuzzleScreen() {
   }, [state.gameMode, state.puzzles, loadRandom, loadAll, loadWithSelection, puzzleOnlyTimer, storyTimer]);
 
   const handleRestartPuzzle = useCallback(() => {
-    console.log('[puzzle.page.handleRestartPuzzle] Closing modal and restarting puzzle');
     setShowStatsModal(false);
     // Reset puzzle state and reload current puzzle
     setState({
@@ -630,7 +625,6 @@ export default function PuzzleScreen() {
   }, [state, setState, config, state.gameMode, puzzleOnlyTimer, beatTheClockTimer]);
 
   const handleStartFreshRun = useCallback(async () => {
-    console.log('[puzzle.page.handleStartFreshRun] Closing modal and starting fresh run');
     setShowStatsModal(false);
     // Reset run timer and load new puzzle
     const runState = startBeatTheClockRun(state);
@@ -644,7 +638,6 @@ export default function PuzzleScreen() {
 
   // Genre completion modal handlers
   const handleContinueSameGenre = useCallback(async () => {
-    console.log('[puzzle.page.handleContinueSameGenre] Replaying books in current genre');
     setShowGenreCompletionModal(false);
 
     // Load sequential puzzle with allowReplay flag
@@ -655,7 +648,6 @@ export default function PuzzleScreen() {
   }, [state.currentGenre, loadSequential]);
 
   const handleSelectNewGenre = useCallback(async (newGenre: string) => {
-    console.log('[puzzle.page.handleSelectNewGenre] Switching to new genre:', newGenre);
     setShowGenreCompletionModal(false);
 
     // Update state with new genre and clear book/puzzle index
@@ -678,7 +670,6 @@ export default function PuzzleScreen() {
   }, [setState, loadSequential]);
 
   const handleCloseGenreCompletionModal = useCallback(() => {
-    console.log('[puzzle.page.handleCloseGenreCompletionModal] Closing modal and returning to library');
     setShowGenreCompletionModal(false);
     router.push('/library');
   }, [router]);
@@ -984,4 +975,3 @@ export default function PuzzleScreen() {
     </div>
   );
 }
-

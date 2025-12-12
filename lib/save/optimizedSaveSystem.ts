@@ -530,22 +530,7 @@ export async function convertToGameStateFormat(
   // Fallback: If selectedGenre is empty but currentGenre exists, use currentGenre
   // This handles old save files that don't have selectedGenre saved
   if (!selectedGenre && currentGenre) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Save System] selectedGenre is empty, falling back to currentGenre:', currentGenre);
-    }
     selectedGenre = currentGenre;
-  }
-  
-  // Debug logging in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Save System] Loading game state:', {
-      currentGenre,
-      selectedGenre: decoded.selectionState?.selectedGenre || '(empty)',
-      selectedGenreAfterFallback: selectedGenre,
-      hasSelectionState: !!decoded.selectionState,
-      hasCurrentState: !!decoded.currentState,
-      completedPuzzles: decoded.completedPuzzlesCount,
-    });
   }
 
   return {

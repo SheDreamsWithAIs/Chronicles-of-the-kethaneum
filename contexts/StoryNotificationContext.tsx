@@ -37,22 +37,22 @@ export function StoryNotificationProvider({ children }: { children: ReactNode })
 
   const setNewStoryAvailable = useCallback(() => {
     setHasNewStory(true);
-    console.log('[StoryNotification] New story moment available!');
+    //console.log('[StoryNotification] New story moment available!');
   }, []);
 
   const clearNewStory = useCallback(() => {
     setHasNewStory(false);
-    console.log('[StoryNotification] Story notification cleared');
+    //console.log('[StoryNotification] Story notification cleared');
   }, []);
 
   const setNewDialogueAvailable = useCallback(() => {
     setHasNewDialogue(true);
-    console.log('[StoryNotification] New dialogue event available!');
+    //console.log('[StoryNotification] New dialogue event available!');
   }, []);
 
   const clearNewDialogue = useCallback(() => {
     setHasNewDialogue(false);
-    console.log('[StoryNotification] Dialogue notification cleared');
+    //console.log('[StoryNotification] Dialogue notification cleared');
   }, []);
 
   return (

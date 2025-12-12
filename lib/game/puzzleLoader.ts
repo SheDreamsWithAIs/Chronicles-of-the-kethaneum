@@ -440,7 +440,6 @@ export function loadSequentialPuzzle(
           }
         } else {
           // Genre is complete - signal to show modal instead of auto-replaying
-          console.log(`All books complete in genre "${selectedGenre}". Signaling genre completion.`);
           return {
             success: false,
             newState: state,
@@ -614,4 +613,3 @@ export function buildBookPartsMapping(state: GameState): GameState {
   
   return newState;
 }
-

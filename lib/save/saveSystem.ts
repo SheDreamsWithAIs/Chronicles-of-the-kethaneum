@@ -106,7 +106,6 @@ export function loadGameProgress(): SavedProgress | null {
   try {
     const savedProgress = localStorage.getItem('kethaneumProgress');
     if (!savedProgress) {
-      console.log('No saved progress found');
       return null;
     }
 
@@ -179,4 +178,3 @@ export function clearAudioSettings(): void {
     console.error('Failed to clear audio settings:', error);
   }
 }
-

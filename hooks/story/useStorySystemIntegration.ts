@@ -27,16 +27,6 @@ interface UseStorySystemIntegrationOptions {
 
 /**
  * Hook to integrate StoryProgressionManager with StoryBlurbManager
- *
- * Usage:
- * ```tsx
- * useStorySystemIntegration({
- *   state: gameState,
- *   onBlurbTriggered: (blurbId, trigger) => {
- *     console.log('New story moment:', blurbId);
- *   }
- * });
- * ```
  */
 export function useStorySystemIntegration({
   state,
@@ -66,8 +56,6 @@ export function useStorySystemIntegration({
       return;
     }
 
-    console.log(`[StorySystemIntegration] Beat advanced to: ${beat}, trigger: ${trigger}`);
-
     // Check if this trigger should fire a blurb
     const blurb = storyBlurbManager.getBlurbForTrigger(
       trigger,
@@ -75,15 +63,8 @@ export function useStorySystemIntegration({
       storyProgress.firedTriggers
     );
 
-    if (blurb) {
-      console.log(`[StorySystemIntegration] Found blurb for trigger ${trigger}:`, blurb.id);
-
-      // Notify callback if provided
-      if (onBlurbTriggered) {
-        onBlurbTriggered(blurb.id, trigger);
-      }
-    } else {
-      console.log(`[StorySystemIntegration] No blurb found for trigger ${trigger}`);
+    if (blurb && onBlurbTriggered) {
+      onBlurbTriggered(blurb.id, trigger);
     }
   }, [enabled, onBlurbTriggered]);
 
@@ -95,10 +76,9 @@ export function useStorySystemIntegration({
     if (!enabled) return;
 
     const { previousBeat, newBeat } = event.detail;
-    console.log(`[StorySystemIntegration] Story progression: ${previousBeat} → ${newBeat}`);
-
-    // You can add additional logic here if needed
-    // For example, updating UI, saving state, etc.
+    // Place for additional UI/state updates if needed when beats change
+    void previousBeat;
+    void newBeat;
   }, [enabled]);
 
   /**
@@ -114,12 +94,9 @@ export function useStorySystemIntegration({
     // Listen for general progression changes
     document.addEventListener('storyProgression:storyProgressionChanged', handleProgressionChanged as EventListener);
 
-    console.log('[StorySystemIntegration] Event listeners registered');
-
     return () => {
       document.removeEventListener('storyProgression:beatTrigger', handleBeatAdvanced as EventListener);
       document.removeEventListener('storyProgression:storyProgressionChanged', handleProgressionChanged as EventListener);
-      console.log('[StorySystemIntegration] Event listeners cleaned up');
     };
   }, [enabled, handleBeatAdvanced, handleProgressionChanged]);
 

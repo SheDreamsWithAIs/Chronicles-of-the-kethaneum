@@ -175,8 +175,7 @@ export function endGame(
     const progressionResult = storyProgressionManager.checkAndAdvanceStory(metrics);
 
     if (progressionResult.shouldAdvance) {
-      console.log(`[Story Progression] ${progressionResult.reason}`);
-      console.log(`[Story Progression] Advanced to: ${progressionResult.nextBeat}`);
+      // Story progression manager updated state internally when advancing
     }
   }
 
@@ -318,13 +317,10 @@ export function resumeGame(state: GameState): GameState {
  * Used for beat-the-clock mode when puzzle completes but run continues
  */
 export function clearPuzzleTimer(state: GameState): GameState {
-  console.log('[clearPuzzleTimer] Clearing puzzle timer, gameMode:', state.gameMode, 'timer exists:', !!state.timer);
-  
   // Stop the timer - store reference before clearing
   const timerToClear = state.timer;
   if (timerToClear) {
     clearInterval(timerToClear);
-    console.log('[clearPuzzleTimer] Timer interval cleared');
   }
   
   return {
@@ -393,4 +389,3 @@ export function endBeatTheClockRun(state: GameState): { newState: GameState; ses
   
   return { newState, sessionStats };
 }
-

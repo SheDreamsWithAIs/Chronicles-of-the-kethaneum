@@ -57,7 +57,6 @@ export function usePageLoader(options: UsePageLoaderOptions = {}) {
     // Debug logging (can be removed later)
     if (process.env.NODE_ENV === 'development') {
       const conditionEntries = Array.from(conditions.entries()).map(([id, loading]) => `${id}: ${loading ? 'loading' : 'ready'}`);
-      console.log(`[usePageLoader] size=${conditions.size}, allLoaded=${allLoaded}, isLoading=${isLoading}, conditions:`, conditionEntries.join(', '));
     }
     
     if (allLoaded && conditions.size > 0) {
