@@ -80,7 +80,7 @@
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  padding: 20px;
+  padding: 20px 20px 140px;
   pointer-events: none; /* Allow clicks to pass through empty space */
 }
 
@@ -92,6 +92,20 @@
   height: 100%;
   background: rgba(0, 0, 0, 0.8);
   z-index: 999;
+}
+
+.dialogueControlsOverlay {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 960px;
+  padding: 0 20px;
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+  z-index: 1001;
 }
 
 /* Character Portrait */
@@ -135,7 +149,19 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+}
+
+.dialogueHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.characterMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .characterName {
@@ -181,9 +207,10 @@
 .chunkIndicator {
   font-family: var(--font-crimson), serif;
   font-size: 14px;
-  color: #8b6f47;
+  color: #d4af37;
   text-align: right;
-  margin-top: auto;
+  letter-spacing: 0.5px;
+  min-width: 60px;
 }
 
 /* Emotion-based styling - subtle variations on the main theme */
@@ -223,9 +250,7 @@
 
 /* Continue Button */
 .continueButton {
-  position: fixed;
-  bottom: 40px;
-  right: 40px;
+  position: relative;
   padding: 15px 30px;
   background: linear-gradient(135deg, var(--accent-main), var(--accent-dark));
   border: 2px solid var(--accent-main);
@@ -237,12 +262,14 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: var(--elevation-medium);
-  z-index: 1001;
+  z-index: 1;
+  pointer-events: auto;
+  transform: translateY(6px);
 }
 
 .continueButton:hover {
   background: linear-gradient(135deg, var(--accent-light), var(--accent-main));
-  transform: translateY(-2px);
+  transform: translateY(4px);
   box-shadow: var(--elevation-high);
 }
 
@@ -254,6 +281,13 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .dialogueControlsOverlay {
+    bottom: 20px;
+    max-width: 100%;
+    justify-content: center;
+    padding: 0 16px;
+  }
+
   .dialoguePanel {
     max-width: 100%;
     min-height: 200px;
@@ -276,10 +310,9 @@
   }
 
   .continueButton {
-    bottom: 20px;
-    right: 20px;
     padding: 12px 24px;
     font-size: 16px;
+    transform: none;
   }
 }
 

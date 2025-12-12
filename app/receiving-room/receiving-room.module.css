@@ -80,7 +80,7 @@
 /* Story Text Area */
 .storyTextArea {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Keep long passages pinned to the top */
   justify-content: center;
   padding: 2rem;
   overflow-y: auto;

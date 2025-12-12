@@ -326,14 +326,14 @@ describe('Multi-Character Dialogue System', () => {
           .then(($text) => {
             const text = $text.text();
             expect(
-              text.includes('Ah, you must be our new Assistant Archivist') ||
-              text.includes('I am Lumina')
+              text.includes('Careful, Archivist') ||
+              text.includes("haven't learned to control your connection to the Book")
             ).to.be.true;
           });
         
         cy.wait(600); // Ensure animation complete
 
-        // Second character (Valdris)
+        // Second dialogue entry (still Lumina)
         cy.get('[data-testid="continue-btn"]', { timeout: 5000 })
           .should('be.visible')
           .click();
@@ -342,18 +342,18 @@ describe('Multi-Character Dialogue System', () => {
         cy.get('[data-testid="dialogue-panel"]', { timeout: 5000 })
           .should('have.length', 2);
         
-        // Verify second character is Valdris with correct dialogue
+        // Verify second dialogue is Lumina with the warning content
         cy.get('[data-testid="character-name"]')
           .last()
-          .should('contain', 'Valdris');
+          .should('contain', 'Lumina');
         
         cy.get('[data-testid="dialogue-text"]')
           .last()
           .then(($text) => {
             const text = $text.text();
             expect(
-              text.includes('Welcome, young seeker') ||
-              text.includes('I am Valdris')
+              text.includes('The Book of Passage does not merely record history') ||
+              text.includes('In these early stages')
             ).to.be.true;
           });
         
@@ -461,8 +461,8 @@ describe('Multi-Character Dialogue System', () => {
           const dialogueText = $text.text();
           // First-visit has specific text that banter won't have
           expect(dialogueText).to.not.include('Ah, you must be our new Assistant Archivist');
-          expect(dialogueText).to.not.include('I am Lumina, Senior Archivist of Interdimensional Collections');
-          expect(dialogueText).to.not.include('Welcome, young seeker. I am Valdris');
+          expect(dialogueText).to.not.include('Careful, Archivist');
+          expect(dialogueText).to.not.include("haven't learned to control your connection to the Book");
         });
       });
     });

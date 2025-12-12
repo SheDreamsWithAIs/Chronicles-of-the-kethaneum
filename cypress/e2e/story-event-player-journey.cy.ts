@@ -43,8 +43,8 @@ describe('Story Event System - Player Journey', () => {
         const dialogueText = $text.text();
 
         // Check if it contains the specific first-visit event text
-        const hasFirstVisitText = dialogueText.includes('Ah, you must be our new Assistant Archivist') ||
-                                  dialogueText.includes('I am Lumina, Senior Archivist of Interdimensional Collections');
+        const hasFirstVisitText = dialogueText.includes('Careful, Archivist') ||
+                                  dialogueText.includes('haven't learned to control your connection to the Book');
 
         if (hasFirstVisitText) {
           cy.log('✅ SUCCESS: First-visit story event dialogue is displaying!');
@@ -52,13 +52,13 @@ describe('Story Event System - Player Journey', () => {
         } else {
           cy.log('⚠️ ISSUE: Not showing first-visit event dialogue');
           cy.log(`   Current dialogue: ${dialogueText}`);
-          cy.log('   Expected: "Ah, you must be our new Assistant Archivist!"');
+          cy.log('   Expected: "Careful, Archivist!"');
         }
 
         // Assert that it's the story event dialogue
         expect(dialogueText).to.satisfy((text: string) => {
-          return text.includes('Ah, you must be our new Assistant Archivist') ||
-                 text.includes('I am Lumina, Senior Archivist of Interdimensional Collections');
+          return text.includes('Careful, Archivist') ||
+                 text.includes('haven't learned to control your connection to the Book');
         }, 'Should display first-visit story event dialogue, not random banter');
       });
 
@@ -130,7 +130,7 @@ describe('Story Event System - Player Journey', () => {
       cy.get('[class*="dialogueOverlay"]').should('be.visible');
 
       // Expected dialogue sequence from first-visit.json:
-      // 1. Lumina: "Ah, you must be our new Assistant Archivist..."
+      // 1. Lumina: "Careful, Archivist..."
       // 2. Valdris: "Welcome, young seeker. I am Valdris..."
       // 3. Lumina: "The knowledge constructs await your attention..."
       // 4. Valdris: "Do not be overwhelmed by the vastness..."
@@ -139,8 +139,8 @@ describe('Story Event System - Player Journey', () => {
       cy.get('[class*="characterName"]').should('include.text', 'Lumina');
       cy.get('[class*="dialogueText"]').should('satisfy', ($el) => {
         const text = $el.text();
-        return text.includes('Assistant Archivist') ||
-               text.includes('Interdimensional Collections');
+        return text.includes('Careful, Archivist') ||
+               text.includes("haven't learned to control your connection to the Book");
       });
 
       // TODO: If the dialogue system supports advancing through sequences,
@@ -241,7 +241,7 @@ describe('Story Event System - Player Journey', () => {
         cy.log('✅ Checking story event metadata');
         expect(event.storyEvent).to.exist;
         expect(event.storyEvent.id).to.equal('first-visit');
-        expect(event.storyEvent.title).to.equal('First Steps in the Kethaneum');
+        expect(event.storyEvent.title).to.equal("Lumina's Warning");
         expect(event.storyEvent.triggerCondition).to.equal('player-enters-library-first-time');
         expect(event.storyEvent.storyBeat).to.equal('hook');
 
@@ -335,7 +335,7 @@ describe('Story Event System - Player Journey', () => {
         const event = new CustomEvent('dialogueManager:storyEventAvailable', {
           detail: {
             eventId: 'first-visit',
-            title: 'First Steps in the Kethaneum',
+            title: "Lumina's Warning",
             triggerCondition: 'player-enters-library-first-time',
             storyBeat: 'hook'
           }
@@ -455,3 +455,4 @@ describe('Story Event System - Player Journey', () => {
     });
   });
 });
+

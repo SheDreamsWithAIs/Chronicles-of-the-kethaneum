@@ -14,8 +14,8 @@
       "id": "intro_001",
       "storyBeat": "hook",
       "trigger": "game_start",
-      "title": "A New Beginning",
-      "text": "The pages of your Book of Passage shimmer as new words appear... Today marks your first day as Assistant Archivist in the vast expanse of the Kethaneum. The cosmic library stretches before you, its infinite shelves holding knowledge from countless worlds and civilizations.",
+      "title": "The Book of Passage",
+      "text": "The crystalline cover of your Book of Passage warms uncomfortably under your fingertips, as if it too were flushed. It pulses in time with your own rapid heartbeat. You look down at it, expecting to see the clean transparency of a blank page.\n\nInstead, words bleed into existence on their own. It captures your feelings, chronicling your deepest reactions in jagged, messy script:\n\nHumiliation...\n\nThe cold floor against your cheek when you should have walked into glory...\n\nThe stiffened silence of your first expectations dying...\n\nYou watch as it transcribes your disappointment and disorientation in real time. It captures the nausea rolling in your stomach and the fear that you have already failed before you have truly begun. As disconcerting as transit was, it was not the most disorienting part. It seems the portal's glitch didn't just rattle your bones. It shook your thoughts loose, spilling them directly onto this page...",
       "order": 1,
       "metadata": {
         "tags": ["introduction", "opening"]

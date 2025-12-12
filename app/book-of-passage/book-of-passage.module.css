@@ -163,9 +163,9 @@
   margin-bottom: 15px;
 }
 
-.storyContent em {
-  color: var(--primary-medium);
-  font-style: italic;
+.storyParagraph {
+  text-indent: 1.5em;
+  white-space: pre-line;
 }
 
 /* Discovered Books Section */
@@ -614,6 +614,20 @@
   margin-bottom: 12px;
 }
 
+.historyToggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  margin: 0 0 12px 0;
+  background: none;
+  border: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .historyEntryNumber {
   display: flex;
   align-items: center;
@@ -637,12 +651,46 @@
   margin: 0;
 }
 
+.historyToggleIcon {
+  margin-left: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary-medium);
+  line-height: 1;
+}
+
+.historyToggleLabel {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.historyPreview {
+  margin: 0 0 12px 40px;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--primary-medium);
+}
+
 .historyEntryText {
-  font-size: 15px;
+  font-size: 18px;
   line-height: 1.7;
   color: var(--neutral-dark);
   margin: 0 0 12px 0;
   padding-left: 40px;
+  text-indent: 1.5em;
+  white-space: pre-line;
+}
+
+.historyEntryText:last-child {
+  margin-bottom: 0;
+}
+
+.historyEntryText + .historyEntryText {
+  margin-top: 10px;
 }
 
 .historyEntryMeta {
@@ -723,4 +771,3 @@
     font-size: 18px;
   }
 }
-
