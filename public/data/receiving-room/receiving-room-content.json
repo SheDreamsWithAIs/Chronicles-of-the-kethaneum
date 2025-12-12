@@ -1,0 +1,123 @@
+{
+  "title": "The Receiving Room",
+  "segments": [
+    {
+      "paragraphs": [
+        {
+          "segments": [
+            {
+              "text": "You awaken in a room unlike any you've seen before. The air itself seems to shimmer with an otherworldly quality, and the walls—if they can be called walls—stretch upward into an impossible darkness above."
+            }
+          ]
+        },
+        {
+          "segments": [
+            {
+              "text": "Your head throbs with the remnants of a journey you can barely remember. Fragments of light, whispers of voices, the sensation of falling through space and time—all of it feels like a half-remembered dream."
+            }
+          ]
+        }
+      ],
+      "actionButton": {
+        "text": "Rise slowly to your feet"
+      }
+    },
+    {
+      "paragraphs": [
+        {
+          "segments": [
+            {
+              "text": "As you stand, the room comes into clearer focus. Shelves line the walls, but they hold no ordinary books. Each volume seems to pulse with its own inner light, and the titles shift and change before your eyes, written in languages you've never seen yet somehow understand."
+            }
+          ]
+        }
+      ],
+      "actionButton": {
+        "text": "Approach the nearest shelf"
+      }
+    },
+    {
+      "paragraphs": [
+        {
+          "segments": [
+            {
+              "text": "Before you can reach the shelves, a figure materializes from the shadows. Tall and elegant, with eyes that hold the depth of countless stars, they regard you with a mixture of curiosity and ancient wisdom."
+            }
+          ]
+        },
+        {
+          "segments": [
+            {
+              "text": "\"Welcome,\" they say, their voice carrying the weight of eons. \"You have been chosen. The ",
+              "color": "#8b5cf6"
+            },
+            {
+              "text": "Kethaneum",
+              "color": "#8b5cf6",
+              "bold": true
+            },
+            {
+              "text": " has been waiting for you.\""
+            }
+          ]
+        }
+      ],
+      "actionButton": {
+        "text": "Listen intently"
+      }
+    },
+    {
+      "paragraphs": [
+        {
+          "segments": [
+            {
+              "text": "They extend a hand, and a book appears—bound in leather that seems to shift between colors, its pages blank except for your name, elegantly inscribed on the first page."
+            }
+          ]
+        },
+        {
+          "segments": [
+            {
+              "text": "\"This is your ",
+              "color": "#fbbf24"
+            },
+            {
+              "text": "Book of Passage",
+              "color": "#fbbf24",
+              "italic": true
+            },
+            {
+              "text": ",\" they explain. \"It will record your journey, your discoveries, your growth. Every puzzle solved, every truth uncovered—all will be written here, in your own hand and in the hand of the Kethaneum itself.\""
+            }
+          ]
+        }
+      ],
+      "actionButton": {
+        "text": "Take the book"
+      }
+    },
+    {
+      "paragraphs": [
+        {
+          "segments": [
+            {
+              "text": "As your fingers touch the book, warmth spreads through your hands. The pages seem to respond to your touch, and for a moment, you catch glimpses of futures yet unwritten—challenges to overcome, knowledge to gain, stories yet to be told."
+            }
+          ]
+        },
+        {
+          "segments": [
+            {
+              "text": "\"Your journey begins now, Assistant Archivist. The cosmic catalog awaits your careful hand. Step forward, seeker, and let your story begin.\"",
+              "italic": true,
+              "color": "#60a5fa"
+            }
+          ]
+        }
+      ],
+      "actionButton": {
+        "text": "Begin your journey"
+      }
+    }
+  ]
+}

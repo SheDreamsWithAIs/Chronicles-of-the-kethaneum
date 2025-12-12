@@ -69,7 +69,8 @@ export default function BackstoryScreen() {
 
     // Navigate based on mode
     if (mode === 'story') {
-      router.push('/book-of-passage');
+      // Route Story mode players to the Receiving Room entry screen
+      router.push('/receiving-room');
     } else {
       // Puzzle Only or Beat the Clock - go directly to puzzle screen
       router.push('/puzzle');
