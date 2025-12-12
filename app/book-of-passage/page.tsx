@@ -43,7 +43,7 @@ type TabOption = 'current-journey' | 'story-history' | 'discovered-books';
 
 export default function BookOfPassageScreen() {
   const router = useRouter();
-  
+
   // Page loading state management - initialize FIRST to show loader immediately
   const { isLoading: pageLoading, setLoading } = usePageLoader({
     minDisplayTime: 500,
@@ -75,6 +75,7 @@ export default function BookOfPassageScreen() {
   // Registry state
   const [registryLoaded, setRegistryLoaded] = useState(false);
   const [availableGenres, setAvailableGenres] = useState<string[]>([]);
+  const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
 
   // Clear new story notification when visiting Book of Passage
   useEffect(() => {
@@ -106,6 +107,16 @@ export default function BookOfPassageScreen() {
   useEffect(() => {
     setLoading('registry', !registryLoaded);
   }, [registryLoaded, setLoading]);
+
+  useEffect(() => {
+    if (!storyHistory || storyHistory.length === 0) {
+      setExpandedEntries(new Set());
+      return;
+    }
+
+    // Reset to all-collapsed when history list changes so players choose what to open
+    setExpandedEntries(new Set());
+  }, [storyHistory]);
 
   // Restrict access to Story Mode only
   useEffect(() => {
@@ -340,6 +351,47 @@ export default function BookOfPassageScreen() {
       .join(' ');
   };
 
+  const handleToggleHistoryEntry = (id: string) => {
+    setExpandedEntries(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const renderParagraphs = (
+    text: string,
+    className?: string,
+    emphasize?: boolean
+  ): JSX.Element[] | null => {
+    if (!text) return null;
+
+    return text
+      .split(/\n\s*\n/)
+      .map(para => para.trim())
+      .filter(Boolean)
+      .map((para, idx) => (
+        <p key={idx} className={className}>
+          {emphasize ? <em>{para}</em> : para}
+        </p>
+      ));
+  };
+
+  const getPreviewText = (text: string, maxLength = 180): string => {
+    if (!text) return '';
+    const firstPara = text
+      .split(/\n\s*\n/)
+      .map(para => para.trim())
+      .find(Boolean) || text.trim();
+
+    if (firstPara.length <= maxLength) return firstPara;
+    return `${firstPara.slice(0, maxLength).trimEnd()}…`;
+  };
+
   return (
     <div className={styles.bookPassageContainer} data-testid="book-of-passage-screen">
       <PageLoader
@@ -391,7 +443,7 @@ export default function BookOfPassageScreen() {
                     {storyReady && currentBlurb ? (
                       <>
                         <h3 className={styles.blurbTitle}>{currentBlurb.title}</h3>
-                        <p><em>{currentBlurb.text}</em></p>
+                        {renderParagraphs(currentBlurb.text, styles.storyParagraph)}
                         {/* Story beat indicator removed for final version */}
                       </>
                     ) : (
@@ -432,11 +484,30 @@ export default function BookOfPassageScreen() {
                     <div className={styles.storyHistoryList}>
                       {storyHistory.map((blurb, index) => (
                         <div key={blurb.id} className={styles.historyEntry}>
-                          <div className={styles.historyEntryHeader}>
+                          <button
+                            className={styles.historyToggle}
+                            onClick={() => handleToggleHistoryEntry(blurb.id)}
+                            aria-expanded={expandedEntries.has(blurb.id)}
+                            aria-controls={`history-text-${blurb.id}`}
+                          >
                             <span className={styles.historyEntryNumber}>{index + 1}</span>
                             <h3 className={styles.historyEntryTitle}>{blurb.title}</h3>
-                          </div>
-                          <p className={styles.historyEntryText}>{blurb.text}</p>
+                            <span className={styles.historyToggleLabel}>
+                              {expandedEntries.has(blurb.id) ? 'Collapse to see less' : 'Expand to see more'}
+                            </span>
+                            <span className={styles.historyToggleIcon}>
+                              {expandedEntries.has(blurb.id) ? '-' : '+'}
+                            </span>
+                          </button>
+                          {expandedEntries.has(blurb.id) ? (
+                            <div id={`history-text-${blurb.id}`}>
+                              {renderParagraphs(blurb.text, styles.historyEntryText)}
+                            </div>
+                          ) : (
+                            <p className={styles.historyPreview}>
+                              {getPreviewText(blurb.text)}
+                            </p>
+                          )}
                           {/* Story beat indicator removed for final version */}
                         </div>
                       ))}
