@@ -159,7 +159,6 @@ export function AudioProvider({ children }: AudioProviderProps) {
               playlistMode,
               bgMusic.autoAdvance
             );
-            console.log(`[Audio] Created ${actPlaylist.name} playlist`);
           }
         });
 
@@ -185,7 +184,6 @@ export function AudioProvider({ children }: AudioProviderProps) {
             
             // Check mute state before playing - don't play if muted
             if (audioManager.isMuted('master') || audioManager.isMuted(AudioCategory.MUSIC)) {
-              console.log('[Audio] Music is muted, skipping playback');
               return;
             }
             
@@ -220,7 +218,6 @@ export function AudioProvider({ children }: AudioProviderProps) {
           // Check if music is already playing - if so, don't restart
           const currentPlaylistInfo = audioManager.getCurrentPlaylistInfo();
           if (currentPlaylistInfo) {
-            console.log('[Audio] Music playlist is already active, skipping restart');
             return;
           }
 
@@ -228,7 +225,6 @@ export function AudioProvider({ children }: AudioProviderProps) {
           
           // Double-check mute state right before playing (in case settings changed)
           if (audioManager.isMuted('master') || audioManager.isMuted(AudioCategory.MUSIC)) {
-            console.log('[Audio] Music is muted, skipping playback on user interaction');
             return;
           }
           
@@ -300,7 +296,6 @@ export function AudioProvider({ children }: AudioProviderProps) {
           const bgMusic = audioConfig.backgroundMusic;
           const playlist = audioManager.getPlaylist(bgMusic.playlistId);
           if (playlist && playlist.tracks.length > 0) {
-            console.log('[Audio] Music unmuted, starting playback');
             audioManager.resumeAudioContext().then(() => {
               audioManager.playPlaylist(bgMusic.playlistId, 0, bgMusic.fadeDuration).catch((error) => {
                 console.warn('[Audio] Failed to start music after unmute:', error);

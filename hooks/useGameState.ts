@@ -13,7 +13,6 @@ import { initializeGameState, restoreGameState } from '@/lib/game/state';
 import {
   loadProgress,
   saveProgress,
-  getSaveSystemInfo,
 } from '@/lib/save/unifiedSaveSystem';
 // Keep legacy import as fallback
 import { loadGameProgress as loadLegacyProgress } from '@/lib/save/saveSystem';
@@ -46,9 +45,6 @@ export function useGameState() {
           });
 
           if (result.wasMigrated) {
-            console.log('Save data migrated to optimized format (v2)');
-            const info = getSaveSystemInfo();
-            console.log(`Storage size: ${info.storageSize.formatted}`);
           }
 
           setState(prevState => restoreGameState(prevState, result.data as Partial<GameState>));
@@ -124,23 +120,6 @@ export function useGameState() {
     // Skip if nothing meaningful changed
     if (stateHash === lastSavedState.current) {
       return;
-    }
-
-    // Log when dialogue state changes trigger a save
-    if (dialogueState && dialogueState.completedStoryEvents.length > 0) {
-      const prevDialogue = lastSavedState.current 
-        ? JSON.parse(lastSavedState.current)?.dialogue 
-        : undefined;
-      const dialogueChanged = !prevDialogue || 
-        JSON.stringify(prevDialogue.completedStoryEvents || []) !== 
-        JSON.stringify(dialogueState.completedStoryEvents);
-      
-      if (dialogueChanged) {
-        console.log('[useGameState] Dialogue state changed, triggering save', {
-          completedEvents: dialogueState.completedStoryEvents,
-          hasVisitedLibrary: dialogueState.hasVisitedLibrary,
-        });
-      }
     }
 
     // Debounce saves

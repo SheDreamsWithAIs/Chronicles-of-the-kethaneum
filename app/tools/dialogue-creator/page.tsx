@@ -291,7 +291,6 @@ export default function DialogueCreatorPage() {
               results={validationResults}
               onFieldClick={(field) => {
                 // Scroll to field - would need to implement
-                console.log('Focus field:', field);
               }}
             />
           </footer>
@@ -300,4 +299,3 @@ export default function DialogueCreatorPage() {
     </>
   );
 }
-

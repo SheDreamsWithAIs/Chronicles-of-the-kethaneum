@@ -18,6 +18,7 @@ export function ActionButton({ text, onActionComplete, holdDuration = 1750 }: Ac
   const buttonRef = useRef<HTMLButtonElement>(null);
   const isCompletedRef = useRef<boolean>(false);
   const helperTextTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const indicatorCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Update progress during hold
   useEffect(() => {
@@ -104,6 +105,9 @@ export function ActionButton({ text, onActionComplete, holdDuration = 1750 }: Ac
       if (helperTextTimeoutRef.current) {
         clearTimeout(helperTextTimeoutRef.current);
       }
+      if (indicatorCheckTimeoutRef.current) {
+        clearTimeout(indicatorCheckTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -185,12 +189,12 @@ export function ActionButton({ text, onActionComplete, holdDuration = 1750 }: Ac
       >
         <div className={styles.buttonContent}>
           {/* Progress indicator */}
-          {isHolding && (
-            <div 
-              className={styles.progressIndicator}
-              style={{ width: `${holdProgress * 100}%` }}
-            />
-          )}
+      {isHolding && (
+        <div 
+          className={styles.progressIndicator}
+          style={{ width: `${holdProgress * 100}%` }}
+        />
+      )}
 
           {/* Button text */}
           <span className={styles.buttonText}>{text}</span>

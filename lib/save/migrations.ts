@@ -243,7 +243,6 @@ export function createBackup(): boolean {
     if (!currentSave) return false;
 
     localStorage.setItem(BACKUP_KEY, currentSave);
-    console.log('Migration backup created');
     return true;
   } catch (error) {
     console.error('Failed to create backup:', error);
@@ -270,7 +269,6 @@ export function restoreFromBackup(): boolean {
     }
 
     localStorage.setItem(STORAGE_KEY, backup);
-    console.log('Restored from backup');
     return true;
   } catch (error) {
     console.error('Failed to restore from backup:', error);
@@ -283,7 +281,6 @@ export function restoreFromBackup(): boolean {
  */
 export function deleteBackup(): void {
   localStorage.removeItem(BACKUP_KEY);
-  console.log('Migration backup deleted');
 }
 
 /**
@@ -313,7 +310,6 @@ export async function autoMigrate(): Promise<MigrationResult | null> {
     return null;
   }
 
-  console.log('Migration needed - starting automatic migration...');
 
   // Load old data
   const saved = localStorage.getItem(STORAGE_KEY);
@@ -348,7 +344,6 @@ export async function autoMigrate(): Promise<MigrationResult | null> {
     // Save migrated data
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(result.data));
-      console.log('Migration successful!', result.stats);
     } catch (error) {
       // Rollback on save failure
       if (backupCreated) {

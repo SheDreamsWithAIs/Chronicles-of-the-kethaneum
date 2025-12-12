@@ -631,7 +631,6 @@ export default function LibraryScreen() {
       } else {
         // Show random character banter
         try {
-          console.log('[Library] No story events available, showing banter');
           const banter = dialogueManager.getRandomBanter(currentBeat);
           
           if (!banter || !banter.success || !banter.dialogue) {
@@ -840,4 +839,3 @@ export default function LibraryScreen() {
     </div>
   );
 }
-

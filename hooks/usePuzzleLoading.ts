@@ -183,7 +183,6 @@ export function usePuzzleLoading({
       } else {
         // Show a notification if genre is exhausted
         if (result.message) {
-          console.log(result.message);
           // Check if genre is exhausted and signal to caller
           if (result.message.includes('completed all puzzles')) {
             return { genreComplete: true };
@@ -210,4 +209,3 @@ export function usePuzzleLoading({
     loadPuzzleForMode,
   };
 }
-

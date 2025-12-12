@@ -25,25 +25,17 @@ export function StorySystemProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function initializeSystems() {
       try {
-        console.log('[StorySystem] Initializing all story systems...');
-
         // 1. Initialize audio system (playlists)
         await initializeAudioSystem();
-        console.log('[StorySystem] ✅ Audio system initialized');
 
         // 2. Initialize dialogue manager (characters)
         await dialogueManager.initialize();
-        console.log('[StorySystem] ✅ Dialogue manager initialized');
 
         // 3. Initialize story blurb manager (narrative moments)
         await storyBlurbManager.loadBlurbs();
-        console.log('[StorySystem] ✅ Story blurb manager initialized');
 
         // 4. Initialize story progression manager (beat advancement)
         await storyProgressionManager.initialize();
-        console.log('[StorySystem] ✅ Story progression manager initialized');
-
-        console.log('[StorySystem] 🎉 All story systems ready!');
       } catch (error) {
         console.error('[StorySystem] Failed to initialize story systems:', error);
       }
@@ -56,7 +48,6 @@ export function StorySystemProvider({ children }: { children: ReactNode }) {
   useStorySystemIntegration({
     state,
     onBlurbTriggered: (blurbId, trigger) => {
-      console.log(`[StorySystem] 🎭 New story moment unlocked: ${blurbId} (trigger: ${trigger})`);
       // Set flag to show glow/pulse on Book of Passage buttons
       setNewStoryAvailable();
     },
@@ -67,7 +58,6 @@ export function StorySystemProvider({ children }: { children: ReactNode }) {
     if (typeof window === 'undefined') return;
 
     const handleStoryEventAvailable = (event: CustomEvent) => {
-      console.log(`[StorySystem] 📚 New story event dialogue available:`, event.detail);
       // Set flag to show glow/pulse on Library buttons
       setNewDialogueAvailable();
     };

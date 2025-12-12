@@ -292,28 +292,9 @@ export default function BookOfPassageScreen() {
     const hasCompletedPuzzlesInGenre = activeGenre && 
       state.completedPuzzlesByGenre?.[activeGenre] && 
       state.completedPuzzlesByGenre[activeGenre].size > 0;
-    
+
     const hasStartedPuzzle = hasGenre && (hasCompletedPuzzles || hasPuzzleLoaded || hasCompletedPuzzlesInGenre);
-    
-    // Debug logging
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Book of Passage] Button visibility check:', {
-        gameStateReady,
-        selectedGenre: state.selectedGenre,
-        currentGenre: state.currentGenre,
-        activeGenre,
-        hasGenre,
-        completedPuzzles: state.completedPuzzles,
-        currentPuzzleIndex: state.currentPuzzleIndex,
-        hasCompletedPuzzles,
-        hasPuzzleLoaded,
-        hasCompletedPuzzlesInGenre,
-        completedPuzzlesByGenre: activeGenre ? (state.completedPuzzlesByGenre?.[activeGenre]?.size || 0) : 0,
-        hasStartedPuzzle,
-        shouldShow: hasStartedPuzzle,
-      });
-    }
-    
+
     return hasStartedPuzzle;
   }, [gameStateReady, state.selectedGenre, state.currentGenre, state.completedPuzzles, state.currentPuzzleIndex]);
 

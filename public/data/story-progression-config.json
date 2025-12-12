@@ -129,7 +129,7 @@
   "settings": {
     "enableAutoProgression": true,
     "allowManualOverride": true,
-    "enableLogging": true,
+    "enableLogging": false,
     "checkProgressionOnPuzzleComplete": true,
     "checkProgressionOnBookDiscovered": true
   },

@@ -298,21 +298,8 @@ export function restoreGameState(state: GameState, savedState: Partial<GameState
   // Fallback: If selectedGenre is empty but currentGenre exists, use currentGenre
   // This provides an additional safety net for old save files
   if (!restored.selectedGenre && restored.currentGenre) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Game State] Restore fallback: selectedGenre is empty, using currentGenre:', restored.currentGenre);
-    }
     restored.selectedGenre = restored.currentGenre;
-  }
-
-  // Debug logging in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Game State] Restored state:', {
-      currentGenre: restored.currentGenre,
-      selectedGenre: restored.selectedGenre,
-      completedPuzzles: restored.completedPuzzles,
-    });
   }
 
   return restored;
 }
-

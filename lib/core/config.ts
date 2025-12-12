@@ -230,8 +230,6 @@ export function enableTestingMode(options: Partial<TestingConfig> = {}): void {
       (activeConfig.testing as any)[key] = value;
     }
   }
-  
-  console.log('Testing mode enabled with options:', activeConfig.testing);
 }
 
 /**
@@ -241,8 +239,6 @@ export function disableTestingMode(): void {
   // Reset all testing flags to defaults
   activeConfig.testing = { ...defaultConfig.testing };
   activeConfig.testing.enabled = false;
-  
-  console.log('Testing mode disabled');
 }
 
 /**
@@ -250,7 +246,6 @@ export function disableTestingMode(): void {
  */
 export function resetToDefaults(): void {
   activeConfig = { ...defaultConfig };
-  console.log('Configuration reset to defaults');
 }
 
 /**
@@ -279,4 +274,3 @@ export function importConfig(json: string): boolean {
     return false;
   }
 }
-
