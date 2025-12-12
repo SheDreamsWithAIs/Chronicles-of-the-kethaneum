@@ -1,0 +1,217 @@
+.receivingRoomContainer {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 1.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: var(--text-light);
+}
+
+.receivingRoomContainer.visible {
+  opacity: 1;
+}
+
+.loadingMessage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  color: var(--text-light);
+  z-index: 10;
+}
+
+.receivingRoomContent {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  height: 90vh;
+  max-height: 800px;
+  display: grid;
+  grid-template-rows: 1fr 2fr 1fr;
+  gap: 2rem;
+  z-index: 10;
+}
+
+/* Room Art Area */
+.roomArtArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+}
+
+.roomArtPlaceholder {
+  width: 100%;
+  max-width: 400px;
+  height: 200px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(96, 165, 250, 0.2));
+  border: 2px solid rgba(139, 92, 246, 0.4);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.artPlaceholderContent {
+  font-family: var(--font-cinzel), serif;
+  font-size: 20px;
+  color: var(--accent-main);
+  text-align: center;
+  opacity: 0.7;
+  z-index: 1;
+  position: relative;
+  line-height: 1.6;
+}
+
+.artPlaceholderSubtext {
+  font-size: 14px;
+  opacity: 0.5;
+  display: block;
+  margin-top: 8px;
+}
+
+/* Story Text Area */
+.storyTextArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.storyTextArea::-webkit-scrollbar {
+  width: 12px;
+}
+
+.storyTextArea::-webkit-scrollbar-track {
+  background: rgba(230, 168, 23, 0.1);
+  border-radius: 6px;
+}
+
+.storyTextArea::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--accent-main), var(--accent-dark));
+  border-radius: 6px;
+}
+
+.textContainer {
+  width: 100%;
+  max-width: 800px;
+  text-align: center;
+}
+
+.fadeIn {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.fadeOut {
+  animation: fadeOut 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+.formattedText {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  color: var(--text-light);
+}
+
+.formattedText p {
+  margin-bottom: 1.5rem;
+}
+
+.formattedText p:last-child {
+  margin-bottom: 0;
+}
+
+/* Action Button Area */
+.actionButtonArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .receivingRoomContent {
+    grid-template-rows: 0.8fr 2fr 1fr;
+    gap: 1.5rem;
+    height: 85vh;
+  }
+
+  .roomArtPlaceholder {
+    height: 150px;
+    max-width: 300px;
+  }
+
+  .artPlaceholderContent {
+    font-size: 16px;
+  }
+
+  .artPlaceholderSubtext {
+    font-size: 12px;
+  }
+
+  .storyTextArea {
+    padding: 1.5rem 1rem;
+  }
+
+  .formattedText {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .actionButtonArea {
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .receivingRoomContent {
+    grid-template-rows: 0.6fr 2.5fr 1fr;
+    gap: 1rem;
+  }
+
+  .roomArtPlaceholder {
+    height: 120px;
+  }
+
+  .artPlaceholderContent {
+    font-size: 14px;
+  }
+
+  .artPlaceholderSubtext {
+    font-size: 11px;
+  }
+
+  .formattedText {
+    font-size: 0.95rem;
+  }
+}
