@@ -773,12 +773,14 @@ export default function LibraryScreen() {
             onClick={handleEndConversation}
             data-testid="dialogue-overlay"
           />
-          <DialogueControls
-            onContinue={() => {
-              dialogueQueueRef.current?.handleContinue();
-            }}
-            disabled={!dialogueQueueRef.current}
-          />
+          <div className={dialogueStyles.dialogueControlsOverlay}>
+            <DialogueControls
+              onContinue={() => {
+                dialogueQueueRef.current?.handleContinue();
+              }}
+              disabled={!dialogueQueueRef.current}
+            />
+          </div>
         </>
       )}
 

@@ -64,7 +64,7 @@ export function DialoguePanel({
       aria-label={`${character.name}: ${dialogueText}`}
       data-testid="dialogue-panel"
       data-dialogue-id={`${character.id}-${currentChunk || 0}`}
-    >
+      >
       <div className={styles.characterPortrait} data-testid="character-portrait">
         {portraitPath && !portraitError ? (
           <img
@@ -79,18 +79,22 @@ export function DialoguePanel({
         )}
       </div>
       <div className={styles.dialogueContent}>
-        <div className={styles.characterName} data-testid="character-name">
-          {character.name}
-        </div>
-        {character.title && (
-          <div className={styles.characterTitle}>{character.title}</div>
-        )}
-        <div className={styles.dialogueText} data-testid="dialogue-text">{dialogueText}</div>
-        {totalChunks && totalChunks > 1 && (
-          <div className={styles.chunkIndicator} data-testid="chunk-indicator">
-            {currentChunk !== undefined ? currentChunk + 1 : 1}/{totalChunks}
+        <div className={styles.dialogueHeader}>
+          <div className={styles.characterMeta}>
+            <div className={styles.characterName} data-testid="character-name">
+              {character.name}
+            </div>
+            {character.title && (
+              <div className={styles.characterTitle}>{character.title}</div>
+            )}
           </div>
-        )}
+          {totalChunks && totalChunks > 1 && (
+            <div className={styles.chunkIndicator} data-testid="chunk-indicator">
+              {currentChunk !== undefined ? currentChunk + 1 : 1}/{totalChunks}
+            </div>
+          )}
+        </div>
+        <div className={styles.dialogueText} data-testid="dialogue-text">{dialogueText}</div>
       </div>
     </div>
   );
