@@ -6,7 +6,7 @@ import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { GameModeModal, type GameMode } from '@/components/GameModeModal';
 import { FormattedBackstory } from '@/components/shared/FormattedBackstory';
 import { useGameState } from '@/hooks/useGameState';
-import { loadGameProgress } from '@/lib/save/saveSystem';
+import { loadProgress, cleanupLegacyKeys } from '@/lib/save';
 import { loadBackstoryContent, type BackstoryContent } from '@/lib/utils/backstoryLoader';
 import styles from './backstory.module.css';
 
@@ -36,10 +36,15 @@ export default function BackstoryScreen() {
 
   useEffect(() => {
     // Check for existing progress
-    const savedProgress = loadGameProgress();
-    if (savedProgress && (savedProgress.completedPuzzles > 0 || savedProgress.currentGenre)) {
-      setHasExistingProgress(true);
-    }
+    cleanupLegacyKeys();
+    loadProgress()
+      .then(result => {
+        const savedProgress = result.data;
+        if (savedProgress && ((savedProgress as any).completedPuzzles > 0 || (savedProgress as any).currentGenre)) {
+          setHasExistingProgress(true);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -150,4 +155,3 @@ export default function BackstoryScreen() {
     </div>
   );
 }
-

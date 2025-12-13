@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { AudioSettingsModal } from '@/components/AudioSettingsModal';
-import { loadGameProgress } from '@/lib/save/saveSystem';
+import { loadProgress, clearProgress, cleanupLegacyKeys } from '@/lib/save';
 import { navigateTo, getRoutePath } from '@/lib/utils/navigation';
 import styles from './title-screen.module.css';
 
@@ -25,11 +25,13 @@ export default function TitleScreen() {
   }, []);
 
   useEffect(() => {
-    const savedProgress = loadGameProgress();
-    if (savedProgress) {
-      setHasSavedGame(true);
-      setSavedGameMode(savedProgress.gameMode || null);
-    }
+    cleanupLegacyKeys();
+    loadProgress().then(result => {
+      if (result.data) {
+        setHasSavedGame(true);
+        setSavedGameMode((result.data as any).gameMode || null);
+      }
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -49,15 +51,16 @@ export default function TitleScreen() {
   }, []);
 
   const handleNewGame = () => {
-    // Clear all saved progress when starting a new game
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('kethaneumProgress');
-
-      // Force a full page reload to ensure all in-memory state is cleared
-      // This prevents race conditions where old state gets re-saved
-      // Use navigateTo to respect basePath for GitHub Pages
-      navigateTo('/backstory');
+    try {
+      clearProgress();
+    } catch (e) {
+      console.error('Failed to clear progress on New Game', e);
     }
+
+    // Force a full page reload to ensure all in-memory state is cleared
+    // This prevents race conditions where old state gets re-saved
+    // Use navigateTo to respect basePath for GitHub Pages
+    navigateTo('/backstory');
   };
 
   const handleContinue = () => {

@@ -163,7 +163,6 @@ function selectKethaneumPuzzle(
     const newState = { ...state };
 
     // Update state for next selection
-    newState.nextKethaneumIndex += 1;
     newState.puzzlesSinceLastKethaneum = 0;
     newState.nextKethaneumInterval = getRandomKethaneumInterval(config);
     newState.currentGenre = config.kethaneumGenreName;
@@ -176,10 +175,11 @@ function selectKethaneumPuzzle(
       newState.kethaneumRevealed = true;
     }
 
-    // Store the index we just used (before we incremented nextKethaneumIndex)
+    // Store the index we are using for this puzzle
     newState.currentPuzzleIndex = state.nextKethaneumIndex;
 
-    const kethaneumExhausted = newState.nextKethaneumIndex >= kethaneumPuzzles.length;
+    // We haven't advanced the Kethaneum index yet; do that on completion
+    const kethaneumExhausted = state.nextKethaneumIndex + 1 >= kethaneumPuzzles.length;
 
     return {
       puzzle,
@@ -309,7 +309,6 @@ function selectGenrePuzzle(
     const newState = { ...state };
 
     // Update state
-    newState.puzzlesSinceLastKethaneum += 1;
     newState.currentGenre = selectedGenre;
     newState.currentBook = puzzle.book;
     newState.currentStoryPart = puzzle.storyPart ?? 0;
@@ -361,10 +360,15 @@ export function markPuzzleCompleted(
     }
 
     // Get the genre from the puzzle
-    const genre = puzzle.genre || newState.currentGenre;
+    const genre = (puzzle.genre && puzzle.genre.trim()) || (newState.currentGenre && newState.currentGenre.trim());
 
     if (!genre || typeof genre !== 'string') {
-      throw new Error('Cannot determine genre for puzzle completion');
+      console.error('[PuzzleSelector] Cannot determine genre for puzzle completion', {
+        puzzleTitle: puzzle.title,
+        puzzleGenre: puzzle.genre,
+        currentGenre: newState.currentGenre,
+      });
+      return state;
     }
 
     // Initialize the set for this genre if needed
@@ -374,9 +378,6 @@ export function markPuzzleCompleted(
 
     // Mark this puzzle as completed
     newState.completedPuzzlesByGenre[genre].add(puzzle.title);
-
-    // Increment global completed counter
-    newState.completedPuzzles += 1;
 
     return newState;
   } catch (error) {
