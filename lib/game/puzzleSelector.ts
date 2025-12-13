@@ -76,27 +76,7 @@ export function selectNextPuzzle(
     }
 
     // Select from the player's chosen genre
-    const result = selectGenrePuzzle(newState, config);
-    if (!result.puzzle) {
-      console.warn('[PuzzleSelector] No genre puzzle selected', {
-        selectedGenre: state.selectedGenre,
-        currentGenre: state.currentGenre,
-        currentBook: state.currentBook,
-        completedPuzzlesByGenre: Object.fromEntries(
-          Object.entries(state.completedPuzzlesByGenre || {}).map(([g, s]) => [g, s instanceof Set ? Array.from(s) : s])
-        ),
-        available: state.puzzles?.[state.selectedGenre]?.map(p => ({ title: p.title, book: p.book, part: p.storyPart })),
-      });
-    } else {
-      console.log('[PuzzleSelector] Selected genre puzzle', {
-        title: result.puzzle.title,
-        book: result.puzzle.book,
-        part: result.puzzle.storyPart,
-        genre: result.puzzle.genre,
-        selectedGenre: state.selectedGenre,
-      });
-    }
-    return result;
+    return selectGenrePuzzle(newState, config);
   } catch (error) {
     console.error('[PuzzleSelector] Fatal error in selectNextPuzzle:', error);
     return {
@@ -129,15 +109,7 @@ function checkIfTimeForKethaneum(
   }
 
   // Check if we've reached the interval
-  const shouldInsert = state.puzzlesSinceLastKethaneum >= state.nextKethaneumInterval;
-  console.log('[PuzzleSelector] Kethaneum check', {
-    shouldInsert,
-    puzzlesSinceLastKethaneum: state.puzzlesSinceLastKethaneum,
-    nextKethaneumInterval: state.nextKethaneumInterval,
-    nextKethaneumIndex: state.nextKethaneumIndex,
-    totalKethaneum: kethaneumPuzzles.length,
-  });
-  return shouldInsert;
+  return state.puzzlesSinceLastKethaneum >= state.nextKethaneumInterval;
 }
 
 /**
@@ -406,14 +378,6 @@ export function markPuzzleCompleted(
 
     // Mark this puzzle as completed
     newState.completedPuzzlesByGenre[genre].add(puzzle.title);
-
-    console.log('[PuzzleSelector] Marked puzzle complete', {
-      title: puzzle.title,
-      book: puzzle.book,
-      genre,
-      currentGenre: newState.currentGenre,
-      totalCompleted: newState.completedPuzzles,
-    });
 
     return newState;
   } catch (error) {

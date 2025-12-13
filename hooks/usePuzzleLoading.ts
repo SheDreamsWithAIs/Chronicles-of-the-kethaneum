@@ -187,16 +187,7 @@ export function usePuzzleLoading({
       }
 
       if (!result.success) {
-        console.warn('[PuzzleLoading] Failed to load puzzle:', result.message, {
-          selectedGenre: state.selectedGenre,
-          currentGenre: state.currentGenre,
-          currentBook: state.currentBook,
-          currentPuzzleIndex: state.currentPuzzleIndex,
-          puzzlesSinceLastKethaneum: state.puzzlesSinceLastKethaneum,
-          nextKethaneumInterval: state.nextKethaneumInterval,
-          hasPuzzles: !!state.puzzles && !!state.puzzles[state.selectedGenre],
-          storyReady: storyBlurbManager.isLoaded(),
-        });
+        console.warn('[PuzzleLoading] Failed to load puzzle:', result.message);
         if (result.message && result.message.includes('No genre selected')) {
           router.push('/library');
         }
