@@ -10,6 +10,7 @@ import { storyBlurbManager } from '@/lib/story';
 import { markPuzzleCompleted } from '@/lib/game/puzzleSelector';
 import { dialogueManager } from '@/lib/dialogue/DialogueManager';
 import { StoryEventTriggerChecker } from '@/lib/dialogue/StoryEventTriggerChecker';
+import { defaultPuzzleSelectionConfig } from '@/lib/game/puzzleSelectionConfig';
 
 interface UseGameModeHandlersProps {
   state: GameState;
@@ -132,6 +133,25 @@ export function useGameModeHandlers({
 
           if (currentPuzzle) {
             updatedState = markPuzzleCompleted(updatedState, currentPuzzle);
+
+            // Only increment Kethaneum counter for non-Kethaneum completions
+            const kethGenre = defaultPuzzleSelectionConfig.kethaneumGenreName;
+            const puzzleGenre = currentPuzzle.genre || currentState.currentGenre;
+            if (puzzleGenre && puzzleGenre !== kethGenre) {
+              updatedState = {
+                ...updatedState,
+                puzzlesSinceLastKethaneum: (updatedState.puzzlesSinceLastKethaneum || 0) + 1,
+              };
+            } else if (puzzleGenre === kethGenre) {
+              // Advance the Kethaneum sequence only when the puzzle is completed
+              const completedIndex = updatedState.currentPuzzleIndex ?? -1;
+              const nextIndex = completedIndex + 1;
+              updatedState = {
+                ...updatedState,
+                puzzlesSinceLastKethaneum: 0,
+                nextKethaneumIndex: Math.max(updatedState.nextKethaneumIndex || 0, nextIndex),
+              };
+            }
           }
         }
 
@@ -238,4 +258,3 @@ export function useGameModeHandlers({
     updateStateRef,
   };
 }
-
