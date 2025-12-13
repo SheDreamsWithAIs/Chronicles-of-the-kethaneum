@@ -47,6 +47,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const resumeAudioHandlerRef = useRef<((e: Event) => Promise<void>) | null>(null);
   const [lastMuteState, setLastMuteState] = useState<{ master: boolean; music: boolean } | null>(null);
+  const hasHandledFirstInteractionRef = useRef(false);
 
   // Load audio configuration from JSON file
   useEffect(() => {
@@ -196,16 +197,31 @@ export function AudioProvider({ children }: AudioProviderProps) {
 
         // Resume audio context and start music on user interaction
         // Only trigger on the FIRST user interaction, then remove listeners
-        let hasHandledFirstInteraction = false;
         const resumeAudioHandler = async (e: Event) => {
           // If we've already handled the first interaction, don't do anything
-          if (hasHandledFirstInteraction) {
+          // Use ref to persist across re-renders
+          if (hasHandledFirstInteractionRef.current) {
             return;
           }
-          
+
+          // Check if music is already playing FIRST - if so, mark as handled and return
+          const currentPlaylistInfo = audioManager.getCurrentPlaylistInfo();
+          if (currentPlaylistInfo) {
+            // Music is already playing, mark as handled and remove listeners
+            hasHandledFirstInteractionRef.current = true;
+            const handler = resumeAudioHandlerRef.current;
+            if (handler) {
+              document.removeEventListener('click', handler);
+              document.removeEventListener('keydown', handler);
+              document.removeEventListener('touchstart', handler);
+              resumeAudioHandlerRef.current = null;
+            }
+            return;
+          }
+
           // Mark as handled immediately to prevent multiple triggers
-          hasHandledFirstInteraction = true;
-          
+          hasHandledFirstInteractionRef.current = true;
+
           // Remove listeners immediately to prevent further triggers
           const handler = resumeAudioHandlerRef.current;
           if (handler) {
@@ -215,29 +231,26 @@ export function AudioProvider({ children }: AudioProviderProps) {
             resumeAudioHandlerRef.current = null;
           }
 
-          // Check if music is already playing - if so, don't restart
-          const currentPlaylistInfo = audioManager.getCurrentPlaylistInfo();
-          if (currentPlaylistInfo) {
-            return;
-          }
-
           await audioManager.resumeAudioContext();
-          
+
           // Double-check mute state right before playing (in case settings changed)
           if (audioManager.isMuted('master') || audioManager.isMuted(AudioCategory.MUSIC)) {
             return;
           }
-          
+
           await startMusic();
         };
 
         // Store handler in ref for cleanup
         resumeAudioHandlerRef.current = resumeAudioHandler;
 
-        // Add event listeners for user interaction
-        document.addEventListener('click', resumeAudioHandler);
-        document.addEventListener('keydown', resumeAudioHandler);
-        document.addEventListener('touchstart', resumeAudioHandler);
+        // Only add event listeners if we haven't handled first interaction yet
+        // This prevents re-adding listeners on component re-renders
+        if (!hasHandledFirstInteractionRef.current) {
+          document.addEventListener('click', resumeAudioHandler);
+          document.addEventListener('keydown', resumeAudioHandler);
+          document.addEventListener('touchstart', resumeAudioHandler);
+        }
       } catch (error) {
         console.warn('[Audio] Failed to load background music:', error);
         // Continue without music if files don't exist
