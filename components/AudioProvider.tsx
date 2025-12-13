@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { audioManager, AudioCategory, PlaylistMode, type PlaylistTrack } from '@/lib/audio/audioManager';
-import { loadAudioSettings, saveAudioSettings } from '@/lib/save/saveSystem';
+import { loadAudioSettings, saveAudioSettings } from '@/lib/save';
 import { getConfig } from '@/lib/core/config';
 import { fetchAsset } from '@/lib/utils/assetPath';
 
@@ -70,11 +70,11 @@ export function AudioProvider({ children }: AudioProviderProps) {
 
   // Load audio settings FIRST (before initializing music)
   useEffect(() => {
-    // Try loading audio settings from unified save system first
+    // Try loading audio settings from save system first
     // This ensures audio settings are synced with game progress
     const loadAudioFromUnifiedSave = async () => {
       try {
-        const { loadProgress } = await import('@/lib/save/unifiedSaveSystem');
+        const { loadProgress } = await import('@/lib/save');
         const result = await loadProgress();
         if (result.audioSettings) {
           audioManager.initialize(result.audioSettings);

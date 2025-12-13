@@ -1,0 +1,256 @@
+{
+  "version": 1,
+  "triggerConfig": {
+    "allowMultiplePerTrigger": false,
+    "defaultStoryBeat": "hook",
+    "milestones": {
+      "booksDiscovered": [5, 10, 25, 50, 100],
+      "puzzlesComplete": [10, 25, 50, 100],
+      "booksComplete": [5, 10, 25]
+    }
+  },
+  "blurbs": [
+    {
+      "id": "intro_001",
+      "storyBeat": "hook",
+      "trigger": "game_start",
+      "title": "The Book of Passage",
+      "text": "The crystalline cover of your Book of Passage warms uncomfortably under your fingertips, as if it too were flushed. It pulses in time with your own rapid heartbeat. You look down at it, expecting to see the clean transparency of a blank page.\n\nInstead, words bleed into existence on their own. It captures your feelings, chronicling your deepest reactions in jagged, messy script:\n\nHumiliation...\n\nThe cold floor against your cheek when you should have walked into glory...\n\nThe stiffened silence of your first expectations dying...\n\nYou watch as it transcribes your disappointment and disorientation in real time. It captures the nausea rolling in your stomach and the fear that you have already failed before you have truly begun. As disconcerting as transit was, it was not the most disorienting part. It seems the portal's glitch didn't just rattle your bones. It shook your thoughts loose, spilling them directly onto this page...",
+      "order": 1,
+      "metadata": {
+        "tags": ["introduction", "opening"]
+      }
+    },
+    {
+      "id": "hook_002",
+      "storyBeat": "hook",
+      "trigger": "first_book_discovered",
+      "title": "First Discovery",
+      "text": "Your fingers brush against the spine of your first knowledge construct. The Book of Passage trembles slightly, recording this moment for eternity. Every great archivist's journey begins with a single discovery.",
+      "order": 2,
+      "metadata": {
+        "tags": ["discovery", "milestone"]
+      }
+    },
+    {
+      "id": "hook_003",
+      "storyBeat": "hook",
+      "trigger": "first_puzzle_complete",
+      "title": "The Words Align",
+      "text": "The scattered words coalesce into meaning beneath your careful hand. You've restored your first fragment of knowledge to the cosmic catalog. The Kethaneum hums with quiet approval.",
+      "order": 3,
+      "metadata": {
+        "tags": ["completion", "achievement"]
+      }
+    },
+    {
+      "id": "hook_004",
+      "storyBeat": "hook",
+      "trigger": "first_book_complete",
+      "title": "A Story Restored",
+      "text": "The final piece falls into place. An entire knowledge construct now glows with renewed purpose on the shelves. Your Book of Passage adds a new chapter, chronicling your first complete restoration.",
+      "order": 4,
+      "metadata": {
+        "tags": ["completion", "book"]
+      }
+    },
+    {
+      "id": "hook_005",
+      "storyBeat": "hook",
+      "trigger": "books_discovered_5",
+      "title": "Growing Collection",
+      "text": "Five knowledge constructs now bear your touch. The other archivists have begun to notice your diligence. Whispers echo through the crystalline corridors—a new talent has emerged.",
+      "order": 5,
+      "metadata": {
+        "tags": ["milestone", "recognition"]
+      }
+    },
+    {
+      "id": "first_plot_001",
+      "storyBeat": "first_plot_point",
+      "trigger": "kethaneum_genre_revealed",
+      "title": "A Deeper Mystery",
+      "text": "Something stirs in the depths of the library. A new section reveals itself—the Kethaneum's own chronicles. These are not ordinary knowledge constructs. They contain the library's memories, its secrets, its very essence.",
+      "order": 10,
+      "metadata": {
+        "tags": ["kethaneum", "mystery", "plot"]
+      }
+    },
+    {
+      "id": "first_plot_002",
+      "storyBeat": "first_plot_point",
+      "trigger": "kethaneum_first_puzzle",
+      "title": "The Library Speaks",
+      "text": "As you work to restore the Kethaneum's own knowledge, you feel a presence watching. Not threatening, but curious. Ancient. The library itself has taken interest in your progress.",
+      "order": 11,
+      "metadata": {
+        "tags": ["kethaneum", "presence"]
+      }
+    },
+    {
+      "id": "first_plot_003",
+      "storyBeat": "first_plot_point",
+      "trigger": "books_discovered_10",
+      "title": "Patterns Emerge",
+      "text": "Ten knowledge constructs cataloged. As you review your work, patterns begin to emerge—connections between disparate tomes, threads of meaning weaving through the cosmic collection. The Kethaneum's design reveals itself slowly.",
+      "order": 12,
+      "metadata": {
+        "tags": ["milestone", "insight"]
+      }
+    },
+    {
+      "id": "first_plot_004",
+      "storyBeat": "first_plot_point",
+      "trigger": "story_beat_first_plot_point",
+      "title": "The First Revelation",
+      "text": "Your Book of Passage glows with newfound warmth. You have proven yourself worthy of deeper knowledge. The Kethaneum's first secrets whisper at the edge of understanding, waiting to be uncovered.",
+      "order": 13,
+      "metadata": {
+        "tags": ["transition", "revelation"]
+      }
+    },
+    {
+      "id": "first_pinch_001",
+      "storyBeat": "first_pinch_point",
+      "trigger": "puzzles_complete_10",
+      "title": "Shadows in the Stacks",
+      "text": "Ten puzzles solved, yet questions multiply. You notice gaps in the collection—spaces where knowledge constructs should be but aren't. Something, or someone, has been removing books from the Kethaneum.",
+      "order": 20,
+      "metadata": {
+        "tags": ["mystery", "tension"]
+      }
+    },
+    {
+      "id": "first_pinch_002",
+      "storyBeat": "first_pinch_point",
+      "trigger": "story_beat_first_pinch_point",
+      "title": "Whispers of Warning",
+      "text": "The senior archivists speak in hushed tones when they think you cannot hear. 'The Corruption spreads,' they say. 'Knowledge fades from the cosmic catalog.' Your work has never felt more urgent.",
+      "order": 21,
+      "metadata": {
+        "tags": ["tension", "stakes"]
+      }
+    },
+    {
+      "id": "midpoint_001",
+      "storyBeat": "midpoint",
+      "trigger": "books_discovered_25",
+      "title": "A Turning Point",
+      "text": "Twenty-five knowledge constructs. Your Book of Passage grows thick with recorded journeys. You are no longer a novice—you are becoming a true guardian of knowledge. But with understanding comes responsibility.",
+      "order": 30,
+      "metadata": {
+        "tags": ["milestone", "growth"]
+      }
+    },
+    {
+      "id": "midpoint_002",
+      "storyBeat": "midpoint",
+      "trigger": "kethaneum_book_complete",
+      "title": "The Library's Trust",
+      "text": "You have fully restored one of the Kethaneum's own chronicles. The library's gratitude washes over you like starlight. In return, it shares a fragment of its ancient memory—a glimpse of threats yet to come.",
+      "order": 31,
+      "metadata": {
+        "tags": ["kethaneum", "revelation"]
+      }
+    },
+    {
+      "id": "midpoint_003",
+      "storyBeat": "midpoint",
+      "trigger": "story_beat_midpoint",
+      "title": "The Choice",
+      "text": "You stand at the heart of your journey. Behind you lies the safety of routine cataloging. Before you stretches a path into mystery and danger. The Kethaneum needs champions. Will you answer its call?",
+      "order": 32,
+      "metadata": {
+        "tags": ["transition", "choice"]
+      }
+    },
+    {
+      "id": "second_pinch_001",
+      "storyBeat": "second_pinch_point",
+      "trigger": "puzzles_complete_25",
+      "title": "The Corruption Revealed",
+      "text": "Twenty-five fragments restored, and now you see it clearly—the darkness eating at the edges of knowledge. Entire sections of the Kethaneum flicker, threatening to fade into oblivion. Time grows short.",
+      "order": 40,
+      "metadata": {
+        "tags": ["danger", "urgency"]
+      }
+    },
+    {
+      "id": "second_pinch_002",
+      "storyBeat": "second_pinch_point",
+      "trigger": "story_beat_second_pinch_point",
+      "title": "Allies and Adversaries",
+      "text": "The battle lines are drawn. Some seek to preserve knowledge; others would see it scattered to the cosmic winds. Your Book of Passage records allies who stand with you—and shadows that work against you.",
+      "order": 41,
+      "metadata": {
+        "tags": ["conflict", "stakes"]
+      }
+    },
+    {
+      "id": "second_plot_001",
+      "storyBeat": "second_plot_point",
+      "trigger": "books_discovered_50",
+      "title": "The Path Forward",
+      "text": "Fifty knowledge constructs bear witness to your dedication. The Kethaneum's defenses recognize you now—doors that once stood sealed swing open at your approach. You have earned the library's deepest trust.",
+      "order": 50,
+      "metadata": {
+        "tags": ["milestone", "trust"]
+      }
+    },
+    {
+      "id": "second_plot_002",
+      "storyBeat": "second_plot_point",
+      "trigger": "story_beat_second_plot_point",
+      "title": "The Final Preparation",
+      "text": "Everything has led to this moment. Your Book of Passage pulses with accumulated wisdom. The Kethaneum shares its last secrets, preparing you for the challenge that awaits in the library's deepest chambers.",
+      "order": 51,
+      "metadata": {
+        "tags": ["preparation", "climax"]
+      }
+    },
+    {
+      "id": "climax_001",
+      "storyBeat": "climax",
+      "trigger": "puzzles_complete_50",
+      "title": "The Heart of Knowledge",
+      "text": "Fifty puzzles completed. You descend into the Kethaneum's core, where all knowledge converges. Here, the source of the Corruption awaits—and only you can restore balance to the cosmic catalog.",
+      "order": 60,
+      "metadata": {
+        "tags": ["climax", "confrontation"]
+      }
+    },
+    {
+      "id": "climax_002",
+      "storyBeat": "climax",
+      "trigger": "story_beat_climax",
+      "title": "The Battle for Knowledge",
+      "text": "Light clashes with shadow in the Kethaneum's heart. Every word you've restored, every book you've cataloged, lends strength to the library's defense. This is the moment your journey prepared you for.",
+      "order": 61,
+      "metadata": {
+        "tags": ["climax", "action"]
+      }
+    },
+    {
+      "id": "resolution_001",
+      "storyBeat": "resolution",
+      "trigger": "books_discovered_100",
+      "title": "A New Era",
+      "text": "One hundred knowledge constructs. The Kethaneum stands restored, its infinite shelves gleaming with preserved wisdom. Your name echoes through the crystalline halls—not as Assistant Archivist, but as Guardian.",
+      "order": 70,
+      "metadata": {
+        "tags": ["achievement", "title"]
+      }
+    },
+    {
+      "id": "resolution_002",
+      "storyBeat": "resolution",
+      "trigger": "story_beat_resolution",
+      "title": "The Journey Continues",
+      "text": "The Corruption is vanquished, but the Kethaneum's work is never done. New knowledge awaits cataloging, new stories await preservation. Your Book of Passage turns to a fresh page—ready for the next chapter.",
+      "order": 71,
+      "metadata": {
+        "tags": ["ending", "continuation"]
+      }
+    }
+  ]
+}

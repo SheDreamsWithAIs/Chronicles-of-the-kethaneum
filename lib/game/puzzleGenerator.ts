@@ -6,6 +6,29 @@
 import { createSeededRandom } from '../utils/mathUtils';
 import type { Config } from '../core/config';
 import type { GameState, WordData, PuzzleData } from './state';
+import { bookRegistry } from '../book/bookRegistry';
+
+/**
+ * Infer all known parts for a book from loaded puzzle data.
+ */
+function inferPartsFromPuzzles(
+  puzzlesByGenre: GameState['puzzles'] | undefined,
+  bookTitle: string
+): number[] {
+  const parts = new Set<number>();
+  if (!puzzlesByGenre) return [];
+
+  for (const genrePuzzles of Object.values(puzzlesByGenre)) {
+    if (!Array.isArray(genrePuzzles)) continue;
+    for (const puzzle of genrePuzzles) {
+      if (puzzle?.book === bookTitle && puzzle.storyPart !== undefined) {
+        parts.add(puzzle.storyPart);
+      }
+    }
+  }
+
+  return Array.from(parts).sort((a, b) => a - b);
+}
 
 /**
  * Generate word search grid
@@ -354,6 +377,35 @@ export function initializePuzzle(
   // Note: currentPuzzleIndex should be set by the caller (puzzleLoader) 
   // since it knows the index in the puzzles array
 
+  // Ensure bookPartsMap is populated for this book/part so completion checks work
+  if (!newState.bookPartsMap || typeof newState.bookPartsMap !== 'object') {
+    newState.bookPartsMap = {};
+  }
+  if (!newState.bookPartsMap[newState.currentBook]) {
+    newState.bookPartsMap[newState.currentBook] = [];
+  }
+  const knownParts = newState.bookPartsMap[newState.currentBook];
+
+  // Try to populate full parts list from registry if missing/empty
+  const bookMeta =
+    bookRegistry.getBookByTitleSync &&
+    (bookRegistry.isLoaded()
+      ? bookRegistry.getBookByTitleSync(newState.currentBook)
+      : null);
+  const inferredParts = inferPartsFromPuzzles(state.puzzles, newState.currentBook);
+
+  if (bookMeta?.parts && knownParts.length < bookMeta.parts) {
+    newState.bookPartsMap[newState.currentBook] = Array.from({ length: bookMeta.parts }, (_, idx) => idx);
+  } else if (inferredParts.length > knownParts.length) {
+    newState.bookPartsMap[newState.currentBook] = inferredParts;
+  }
+
+  // Ensure current part is present
+  if (!newState.bookPartsMap[newState.currentBook].includes(newState.currentStoryPart)) {
+    newState.bookPartsMap[newState.currentBook].push(newState.currentStoryPart);
+    newState.bookPartsMap[newState.currentBook].sort((a, b) => a - b);
+  }
+
   // Ensure discoveredBooks is initialized
   if (!newState.discoveredBooks || !(newState.discoveredBooks instanceof Set)) {
     newState.discoveredBooks = new Set();
@@ -366,6 +418,11 @@ export function initializePuzzle(
   if (!bookAlreadyDiscovered) {
     newState.discoveredBooks.add(newState.currentBook);
     newState.completedBooks = newState.discoveredBooks.size;
+    console.log('[PuzzleGenerator] Discovered new book during initialization', {
+      book: newState.currentBook,
+      genre: newState.currentGenre,
+      storyPart: newState.currentStoryPart,
+    });
   }
 
   // Filter and prepare words - preserve original order
@@ -409,4 +466,3 @@ export function initializePuzzle(
   
   return { success: true, newState };
 }
-

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { useFontSize } from '@/hooks/useFontSize';
-import { saveProgress } from '@/lib/save/unifiedSaveSystem';
+import { saveProgress } from '@/lib/save';
 import { AudioSettingsModal } from './AudioSettingsModal';
 import styles from './SettingsMenu.module.css';
 
@@ -186,4 +186,3 @@ export function SettingsMenu({
     </>
   );
 }
-
