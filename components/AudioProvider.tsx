@@ -47,8 +47,6 @@ export function AudioProvider({ children }: AudioProviderProps) {
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const resumeAudioHandlerRef = useRef<((e: Event) => Promise<void>) | null>(null);
   const [lastMuteState, setLastMuteState] = useState<{ master: boolean; music: boolean } | null>(null);
-  const hasHandledFirstInteractionRef = useRef(false);
-  const hasStartedBackgroundRef = useRef(false);
 
   // Load audio configuration from JSON file
   useEffect(() => {
@@ -177,14 +175,6 @@ export function AudioProvider({ children }: AudioProviderProps) {
         // Wait for user interaction first (browser requirement)
         const startMusic = async () => {
           try {
-            // If already playing this playlist, don't restart
-            const currentInfo = audioManager.getCurrentPlaylistInfo();
-            if (currentInfo?.playlistId === bgMusic.playlistId) {
-              hasStartedBackgroundRef.current = true;
-              console.log('[AudioProvider] Background playlist already active, skipping restart', currentInfo);
-              return;
-            }
-
             // Check if playlist has any loaded tracks before trying to play
             const playlist = audioManager.getPlaylist(bgMusic.playlistId);
             if (!playlist || playlist.tracks.length === 0) {
@@ -194,16 +184,10 @@ export function AudioProvider({ children }: AudioProviderProps) {
             
             // Check mute state before playing - don't play if muted
             if (audioManager.isMuted('master') || audioManager.isMuted(AudioCategory.MUSIC)) {
-              console.log('[AudioProvider] Background music muted, skipping start');
               return;
             }
             
             await audioManager.playPlaylist(bgMusic.playlistId, 0, bgMusic.fadeDuration);
-            console.log('[AudioProvider] Started background playlist', {
-              playlistId: bgMusic.playlistId,
-              fade: bgMusic.fadeDuration,
-            });
-            hasStartedBackgroundRef.current = true;
           } catch (error) {
             console.warn('[Audio] Failed to start background music:', error);
             // Continue without music - not a critical error
@@ -212,31 +196,16 @@ export function AudioProvider({ children }: AudioProviderProps) {
 
         // Resume audio context and start music on user interaction
         // Only trigger on the FIRST user interaction, then remove listeners
+        let hasHandledFirstInteraction = false;
         const resumeAudioHandler = async (e: Event) => {
           // If we've already handled the first interaction, don't do anything
-          // Use ref to persist across re-renders
-          if (hasHandledFirstInteractionRef.current) {
+          if (hasHandledFirstInteraction) {
             return;
           }
-
-          // Check if music is already playing FIRST - if so, mark as handled and return
-          const currentPlaylistInfo = audioManager.getCurrentPlaylistInfo();
-          if (currentPlaylistInfo) {
-            // Music is already playing, mark as handled and remove listeners
-            hasHandledFirstInteractionRef.current = true;
-            const handler = resumeAudioHandlerRef.current;
-            if (handler) {
-              document.removeEventListener('click', handler);
-              document.removeEventListener('keydown', handler);
-              document.removeEventListener('touchstart', handler);
-              resumeAudioHandlerRef.current = null;
-            }
-            return;
-          }
-
+          
           // Mark as handled immediately to prevent multiple triggers
-          hasHandledFirstInteractionRef.current = true;
-
+          hasHandledFirstInteraction = true;
+          
           // Remove listeners immediately to prevent further triggers
           const handler = resumeAudioHandlerRef.current;
           if (handler) {
@@ -246,27 +215,29 @@ export function AudioProvider({ children }: AudioProviderProps) {
             resumeAudioHandlerRef.current = null;
           }
 
-          await audioManager.resumeAudioContext();
-          console.log('[AudioProvider] Resumed audio context after interaction', { type: e.type });
+          // Check if music is already playing - if so, don't restart
+          const currentPlaylistInfo = audioManager.getCurrentPlaylistInfo();
+          if (currentPlaylistInfo) {
+            return;
+          }
 
+          await audioManager.resumeAudioContext();
+          
           // Double-check mute state right before playing (in case settings changed)
           if (audioManager.isMuted('master') || audioManager.isMuted(AudioCategory.MUSIC)) {
             return;
           }
-
+          
           await startMusic();
         };
 
         // Store handler in ref for cleanup
         resumeAudioHandlerRef.current = resumeAudioHandler;
 
-        // Only add event listeners if we haven't handled first interaction yet
-        // This prevents re-adding listeners on component re-renders
-        if (!hasHandledFirstInteractionRef.current) {
-          document.addEventListener('click', resumeAudioHandler);
-          document.addEventListener('keydown', resumeAudioHandler);
-          document.addEventListener('touchstart', resumeAudioHandler);
-        }
+        // Add event listeners for user interaction
+        document.addEventListener('click', resumeAudioHandler);
+        document.addEventListener('keydown', resumeAudioHandler);
+        document.addEventListener('touchstart', resumeAudioHandler);
       } catch (error) {
         console.warn('[Audio] Failed to load background music:', error);
         // Continue without music if files don't exist
@@ -285,6 +256,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
     // This is a simple approach - in a production app you might use a more sophisticated method
     const saveInterval = setInterval(saveSettings, 5000); // Save every 5 seconds
 
+    // Cleanup
     return () => {
       clearInterval(saveInterval);
       saveSettings(); // Save one last time on unmount
@@ -295,6 +267,10 @@ export function AudioProvider({ children }: AudioProviderProps) {
         document.removeEventListener('keydown', handler);
         document.removeEventListener('touchstart', handler);
         resumeAudioHandlerRef.current = null;
+      }
+      // Stop music playlist on unmount (though this shouldn't happen in a SPA)
+      if (audioConfig) {
+        audioManager.stopPlaylist(1000).catch(() => {});
       }
     };
   }, [audioConfig, settingsLoaded]);
