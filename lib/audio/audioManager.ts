@@ -507,6 +507,11 @@ export class AudioManager {
       return;
     }
 
+    // If this playlist is already active, don't restart it
+    if (this.currentPlaylist === playlistId && this.currentMusic) {
+      return;
+    }
+
     // If this playlist is already active and currently playing, do not restart
     if (this.currentPlaylist === playlistId) {
       const activeTrack = playlist.tracks[this.currentTrackIndex];
