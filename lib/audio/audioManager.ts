@@ -513,6 +513,11 @@ export class AudioManager {
       const activeAudio = activeTrack ? this.tracks.get(activeTrack.id)?.audio : null;
       if (activeAudio) {
         if (!activeAudio.paused && !activeAudio.ended) {
+          console.log('[AudioManager] playPlaylist: already playing, skipping restart', {
+            playlistId,
+            trackId: activeTrack.id,
+            index: this.currentTrackIndex,
+          });
           return;
         }
         // If paused, resume without resetting position
@@ -520,6 +525,11 @@ export class AudioManager {
         if (!this.isMuted('master') && !this.isMuted(playlist.category)) {
           try {
             await activeAudio.play();
+            console.log('[AudioManager] playPlaylist: resumed paused track', {
+              playlistId,
+              trackId: activeTrack.id,
+              index: this.currentTrackIndex,
+            });
           } catch (e) {
             // If resume fails, fall through to restart logic below
             console.warn('[Audio] Failed to resume existing playlist track, restarting:', e);

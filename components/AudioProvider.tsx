@@ -181,6 +181,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
             const currentInfo = audioManager.getCurrentPlaylistInfo();
             if (currentInfo?.playlistId === bgMusic.playlistId) {
               hasStartedBackgroundRef.current = true;
+              console.log('[AudioProvider] Background playlist already active, skipping restart', currentInfo);
               return;
             }
 
@@ -193,10 +194,15 @@ export function AudioProvider({ children }: AudioProviderProps) {
             
             // Check mute state before playing - don't play if muted
             if (audioManager.isMuted('master') || audioManager.isMuted(AudioCategory.MUSIC)) {
+              console.log('[AudioProvider] Background music muted, skipping start');
               return;
             }
             
             await audioManager.playPlaylist(bgMusic.playlistId, 0, bgMusic.fadeDuration);
+            console.log('[AudioProvider] Started background playlist', {
+              playlistId: bgMusic.playlistId,
+              fade: bgMusic.fadeDuration,
+            });
             hasStartedBackgroundRef.current = true;
           } catch (error) {
             console.warn('[Audio] Failed to start background music:', error);
@@ -241,6 +247,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
           }
 
           await audioManager.resumeAudioContext();
+          console.log('[AudioProvider] Resumed audio context after interaction', { type: e.type });
 
           // Double-check mute state right before playing (in case settings changed)
           if (audioManager.isMuted('master') || audioManager.isMuted(AudioCategory.MUSIC)) {
