@@ -48,6 +48,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
   const resumeAudioHandlerRef = useRef<((e: Event) => Promise<void>) | null>(null);
   const [lastMuteState, setLastMuteState] = useState<{ master: boolean; music: boolean } | null>(null);
   const hasHandledFirstInteractionRef = useRef(false);
+  const hasStartedBackgroundRef = useRef(false);
 
   // Load audio configuration from JSON file
   useEffect(() => {
@@ -176,6 +177,13 @@ export function AudioProvider({ children }: AudioProviderProps) {
         // Wait for user interaction first (browser requirement)
         const startMusic = async () => {
           try {
+            // If already playing this playlist, don't restart
+            const currentInfo = audioManager.getCurrentPlaylistInfo();
+            if (currentInfo?.playlistId === bgMusic.playlistId) {
+              hasStartedBackgroundRef.current = true;
+              return;
+            }
+
             // Check if playlist has any loaded tracks before trying to play
             const playlist = audioManager.getPlaylist(bgMusic.playlistId);
             if (!playlist || playlist.tracks.length === 0) {
@@ -189,6 +197,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
             }
             
             await audioManager.playPlaylist(bgMusic.playlistId, 0, bgMusic.fadeDuration);
+            hasStartedBackgroundRef.current = true;
           } catch (error) {
             console.warn('[Audio] Failed to start background music:', error);
             // Continue without music - not a critical error
