@@ -269,7 +269,6 @@ export function AudioProvider({ children }: AudioProviderProps) {
     // This is a simple approach - in a production app you might use a more sophisticated method
     const saveInterval = setInterval(saveSettings, 5000); // Save every 5 seconds
 
-    // Cleanup
     return () => {
       clearInterval(saveInterval);
       saveSettings(); // Save one last time on unmount
@@ -280,10 +279,6 @@ export function AudioProvider({ children }: AudioProviderProps) {
         document.removeEventListener('keydown', handler);
         document.removeEventListener('touchstart', handler);
         resumeAudioHandlerRef.current = null;
-      }
-      // Stop music playlist on unmount (though this shouldn't happen in a SPA)
-      if (audioConfig) {
-        audioManager.stopPlaylist(1000).catch(() => {});
       }
     };
   }, [audioConfig, settingsLoaded]);
