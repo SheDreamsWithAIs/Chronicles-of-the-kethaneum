@@ -161,8 +161,10 @@
   bottom: 0;
   left: 0;
   height: 4px;
+  width: 100%;
   background: linear-gradient(90deg, #f4efe7, #dcd0c0);
-  transition: width 0.1s linear;
+  transform-origin: left;
+  transition: transform 0.05s linear, opacity 0.15s ease-out;
   z-index: 3;
   box-shadow: 0 0 8px rgba(254, 243, 199, 0.8);
 }

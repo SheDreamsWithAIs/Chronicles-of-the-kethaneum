@@ -182,19 +182,17 @@ export function ActionButton({ text, onActionComplete, holdDuration = 1750 }: Ac
         onTouchCancel={handleTouchCancel}
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
-        style={{
-          '--hold-progress': holdProgress,
-        } as React.CSSProperties}
         data-testid="action-button"
       >
         <div className={styles.buttonContent}>
           {/* Progress indicator */}
-      {isHolding && (
-        <div 
-          className={styles.progressIndicator}
-          style={{ width: `${holdProgress * 100}%` }}
-        />
-      )}
+          <div
+            className={styles.progressIndicator}
+            style={{
+              transform: `scaleX(${Math.max(holdProgress, isHolding ? 0.02 : 0)})`,
+              opacity: isHolding ? 1 : 0,
+            }}
+          />
 
           {/* Button text */}
           <span className={styles.buttonText}>{text}</span>
