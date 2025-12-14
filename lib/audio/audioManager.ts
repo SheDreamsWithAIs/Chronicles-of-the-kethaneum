@@ -507,6 +507,15 @@ export class AudioManager {
       return;
     }
 
+    // If this playlist is already active and currently playing, do not restart
+    if (this.currentPlaylist === playlistId) {
+      const activeTrack = playlist.tracks[this.currentTrackIndex];
+      const activeAudio = activeTrack ? this.tracks.get(activeTrack.id)?.audio : null;
+      if (activeAudio && !activeAudio.paused && !activeAudio.ended) {
+        return;
+      }
+    }
+
     // Check if any tracks in the playlist are actually loaded
     const hasLoadedTracks = playlist.tracks.some(track => this.tracks.has(track.id));
     if (!hasLoadedTracks) {
