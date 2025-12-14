@@ -16,6 +16,7 @@ export default function ReceivingRoomScreen() {
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [hideContentForExit, setHideContentForExit] = useState(false);
   const hasSetVisitFlag = useRef(false);
   const { isLoading: pageLoading, setLoading } = usePageLoader({
     minDisplayTime: 300,
@@ -49,6 +50,7 @@ export default function ReceivingRoomScreen() {
     if (isLastSegment) {
       // Last segment - navigate to book of passage
       setIsTransitioning(true);
+      setHideContentForExit(true);
       setLoading('transition', true);
       // Use a small delay for transition, then navigate
       setTimeout(() => {
@@ -132,7 +134,7 @@ export default function ReceivingRoomScreen() {
       </div>
 
       <PageLoader
-        isLoading={pageLoading}
+        isLoading={pageLoading || hideContentForExit}
         variant="backstory"
         message="Preparing the receiving room..."
       />
