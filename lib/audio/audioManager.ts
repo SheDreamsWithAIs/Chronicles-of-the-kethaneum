@@ -507,16 +507,24 @@ export class AudioManager {
       return;
     }
 
-    // If this playlist is already active, don't restart it
-    if (this.currentPlaylist === playlistId && this.currentMusic) {
-      return;
-    }
-
     // If this playlist is already active and currently playing, do not restart
     if (this.currentPlaylist === playlistId) {
       const activeTrack = playlist.tracks[this.currentTrackIndex];
       const activeAudio = activeTrack ? this.tracks.get(activeTrack.id)?.audio : null;
-      if (activeAudio && !activeAudio.paused && !activeAudio.ended) {
+      if (activeAudio) {
+        if (!activeAudio.paused && !activeAudio.ended) {
+          return;
+        }
+        // If paused, resume without resetting position
+        this.updateVolume(activeAudio, playlist.category);
+        if (!this.isMuted('master') && !this.isMuted(playlist.category)) {
+          try {
+            await activeAudio.play();
+          } catch (e) {
+            // If resume fails, fall through to restart logic below
+            console.warn('[Audio] Failed to resume existing playlist track, restarting:', e);
+          }
+        }
         return;
       }
     }
