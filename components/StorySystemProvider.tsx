@@ -15,7 +15,6 @@ import { useStorySystemIntegration } from '@/hooks/story/useStorySystemIntegrati
 import { useStoryNotification } from '@/contexts/StoryNotificationContext';
 import { storyBlurbManager, storyProgressionManager } from '@/lib/story';
 import { dialogueManager } from '@/lib/dialogue/DialogueManager';
-import { initializeAudioSystem } from '@/lib/audio/initializeAudio';
 
 export function StorySystemProvider({ children }: { children: ReactNode }) {
   const { state } = useGameState();
@@ -25,16 +24,13 @@ export function StorySystemProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function initializeSystems() {
       try {
-        // 1. Initialize audio system (playlists)
-        await initializeAudioSystem();
-
-        // 2. Initialize dialogue manager (characters)
+        // 1. Initialize dialogue manager (characters)
         await dialogueManager.initialize();
 
-        // 3. Initialize story blurb manager (narrative moments)
+        // 2. Initialize story blurb manager (narrative moments)
         await storyBlurbManager.loadBlurbs();
 
-        // 4. Initialize story progression manager (beat advancement)
+        // 3. Initialize story progression manager (beat advancement)
         await storyProgressionManager.initialize();
       } catch (error) {
         console.error('[StorySystem] Failed to initialize story systems:', error);

@@ -15,7 +15,6 @@
 
 import { fetchAsset } from '@/lib/utils/assetPath';
 import { dialogueManager } from '@/lib/dialogue/DialogueManager';
-import { audioManager, AudioCategory } from '@/lib/audio/audioManager';
 import type { StoryBeat, LoadingGroup } from '@/lib/dialogue/types';
 import type {
   StoryProgressionConfig,
@@ -31,12 +30,15 @@ export class StoryProgressionManager {
   private currentBeat: StoryBeat = 'hook';
   private triggeredEvents: Set<string> = new Set();
   private loadedCharacterGroups: Set<LoadingGroup> = new Set();
+  private isInitializing: boolean = false; // Track if we're in initialization phase
 
   /**
    * Initialize the story progression system
    */
   async initialize(): Promise<boolean> {
     try {
+      this.isInitializing = true;
+     
       // Load configuration
       await this.loadConfiguration();
 
@@ -51,15 +53,14 @@ export class StoryProgressionManager {
 
       this.isInitialized = true;
       this.log('Story Progression Manager initialized successfully');
+     
 
-      // Initial music setup for current beat
-      // Only update music if it's not already playing the correct playlist
-      // This prevents music from restarting when navigating between screens
-      this.updateMusic(this.currentBeat);
-
+      
+      this.isInitializing = false;
       return true;
     } catch (error) {
-      console.error('Failed to initialize Story Progression Manager:', error);
+      console.error('[StoryProgressionManager] Failed to initialize:', error);
+      this.isInitializing = false;
       return false;
     }
   }
@@ -89,14 +90,17 @@ export class StoryProgressionManager {
     if (typeof window === 'undefined') return;
 
     // Listen for storybeat changes from dialogue manager
-    document.addEventListener('dialogueManager:beatChanged', ((event: CustomEvent) => {
+    const beatChangeHandler = ((event: CustomEvent) => {
       const { newBeat, previousBeat } = event.detail;
+      
       this.log(`Storybeat changed: ${previousBeat} → ${newBeat}`);
       this.currentBeat = newBeat;
 
       // Handle beat change
       this.onStoryBeatChanged(newBeat, previousBeat);
-    }) as EventListener);
+    }) as EventListener;
+    
+    document.addEventListener('dialogueManager:beatChanged', beatChangeHandler);
   }
 
   /**
@@ -105,8 +109,11 @@ export class StoryProgressionManager {
   private async onStoryBeatChanged(newBeat: StoryBeat, previousBeat: StoryBeat): Promise<void> {
     if (!this.config) return;
 
+
+
     this.log(`Processing storybeat change to: ${newBeat}`);
 
+    
     // 1. Update music
     await this.updateMusic(newBeat);
 
@@ -261,55 +268,13 @@ export class StoryProgressionManager {
 
   /**
    * Update music based on storybeat
+   * 
+   * REMOVED: Audio system has been removed. This method is kept as a placeholder.
    */
   private async updateMusic(beat: StoryBeat): Promise<void> {
-    if (!this.config) return;
-
-    const playlistId = this.config.musicMapping.beatToPlaylist[beat];
-    if (!playlistId) {
-      this.log(`No music configured for beat: ${beat}`);
-      return;
-    }
-
-    try {
-      const fadeDuration = this.config.musicMapping.fadeDuration || 2000;
-
-      // Check if playlist exists before trying to play
-      const playlist = audioManager.getPlaylist(playlistId);
-      if (!playlist) {
-        this.log(`Playlist not found: ${playlistId}, skipping music change`);
-        return;
-      }
-
-      // Check if playlist has any loaded tracks
-      const hasLoadedTracks = playlist.tracks.some(track => {
-        // Check if track is loaded by checking if it exists in audioManager's tracks
-        return audioManager.getPlaylist(playlistId)?.tracks.some(t => {
-          // We need to check if the track is actually loaded
-          // The audioManager doesn't expose tracks directly, so we'll try to play and let it handle gracefully
-          return true; // Let playPlaylist handle the check
-        });
-      });
-
-      // Check current playlist - don't interrupt if it's already playing the same playlist
-      const currentInfo = audioManager.getCurrentPlaylistInfo();
-      if (currentInfo?.playlistId === playlistId) {
-        this.log(`Playlist "${playlistId}" is already playing, skipping music change`);
-        return;
-      }
-
-      // Check mute state before playing - don't play if muted
-      if (audioManager.isMuted('master') || audioManager.isMuted(AudioCategory.MUSIC)) {
-        this.log(`Music is muted, skipping playlist playback`);
-        return;
-      }
-
-      // Try to play the playlist (it will gracefully skip if no tracks are loaded)
-      await audioManager.playPlaylist(playlistId, 0, fadeDuration);
-      this.log(`Music changed to playlist: ${playlistId}`);
-    } catch (error) {
-      console.error(`Failed to play playlist ${playlistId}:`, error);
-    }
+    // Audio system removed - no music updates
+    // This method is kept as a placeholder for when audio system is rebuilt
+    return;
   }
 
   /**

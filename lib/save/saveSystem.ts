@@ -18,8 +18,9 @@ import {
 } from '../book/progressBitmap';
 import type { GameState } from '../game/state';
 import type { StoryProgressState } from '../story/types';
-import type { AudioSettings } from '../audio/audioManager';
-import { audioManager } from '../audio/audioManager';
+
+// Audio system removed - audio settings types no longer available
+type AudioSettings = any; // Placeholder type
 
 // ============================================================================
 // Types - Optimized Storage Format
@@ -316,20 +317,8 @@ export async function saveOptimizedProgress(state: GameState): Promise<void> {
       optimized.dlv = true;
     }
 
-    // Add audio settings
-    const audioSettings = audioManager.getSettings();
-    optimized.a = {
-      mv: audioSettings.masterVolume,
-      mu: audioSettings.musicVolume,
-      av: audioSettings.ambientVolume,
-      sv: audioSettings.sfxVolume,
-      vv: audioSettings.voiceVolume,
-      mm: audioSettings.masterMuted,
-      mum: audioSettings.musicMuted,
-      am: audioSettings.ambientMuted,
-      sm: audioSettings.sfxMuted,
-      vm: audioSettings.voiceMuted,
-    };
+    // Audio settings removed - audio system has been removed
+    // optimized.a = { ... };
 
     // Save to localStorage
     localStorage.setItem(STORAGE_KEY, JSON.stringify(optimized));

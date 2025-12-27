@@ -15,7 +15,6 @@ import {
   saveProgress,
   cleanupLegacyKeys,
 } from '@/lib/save';
-import { audioManager } from '@/lib/audio/audioManager';
 
 export function useGameState() {
   const [state, setState] = useState<GameState>(() => initializeGameState());
@@ -35,10 +34,8 @@ export function useGameState() {
         if (result.data) {
           setState(prevState => restoreGameState(prevState, result.data as Partial<GameState>));
           
-          // Apply audio settings if loaded
-          if (result.audioSettings) {
-            audioManager.updateSettings(result.audioSettings);
-          }
+          // Audio settings removed - audio system has been removed
+          // Audio settings will be handled when audio system is rebuilt
         }
       } catch (error) {
         console.error('Failed to load game progress:', error);
@@ -116,9 +113,8 @@ export function useGameState() {
       if (result.data) {
         const restored = restoreGameState(newState, result.data as Partial<GameState>);
         setState(restored);
-        if (result.audioSettings) {
-          audioManager.updateSettings(result.audioSettings);
-        }
+        // Audio settings removed - audio system has been removed
+        // Audio settings will be handled when audio system is rebuilt
       } else {
         setState(newState);
       }

@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { useFontSize } from '@/hooks/useFontSize';
 import { saveProgress } from '@/lib/save';
-import { AudioSettingsModal } from './AudioSettingsModal';
 import styles from './SettingsMenu.module.css';
 
 interface SettingsMenuProps {
@@ -70,15 +69,20 @@ export function SettingsMenu({
           <h2 className={styles.panelTitle} id="settings-modal-title">Settings</h2>
 
           <div className={styles.settingsContainer}>
-            {/* Audio Settings Section */}
+            {/* Audio Settings Section - Placeholder for future audio system rebuild */}
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Audio</h3>
               <button
                 className={styles.actionButton}
                 onClick={() => setShowAudioSettings(true)}
+                disabled={true}
+                title="Audio system being rebuilt"
               >
                 Open Audio Settings
               </button>
+              <p style={{ fontSize: '0.85rem', color: '#999', marginTop: '0.5rem' }}>
+                Audio system is being rebuilt
+              </p>
             </div>
 
             {/* Manual Save Section */}
@@ -177,12 +181,12 @@ export function SettingsMenu({
         </div>
       </div>
 
-      {/* Audio Settings Modal */}
-      <AudioSettingsModal
+      {/* Audio Settings Modal - Placeholder for future audio system rebuild */}
+      {/* <AudioSettingsModal
         isOpen={showAudioSettings}
         onClose={handleAudioSettingsClose}
         onSave={handleAudioSettingsSave}
-      />
+      /> */}
     </>
   );
 }
