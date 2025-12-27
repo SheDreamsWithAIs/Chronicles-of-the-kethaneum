@@ -26,7 +26,7 @@ export function PageLoader({
   }
 
   return (
-    <div className={styles.loaderOverlay}>
+    <div className={styles.loaderOverlay} data-testid="page-loader">
       <CosmicBackground variant={variant} starCount={150} particleCount={40} />
       <div className={styles.loaderContent}>
         <div className={styles.logoContainer}>

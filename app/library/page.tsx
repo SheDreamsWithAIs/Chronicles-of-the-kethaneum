@@ -23,7 +23,7 @@ import notificationStyles from '@/styles/story-notification.module.css';
 
 export default function LibraryScreen() {
   const router = useRouter();
-  
+
   // Page loading state management - initialize FIRST to show loader immediately
   const { isLoading: pageLoading, setLoading } = usePageLoader({
     minDisplayTime: 500,
@@ -64,8 +64,8 @@ export default function LibraryScreen() {
   useEffect(() => {
     // Check if storyProgress exists and has required properties
     if (state) {
-      const storyProgressReady = state.storyProgress && 
-        typeof state.storyProgress === 'object' && 
+      const storyProgressReady = state.storyProgress &&
+        typeof state.storyProgress === 'object' &&
         'currentStoryBeat' in state.storyProgress;
       setLoading('storyProgress', !storyProgressReady);
     } else {
@@ -80,8 +80,8 @@ export default function LibraryScreen() {
     const stateCompleted = state.dialogue?.completedStoryEvents || [];
     // Only update if different to avoid unnecessary updates
     if (completedEventsRef.current.length !== stateCompleted.length ||
-        !stateCompleted.every(id => completedEventsRef.current.includes(id)) ||
-        !completedEventsRef.current.every(id => stateCompleted.includes(id))) {
+      !stateCompleted.every(id => completedEventsRef.current.includes(id)) ||
+      !completedEventsRef.current.every(id => stateCompleted.includes(id))) {
       completedEventsRef.current = stateCompleted;
     }
   }, [state.dialogue?.completedStoryEvents]);
@@ -91,7 +91,7 @@ export default function LibraryScreen() {
   useEffect(() => {
     const stateCompleted = state.dialogue?.completedStoryEvents || [];
     const refCompleted = completedEventsRef.current || [];
-    
+
     // If ref has more events than state, state update may have failed
     if (refCompleted.length > stateCompleted.length) {
       const missingInState = refCompleted.filter(id => !stateCompleted.includes(id));
@@ -103,7 +103,7 @@ export default function LibraryScreen() {
         });
       }
     }
-    
+
     // If state has events not in ref, sync ref (state is authoritative)
     if (stateCompleted.length > refCompleted.length) {
       const missingInRef = stateCompleted.filter(id => !refCompleted.includes(id));
@@ -128,12 +128,12 @@ export default function LibraryScreen() {
     // Use StoryEventTriggerChecker to check if any events are currently available
     // This checks if trigger conditions are currently satisfied (not transitions)
     const triggeredEventIds = StoryEventTriggerChecker.checkCurrentlyAvailableEvents(state);
-    
+
     // Filter out completed events
     const completedEvents = completedEventsRef.current.length > 0
       ? completedEventsRef.current
       : (state.dialogue?.completedStoryEvents || []);
-    
+
     const availableEventIds = triggeredEventIds.filter(
       eventId => !completedEvents.includes(eventId)
     );
@@ -204,7 +204,7 @@ export default function LibraryScreen() {
       // Check if we're selecting the same genre with an incomplete puzzle
       const isSameGenre = prevState.currentGenre === genre;
       const hasValidPuzzleIndex = prevState.currentPuzzleIndex !== undefined &&
-                                   prevState.currentPuzzleIndex >= 0;
+        prevState.currentPuzzleIndex >= 0;
       let shouldClearCurrentState = true;
       let shouldPreserveBook = false;
 
@@ -212,8 +212,8 @@ export default function LibraryScreen() {
         const currentPuzzle = prevState.puzzles[genre][prevState.currentPuzzleIndex];
         const completedSet = prevState.completedPuzzlesByGenre?.[genre];
         const isCompleted = currentPuzzle &&
-                           completedSet &&
-                           completedSet.has(currentPuzzle.title);
+          completedSet &&
+          completedSet.has(currentPuzzle.title);
 
         if (!isCompleted) {
           // Puzzle is incomplete - keep current state so restore logic can load same puzzle
@@ -274,7 +274,7 @@ export default function LibraryScreen() {
     }
 
     setConversationActive(true);
-    
+
     // Wait for DialogueQueue to mount and ref to be available
     // Use multiple requestAnimationFrame calls and a small timeout to ensure React has rendered
     let retries = 0;
@@ -282,18 +282,18 @@ export default function LibraryScreen() {
       await new Promise(resolve => requestAnimationFrame(resolve));
       retries++;
     }
-    
+
     // Final check with a small timeout as fallback
     if (!dialogueQueueRef.current) {
       await new Promise(resolve => setTimeout(resolve, 50));
     }
-    
+
     if (!dialogueQueueRef.current) {
       console.error('DialogueQueue ref not available after waiting');
       setConversationActive(false);
       return;
     }
-    
+
     // CRITICAL: Clear the queue before starting any new conversation (story event or banter)
     // This ensures old panels from previous conversations don't persist
     try {
@@ -312,12 +312,12 @@ export default function LibraryScreen() {
       // Use union of both to ensure we don't miss any completed events
       const stateCompleted = state.dialogue?.completedStoryEvents || [];
       const refCompleted = completedEventsRef.current || [];
-      
+
       // If ref has more events than state, it means state hasn't updated yet
       // In this case, use ref as source of truth (it was updated synchronously)
       // Otherwise, use state (it's persisted and authoritative)
       const allCompleted = Array.from(new Set([...stateCompleted, ...refCompleted]));
-      
+
       // Update ref to match state if state has more (state is authoritative for persistence)
       // But don't overwrite ref if it has more recent data (state update pending)
       if (stateCompleted.length >= refCompleted.length) {
@@ -327,18 +327,18 @@ export default function LibraryScreen() {
         // Ref has more - state update is pending, keep ref but it will sync via useEffect
         // Don't overwrite ref here, let useEffect handle it when state catches up
       }
-      
+
       // Use the union to ensure we don't miss any completed events
       const completedEvents = allCompleted.length > 0 ? allCompleted : stateCompleted;
-      
+
       // Check for available story events
-      
+
       // Validate completedEvents is an array
       if (!Array.isArray(completedEvents)) {
         console.error('[Library] completedEvents is not an array:', completedEvents);
         throw new Error('completedEvents must be an array');
       }
-      
+
       // Get available event, filtering out completed ones
       // Now uses StoryEventTriggerChecker internally to verify trigger conditions
       let availableEvent: any = null;
@@ -349,14 +349,14 @@ export default function LibraryScreen() {
         }
 
         availableEvent = dialogueManager.getAvailableStoryEvent(state, completedEvents);
-        
+
         // Validate event structure if one was returned
         if (availableEvent) {
           const eventId = availableEvent.storyEvent?.id;
           if (!eventId) {
             throw new Error('Available event missing storyEvent.id');
           }
-          
+
           // CRITICAL: Double-check that returned event is not completed
           const isCompleted = completedEvents.includes(eventId);
           if (isCompleted) {
@@ -383,7 +383,7 @@ export default function LibraryScreen() {
         if (!eventId) {
           throw new Error('Available event missing storyEvent.id');
         }
-        
+
         // Play story event sequence
         const player = new StoryEventPlayer(dialogueManager);
         currentEventIdRef.current = eventId;
@@ -395,7 +395,7 @@ export default function LibraryScreen() {
               console.error('[Library] Invalid dialogue entry received:', entry);
               return;
             }
-            
+
             if (dialogueQueueRef.current) {
               dialogueQueueRef.current.addDialogue(entry);
             } else {
@@ -418,9 +418,9 @@ export default function LibraryScreen() {
               setConversationActive(false);
               return;
             }
-            
+
             const completedId = currentEventIdRef.current;
-              
+
             // Mark event as completed and check for remaining events
             try {
               // Validate completedId is valid
@@ -433,7 +433,7 @@ export default function LibraryScreen() {
                   // Ensure dialogue object exists
                   const prevDialogue = prevState.dialogue || {};
                   const completedEvents = prevDialogue.completedStoryEvents || [];
-                  
+
                   // Validate completedEvents is an array
                   if (!Array.isArray(completedEvents)) {
                     const error = new Error(
@@ -443,22 +443,22 @@ export default function LibraryScreen() {
                     // Return previous state on error to prevent corruption
                     return prevState;
                   }
-                  
+
                   // Check if already completed (shouldn't happen, but defensive)
                   const wasAlreadyCompleted = completedEvents.includes(completedId);
                   if (wasAlreadyCompleted) {
                     console.warn(`[Library] Event '${completedId}' was already marked as completed, skipping update`);
                     return prevState;
                   }
-                  
+
                   // Calculate updated completed events list
                   const updatedCompletedEvents = [...completedEvents, completedId];
-                  
+
                   // Validate the updated array
                   if (!Array.isArray(updatedCompletedEvents)) {
                     throw new Error('Failed to create updated completed events array');
                   }
-                  
+
                   // Build updated state for checking remaining events
                   // Use prevState from setState callback which has the latest state
                   const updatedStateForCheck = {
@@ -468,11 +468,11 @@ export default function LibraryScreen() {
                       completedStoryEvents: updatedCompletedEvents,
                     },
                   };
-                  
+
                   try {
                     // Get remaining events (already filtered by completion and trigger conditions)
                     const remainingEvents = dialogueManager.getAvailableStoryEvents(updatedStateForCheck, updatedCompletedEvents);
-                    
+
                     // Clear notification if all unlocked events are done
                     if (remainingEvents.length === 0) {
                       setTimeout(() => {
@@ -487,10 +487,10 @@ export default function LibraryScreen() {
                     console.error('[Library] Error checking remaining events:', error);
                     // Don't throw - this is non-critical
                   }
-                  
+
                   // Update ref immediately for synchronous access
                   completedEventsRef.current = updatedCompletedEvents;
-                  
+
                   // Always return updated state to ensure persistence
                   // Initialize dialogue object if it doesn't exist
                   const newState = {
@@ -499,17 +499,17 @@ export default function LibraryScreen() {
                       ...prevDialogue,
                       completedStoryEvents: updatedCompletedEvents,
                       // Mark library as visited when first-visit completes
-                      hasVisitedLibrary: completedId === 'first-visit' 
-                        ? true 
+                      hasVisitedLibrary: completedId === 'first-visit'
+                        ? true
                         : prevDialogue.hasVisitedLibrary ?? false,
                     },
                   };
-                  
+
                   // Validate new state structure
                   if (!newState.dialogue || !Array.isArray(newState.dialogue.completedStoryEvents)) {
                     throw new Error('Failed to create valid new state with dialogue');
                   }
-                  
+
                   return newState;
                 } catch (error) {
                   console.error('[Library] Error in setState callback:', error);
@@ -517,10 +517,10 @@ export default function LibraryScreen() {
                   return prevState;
                 }
               });
-              
+
               // Wait for state to propagate and save
               await new Promise(resolve => setTimeout(resolve, 100));
-              
+
               // Verify ref was updated
               if (!completedEventsRef.current.includes(completedId)) {
                 const error = new Error(
@@ -529,33 +529,33 @@ export default function LibraryScreen() {
                 console.error('[Library] CRITICAL:', error);
                 throw error;
               }
-              
-                
+
+
             } catch (error) {
               console.error('[Library] Error updating state:', error);
               // Re-throw to ensure error is handled upstream
               throw error;
             }
-              
-              // Wait a moment for state update and to ensure dialogue has been displayed
-              await new Promise(resolve => setTimeout(resolve, 200));
-              
-              // Clear the dialogue queue
-              try {
-                if (dialogueQueueRef.current) {
-                  dialogueQueueRef.current.clear();
-                }
-              } catch (error) {
-                console.error('[Library] Error clearing dialogue queue:', error);
+
+            // Wait a moment for state update and to ensure dialogue has been displayed
+            await new Promise(resolve => setTimeout(resolve, 200));
+
+            // Clear the dialogue queue
+            try {
+              if (dialogueQueueRef.current) {
+                dialogueQueueRef.current.clear();
               }
-              
-              // Clean up and end conversation
-              currentEventIdRef.current = null;
-              eventPlayerRef.current = null;
-              
-              // Small delay before ending conversation to prevent race conditions
-              await new Promise(resolve => setTimeout(resolve, 50));
-              setConversationActive(false);
+            } catch (error) {
+              console.error('[Library] Error clearing dialogue queue:', error);
+            }
+
+            // Clean up and end conversation
+            currentEventIdRef.current = null;
+            eventPlayerRef.current = null;
+
+            // Small delay before ending conversation to prevent race conditions
+            await new Promise(resolve => setTimeout(resolve, 50));
+            setConversationActive(false);
           } catch (error) {
             console.error('[Library] Error in onCompleted callback:', error);
             // Ensure conversation ends even on error
@@ -576,11 +576,11 @@ export default function LibraryScreen() {
           currentEventIdRef.current = null;
           eventPlayerRef.current = null;
           setConversationActive(false);
-          
+
           // Re-throw to prevent further execution
           throw error;
         }
-        
+
         // Ensure ref is still available before starting
         if (!dialogueQueueRef.current) {
           console.error('[Library] DialogueQueue ref lost before starting player');
@@ -589,7 +589,7 @@ export default function LibraryScreen() {
           eventPlayerRef.current = null;
           return;
         }
-        
+
         // Verify story event has dialogue entries before starting
         if (!availableEvent.dialogue || availableEvent.dialogue.length === 0) {
           console.error('[Library] Story event has no dialogue entries:', eventId);
@@ -598,7 +598,7 @@ export default function LibraryScreen() {
           eventPlayerRef.current = null;
           return;
         }
-        
+
         // Start the player immediately - this will emit the first dialogue via emitNextDialogue()
         // The callback will add it to the queue, making the panel appear right away
         try {
@@ -610,17 +610,17 @@ export default function LibraryScreen() {
           eventPlayerRef.current = null;
           throw error;
         }
-        
+
         // Preload portraits in the background (non-blocking) - portraits will appear when ready
         player.preloadPortraits().catch((error) => {
           console.error('[Library] Error preloading portraits:', error);
           // Don't block dialogue if portraits fail to load
         });
-        
+
         // Give the dialogue time to be added to the queue
         // The callback should fire synchronously, but give it a moment to process
         await new Promise(resolve => setTimeout(resolve, 150));
-        
+
         // Verify dialogue was added (debugging)
         if (!dialogueQueueRef.current) {
           console.warn('[Library] DialogueQueue ref lost after starting player');
@@ -632,20 +632,20 @@ export default function LibraryScreen() {
         // Show random character banter
         try {
           const banter = dialogueManager.getRandomBanter(currentBeat);
-          
+
           if (!banter || !banter.success || !banter.dialogue) {
             console.error('[Library] Failed to get banter:', banter?.error || 'Unknown error');
             setConversationActive(false);
             return;
           }
-          
+
           const characterData = dialogueManager.getCharacterById(banter.dialogue.characterId);
           if (!characterData) {
             console.error(`[Library] Character ${banter.dialogue.characterId} not found for banter`);
             setConversationActive(false);
             return;
           }
-          
+
           // Apply smart chunking to banter text with error handling
           let chunks: string[];
           try {
@@ -659,7 +659,7 @@ export default function LibraryScreen() {
             // Fallback: use original text as single chunk
             chunks = [banter.dialogue.text];
           }
-          
+
           const entry: DialogueEntry = {
             id: `banter-${Date.now()}`,
             character: {
@@ -673,11 +673,11 @@ export default function LibraryScreen() {
             chunks,
             currentChunk: 0,
           };
-          
-          
+
+
           if (dialogueQueueRef.current) {
             dialogueQueueRef.current.addDialogue(entry);
-            
+
             // Give dialogue time to be added to queue
             await new Promise(resolve => setTimeout(resolve, 100));
           } else {
@@ -750,7 +750,7 @@ export default function LibraryScreen() {
         message="Loading the Library Archives..."
       />
       <CosmicBackground variant="library" starCount={300} particleCount={25} />
-      
+
       <GenreSelectionModal
         isOpen={showGenreModal}
         onClose={handleCloseGenreModal}
@@ -768,8 +768,8 @@ export default function LibraryScreen() {
       />
       {conversationActive && (
         <>
-          <div 
-            className={dialogueStyles.dialogueOverlay} 
+          <div
+            className={dialogueStyles.dialogueOverlay}
             onClick={handleEndConversation}
             data-testid="dialogue-overlay"
           />
@@ -795,32 +795,33 @@ export default function LibraryScreen() {
         </div>
 
         <div className={styles.libraryActions}>
-          <button 
-            className={`${styles.libraryButton} ${styles.primary}`} 
+          <button
+            className={`${styles.libraryButton} ${styles.primary}`}
             onClick={handleBrowseArchives}
             data-testid="browse-archives-btn"
           >
             Browse the Archives
           </button>
-          
-          <button 
+
+          <button
             className={`${styles.libraryButton} ${hasNewDialogue ? notificationStyles.storyNotificationGlowExternal : ''}`}
             onClick={handleStartConversation}
             title={hasNewDialogue ? 'New story event waiting!' : undefined}
+            data-testid="start-conversation-btn"
           >
             Start a Conversation
           </button>
-          
+
           <button className={styles.libraryButton} onClick={handleBookOfPassage}>
             Look at your Book of Passage
           </button>
-          
+
           <button className={styles.libraryButton} onClick={handleReturnToMenu}>
             Return to Main Menu
           </button>
-          
-          <button 
-            className={styles.libraryButton} 
+
+          <button
+            className={styles.libraryButton}
             onClick={handleLibrarySettings}
           >
             Open Settings

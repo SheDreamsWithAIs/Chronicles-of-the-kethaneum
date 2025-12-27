@@ -507,6 +507,38 @@ export class AudioManager {
       return;
     }
 
+    // If this playlist is already active and currently playing, do not restart
+    if (this.currentPlaylist === playlistId) {
+      const activeTrack = playlist.tracks[this.currentTrackIndex];
+      const activeAudio = activeTrack ? this.tracks.get(activeTrack.id)?.audio : null;
+      if (activeAudio) {
+        if (!activeAudio.paused && !activeAudio.ended) {
+          console.log('[AudioManager] playPlaylist: already playing, skipping restart', {
+            playlistId,
+            trackId: activeTrack.id,
+            index: this.currentTrackIndex,
+          });
+          return;
+        }
+        // If paused, resume without resetting position
+        this.updateVolume(activeAudio, playlist.category);
+        if (!this.isMuted('master') && !this.isMuted(playlist.category)) {
+          try {
+            await activeAudio.play();
+            console.log('[AudioManager] playPlaylist: resumed paused track', {
+              playlistId,
+              trackId: activeTrack.id,
+              index: this.currentTrackIndex,
+            });
+          } catch (e) {
+            // If resume fails, fall through to restart logic below
+            console.warn('[Audio] Failed to resume existing playlist track, restarting:', e);
+          }
+        }
+        return;
+      }
+    }
+
     // Check if any tracks in the playlist are actually loaded
     const hasLoadedTracks = playlist.tracks.some(track => this.tracks.has(track.id));
     if (!hasLoadedTracks) {
