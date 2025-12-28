@@ -5,7 +5,7 @@
  * Provides audio controls and state across all screens
  */
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { AudioManager } from '@/lib/audio/AudioManager';
 import type { AudioState } from '@/lib/audio/types';
 
@@ -37,7 +37,8 @@ export function AudioProvider({ children }: AudioProviderProps) {
     isLoaded: false,
   });
 
-  const audioManager = AudioManager.getInstance();
+  // Use ref to maintain stable reference to AudioManager singleton
+  const audioManagerRef = useRef<AudioManager>(AudioManager.getInstance());
 
   /**
    * Load saved settings from localStorage
@@ -75,24 +76,27 @@ export function AudioProvider({ children }: AudioProviderProps) {
   }, []);
 
   /**
-   * Initialize audio system
+   * Initialize audio system - only runs once on mount
    */
   useEffect(() => {
     let mounted = true;
 
     const initAudio = async () => {
       try {
-        // Load saved settings
-        const settings = loadSettings();
+        const audioManager = audioManagerRef.current;
 
-        // Initialize the audio manager
+        // Load saved settings
+        const saved = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
+        const settings = saved ? JSON.parse(saved) : { volume: 70, isMuted: false };
+
+        // Initialize the audio manager (only happens once due to isInitialized flag)
         await audioManager.initialize('/data/audio-config.json');
 
         if (!mounted) return;
 
         // Apply saved settings
-        audioManager.setVolume(settings.volume);
-        audioManager.setMuted(settings.isMuted);
+        audioManager.setVolume(settings.volume ?? 70);
+        audioManager.setMuted(settings.isMuted ?? false);
 
         // Start playing if not muted
         if (!settings.isMuted) {
@@ -122,61 +126,68 @@ export function AudioProvider({ children }: AudioProviderProps) {
     return () => {
       mounted = false;
     };
-  }, [audioManager, loadSettings]);
+    // Empty dependency array - only run once on mount
+  }, []);
 
   /**
    * Set volume
    */
   const setVolume = useCallback((volume: number) => {
+    const audioManager = audioManagerRef.current;
     audioManager.setVolume(volume);
-    const newMuted = audioState.isMuted;
 
-    setAudioState((prev) => ({
-      ...prev,
-      volume,
-    }));
-
-    saveSettings(volume, newMuted);
-  }, [audioManager, audioState.isMuted, saveSettings]);
+    setAudioState((prev) => {
+      const newMuted = prev.isMuted;
+      saveSettings(volume, newMuted);
+      return {
+        ...prev,
+        volume,
+      };
+    });
+  }, [saveSettings]);
 
   /**
    * Toggle mute
    */
   const toggleMute = useCallback(() => {
+    const audioManager = audioManagerRef.current;
     audioManager.toggleMute();
     const newMuted = audioManager.getMuted();
     const isPlaying = audioManager.isPlaying();
 
-    setAudioState((prev) => ({
-      ...prev,
-      isMuted: newMuted,
-      isPlaying,
-    }));
-
-    saveSettings(audioState.volume, newMuted);
-  }, [audioManager, audioState.volume, saveSettings]);
+    setAudioState((prev) => {
+      saveSettings(prev.volume, newMuted);
+      return {
+        ...prev,
+        isMuted: newMuted,
+        isPlaying,
+      };
+    });
+  }, [saveSettings]);
 
   /**
    * Play audio
    */
   const play = useCallback(async () => {
+    const audioManager = audioManagerRef.current;
     await audioManager.play();
     setAudioState((prev) => ({
       ...prev,
       isPlaying: true,
     }));
-  }, [audioManager]);
+  }, []);
 
   /**
    * Pause audio
    */
   const pause = useCallback(() => {
+    const audioManager = audioManagerRef.current;
     audioManager.pause();
     setAudioState((prev) => ({
       ...prev,
       isPlaying: false,
     }));
-  }, [audioManager]);
+  }, []);
 
   const value: AudioContextValue = {
     volume: audioState.volume,
