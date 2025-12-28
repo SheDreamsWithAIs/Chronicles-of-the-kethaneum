@@ -87,8 +87,16 @@ export class AudioManager {
 
     if (this.config.mode === 'REPEAT_ONE') {
       this.play();
-    } else if (this.config.autoAdvance) {
-      this.nextTrack();
+    } else if (this.config.mode === 'REPEAT_ALL' || this.config.autoAdvance) {
+      // For single-track playlists, just restart the current track
+      if (this.config.tracks.length === 1) {
+        if (this.audio) {
+          this.audio.currentTime = 0;
+        }
+        this.play();
+      } else {
+        this.nextTrack();
+      }
     }
   }
 
