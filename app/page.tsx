@@ -56,9 +56,11 @@ export default function TitleScreen() {
       console.error('Failed to clear progress on New Game', e);
     }
 
-    // Use client-side navigation to preserve audio playback
-    // clearProgress() already clears the state, no reload needed
-    router.push('/backstory');
+    // Force a full page reload to ensure all in-memory state is cleared
+    // This prevents race conditions where old state gets re-saved
+    // Use navigateTo to respect basePath for GitHub Pages
+    // Note: This will restart background music
+    navigateTo('/backstory');
   };
 
   const handleContinue = () => {
