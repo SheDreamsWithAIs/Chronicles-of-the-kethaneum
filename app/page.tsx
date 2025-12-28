@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { loadProgress, clearProgress, cleanupLegacyKeys } from '@/lib/save';
-import { navigateTo, getRoutePath } from '@/lib/utils/navigation';
+import { getRoutePath } from '@/lib/utils/navigation';
 import styles from './title-screen.module.css';
 
 export default function TitleScreen() {
@@ -56,11 +56,9 @@ export default function TitleScreen() {
       console.error('Failed to clear progress on New Game', e);
     }
 
-    // Force a full page reload to ensure all in-memory state is cleared
-    // This prevents race conditions where old state gets re-saved
-    // Use navigateTo to respect basePath for GitHub Pages
-    // Note: This will restart background music
-    navigateTo('/backstory');
+    // Use client-side navigation to preserve audio playback
+    // clearProgress() clears state without needing a reload
+    router.push('/backstory');
   };
 
   const handleContinue = () => {
