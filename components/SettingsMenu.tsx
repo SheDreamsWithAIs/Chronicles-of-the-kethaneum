@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { useFontSize } from '@/hooks/useFontSize';
+import { useAudio } from '@/hooks/useAudio';
 import { saveProgress } from '@/lib/save';
 import styles from './SettingsMenu.module.css';
 
@@ -27,7 +28,7 @@ export function SettingsMenu({
 }: SettingsMenuProps) {
   const { state } = useGameState();
   const { fontSize, setFontSize, resetFontSize, minFontSize, maxFontSize } = useFontSize();
-  const [showAudioSettings, setShowAudioSettings] = useState(false);
+  const { volume, isMuted, setVolume, toggleMute } = useAudio();
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
 
   if (!isOpen) return null;
@@ -49,17 +50,8 @@ export function SettingsMenu({
     setFontSize(value);
   };
 
-  const handleAudioSettingsClose = () => {
-    setShowAudioSettings(false);
-  };
-
-  const handleAudioSettingsSave = async () => {
-    // Save game progress to persist audio settings
-    try {
-      await saveProgress(state);
-    } catch (error) {
-      console.error('Failed to save audio settings:', error);
-    }
+  const handleVolumeChange = (value: number) => {
+    setVolume(value);
   };
 
   return (
@@ -69,20 +61,37 @@ export function SettingsMenu({
           <h2 className={styles.panelTitle} id="settings-modal-title">Settings</h2>
 
           <div className={styles.settingsContainer}>
-            {/* Audio Settings Section - Placeholder for future audio system rebuild */}
+            {/* Audio Settings Section */}
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Audio</h3>
+
+              {/* Volume Control */}
+              <div className={styles.fontSizeControl}>
+                <label className={styles.audioLabel}>Music Volume</label>
+                <div className={styles.sliderContainer}>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={volume}
+                    onChange={(e) => handleVolumeChange(Number(e.target.value))}
+                    className={styles.slider}
+                    disabled={isMuted}
+                  />
+                  <span className={styles.fontSizeValue}>
+                    {volume}%
+                  </span>
+                </div>
+              </div>
+
+              {/* Mute Toggle */}
               <button
                 className={styles.actionButton}
-                onClick={() => setShowAudioSettings(true)}
-                disabled={true}
-                title="Audio system being rebuilt"
+                onClick={toggleMute}
+                style={{ marginTop: '0.5rem' }}
               >
-                Open Audio Settings
+                {isMuted ? '🔇 Unmute Music' : '🔊 Mute Music'}
               </button>
-              <p style={{ fontSize: '0.85rem', color: '#999', marginTop: '0.5rem' }}>
-                Audio system is being rebuilt
-              </p>
             </div>
 
             {/* Manual Save Section */}
@@ -180,13 +189,6 @@ export function SettingsMenu({
           </div>
         </div>
       </div>
-
-      {/* Audio Settings Modal - Placeholder for future audio system rebuild */}
-      {/* <AudioSettingsModal
-        isOpen={showAudioSettings}
-        onClose={handleAudioSettingsClose}
-        onSave={handleAudioSettingsSave}
-      /> */}
     </>
   );
 }

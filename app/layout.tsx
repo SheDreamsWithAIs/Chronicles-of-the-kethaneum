@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Crimson_Text, Dancing_Script, Cinzel } from "next/font/google";
 import { StoryNotificationProvider } from "@/contexts/StoryNotificationContext";
 import { StorySystemProvider } from "@/components/StorySystemProvider";
+import { AudioProvider } from "@/contexts/AudioContext";
 import { FontSizeInitializer } from "@/components/FontSizeInitializer";
 import "./globals.css";
 
@@ -40,13 +41,15 @@ export default function RootLayout({
         className={`${crimsonText.variable} ${dancingScript.variable} ${cinzel.variable} antialiased`}
       >
         <FontSizeInitializer />
-        <StoryNotificationProvider>
-          <StorySystemProvider>
-            <div id="game-container" className="min-h-screen">
-              {children}
-            </div>
-          </StorySystemProvider>
-        </StoryNotificationProvider>
+        <AudioProvider>
+          <StoryNotificationProvider>
+            <StorySystemProvider>
+              <div id="game-container" className="min-h-screen">
+                {children}
+              </div>
+            </StorySystemProvider>
+          </StoryNotificationProvider>
+        </AudioProvider>
       </body>
     </html>
   );
