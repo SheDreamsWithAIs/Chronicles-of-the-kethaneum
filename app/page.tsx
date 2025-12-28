@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
+import { SettingsMenu } from '@/components/SettingsMenu';
 import { loadProgress, clearProgress, cleanupLegacyKeys } from '@/lib/save';
 import { getRoutePath } from '@/lib/utils/navigation';
 import styles from './title-screen.module.css';
@@ -133,11 +134,13 @@ export default function TitleScreen() {
         </div>
       </div>
 
-      {/* Audio Settings Modal - Placeholder for future audio system rebuild */}
-      {/* <AudioSettingsModal
+      <SettingsMenu
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
-      /> */}
+        onNavigateToTitle={() => setShowSettings(false)}
+        context="library"
+        onReturnToLibrary={() => setShowSettings(false)}
+      />
     </>
   );
 }
