@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { flushSync } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { PageLoader } from '@/components/shared/PageLoader';
@@ -32,6 +33,7 @@ export default function LibraryScreen() {
   const [conversationActive, setConversationActive] = useState(false);
   const [showGenreModal, setShowGenreModal] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [isNavigatingToPuzzle, setIsNavigatingToPuzzle] = useState(false);
   const { state, setState, isReady: gameStateReady } = useGameState();
   const { loadSequential, loadAll } = usePuzzle(state, setState);
   const { hasNewDialogue, clearNewDialogue, setNewDialogueAvailable } = useStoryNotification();
@@ -178,6 +180,23 @@ export default function LibraryScreen() {
   };
 
   const handleSelectGenre = async (genre: string) => {
+    // Show loader immediately - use flushSync to force synchronous render
+    flushSync(() => {
+      setIsNavigatingToPuzzle(true);
+      setLoading('navigatingToPuzzle', true);
+    });
+    
+    // Wait for loader to render before closing modal
+    // Use multiple animation frames and a small timeout to ensure DOM update
+    await new Promise(resolve => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setTimeout(resolve, 50);
+        });
+      });
+    });
+    
+    // Now close the modal
     setShowGenreModal(false);
 
     // Ensure puzzles are loaded
@@ -742,12 +761,17 @@ export default function LibraryScreen() {
     setShowSettingsMenu(true);
   };
 
+  // Track navigation loading condition
+  useEffect(() => {
+    setLoading('navigatingToPuzzle', isNavigatingToPuzzle);
+  }, [isNavigatingToPuzzle, setLoading]);
+
   return (
     <div className={styles.libraryContainer}>
       <PageLoader
-        isLoading={pageLoading}
+        isLoading={pageLoading || isNavigatingToPuzzle}
         variant="library"
-        message="Loading the Library Archives..."
+        message={isNavigatingToPuzzle ? "Preparing your puzzle..." : "Loading the Library Archives..."}
       />
       <CosmicBackground variant="library" starCount={300} particleCount={25} />
 
