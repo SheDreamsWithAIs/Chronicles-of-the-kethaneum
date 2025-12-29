@@ -173,9 +173,10 @@ export class AudioManager {
   private async changeTrack(newIndex: number): Promise<void> {
     if (!this.audio || !this.config) return;
 
-    const wasPlaying = !this.audio.paused;
+    // Check if audio was playing - includes ended state for auto-advance
+    const wasPlaying = !this.audio.paused || this.audio.ended;
 
-    if (wasPlaying) {
+    if (wasPlaying && !this.audio.paused) {
       await this.fadeOut();
     }
 
