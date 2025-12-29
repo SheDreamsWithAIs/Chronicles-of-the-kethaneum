@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { FormattedSegment } from '@/components/receiving-room/FormattedSegment';
 import { ActionButton } from '@/components/receiving-room/ActionButton';
-import { navigateTo } from '@/lib/utils/navigation';
 import { loadReceivingRoomContent, type ReceivingRoomContent } from '@/lib/utils/receivingRoomLoader';
 import { PageLoader } from '@/components/shared/PageLoader';
 import { usePageLoader } from '@/hooks/usePageLoader';
 import styles from './receiving-room.module.css';
 
 export default function ReceivingRoomScreen() {
+  const router = useRouter();
   const storyAreaRef = useRef<HTMLDivElement>(null);
   const [content, setContent] = useState<ReceivingRoomContent | null>(null);
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
@@ -54,7 +55,7 @@ export default function ReceivingRoomScreen() {
       setLoading('transition', true);
       // Use a small delay for transition, then navigate
       setTimeout(() => {
-        navigateTo('/book-of-passage');
+        router.push('/book-of-passage');
       }, 300);
     } else {
       // Not the last segment - move to next segment
