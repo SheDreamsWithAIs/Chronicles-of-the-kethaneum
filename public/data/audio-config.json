@@ -1,0 +1,37 @@
+{
+  "backgroundMusic": {
+    "playlistId": "background-music",
+    "playlistName": "Act 1 Background Music",
+    "mode": "REPEAT_ALL",
+    "autoAdvance": true,
+    "fadeDuration": 2000,
+    "tracks": [
+      {
+        "id": "act1-bg-1",
+        "src": "/audio/music/Act-1-bg-music/Reflection in the Expanse.mp3",
+        "title": "Reflection in the Expanse"
+      },
+      {
+        "id": "act1-bg-2",
+        "src": "/audio/music/Act-1-bg-music/The Kethaneum (act 1).mp3",
+        "title": "The Kethaneum"
+      },
+      {
+        "id": "act1-bg-3",
+        "src": "/audio/music/Act-1-bg-music/The Silence Between Words.mp3",
+        "title": "The Silence Between Words"
+      },
+      {
+        "id": "act1-bg-4",
+        "src": "/audio/music/Act-1-bg-music/Through the Quiet Veil.mp3",
+        "title": "Through the Quiet Veil"
+      },
+      {
+        "id": "act1-bg-5",
+        "src": "/audio/music/Act-1-bg-music/Whispers of the Ages.mp3",
+        "title": "Whispers of the Ages"
+      }
+    ]
+  }
+}
+

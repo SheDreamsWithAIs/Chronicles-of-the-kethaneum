@@ -3,9 +3,10 @@
  * Separates loading orchestration from the main puzzle component
  */
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import type { GameState } from '@/lib/game/state';
 import { startBeatTheClockRun } from '@/lib/game/logic';
+import { storyBlurbManager } from '@/lib/story';
 
 interface UsePuzzleLoadingProps {
   state: GameState;
@@ -36,13 +37,14 @@ export function usePuzzleLoading({
   setPuzzleStartTime,
   router,
 }: UsePuzzleLoadingProps) {
+  const selectionInFlightRef = useRef(false);
   
   const loadPuzzleForMode = useCallback(async (): Promise<{ genreComplete?: boolean } | void> => {
     // Don't try to load until state restoration is complete
     if (!isReady) return;
-    
+
     if (state.grid && state.grid.length > 0) return; // Already loaded
-    
+
     // Wait a moment to ensure state restoration from localStorage has completed
     await new Promise(resolve => setTimeout(resolve, 50));
     
@@ -117,32 +119,43 @@ export function usePuzzleLoading({
     } else {
       // Story Mode: Use new puzzle selection system with Kethaneum weaving
 
-      // First, try to restore exact puzzle if we're refreshing the page
-      if (genreToLoad && puzzleIndex !== undefined && puzzleIndex >= 0 &&
-          state.puzzles && state.puzzles[genreToLoad] &&
-          state.puzzles[genreToLoad][puzzleIndex]) {
-        // Restore the exact puzzle we were on
+      // Determine if we should restore the same puzzle
+      // Restore if:
+      // 1. We have a valid currentGenre/puzzleIndex (saved state)
+      // 2. The puzzle exists in the loaded set
+      // 3. The puzzle at that index is NOT completed (incomplete puzzle - user wants to continue)
+      // Note: Do NOT require selectedGenre to match so Kethaneum insertions restore correctly.
+      const shouldRestore = genreToLoad &&
+                            puzzleIndex !== undefined &&
+                            puzzleIndex >= 0 &&
+                            state.puzzles &&
+                            state.puzzles[genreToLoad] &&
+                            state.puzzles[genreToLoad][puzzleIndex];
+
+      if (shouldRestore) {
         const puzzleToRestore = state.puzzles[genreToLoad][puzzleIndex];
+        const completedSet = state.completedPuzzlesByGenre?.[genreToLoad];
+        const isCompleted = completedSet && completedSet.has(puzzleToRestore.title);
 
-        // Verify it matches the saved book and story part
-        if ((!bookToLoad || puzzleToRestore.book === bookToLoad) &&
-            (state.currentStoryPart === undefined || puzzleToRestore.storyPart === state.currentStoryPart)) {
-          // Initialize the puzzle - it will preserve currentGenre and currentPuzzleIndex from state
-          // But we need to ensure they're set before calling initialize
-          setState(prevState => ({
-            ...prevState,
-            currentGenre: genreToLoad,
-            currentPuzzleIndex: puzzleIndex,
-            currentBook: puzzleToRestore.book,
-            currentStoryPart: puzzleToRestore.storyPart !== undefined ? puzzleToRestore.storyPart : 0
-          }));
+        // Only restore if puzzle is NOT completed (user wants to continue same puzzle)
+        if (!isCompleted) {
+          // Verify it matches the saved book and story part
+          if ((!bookToLoad || puzzleToRestore.book === bookToLoad) &&
+              (state.currentStoryPart === undefined || puzzleToRestore.storyPart === state.currentStoryPart)) {
+            setState(prevState => ({
+              ...prevState,
+              currentGenre: genreToLoad,
+              currentPuzzleIndex: puzzleIndex,
+              currentBook: puzzleToRestore.book,
+              currentStoryPart: puzzleToRestore.storyPart !== undefined ? puzzleToRestore.storyPart : 0
+            }));
 
-          // Wait for state update, then initialize
-          await new Promise(resolve => setTimeout(resolve, 0));
+            await new Promise(resolve => setTimeout(resolve, 0));
 
-          const success = initialize(puzzleToRestore);
-          if (success) {
-            return;
+            const success = initialize(puzzleToRestore);
+            if (success) {
+              return;
+            }
           }
         }
       }
@@ -162,17 +175,25 @@ export function usePuzzleLoading({
       }
 
       // Use the new selection system
-      const result = loadWithSelection();
+      if (selectionInFlightRef.current) {
+        return;
+      }
+      selectionInFlightRef.current = true;
+      let result;
+      try {
+        result = loadWithSelection();
+      } finally {
+        selectionInFlightRef.current = false;
+      }
 
       if (!result.success) {
-        console.warn('Failed to load puzzle:', result.message);
+        console.warn('[PuzzleLoading] Failed to load puzzle:', result.message);
         if (result.message && result.message.includes('No genre selected')) {
           router.push('/library');
         }
       } else {
         // Show a notification if genre is exhausted
         if (result.message) {
-          console.log(result.message);
           // Check if genre is exhausted and signal to caller
           if (result.message.includes('completed all puzzles')) {
             return { genreComplete: true };
@@ -199,4 +220,3 @@ export function usePuzzleLoading({
     loadPuzzleForMode,
   };
 }
-

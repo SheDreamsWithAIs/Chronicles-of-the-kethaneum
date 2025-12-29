@@ -135,6 +135,25 @@ class BookRegistryManager {
   }
 
   /**
+   * Get book metadata by title (synchronous - requires registry to be loaded)
+   */
+  getBookByTitleSync(title: string): BookMetadata | null {
+    const bookId = this.titleToIdMap.get(title.toLowerCase());
+    if (!bookId) return null;
+    return this.cache.get(bookId) || null;
+  }
+
+  /**
+   * Get book metadata by title (async)
+   */
+  async getBookByTitle(title: string): Promise<BookMetadata | null> {
+    await this.loadRegistry();
+    const bookId = this.titleToIdMap.get(title.toLowerCase());
+    if (!bookId) return null;
+    return this.registry?.books[bookId] || null;
+  }
+
+  /**
    * Get book ID by title (case-insensitive)
    */
   async getBookIdByTitle(title: string): Promise<string | null> {

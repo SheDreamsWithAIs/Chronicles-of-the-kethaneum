@@ -82,6 +82,13 @@
   letter-spacing: 0.5px;
   position: relative;
   overflow: hidden;
+  z-index: 1; /* Ensure button content is above glow */
+}
+
+/* Allow external glow to show when present */
+.libraryButton:has(.storyNotificationGlowExternal),
+.libraryButton.storyNotificationGlowExternal {
+  overflow: visible;
 }
 
 .libraryButton::before {

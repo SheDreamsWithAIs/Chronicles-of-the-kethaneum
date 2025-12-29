@@ -12,6 +12,7 @@ interface FormattedBackstoryProps {
 
 /**
  * Renders a single text segment with formatting
+ * CSS white-space: pre-wrap handles newlines, so we don't need to convert them to <br> tags
  */
 function renderSegment(segment: TextSegment, index: number): React.ReactNode {
   const { text, color, italic, bold } = segment;
@@ -21,25 +22,26 @@ function renderSegment(segment: TextSegment, index: number): React.ReactNode {
     style.color = color;
   }
 
+  // CSS white-space: pre-wrap will handle newlines, so just render the text directly
   let element: React.ReactNode = text;
 
   // Apply formatting in order: bold, then italic
   if (bold) {
-    element = <strong key={index}>{element}</strong>;
+    element = <strong key={`${index}-bold`}>{element}</strong>;
   }
   if (italic) {
-    element = <em key={index}>{element}</em>;
+    element = <em key={`${index}-italic`}>{element}</em>;
   }
 
   // If we have a color or both bold and italic, wrap in span
   if (color || (bold && italic)) {
     element = (
-      <span key={index} style={style}>
+      <span key={`${index}-span`} style={style}>
         {element}
       </span>
     );
   }
-
+  
   return element;
 }
 
@@ -50,13 +52,19 @@ function renderSegment(segment: TextSegment, index: number): React.ReactNode {
 export function FormattedBackstory({ content, className }: FormattedBackstoryProps) {
   return (
     <div className={className}>
-      {content.paragraphs.map((paragraph, pIndex) => (
-        <p key={pIndex}>
-          {paragraph.segments.map((segment, sIndex) =>
-            renderSegment(segment, sIndex)
-          )}
-        </p>
-      ))}
+      {content.paragraphs.map((paragraph, pIndex) => {
+        // Always render the paragraph - CSS white-space: pre-wrap handles whitespace
+        // If paragraph has no segments, render empty paragraph (CSS will preserve it)
+        return (
+          <p key={pIndex}>
+            {paragraph.segments.map((segment, sIndex) => (
+              <React.Fragment key={sIndex}>
+                {renderSegment(segment, sIndex)}
+              </React.Fragment>
+            ))}
+          </p>
+        );
+      })}
     </div>
   );
 }

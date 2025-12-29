@@ -1,7 +1,7 @@
 {
   "storyEvent": {
     "id": "first-visit",
-    "title": "First Steps in the Kethaneum",
+    "title": "Lumina's Warning",
     "triggerCondition": "player-enters-library-first-time",
     "storyBeat": "hook"
   },
@@ -9,29 +9,43 @@
     {
       "sequence": 1,
       "speaker": "archivist-lumina",
-      "text": "Ah, you must be our new Assistant Archivist! I am Lumina, Senior Archivist of Interdimensional Collections.",
-      "emotion": ["welcoming", "formal"],
+      "text": "Lumina watches you. Her eyes drop to the crystalline cover in your hand, still faintly glowing with your inscribed emotions. Her expression shifts to calculated knowing. \"Careful, Archivist,\" she murmurs, stepping between you and the prying eyes of the junior staff. \"You haven't learned to control your connection to the Book.\"",
+      "emotion": ["protective", "serious"],
       "pauseAfter": true
     },
     {
       "sequence": 2,
-      "speaker": "keeper-valdris",
-      "text": "Welcome, young seeker. I am Valdris, Keeper of the Ancient Texts. Your arrival has been long anticipated.",
-      "emotion": ["formal", "warm", "mystical"],
+      "speaker": "archivist-lumina",
+      "text": "She taps the cover of your book with two of the six, slender fingers on her hand. \"The Book of Passage does not merely record history; it is linked to your essence. In these early stages, before you learn to discipline your mind, it will transcribe everything. Your history, your observations... and your vulnerabilities.\"",
+      "emotion": ["warning", "instructive"],
       "pauseAfter": true
     },
     {
       "sequence": 3,
       "speaker": "archivist-lumina",
-      "text": "The knowledge constructs await your attention. Each one contains scattered words that, when properly organized, reveal wisdom from across the multiverse.",
-      "emotion": ["explanatory", "encouraging"],
+      "text": "She leans in slightly, her tone shifting to a guarded hush. \"Keep it close. And to most—keep it closed.\" She chooses her next words carefully. \"Tension in the Kethaneum has become sharp. You do not want your doubts read like a public notice by those looking for weakness.\"",
+      "emotion": ["cautious", "serious"],
       "pauseAfter": true
     },
     {
       "sequence": 4,
-      "speaker": "keeper-valdris",
-      "text": "Do not be overwhelmed by the vastness of what lies before you. Every master archivist began with a single word, a single pattern recognized.",
-      "emotion": ["reassuring", "wise"],
+      "speaker": "archivist-lumina",
+      "text": "Satisfied that you understand, she straightens up, returning to her professional persona. \"Now, Archivist, to business.\" A wry smile graces her lips. \"Yes, I said Archivist. Do not forget that you have earned that distinction. You are here to do a job. Not sightsee. You work here now.\"",
+      "emotion": ["encouraging", "firm"],
+      "pauseAfter": true
+    },
+    {
+      "sequence": 5,
+      "speaker": "archivist-lumina",
+      "text": "\"The modernization efforts have disrupted more than transits. The Archives themselves are straining. Words are being lost, meanings scrambled. We need every available archivist working to catalog and stabilize the texts.\" She glances toward the infinite corridors. \"Venture deeper into the archives and the Kethaneum will bring the wounded texts to you. Do not worry. You know how to catalog the texts. This is what you have studied for. May knowledge smile on you and our combined efforts elevate you.\"",
+      "emotion": ["urgent", "motivating"],
+      "pauseAfter": true
+    },
+    {
+      "sequence": 6,
+      "speaker": "archivist-lumina",
+      "text": "With that, Lumina sends you out into the archives.",
+      "emotion": ["warm", "resolute"],
       "pauseAfter": false,
       "isLastInSequence": true
     }
@@ -40,16 +54,12 @@
     {
       "id": "archivist-lumina",
       "portraitFile": "lumina-portrait.svg"
-    },
-    {
-      "id": "keeper-valdris", 
-      "portraitFile": "valdris-portrait.svg"
     }
   ],
   "metadata": {
     "estimatedDuration": "medium",
     "storyImportance": "introduction",
     "unlocks": ["library-navigation", "genre-browsing"],
-    "lastUpdated": "2025-05-27"
+    "lastUpdated": "2025-05-28"
   }
 }

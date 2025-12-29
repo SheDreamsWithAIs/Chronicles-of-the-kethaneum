@@ -5,6 +5,9 @@
 
 import type { GameState, WordData, Cell, SessionStats } from './state';
 import type { Config } from '../core/config';
+import { bookRegistry } from '../book/bookRegistry';
+import { storyProgressionManager } from '@/lib/story/StoryProgressionManager';
+import type { ProgressionMetrics } from '@/lib/story/types';
 
 /**
  * Check if the selected cells form a word in the puzzle
@@ -137,6 +140,11 @@ export function endGame(
         newState.discoveredBooks.add(newState.currentBook);
         // Update completedBooks based on the actual set size
         newState.completedBooks = newState.discoveredBooks.size;
+        console.log('[GameLogic] Discovered book on completion', {
+          book: newState.currentBook,
+          genre: newState.currentGenre,
+          storyPart: newState.currentStoryPart,
+        });
       }
 
       // Update the next story part to show for this book
@@ -154,12 +162,33 @@ export function endGame(
         const bookData = newState.books[newState.currentBook];
         if (Array.isArray(bookData)) {
           // Convert to object with complete flag
-          newState.books[newState.currentBook] = {
-            ...bookData.reduce((acc, val, idx) => ({ ...acc, [idx]: val }), {}),
-            complete: true,
-          };
-        }
-      }
+      newState.books[newState.currentBook] = {
+        ...bookData.reduce((acc, val, idx) => ({ ...acc, [idx]: val }), {}),
+        complete: true,
+      };
+    }
+  }
+      console.log('[GameLogic] Completion state', {
+        book: newState.currentBook,
+        storyPart: newState.currentStoryPart,
+        isComplete,
+        partsMap: newState.bookPartsMap?.[newState.currentBook],
+        bookData: newState.books[newState.currentBook],
+      });
+    }
+
+    // Check story progression after completing a puzzle
+    const metrics: ProgressionMetrics = {
+    completedPuzzles: newState.completedPuzzles,
+    discoveredBooks: newState.discoveredBooks.size,
+    completedBooks: newState.completedBooks,
+  };
+
+    // Check if we should advance the story
+    const progressionResult = storyProgressionManager.checkAndAdvanceStory(metrics);
+
+    if (progressionResult.shouldAdvance) {
+      // Story progression manager updated state internally when advancing
     }
   }
 
@@ -173,8 +202,24 @@ export function checkBookCompletion(bookTitle: string, state: GameState): boolea
   // Return false if the book doesn't exist in state
   if (!state.books[bookTitle]) return false;
 
-  // Get available parts from the mapping 
-  const availableParts = state.bookPartsMap[bookTitle];
+  // Get available parts from the mapping, fallback to registry if missing
+  let availableParts = state.bookPartsMap[bookTitle];
+
+  if (!availableParts || availableParts.length === 0) {
+    const bookMeta =
+      bookRegistry.getBookByTitleSync && bookRegistry.isLoaded()
+        ? bookRegistry.getBookByTitleSync(bookTitle)
+        : null;
+    if (bookMeta?.parts) {
+      availableParts = Array.from({ length: bookMeta.parts }, (_, idx) => idx);
+      state.bookPartsMap[bookTitle] = availableParts;
+    } else {
+      availableParts = inferPartsFromPuzzles(state, bookTitle);
+      if (availableParts.length > 0) {
+        state.bookPartsMap[bookTitle] = availableParts;
+      }
+    }
+  }
 
   // If no parts mapping exists, we can't determine completion
   if (!availableParts || availableParts.length === 0) return false;
@@ -189,6 +234,25 @@ export function checkBookCompletion(bookTitle: string, state: GameState): boolea
   }
 
   return false;
+}
+
+/**
+ * Infer available parts for a book from loaded puzzles.
+ */
+function inferPartsFromPuzzles(state: GameState, bookTitle: string): number[] {
+  const parts = new Set<number>();
+  if (!state.puzzles) return [];
+
+  for (const genrePuzzles of Object.values(state.puzzles)) {
+    if (!Array.isArray(genrePuzzles)) continue;
+    for (const puzzle of genrePuzzles) {
+      if (puzzle?.book === bookTitle && puzzle.storyPart !== undefined) {
+        parts.add(puzzle.storyPart);
+      }
+    }
+  }
+
+  return Array.from(parts).sort((a, b) => a - b);
 }
 
 /**
@@ -301,13 +365,10 @@ export function resumeGame(state: GameState): GameState {
  * Used for beat-the-clock mode when puzzle completes but run continues
  */
 export function clearPuzzleTimer(state: GameState): GameState {
-  console.log('[clearPuzzleTimer] Clearing puzzle timer, gameMode:', state.gameMode, 'timer exists:', !!state.timer);
-  
   // Stop the timer - store reference before clearing
   const timerToClear = state.timer;
   if (timerToClear) {
     clearInterval(timerToClear);
-    console.log('[clearPuzzleTimer] Timer interval cleared');
   }
   
   return {
@@ -376,4 +437,3 @@ export function endBeatTheClockRun(state: GameState): { newState: GameState; ses
   
   return { newState, sessionStats };
 }
-

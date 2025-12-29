@@ -5,6 +5,8 @@
  */
 
 import { fetchAsset } from '@/lib/utils/assetPath';
+import type { GameState } from '@/lib/game/state';
+import { StoryEventTriggerChecker } from './StoryEventTriggerChecker';
 import type {
   StoryBeat,
   LoadingGroup,
@@ -48,6 +50,9 @@ export class DialogueManager {
 
       // Load initial character groups
       await this.loadCharacterGroup('introduction_characters');
+
+      // Load story events
+      await this.loadStoryEvents();
 
       this.isInitialized = true;
       return true;
@@ -275,6 +280,268 @@ export class DialogueManager {
     }
 
     return true;
+  }
+
+  /**
+   * Load all story events from the story-events directory
+   */
+  private async loadStoryEvents(): Promise<void> {
+    try {
+      if (!this.config) {
+        throw new Error('Configuration not loaded');
+      }
+
+      // Load story event manifest
+      const eventFiles = await this.loadStoryEventManifest();
+
+      // Load each story event file
+      for (const filename of eventFiles) {
+        const storyEvent = await this.loadAndValidateStoryEventFile(filename);
+        if (storyEvent && storyEvent.storyEvent?.id) {
+          this.storyEvents.set(storyEvent.storyEvent.id, storyEvent);
+        }
+      }
+
+
+      // Initialize story event trigger checker index for performance
+      // This indexes events by story beat so we only check relevant events
+      if (typeof window !== 'undefined') {
+        // Dynamic import to avoid circular dependency
+        import('./StoryEventTriggerChecker').then(({ StoryEventTriggerChecker }) => {
+          StoryEventTriggerChecker.initializeIndex();
+        });
+      }
+
+      // Emit event that story events are loaded
+      this.emit('storyEventsLoaded', {
+        count: this.storyEvents.size,
+        eventIds: Array.from(this.storyEvents.keys()),
+      });
+    } catch (error) {
+      this.handleError('story-events-loading', error);
+    }
+  }
+
+  /**
+   * Load story event manifest (list of event files)
+   */
+  private async loadStoryEventManifest(): Promise<string[]> {
+    try {
+      if (!this.config) {
+        throw new Error('Configuration not loaded');
+      }
+
+      const manifestPath = this.config.paths.storyEventsDirectory + 'event-manifest.json';
+      const response = await fetchAsset(manifestPath);
+
+      if (!response.ok) {
+        // If no manifest, try to load known events directly
+        console.warn('[DialogueManager] No story event manifest found, loading default events');
+        return ['first-visit.json'];
+      }
+
+      const filenames = await response.json();
+
+      if (!Array.isArray(filenames)) {
+        throw new Error('Invalid manifest structure: expected array of filenames');
+      }
+
+      return filenames;
+    } catch (error) {
+      this.handleError('story-event-manifest-loading', error);
+      // Return default events
+      return ['first-visit.json'];
+    }
+  }
+
+  /**
+   * Load and validate a story event file
+   */
+  private async loadAndValidateStoryEventFile(filename: string): Promise<any | null> {
+    try {
+      if (!this.config) {
+        throw new Error('Configuration not loaded');
+      }
+
+      const basePath = this.config.paths.storyEventsDirectory;
+      const response = await fetchAsset(`${basePath}${filename}`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to load story event file: ${response.status}`);
+      }
+
+      const storyEventData = await response.json();
+
+      // Validate story event data structure
+      if (!this.validateStoryEventData(storyEventData)) {
+        throw new Error(`Invalid story event data structure in ${filename}`);
+      }
+
+      return storyEventData;
+    } catch (error) {
+      this.handleError('story-event-file-loading', error);
+      return null;
+    }
+  }
+
+  /**
+   * Validate story event data structure
+   */
+  private validateStoryEventData(eventData: any): boolean {
+    if (!eventData || typeof eventData !== 'object') {
+      return false;
+    }
+
+    const storyEvent = eventData.storyEvent;
+    if (!storyEvent || !storyEvent.id || !storyEvent.title) {
+      return false;
+    }
+
+    const dialogue = eventData.dialogue;
+    if (!Array.isArray(dialogue) || dialogue.length === 0) {
+      return false;
+    }
+
+    // Validate each dialogue entry has required fields
+    for (const entry of dialogue) {
+      if (!entry.speaker || !entry.text || typeof entry.sequence !== 'number') {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Get a story event by ID
+   */
+  getStoryEvent(eventId: string): any | null {
+    return this.storyEvents.get(eventId) || null;
+  }
+
+  /**
+   * Get character data by character ID
+   */
+  getCharacterById(characterId: string): CharacterData | null {
+    return this.characters.get(characterId) || null;
+  }
+
+  /**
+   * Get dialogue configuration
+   */
+  getConfig(): DialogueConfig | null {
+    return this.config;
+  }
+
+  /**
+   * Get first available story event
+   * Checks trigger conditions and filters out completed events
+   * Requires GameState to properly evaluate trigger conditions
+   */
+  getAvailableStoryEvent(currentState: GameState, completedEvents?: string[]): any | null {
+    try {
+      const availableEvents = this.getAvailableStoryEvents(currentState, completedEvents);
+      
+      if (availableEvents.length === 0) {
+        return null;
+      }
+
+      // Return first available event (full StoryEvent object)
+      const eventId = availableEvents[0];
+      const event = this.getStoryEvent(eventId);
+      
+      // Validate that the returned event matches the requested ID
+      if (!event) {
+        throw new Error(`Story event not found: ${eventId}`);
+      }
+      
+      const returnedEventId = event.storyEvent?.id;
+      if (returnedEventId !== eventId) {
+        throw new Error(
+          `Event ID mismatch in getAvailableStoryEvent: requested '${eventId}' but got '${returnedEventId}'`
+        );
+      }
+      
+      return event;
+    } catch (error) {
+      console.error('[DialogueManager] Error in getAvailableStoryEvent:', error);
+      throw error; // Re-throw to allow caller to handle
+    }
+  }
+
+  /**
+   * Get all loaded story events
+   * Used by StoryEventTriggerChecker to check against state
+   */
+  getAllStoryEvents(): Map<string, any> {
+    return this.storyEvents;
+  }
+
+  /**
+   * Check if DialogueManager is initialized
+   */
+  getInitialized(): boolean {
+    return this.isInitialized;
+  }
+
+  /**
+   * Check if a story event should be triggered based on conditions
+   * Returns the event ID if available, null otherwise
+   */
+  checkForAvailableStoryEvent(triggerCondition: string, currentBeat?: StoryBeat): string | null {
+    for (const [eventId, eventData] of this.storyEvents.entries()) {
+      const event = eventData.storyEvent;
+
+      // Check if trigger condition matches
+      if (event.triggerCondition === triggerCondition) {
+        // Check if story beat matches (if specified)
+        if (event.storyBeat && currentBeat && event.storyBeat !== currentBeat) {
+          continue;
+        }
+
+        // Event is available - emit notification
+        this.emit('storyEventAvailable', {
+          eventId,
+          title: event.title,
+          triggerCondition,
+          storyBeat: event.storyBeat,
+        });
+
+        return eventId;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Get all available story events for current conditions
+   * Uses StoryEventTriggerChecker to verify trigger conditions are satisfied
+   * Filters out completed events if provided
+   */
+  getAvailableStoryEvents(currentState: GameState, completedEvents?: string[]): string[] {
+    try {
+      // Use StoryEventTriggerChecker to get events that satisfy trigger conditions
+      const triggerCheckedEvents = StoryEventTriggerChecker.checkCurrentlyAvailableEvents(currentState);
+      
+      // Validate completedEvents is an array if provided
+      if (completedEvents !== undefined && !Array.isArray(completedEvents)) {
+        console.error('[DialogueManager] completedEvents is not an array:', completedEvents);
+        completedEvents = [];
+      }
+
+      // Filter out completed events if provided
+      const filteredEvents = completedEvents && completedEvents.length > 0
+        ? triggerCheckedEvents.filter((eventId) => !completedEvents.includes(eventId))
+        : triggerCheckedEvents;
+
+      // Filtered events (after removing completed)
+
+      return filteredEvents;
+    } catch (error) {
+      console.error('[DialogueManager] Error in getAvailableStoryEvents:', error);
+      return [];
+    }
   }
 
   /**

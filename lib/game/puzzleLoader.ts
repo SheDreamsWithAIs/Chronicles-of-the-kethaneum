@@ -17,9 +17,9 @@ async function loadGenreManifest(): Promise<string[]> {
     if (!response.ok) {
       console.warn('Failed to load genre manifest, falling back to default files');
       return [
-        '/data/kethaneumPuzzles.json',
-        '/data/naturePuzzles.json',
-        '/data/testPuzzles.json'
+        '/data/story-puzzles/kethaneumPuzzles.json',
+        '/data/story-puzzles/naturePuzzles.json',
+        '/data/story-puzzles/testPuzzles.json'
       ];
     }
     const manifest = await response.json();
@@ -28,9 +28,9 @@ async function loadGenreManifest(): Promise<string[]> {
     console.error('Error loading genre manifest:', error);
     // Fallback to default files if manifest fails to load
     return [
-      '/data/kethaneumPuzzles.json',
-      '/data/naturePuzzles.json',
-      '/data/testPuzzles.json'
+      '/data/story-puzzles/kethaneumPuzzles.json',
+      '/data/story-puzzles/naturePuzzles.json',
+      '/data/story-puzzles/testPuzzles.json'
     ];
   }
 }
@@ -440,7 +440,6 @@ export function loadSequentialPuzzle(
           }
         } else {
           // Genre is complete - signal to show modal instead of auto-replaying
-          console.log(`All books complete in genre "${selectedGenre}". Signaling genre completion.`);
           return {
             success: false,
             newState: state,
@@ -614,4 +613,3 @@ export function buildBookPartsMapping(state: GameState): GameState {
   
   return newState;
 }
-

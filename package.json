@@ -11,23 +11,25 @@
     "cypress": "cypress open",
     "cypress:headless": "cypress run",
     "test:e2e": "start-server-and-test dev http://localhost:3000 cypress",
-    "test:e2e:headless": "start-server-and-test dev http://localhost:3000 cypress:headless"
+    "test:e2e:headless": "start-server-and-test dev http://localhost:3000 cypress:headless",
+    "test:multi-dialogue": "cypress run --spec cypress/e2e/multi-character-dialogue.cy.ts"
   },
   "dependencies": {
+    "next": "16.0.1",
     "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "next": "16.0.1"
+    "react-dom": "19.2.0"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
+    "baseline-browser-mapping": "^2.9.6",
+    "cypress": "^13.6.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.1",
-    "cypress": "^13.6.0",
-    "start-server-and-test": "^2.0.3"
+    "start-server-and-test": "^2.0.3",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

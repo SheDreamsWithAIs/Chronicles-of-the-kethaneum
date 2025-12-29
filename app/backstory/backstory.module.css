@@ -116,15 +116,14 @@
   line-height: 1.8;
   color: var(--neutral-dark);
   text-align: justify;
+  white-space: pre-wrap;
+  tab-size: 4;
 }
 
 .storyContent p {
-  margin-bottom: 20px;
-  text-indent: 30px;
-}
-
-.storyContent p:first-child {
-  text-indent: 0;
+  margin-bottom: 0;
+  white-space: pre-wrap;
+  tab-size: 4;
 }
 
 .storyContent em {

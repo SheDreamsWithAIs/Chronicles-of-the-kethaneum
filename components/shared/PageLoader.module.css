@@ -1,0 +1,168 @@
+/* Page Loader Styles */
+
+.loaderOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  transition: opacity 500ms ease-out;
+}
+
+.loaderOverlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loaderContent {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.logoContainer {
+  width: 400px;
+  height: 400px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.logoWrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoGlow {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.8;
+  animation: logoGlowPulse 6s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+
+@keyframes logoGlowPulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+.tagline {
+  font-family: var(--font-crimson), serif;
+  font-size: 22px;
+  font-style: italic;
+  color: var(--accent-main);
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  opacity: 0.95;
+  font-weight: 500;
+}
+
+.loadingMessage {
+  font-family: var(--font-crimson), serif;
+  font-size: 18px;
+  color: var(--accent-main);
+  text-align: center;
+  margin-top: 0;
+  opacity: 0.9;
+  animation: messageFade 2s ease-in-out infinite;
+}
+
+@keyframes messageFade {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .logoContainer {
+    width: 250px;
+    height: 250px;
+    margin-bottom: 20px;
+  }
+
+  .tagline {
+    font-size: 20px;
+    margin-top: 15px;
+    margin-bottom: 8px;
+  }
+
+  .loadingMessage {
+    font-size: 16px;
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .logoContainer {
+    width: 200px;
+    height: 200px;
+    margin-bottom: 15px;
+  }
+
+  .tagline {
+    font-size: 18px;
+    margin-top: 10px;
+    margin-bottom: 6px;
+  }
+
+  .loadingMessage {
+    font-size: 14px;
+    margin-top: 0;
+  }
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .logoGlow {
+    animation: none;
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .tagline {
+    animation: none;
+    opacity: 0.95;
+  }
+
+  .loadingMessage {
+    animation: none;
+    opacity: 0.9;
+  }
+
+  .loaderOverlay {
+    transition-duration: 200ms;
+  }
+}

@@ -3,10 +3,15 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
+import { PageLoader } from '@/components/shared/PageLoader';
 import { GameStatsModal } from '@/components/GameStatsModal';
 import { GenreCompletionModal } from '@/components/GenreCompletionModal';
+import { BookOfPassageButton } from '@/components/BookOfPassageButton';
+import { LibraryButton } from '@/components/LibraryButton';
+import { SettingsMenu } from '@/components/SettingsMenu';
 import { useGameState } from '@/hooks/useGameState';
 import { usePuzzle } from '@/hooks/usePuzzle';
+import { usePageLoader } from '@/hooks/usePageLoader';
 import { useGameLogic } from '@/hooks/useGameLogic';
 import { useGameModeHandlers } from '@/hooks/useGameModeHandlers';
 import { usePuzzleLoading } from '@/hooks/usePuzzleLoading';
@@ -18,6 +23,12 @@ import styles from './puzzle.module.css';
 
 export default function PuzzleScreen() {
   const router = useRouter();
+  
+  // Page loading state management - initialize FIRST to show loader immediately
+  const { isLoading: pageLoading, setLoading } = usePageLoader({
+    minDisplayTime: 500,
+  });
+
   const { state, setState, isReady } = useGameState();
   const { loadSequential, loadAll, initialize, loadRandom, restorePuzzleOnly, loadBeatTheClock, loadWithSelection, markCompleted } = usePuzzle(state, setState);
   const config = getConfig();
@@ -25,23 +36,21 @@ export default function PuzzleScreen() {
   const [statsModalIsWin, setStatsModalIsWin] = useState(false);
   const [showGenreCompletionModal, setShowGenreCompletionModal] = useState(false);
   const [puzzleStartTime, setPuzzleStartTime] = useState<number | null>(null);
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   // Track if we're transitioning between puzzles to prevent timer restart
   const isTransitioningRef = useRef(false);
   
   // Wrapper for loadBeatTheClock that sets transition flag
   const loadBeatTheClockWithTransition = useCallback(async () => {
     isTransitioningRef.current = true;
-    console.log('[puzzle.page] Setting transition flag - loading puzzle');
     try {
       const result = await loadBeatTheClock();
       // Wait a tick for state to update before clearing flag
       await new Promise(resolve => setTimeout(resolve, 0));
       isTransitioningRef.current = false;
-      console.log('[puzzle.page] Clearing transition flag - puzzle loaded');
       return result;
     } catch (error) {
       isTransitioningRef.current = false;
-      console.log('[puzzle.page] Clearing transition flag - error loading puzzle');
       throw error;
     }
   }, [loadBeatTheClock]);
@@ -104,6 +113,22 @@ export default function PuzzleScreen() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ row: number; col: number } | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const [puzzleLoadingComplete, setPuzzleLoadingComplete] = useState(false);
+
+  // Track loading conditions
+  useEffect(() => {
+    setLoading('gameState', !isReady);
+  }, [isReady, setLoading]);
+
+  useEffect(() => {
+    if (state) {
+      const puzzleLoaded = state.grid && state.grid.length > 0;
+      setLoading('puzzle', !puzzleLoaded);
+      setPuzzleLoadingComplete(puzzleLoaded);
+    } else {
+      setLoading('puzzle', true);
+    }
+  }, [state, state?.grid, setLoading]);
 
   // Use refs to track selection during drag without causing re-renders
   const selectedCellsRef = useRef<Set<string>>(new Set());
@@ -121,22 +146,27 @@ export default function PuzzleScreen() {
   // Load puzzle if not already loaded
   useEffect(() => {
     if (!state.grid || state.grid.length === 0) {
+      setPuzzleLoadingComplete(false);
       loadPuzzleForMode().then((result) => {
         if (result?.genreComplete) {
           setShowGenreCompletionModal(true);
         }
+        setPuzzleLoadingComplete(true);
+      }).catch(() => {
+        setPuzzleLoadingComplete(true);
       });
+    } else {
+      setPuzzleLoadingComplete(true);
     }
-  }, [isReady, state.currentGenre, state.currentPuzzleIndex, state.grid?.length, loadPuzzleForMode]); // Re-run when ready, genre, puzzle index, or grid changes
+  }, [isReady, state.currentGenre, state.currentPuzzleIndex, state.grid?.length, state.selectedGenre, loadPuzzleForMode]); // Re-run when ready, genre, puzzle index, selectedGenre, or grid changes
 
   // Start timer when puzzle is loaded
   useEffect(() => {
     // Don't start timer if we're transitioning between puzzles
     if (isTransitioningRef.current) {
-      console.log('[puzzle.page] Timer not started - transitioning between puzzles');
       return;
     }
-    
+
     if (state.grid && state.grid.length > 0 && !state.timer && !state.paused && !state.gameOver) {
       if (state.gameMode === 'story') {
         // Story mode: initialize decorative timer
@@ -146,17 +176,12 @@ export default function PuzzleScreen() {
       } else {
         // Puzzle-only and beat-the-clock: start countdown timer
         if (state.timeRemaining > 0) {
-          console.log('[puzzle.page] Starting timer - grid exists, no timer, not paused, not gameOver, timeRemaining:', state.timeRemaining);
           if (state.gameMode === 'puzzle-only') {
             puzzleOnlyTimer.start();
           } else if (state.gameMode === 'beat-the-clock') {
             beatTheClockTimer.start();
           }
         }
-      }
-    } else {
-      if (state.grid && state.grid.length > 0) {
-        console.log('[puzzle.page] Timer not started - timer:', state.timer ? 'exists' : 'null', 'paused:', state.paused, 'gameOver:', state.gameOver, 'timeRemaining:', state.timeRemaining, 'transitioning:', isTransitioningRef.current);
       }
     }
   }, [state.grid?.length, state.timer, state.paused, state.gameOver, state.gameMode, state.timeRemaining, storyTimer, puzzleOnlyTimer, beatTheClockTimer]);
@@ -537,14 +562,13 @@ export default function PuzzleScreen() {
     router.push('/');
   };
 
-  const handleOptions = () => {
-    // TODO: Open options modal when implemented
-    console.log('Options clicked');
+  const handleSettings = () => {
+    setIsPaused(false); // Close pause menu
+    setShowSettingsMenu(true); // Open settings menu
   };
 
   // Stats modal handlers
   const handleNextPuzzle = useCallback(async () => {
-    console.log('[puzzle.page.handleNextPuzzle] Closing modal and loading next puzzle');
     setShowStatsModal(false);
     if (state.gameMode === 'puzzle-only') {
       // Clear timer before loading new puzzle to prevent stale callbacks
@@ -582,7 +606,6 @@ export default function PuzzleScreen() {
   }, [state.gameMode, state.puzzles, loadRandom, loadAll, loadWithSelection, puzzleOnlyTimer, storyTimer]);
 
   const handleRestartPuzzle = useCallback(() => {
-    console.log('[puzzle.page.handleRestartPuzzle] Closing modal and restarting puzzle');
     setShowStatsModal(false);
     // Reset puzzle state and reload current puzzle
     setState({
@@ -602,7 +625,6 @@ export default function PuzzleScreen() {
   }, [state, setState, config, state.gameMode, puzzleOnlyTimer, beatTheClockTimer]);
 
   const handleStartFreshRun = useCallback(async () => {
-    console.log('[puzzle.page.handleStartFreshRun] Closing modal and starting fresh run');
     setShowStatsModal(false);
     // Reset run timer and load new puzzle
     const runState = startBeatTheClockRun(state);
@@ -616,7 +638,6 @@ export default function PuzzleScreen() {
 
   // Genre completion modal handlers
   const handleContinueSameGenre = useCallback(async () => {
-    console.log('[puzzle.page.handleContinueSameGenre] Replaying books in current genre');
     setShowGenreCompletionModal(false);
 
     // Load sequential puzzle with allowReplay flag
@@ -627,7 +648,6 @@ export default function PuzzleScreen() {
   }, [state.currentGenre, loadSequential]);
 
   const handleSelectNewGenre = useCallback(async (newGenre: string) => {
-    console.log('[puzzle.page.handleSelectNewGenre] Switching to new genre:', newGenre);
     setShowGenreCompletionModal(false);
 
     // Update state with new genre and clear book/puzzle index
@@ -650,7 +670,6 @@ export default function PuzzleScreen() {
   }, [setState, loadSequential]);
 
   const handleCloseGenreCompletionModal = useCallback(() => {
-    console.log('[puzzle.page.handleCloseGenreCompletionModal] Closing modal and returning to library');
     setShowGenreCompletionModal(false);
     router.push('/library');
   }, [router]);
@@ -675,6 +694,11 @@ export default function PuzzleScreen() {
 
   return (
     <div className={styles.puzzleContainer} data-testid="puzzle-screen">
+      <PageLoader
+        isLoading={pageLoading}
+        variant="puzzle"
+        message="Loading puzzle..."
+      />
       <CosmicBackground variant="puzzle" starCount={450} particleCount={0} />
       
       {/* Timer display - Story Mode shows decorative full bar, others show countdown */}
@@ -879,21 +903,19 @@ export default function PuzzleScreen() {
                 Resume
               </button>
 
-              <button
+              <BookOfPassageButton
                 className={styles.pauseBtn}
                 onClick={handleBackToBookOfPassage}
                 data-testid="back-to-book-btn"
-              >
-                Back to Book of Passage
-              </button>
+              />
 
-              <button
+              <LibraryButton
                 className={styles.pauseBtn}
                 onClick={handleBackToLibrary}
                 data-testid="back-to-library-btn"
               >
-                Back to Library
-              </button>
+                Return to Library
+              </LibraryButton>
 
               <button
                 className={styles.pauseBtn}
@@ -904,12 +926,11 @@ export default function PuzzleScreen() {
               </button>
 
               <button
-                className={`${styles.pauseBtn} ${styles.disabled}`}
-                onClick={handleOptions}
-                disabled
-                data-testid="options-btn"
+                className={styles.pauseBtn}
+                onClick={handleSettings}
+                data-testid="settings-btn"
               >
-                Options
+                Settings
               </button>
             </div>
           </div>
@@ -941,7 +962,16 @@ export default function PuzzleScreen() {
         onSelectNewGenre={handleSelectNewGenre}
         onClose={handleCloseGenreCompletionModal}
       />
+
+      {/* Settings Menu */}
+      <SettingsMenu
+        isOpen={showSettingsMenu}
+        onClose={() => setShowSettingsMenu(false)}
+        onNavigateToTitle={handleBackToMainMenu}
+        context="puzzle"
+        onResumeGame={handleResume}
+        onReturnToPause={() => setIsPaused(true)}
+      />
     </div>
   );
 }
-

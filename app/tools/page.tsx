@@ -124,6 +124,60 @@ export default function ToolsPage() {
                 </div>
               </div>
             </Link>
+
+            {/* Story Blurb Editor Tool */}
+            <Link href="/tools/story-blurb-editor">
+              <div className="bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-6 hover:bg-[var(--primary-light)] transition-all cursor-pointer h-full">
+                <div className="flex items-center mb-4">
+                  <div className="text-4xl mr-4">📜</div>
+                  <h2 className="text-2xl font-bold text-[var(--text-light)]">Story Blurb Editor</h2>
+                </div>
+                <p className="text-[var(--text-medium)] mb-4">
+                  Create and manage story progression blurbs that appear in the Book of Passage as players advance.
+                </p>
+                <div className="space-y-2 text-sm text-[var(--text-light)]">
+                  <div className="flex items-start">
+                    <span className="mr-2">✓</span>
+                    <span>Manage blurbs by story beat</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">✓</span>
+                    <span>Configure triggers & conditions</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">✓</span>
+                    <span>Live preview & auto-save</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* Character and Banter Dialogue Creator Tool */}
+            <Link href="/tools/dialogue-creator">
+              <div className="bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-6 hover:bg-[var(--primary-light)] transition-all cursor-pointer h-full">
+                <div className="flex items-center mb-4">
+                  <div className="text-4xl mr-4">💬</div>
+                  <h2 className="text-2xl font-bold text-[var(--text-light)]">Character and Banter Dialogue Creator</h2>
+                </div>
+                <p className="text-[var(--text-medium)] mb-4">
+                  Create and edit character files with banter dialogue, validation, preview, and story beat management.
+                </p>
+                <div className="space-y-2 text-sm text-[var(--text-light)]">
+                  <div className="flex items-start">
+                    <span className="mr-2">✓</span>
+                    <span>Character & dialogue entry management</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">✓</span>
+                    <span>Real-time validation & emotion suggestions</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">✓</span>
+                    <span>Live preview & story beat filtering</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
           </div>
 
           <div className="mt-8 bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-6">

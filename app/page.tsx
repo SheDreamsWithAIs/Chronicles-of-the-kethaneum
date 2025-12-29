@@ -3,9 +3,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
-import { AudioSettingsModal } from '@/components/AudioSettingsModal';
-import { loadGameProgress } from '@/lib/save/saveSystem';
-import { navigateTo, getRoutePath } from '@/lib/utils/navigation';
+import { SettingsMenu } from '@/components/SettingsMenu';
+import { loadProgress, clearProgress, cleanupLegacyKeys } from '@/lib/save';
+import { getRoutePath } from '@/lib/utils/navigation';
 import styles from './title-screen.module.css';
 
 export default function TitleScreen() {
@@ -25,11 +25,13 @@ export default function TitleScreen() {
   }, []);
 
   useEffect(() => {
-    const savedProgress = loadGameProgress();
-    if (savedProgress) {
-      setHasSavedGame(true);
-      setSavedGameMode(savedProgress.gameMode || null);
-    }
+    cleanupLegacyKeys();
+    loadProgress().then(result => {
+      if (result.data) {
+        setHasSavedGame(true);
+        setSavedGameMode((result.data as any).gameMode || null);
+      }
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -49,15 +51,15 @@ export default function TitleScreen() {
   }, []);
 
   const handleNewGame = () => {
-    // Clear all saved progress when starting a new game
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('kethaneumProgress');
-
-      // Force a full page reload to ensure all in-memory state is cleared
-      // This prevents race conditions where old state gets re-saved
-      // Use navigateTo to respect basePath for GitHub Pages
-      navigateTo('/backstory');
+    try {
+      clearProgress();
+    } catch (e) {
+      console.error('Failed to clear progress on New Game', e);
     }
+
+    // Use client-side navigation to preserve audio playback
+    // clearProgress() clears state without needing a reload
+    router.push('/backstory');
   };
 
   const handleContinue = () => {
@@ -120,8 +122,8 @@ export default function TitleScreen() {
                 </button>
 
                 <button
-                  className={`${styles.gameButton} ${styles.secondary} ${styles.disabled}`}
-                  disabled
+                  className={`${styles.gameButton} ${styles.secondary}`}
+                  onClick={() => router.push('/credits')}
                   data-testid="credits-btn"
                 >
                   Credits
@@ -132,9 +134,11 @@ export default function TitleScreen() {
         </div>
       </div>
 
-      <AudioSettingsModal
+      <SettingsMenu
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
+        onNavigateToTitle={() => setShowSettings(false)}
+        context="title"
       />
     </>
   );
