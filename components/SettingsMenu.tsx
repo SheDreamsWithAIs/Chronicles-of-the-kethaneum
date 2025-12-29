@@ -11,7 +11,7 @@ interface SettingsMenuProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigateToTitle: () => void;
-  context: 'puzzle' | 'library';
+  context: 'puzzle' | 'library' | 'title';
   onResumeGame?: () => void;
   onReturnToPause?: () => void;
   onReturnToLibrary?: () => void;
@@ -177,15 +177,17 @@ export function SettingsMenu({
                 Return to Library
               </button>
             )}
-            <button
-              className={`${styles.navButton} ${styles.secondaryButton}`}
-              onClick={() => {
-                onClose();
-                onNavigateToTitle();
-              }}
-            >
-              Navigate to Title Screen
-            </button>
+            {context !== 'title' && (
+              <button
+                className={`${styles.navButton} ${styles.secondaryButton}`}
+                onClick={() => {
+                  onClose();
+                  onNavigateToTitle();
+                }}
+              >
+                Return to Title Screen
+              </button>
+            )}
           </div>
         </div>
       </div>

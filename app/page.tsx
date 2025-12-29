@@ -138,8 +138,7 @@ export default function TitleScreen() {
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
         onNavigateToTitle={() => setShowSettings(false)}
-        context="library"
-        onReturnToLibrary={() => setShowSettings(false)}
+        context="title"
       />
     </>
   );
