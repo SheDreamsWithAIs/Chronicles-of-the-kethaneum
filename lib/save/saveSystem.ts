@@ -494,6 +494,7 @@ export async function convertToGameStateFormat(
   storyProgress?: StoryProgressState;
   dialogue?: {
     completedStoryEvents: string[];
+    hasVisitedLibrary?: boolean;
   };
   audioSettings?: AudioSettings;
 }> {

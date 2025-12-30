@@ -27,11 +27,18 @@ let movedDirs = [];
 DEV_DIRS.forEach(({ src, dest }) => {
   if (existsSync(src)) {
     try {
+      // Remove destination if it already exists (from failed previous build)
+      if (existsSync(dest)) {
+        console.log(`Removing existing ${dest}...`);
+        rmSync(dest, { recursive: true, force: true });
+      }
       renameSync(src, dest);
       movedDirs.push({ src, dest });
       console.log(`✓ Moved ${src} → ${dest}`);
     } catch (error) {
       console.error(`✗ Failed to move ${src}:`, error.message);
+      console.error('  This usually happens when the directory is open in VS Code or another program.');
+      console.error('  Please close any programs accessing these directories and try again.');
       process.exit(1);
     }
   }
