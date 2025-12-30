@@ -214,6 +214,7 @@ export default function GenreBuilder() {
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [saveMessage, setSaveMessage] = useState<string>('');
+  const [fileHandle, setFileHandle] = useState<FileSystemFileHandle | null>(null);
 
   // Auto-save on changes
   useEffect(() => {
@@ -244,7 +245,39 @@ export default function GenreBuilder() {
       const newFile = createNewGenreFile();
       setGenreFile(newFile);
       setScope({ level: 'file' });
+      setFileHandle(null);
       clearLocalStorage();
+    }
+  }, []);
+
+  const handleLoadFileModern = useCallback(async () => {
+    try {
+      // Check if File System Access API is supported
+      if ('showOpenFilePicker' in window) {
+        const [handle] = await (window as any).showOpenFilePicker({
+          types: [{
+            description: 'JSON Files',
+            accept: { 'application/json': ['.json'] }
+          }],
+          multiple: false
+        });
+        setFileHandle(handle);
+        const file = await handle.getFile();
+        const text = await file.text();
+        const puzzles = JSON.parse(text) as Puzzle[];
+        const loadedFile = jsonToGenreFile(puzzles, file.name);
+        setGenreFile(loadedFile);
+        setScope({ level: 'file' });
+        setSaveMessage(`Loaded ${file.name}`);
+        setTimeout(() => setSaveMessage(''), 3000);
+      } else {
+        // Fallback to traditional file input
+        document.getElementById('legacy-file-input')?.click();
+      }
+    } catch (error: any) {
+      if (error.name !== 'AbortError') {
+        alert('Error loading file: ' + error.message);
+      }
     }
   }, []);
 
@@ -258,6 +291,7 @@ export default function GenreBuilder() {
       const loadedFile = jsonToGenreFile(puzzles, file.name);
       setGenreFile(loadedFile);
       setScope({ level: 'file' });
+      setFileHandle(null); // No file handle for legacy input
       setSaveMessage(`Loaded ${file.name}`);
       setTimeout(() => setSaveMessage(''), 3000);
     } catch (error) {
@@ -277,7 +311,22 @@ export default function GenreBuilder() {
       const json = genreFileToJSON(genreFile);
       const jsonString = JSON.stringify(json, null, 2);
 
-      // Create blob and download
+      // Try to use File System Access API if we have a file handle
+      if (fileHandle && 'createWritable' in fileHandle) {
+        try {
+          const writable = await (fileHandle as any).createWritable();
+          await writable.write(jsonString);
+          await writable.close();
+          setSaveMessage(`Updated ${genreFile.filename}`);
+          setTimeout(() => setSaveMessage(''), 3000);
+          return;
+        } catch (error: any) {
+          // If permission was denied or API failed, fall back to download
+          console.warn('File System Access API failed, falling back to download:', error);
+        }
+      }
+
+      // Fallback: Create blob and download
       const blob = new Blob([jsonString], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -297,7 +346,7 @@ export default function GenreBuilder() {
     } catch (error) {
       alert('Error saving file: ' + (error as Error).message);
     }
-  }, [genreFile]);
+  }, [genreFile, fileHandle]);
 
   const updateGenreFile = useCallback((updater: (prev: GenreFile) => GenreFile) => {
     setGenreFile(updater);
@@ -379,7 +428,7 @@ export default function GenreBuilder() {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <header className="mb-6 bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-4">
-          <h1 className="text-3xl font-bold mb-4 text-[var(--text-light)]">Genre Builder Tool</h1>
+          <h1 className="text-3xl font-bold mb-4 text-[var(--text-light)]">Genre and Book Builder Tool</h1>
 
           {/* File Controls */}
           <div className="flex gap-4 items-center flex-wrap">
@@ -390,15 +439,21 @@ export default function GenreBuilder() {
               New File
             </button>
 
-            <label className="px-4 py-2 bg-[var(--primary-light)] text-white rounded hover:bg-[var(--primary-lighter)] cursor-pointer transition-all font-semibold">
+            <button
+              onClick={handleLoadFileModern}
+              className="px-4 py-2 bg-[var(--primary-light)] text-white rounded hover:bg-[var(--primary-lighter)] transition-all font-semibold"
+            >
               Load File
-              <input
-                type="file"
-                accept=".json"
-                onChange={handleLoadFile}
-                className="hidden"
-              />
-            </label>
+            </button>
+
+            {/* Hidden fallback file input for browsers without File System Access API */}
+            <input
+              id="legacy-file-input"
+              type="file"
+              accept=".json"
+              onChange={handleLoadFile}
+              className="hidden"
+            />
 
             <button
               onClick={handleSaveFile}
@@ -477,7 +532,13 @@ export default function GenreBuilder() {
                 onUpdateBookName={(name) => {
                   updateGenreFile(prev => {
                     const newBooks = [...prev.books];
-                    newBooks[scope.bookIndex!] = { ...newBooks[scope.bookIndex!], name };
+                    const book = newBooks[scope.bookIndex!];
+                    // Update book name and propagate to all puzzles
+                    newBooks[scope.bookIndex!] = {
+                      ...book,
+                      name,
+                      puzzles: book.puzzles.map(puzzle => ({ ...puzzle, book: name }))
+                    };
                     return { ...prev, books: newBooks };
                   });
                 }}
@@ -734,7 +795,7 @@ function BookView({ book, bookIndex, genre, onAddPuzzle, onDeletePuzzle, onSelec
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="bg-[var(--accent-dark)] text-[var(--text-light)] px-2 py-1 rounded text-sm font-semibold">
+                  <span className="bg-[var(--accent-dark)] text-[var(--primary-dark)] px-2 py-1 rounded text-sm font-semibold">
                     Part {index}
                   </span>
                   <h4 className="font-bold text-[var(--text-light)]">{puzzle.title || `Untitled Puzzle ${index + 1}`}</h4>
@@ -777,6 +838,35 @@ function PuzzleForm({ puzzle, puzzleIndex, bookIndex, onUpdate, validationErrors
 }) {
   const getError = (field: string) => validationErrors.find(e => e.field === field);
 
+  // Local state for word input to allow free typing
+  const [wordInput, setWordInput] = useState('');
+  const [isWordInputFocused, setIsWordInputFocused] = useState(false);
+
+  // Initialize word input from puzzle.words
+  useEffect(() => {
+    if (!isWordInputFocused) {
+      setWordInput(puzzle.words.join(', '));
+    }
+  }, [puzzle.words, isWordInputFocused, puzzleIndex]);
+
+  const handleWordInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setWordInput(e.target.value);
+  };
+
+  const handleWordInputBlur = () => {
+    setIsWordInputFocused(false);
+    const words = wordInput
+      .split(',')
+      .map(w => w.trim())
+      .filter(w => w.length > 0);
+    onUpdate({ words });
+    setWordInput(words.join(', ')); // Normalize display
+  };
+
+  const handleWordInputFocus = () => {
+    setIsWordInputFocused(true);
+  };
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4 text-[var(--text-light)]">Puzzle Editor (Part {puzzleIndex})</h2>
@@ -810,19 +900,15 @@ function PuzzleForm({ puzzle, puzzleIndex, bookIndex, onUpdate, validationErrors
         <div>
           <label className="block font-semibold mb-2 text-[var(--text-light)]">Words</label>
           <textarea
-            value={puzzle.words.join(', ')}
-            onChange={(e) => {
-              const words = e.target.value
-                .split(',')
-                .map(w => w.trim())
-                .filter(w => w.length > 0);
-              onUpdate({ words });
-            }}
+            value={wordInput}
+            onChange={handleWordInputChange}
+            onBlur={handleWordInputBlur}
+            onFocus={handleWordInputFocus}
             className={`w-full px-3 py-2 bg-[var(--primary-dark)] text-[var(--text-light)] border rounded h-24 focus:outline-none ${getError('words') ? 'border-red-500 focus:border-red-500' : 'border-[var(--primary-light)] focus:border-[var(--accent-light)]'}`}
             placeholder="Enter words separated by commas (e.g., apple, banana, cherry)"
           />
           {getError('words') && <p className="text-red-500 text-sm mt-1">{getError('words')!.message}</p>}
-          <p className="text-sm text-[var(--text-medium)] mt-1">Enter words separated by commas. These are the words players will search for in the puzzle.</p>
+          <p className="text-sm text-[var(--text-medium)] mt-1">Type freely with spaces and commas. Words will be parsed when you finish editing.</p>
         </div>
 
         <div>
