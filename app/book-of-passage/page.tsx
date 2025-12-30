@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, ReactElement } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { PageLoader } from '@/components/shared/PageLoader';
@@ -367,7 +367,7 @@ export default function BookOfPassageScreen() {
     text: string,
     className?: string,
     emphasize?: boolean
-  ): JSX.Element[] | null => {
+  ): ReactElement[] | null => {
     if (!text) return null;
 
     return text

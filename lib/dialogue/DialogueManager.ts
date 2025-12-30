@@ -532,7 +532,7 @@ export class DialogueManager {
 
       // Filter out completed events if provided
       const filteredEvents = completedEvents && completedEvents.length > 0
-        ? triggerCheckedEvents.filter((eventId) => !completedEvents.includes(eventId))
+        ? triggerCheckedEvents.filter((eventId) => !completedEvents!.includes(eventId))
         : triggerCheckedEvents;
 
       // Filtered events (after removing completed)

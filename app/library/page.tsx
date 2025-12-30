@@ -431,7 +431,7 @@ export default function LibraryScreen() {
               setState((prevState) => {
                 try {
                   // Ensure dialogue object exists
-                  const prevDialogue = prevState.dialogue || {};
+                  const prevDialogue = prevState.dialogue || { completedStoryEvents: [] };
                   const completedEvents = prevDialogue.completedStoryEvents || [];
 
                   // Validate completedEvents is an array

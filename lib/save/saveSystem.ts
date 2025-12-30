@@ -216,7 +216,7 @@ export async function saveOptimizedProgress(state: GameState): Promise<void> {
 
         const hasProgress =
           (Array.isArray(bookData) && bookData.some(Boolean)) ||
-          (bookData && typeof bookData === 'object' && bookData.complete === true);
+          (bookData && typeof bookData === 'object' && !Array.isArray(bookData) && 'complete' in bookData && bookData.complete === true);
 
         if (hasProgress) {
           discoveredTitles.add(title);
