@@ -207,7 +207,7 @@ export function checkBookCompletion(bookTitle: string, state: GameState): boolea
 
   if (!availableParts || availableParts.length === 0) {
     const bookMeta =
-      bookRegistry.getBookByTitleSync && bookRegistry.isLoaded()
+      bookRegistry.isLoaded()
         ? bookRegistry.getBookByTitleSync(bookTitle)
         : null;
     if (bookMeta?.parts) {

@@ -12,12 +12,12 @@ function validatePath(folderPath: string): boolean {
 // GET - Read manifest
 export async function GET(
   request: NextRequest,
-  { params }: { params: { manifestType: string } }
+  { params }: { params: Promise<{ manifestType: string }> }
 ) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const relativePath = searchParams.get('path') || '';
-    const { manifestType } = params;
+    const { manifestType } = await params;
 
     if (!validatePath(relativePath)) {
       return NextResponse.json(
@@ -49,12 +49,12 @@ export async function GET(
 // POST - Save manifest
 export async function POST(
   request: NextRequest,
-  { params }: { params: { manifestType: string } }
+  { params }: { params: Promise<{ manifestType: string }> }
 ) {
   try {
     const body = await request.json();
     const { manifest, path: relativePath, create } = body;
-    const { manifestType } = params;
+    const { manifestType } = await params;
 
     if (!validatePath(relativePath || '')) {
       return NextResponse.json(
