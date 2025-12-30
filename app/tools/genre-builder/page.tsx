@@ -795,7 +795,7 @@ function BookView({ book, bookIndex, genre, onAddPuzzle, onDeletePuzzle, onSelec
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="bg-[var(--accent-dark)] text-white px-2 py-1 rounded text-sm font-semibold">
+                  <span className="bg-[var(--accent-dark)] text-[var(--primary-dark)] px-2 py-1 rounded text-sm font-semibold">
                     Part {index}
                   </span>
                   <h4 className="font-bold text-[var(--text-light)]">{puzzle.title || `Untitled Puzzle ${index + 1}`}</h4>
