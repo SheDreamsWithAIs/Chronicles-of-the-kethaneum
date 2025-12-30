@@ -49,7 +49,7 @@ export default function ToolsPage() {
               <div className="bg-[var(--primary-medium)] bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg border border-[var(--primary-light)] p-6 hover:bg-[var(--primary-light)] transition-all cursor-pointer h-full">
                 <div className="flex items-center mb-4">
                   <div className="text-4xl mr-4">📖</div>
-                  <h2 className="text-2xl font-bold text-[var(--text-light)]">Genre Builder</h2>
+                  <h2 className="text-2xl font-bold text-[var(--text-light)]">Genre and Book Builder</h2>
                 </div>
                 <p className="text-[var(--text-medium)] mb-4">
                   Create and edit genre files with an intuitive three-level interface for managing books and puzzles.
