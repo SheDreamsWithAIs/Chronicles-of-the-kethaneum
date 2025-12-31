@@ -456,48 +456,194 @@ const handleWin = useCallback(() => {
 
 ## Book of Passage Integration
 
-### Trigger Updates
+### Current System Analysis
 
-**Location**: `/public/data/story-progress.json`
+**Good News**: The Book of Passage system already has everything needed for event-based triggers!
 
-Add new trigger types for story event-based blurbs:
+#### ✅ Already Implemented:
 
-```json
-{
-  "id": "story_001",
-  "trigger": "story_event_complete_first-visit",
-  "title": "A Warning Heeded",
-  "text": "Lumina's words echo in your mind...",
-  "order": 5
+1. **Unique IDs**: Every blurb has a unique `id` field in `/public/data/story-progress.json`
+2. **Trigger System**: Blurbs unlock based on configurable `trigger` conditions
+3. **Display Order**: Blurbs are stored in `storyProgress.unlockedBlurbs[]` array **in the order they were triggered**
+4. **History Function**: `getStoryHistory()` returns blurbs in unlock order (chronological, not by `order` field)
+5. **Extensible Triggers**: TypeScript type includes `custom_${string}` pattern for any custom trigger
+
+#### How It Currently Works:
+
+```typescript
+// From lib/story/storyBlurbManager.ts
+unlockBlurb(blurbId: string, currentProgress: StoryProgressState): StoryProgressState {
+  return {
+    ...currentProgress,
+    currentBlurbId: blurbId,
+    unlockedBlurbs: [...currentProgress.unlockedBlurbs, blurbId], // Appends in order
+    firedTriggers: [...currentProgress.firedTriggers, blurb.trigger],
+    lastUpdated: Date.now(),
+  };
+}
+
+getStoryHistory(storyProgress: StoryProgressState): StoryBlurb[] {
+  const history: StoryBlurb[] = [];
+  for (const blurbId of storyProgress.unlockedBlurbs) { // Order preserved
+    const blurb = this.getBlurbById(blurbId);
+    if (blurb) history.push(blurb);
+  }
+  return history;
 }
 ```
 
-**Modify**: `/lib/story/storyBlurbManager.ts`
+**Result**: Book of Passage naturally displays blurbs in the order they were unlocked, preserving narrative coherence.
 
-Add story event completion triggers to `checkTriggerConditions()`:
+### What We Need to Add
+
+#### 1. New Trigger Types
+
+Use the `custom_` pattern for story event and Kethaneum milestone triggers:
+
+**Story Event Triggers** (format: `custom_story_event_{eventId}`):
+- `custom_story_event_first-visit` - Triggers when "first-visit" story event completes
+- `custom_story_event_first-kethaneum-puzzle` - Triggers when this event completes
+- `custom_story_event_{any-event-id}` - Extensible for any story event
+
+**Kethaneum Milestone Triggers** (format: `custom_kethaneum_milestone_{count}`):
+- `custom_kethaneum_milestone_1` - Triggers when 1st Kethaneum puzzle completes
+- `custom_kethaneum_milestone_3` - Triggers when 3rd Kethaneum puzzle completes
+- `custom_kethaneum_milestone_{n}` - Extensible for any milestone
+
+**Why Use `custom_` Pattern?**
+- Already defined in TypeScript: `| 'custom_${string}'`
+- No need to update type definitions
+- Fully extensible without code changes
+- Clear semantic naming
+
+#### 2. Trigger Detection Logic
+
+**Modify**: `/lib/story/storyBlurbManager.ts` - Add to `checkTriggerConditions()`
 
 ```typescript
-// Check for story event completions
-if (state.narrativeOrchestration.completedStoryEvents.length > previousState?.narrativeOrchestration?.completedStoryEvents?.length) {
-  const newlyCompleted = state.narrativeOrchestration.completedStoryEvents.filter(
-    id => !previousState?.narrativeOrchestration?.completedStoryEvents?.includes(id)
-  );
+// NEW: Check for story event completions
+if (state.narrativeOrchestration) {
+  const currentCompleted = state.narrativeOrchestration.completedStoryEvents;
+  const previousCompleted = previousState?.narrativeOrchestration?.completedStoryEvents || [];
 
-  for (const eventId of newlyCompleted) {
-    const trigger = `story_event_complete_${eventId}` as StoryTrigger;
-    if (availableBlurb.trigger === trigger && !firedTriggers.includes(trigger)) {
-      return availableBlurb;
+  if (currentCompleted.length > previousCompleted.length) {
+    // Find newly completed event
+    const newlyCompleted = currentCompleted.filter(
+      id => !previousCompleted.includes(id)
+    );
+
+    for (const eventId of newlyCompleted) {
+      const trigger = `custom_story_event_${eventId}` as StoryTrigger;
+      const result = checkTrigger(trigger);
+      if (result) return result;
     }
   }
 }
 
-// Also check for Kethaneum puzzle completions
-if (state.narrativeOrchestration.kethaneumPuzzlesCompleted > previousState?.narrativeOrchestration?.kethaneumPuzzlesCompleted) {
-  const kethaneumCount = state.narrativeOrchestration.kethaneumPuzzlesCompleted;
-  const trigger = `kethaneum_puzzle_${kethaneumCount}` as StoryTrigger;
-  // ... check for matching blurb
+// NEW: Check for Kethaneum puzzle milestones
+if (state.narrativeOrchestration) {
+  const currentCount = state.narrativeOrchestration.kethaneumPuzzlesCompleted;
+  const previousCount = previousState?.narrativeOrchestration?.kethaneumPuzzlesCompleted || 0;
+
+  if (currentCount > previousCount) {
+    // Check for milestone trigger at current count
+    const trigger = `custom_kethaneum_milestone_${currentCount}` as StoryTrigger;
+    const result = checkTrigger(trigger);
+    if (result) return result;
+  }
 }
 ```
+
+#### 3. Configuration Examples
+
+**Location**: `/public/data/story-progress.json`
+
+```json
+{
+  "version": 1,
+  "triggerConfig": {
+    "allowMultiplePerTrigger": false,
+    "defaultStoryBeat": "hook"
+  },
+  "blurbs": [
+    {
+      "id": "intro_001",
+      "storyBeat": "hook",
+      "trigger": "game_start",
+      "title": "The Book of Passage",
+      "text": "The crystalline cover of your Book of Passage...",
+      "order": 1
+    },
+    {
+      "id": "after_luminas_warning",
+      "storyBeat": "hook",
+      "trigger": "custom_story_event_first-visit",
+      "title": "A Warning Heeded",
+      "text": "Lumina's words echo in your mind as you return to the puzzles. Her protective stance, the urgency in her voice... You feel the weight of her warning pressing against your thoughts.",
+      "order": 2
+    },
+    {
+      "id": "first_kethaneum_reflection",
+      "storyBeat": "hook",
+      "trigger": "custom_kethaneum_milestone_1",
+      "title": "The Kethaneum's Pull",
+      "text": "Having completed your first Kethaneum puzzle, you feel something shift within you. The library's energy pulses differently now, as if acknowledging your progress.",
+      "order": 3
+    },
+    {
+      "id": "third_kethaneum_insight",
+      "storyBeat": "first_plot_point",
+      "trigger": "custom_kethaneum_milestone_3",
+      "title": "Patterns Emerge",
+      "text": "Three Kethaneum books completed. The patterns are becoming clearer, the connections between the puzzles revealing something larger...",
+      "order": 10
+    },
+    {
+      "id": "after_second_story_event",
+      "storyBeat": "first_plot_point",
+      "trigger": "custom_story_event_first-kethaneum-puzzle",
+      "title": "Understanding Deepens",
+      "text": "The revelations from your recent encounter settle into your understanding...",
+      "order": 11
+    }
+  ]
+}
+```
+
+### Configuration Best Practices
+
+1. **Unique IDs**: Use descriptive, unique IDs for each blurb
+2. **Story Beats**: Align blurbs with appropriate story beats
+3. **Order Field**: Use for fallback ordering within same story beat (though unlock order is primary)
+4. **Trigger Format**: Follow naming conventions:
+   - `custom_story_event_{eventId}` for story events
+   - `custom_kethaneum_milestone_{count}` for Kethaneum milestones
+5. **Testing**: Each trigger should be testable by completing the corresponding action
+
+### Integration Points
+
+The Book of Passage blurbs will trigger **after** puzzle completion in this sequence:
+
+```
+1. Player completes puzzle
+2. Mark puzzle completed
+3. Track Kethaneum completion (if applicable)
+4. Check & unlock story event (if thresholds met)
+5. Complete story event (when player finishes dialogue)
+6. Check Book of Passage triggers ← Story event completion triggers blurb
+7. Check Book of Passage triggers ← Kethaneum milestone triggers blurb
+8. Display win modal (with any active blurb)
+```
+
+### Testing Strategy for Book of Passage
+
+**Test Cases**:
+1. Complete story event "first-visit" → Verify `custom_story_event_first-visit` blurb unlocks
+2. Complete 1st Kethaneum puzzle → Verify `custom_kethaneum_milestone_1` blurb unlocks
+3. Complete 3rd Kethaneum puzzle → Verify `custom_kethaneum_milestone_3` blurb unlocks
+4. Verify blurbs appear in Book of Passage in unlock order
+5. Verify no duplicate blurb unlocks
+6. Verify `firedTriggers` prevents re-triggering same blurb
 
 ---
 
@@ -549,84 +695,285 @@ export function restoreGameState(saved: any): GameState {
 
 ---
 
-## Implementation Phases
+## Implementation Phases with Testing Milestones
+
+**IMPORTANT**: Each phase must pass its testing milestone before proceeding to the next phase. This prevents cascading bugs and makes debugging much easier.
 
 ### Phase 1: Core State & Configuration (Foundation)
-**Files to Create/Modify**:
-- ✅ Create `/lib/narrative/storyEventConfig.ts`
-- ✅ Create `/lib/narrative/storyEventUnlockChecker.ts`
-- ✅ Modify `/lib/game/state.ts` - Add `narrativeOrchestration` to GameState
-- ✅ Update `/lib/game/puzzleSelectionConfig.ts` - Change interval to 5-7
+**Status**: ✅ COMPLETED
 
-**Acceptance Criteria**:
-- State includes all new narrative orchestration fields
-- Story event unlock requirements are defined
-- Configuration is type-safe and validated
+**Files Created**:
+- `/lib/narrative/types.ts` - NarrativeOrchestrationState type
+- `/lib/narrative/storyEventConfig.ts` - Unlock requirements & orchestration config
+- `/lib/narrative/storyEventUnlockChecker.ts` - Story event unlock/complete logic
 
-### Phase 2: Puzzle Selector Gating (Core Logic)
+**Files Modified**:
+- `/lib/game/state.ts` - Added `narrativeOrchestration` to GameState, save/restore logic
+- `/lib/game/puzzleSelectionConfig.ts` - Changed Kethaneum interval to 5-7
+
+**Testing Milestone**:
+- [ ] Verify new game initializes with `narrativeOrchestration` at defaults
+- [ ] Verify saved game without field initializes to defaults (migration)
+- [ ] Verify saved game with field restores correctly
+- [ ] Verify TypeScript compiles without errors
+- [ ] Verify storyEventConfig validation catches bad configuration
+
+**How to Test**:
+```typescript
+// In browser console after starting new game:
+console.log(gameState.narrativeOrchestration);
+// Should show: { kethaneumPuzzlesCompleted: 0, storyEventDebt: 0, ... }
+```
+
+---
+
+### Phase 2: Kethaneum Tracking & Debt Gating
+**Status**: 🔄 PARTIALLY COMPLETED
+
+**Files Modified**:
+- `/lib/game/puzzleSelector.ts` - Added debt gating logic
+- `/hooks/useGameModeHandlers.ts` - Track Kethaneum puzzle completions
+
+**Testing Milestone**:
+- [ ] Complete 1 Kethaneum puzzle → Verify `kethaneumPuzzlesCompleted` = 1
+- [ ] Complete 5-7 normal puzzles → Verify next puzzle is Kethaneum (if debt = 0)
+- [ ] Manually set `storyEventDebt` to 2 → Verify Kethaneum blocked, normal puzzle shown
+- [ ] Set debt back to 0 → Verify Kethaneum immediately available (counter already met)
+- [ ] Verify Kethaneum counter doesn't increment for normal puzzles
+- [ ] Verify puzzle counter persists across save/load
+
+**How to Test**:
+```typescript
+// In browser console:
+// 1. Check current state
+console.log('Kethaneum count:', gameState.narrativeOrchestration.kethaneumPuzzlesCompleted);
+console.log('Debt:', gameState.narrativeOrchestration.storyEventDebt);
+console.log('Puzzles since last Kethaneum:', gameState.puzzlesSinceLastKethaneum);
+
+// 2. Manually trigger debt (for testing)
+gameState.narrativeOrchestration.storyEventDebt = 2;
+
+// 3. Complete puzzle and verify Kethaneum doesn't appear
+```
+
+**STOP HERE AND TEST BEFORE PROCEEDING**
+
+---
+
+### Phase 3: Story Event Unlocking
+**Status**: ⏸️ NOT STARTED
+
 **Files to Modify**:
-- ✅ Modify `/lib/game/puzzleSelector.ts` - Add debt gating logic
-- ✅ Modify `/hooks/useGameModeHandlers.ts` - Track Kethaneum completions
+- `/hooks/useGameModeHandlers.ts` - Add story event unlock checking in `handleWin()`
 
-**Acceptance Criteria**:
-- Kethaneum puzzles blocked when debt >= threshold
-- Normal puzzles continue when Kethaneum blocked
-- Counter increments properly for Kethaneum vs normal
+**Implementation Steps**:
+1. Import `checkStoryEventUnlock` and `unlockStoryEvent`
+2. After tracking Kethaneum completion, call `checkStoryEventUnlock(updatedState)`
+3. If event unlocks, call `unlockStoryEvent()` and update state
+4. Log unlock events for debugging
 
-### Phase 3: Story Event Unlocking (Unlock Flow)
+**Testing Milestone**:
+- [ ] Complete 1 Kethaneum + 7 normal → Verify "first-visit" unlocks
+- [ ] Verify `unlockedStoryEvents` contains "first-visit"
+- [ ] Verify `storyEventDebt` = 1
+- [ ] Verify `lastStoryEventUnlocked` = "first-visit"
+- [ ] Complete more puzzles (don't complete event) → Verify event 2 doesn't unlock yet
+- [ ] Complete to 2 Kethaneum + 10 normal → Verify "first-kethaneum-puzzle" unlocks
+- [ ] Verify `storyEventDebt` = 2
+- [ ] Verify only one event unlocked at a time (sequential)
+
+**How to Test**:
+```typescript
+// Set up test scenario:
+gameState.narrativeOrchestration.kethaneumPuzzlesCompleted = 0;
+gameState.completedPuzzles = 0;
+
+// Complete 1 Kethaneum + 7 normal (8 total)
+// Check:
+console.log('Unlocked events:', gameState.narrativeOrchestration.unlockedStoryEvents);
+// Should be: ["first-visit"]
+console.log('Debt:', gameState.narrativeOrchestration.storyEventDebt);
+// Should be: 1
+```
+
+**STOP HERE AND TEST BEFORE PROCEEDING**
+
+---
+
+### Phase 4: Story Event Completion
+**Status**: ⏸️ NOT STARTED
+
 **Files to Modify**:
-- ✅ Modify `/hooks/useGameModeHandlers.ts` - Call unlock checker after puzzle completion
-- ✅ Ensure story events unlocked one at a time in order
+- Need to research where story event dialogue completion is handled
+- Likely `/lib/dialogue/DialogueManager.ts` or dialogue UI component
 
-**Acceptance Criteria**:
-- Story events unlock when thresholds met
-- Only next event in sequence unlocks
-- Debt counter increments on unlock
+**Implementation Steps**:
+1. Find where story event dialogue ends (dialogue system review needed)
+2. Import `completeStoryEvent` from storyEventUnlockChecker
+3. Call `completeStoryEvent(state, eventId)` when dialogue finishes
+4. Update game state with returned state
+5. Log completion for debugging
 
-### Phase 4: Story Event Completion (Debt Decrement)
+**Testing Milestone**:
+- [ ] Unlock a story event (debt = 1)
+- [ ] Complete the story event dialogue
+- [ ] Verify event moved from `unlockedStoryEvents` to `completedStoryEvents`
+- [ ] Verify `storyEventDebt` decremented by 1
+- [ ] Verify event added to `dialogue.completedStoryEvents` (backwards compat)
+- [ ] Verify `storyEventsCompleted` incremented
+- [ ] Save and reload → Verify completion persists
+
+**How to Test**:
+```typescript
+// Before completing dialogue:
+console.log('Unlocked:', gameState.narrativeOrchestration.unlockedStoryEvents);
+console.log('Completed:', gameState.narrativeOrchestration.completedStoryEvents);
+console.log('Debt:', gameState.narrativeOrchestration.storyEventDebt);
+
+// After completing dialogue:
+// Unlocked should be empty, Completed should have the event, Debt should decrease
+```
+
+**STOP HERE AND TEST BEFORE PROCEEDING**
+
+---
+
+### Phase 5: Win Modal Messaging
+**Status**: ⏸️ NOT STARTED
+
+**Files to Create**:
+- `/lib/narrative/narrativeMessaging.ts`
+
 **Files to Modify**:
-- ✅ Modify `/lib/dialogue/DialogueManager.ts` - Call `completeStoryEvent()` when dialogue ends
-- ✅ Or create new hook for story event completion
+- `/components/GameStatsModal.tsx`
 
-**Acceptance Criteria**:
-- Completing story event decrements debt
-- Event moved from unlocked to completed list
-- State persists correctly
+**Implementation Steps**:
+1. Create `narrativeMessaging.ts` with `getNarrativeMessage()` function
+2. Import and call in GameStatsModal
+3. Add conditional rendering for narrative messages
+4. Add placeholder styling (doesn't need to be pretty yet)
+5. Add console logs to verify messaging logic
 
-### Phase 5: Win Modal Messaging (Player Feedback)
-**Files to Create/Modify**:
-- ✅ Create `/lib/narrative/narrativeMessaging.ts`
-- ✅ Modify `/components/GameStatsModal.tsx` - Add narrative message display
-- ✅ Add CSS for glowing/pulsing button effect
+**Testing Milestone**:
+- [ ] Debt = 0, just unlocked event → Verify "Something vies..." message shows
+- [ ] Debt = 1 → Verify "Something is drawing..." message shows
+- [ ] Debt = 2 → Verify "The energy feels urgent..." message shows
+- [ ] Debt = 0, no recent unlock → Verify no message shows
+- [ ] Each message has correct `isBlocking` state
+- [ ] Message text matches config
 
-**Acceptance Criteria**:
-- Messages show based on debt level (0, 1, 2+)
-- Story events button glows when debt > 0
-- Message text matches config
-- Blocking state clearly indicated
+**How to Test**:
+```typescript
+// Manually set debt levels and complete puzzle:
+gameState.narrativeOrchestration.storyEventDebt = 0;
+gameState.narrativeOrchestration.lastStoryEventUnlocked = "test-event";
+// Complete puzzle, check win modal for message
 
-### Phase 6: Book of Passage Integration (Event Triggers)
+gameState.narrativeOrchestration.storyEventDebt = 1;
+gameState.narrativeOrchestration.lastStoryEventUnlocked = null;
+// Complete puzzle, check for different message
+
+gameState.narrativeOrchestration.storyEventDebt = 2;
+// Complete puzzle, check for blocking message
+```
+
+**STOP HERE AND TEST BEFORE PROCEEDING**
+
+---
+
+### Phase 6: Book of Passage Triggers
+**Status**: ⏸️ NOT STARTED
+
 **Files to Modify**:
-- ✅ Modify `/lib/story/storyBlurbManager.ts` - Add story event triggers
-- ✅ Update `/lib/story/types.ts` - Add new StoryTrigger types
-- ✅ Update `/public/data/story-progress.json` - Add event-based blurbs
+- `/lib/story/storyBlurbManager.ts` - Add trigger checking logic
 
-**Acceptance Criteria**:
-- Blurbs trigger on story event completion
-- Blurbs trigger on specific Kethaneum puzzle completion
-- No duplicate triggers
+**Files to Create/Update**:
+- `/public/data/story-progress.json` - Add test blurbs
 
-### Phase 7: Testing & Polish
-**Testing Checklist**:
-- ✅ Kethaneum interval is 5-7 puzzles
-- ✅ Story event 1 unlocks after 1 Kethaneum + 7 normal
-- ✅ Story event 2 unlocks after 2 Kethaneum + 10 normal
-- ✅ Debt counter blocks at threshold (2)
-- ✅ Messages show correctly in win modal
-- ✅ Completing story events clears debt
-- ✅ Book of Passage blurbs trigger on events
-- ✅ State persists across sessions
-- ✅ No duplicate unlocks or completions
+**Implementation Steps**:
+1. Add story event completion checking to `checkTriggerConditions()`
+2. Add Kethaneum milestone checking to `checkTriggerConditions()`
+3. Create test blurbs in story-progress.json
+4. Add console logs for debugging trigger detection
+
+**Testing Milestone**:
+- [ ] Complete story event → Verify corresponding blurb triggers
+- [ ] Complete 1st Kethaneum → Verify milestone blurb triggers
+- [ ] Complete 3rd Kethaneum → Verify milestone blurb triggers
+- [ ] Verify blurbs appear in Book of Passage
+- [ ] Verify blurbs appear in triggered order
+- [ ] Verify no duplicate blurb unlocks
+- [ ] Verify `firedTriggers` prevents re-triggering
+
+**How to Test**:
+```typescript
+// Add test blurb to story-progress.json:
+{
+  "id": "test_story_event",
+  "trigger": "custom_story_event_first-visit",
+  "title": "Test",
+  "text": "Test blurb",
+  "order": 100,
+  "storyBeat": "hook"
+}
+
+// Complete "first-visit" event, check:
+console.log('Unlocked blurbs:', gameState.storyProgress.unlockedBlurbs);
+// Should include "test_story_event"
+console.log('Fired triggers:', gameState.storyProgress.firedTriggers);
+// Should include "custom_story_event_first-visit"
+```
+
+**STOP HERE AND TEST BEFORE PROCEEDING**
+
+---
+
+### Phase 7: Integration Testing & Polish
+**Status**: ⏸️ NOT STARTED
+
+**Full System Test**:
+This phase tests the complete flow end-to-end.
+
+**Test Scenarios**:
+
+1. **Happy Path - Normal Progression**:
+   - [ ] Start new game
+   - [ ] Complete 1 Kethaneum + 7 normal puzzles
+   - [ ] Verify first story event unlocks (debt = 1)
+   - [ ] Verify messaging in win modal
+   - [ ] Complete story event
+   - [ ] Verify debt decreases to 0
+   - [ ] Verify Book of Passage blurb unlocks
+   - [ ] Continue to 2 Kethaneum + 10 normal
+   - [ ] Verify second story event unlocks (debt = 1)
+   - [ ] Complete second story event
+   - [ ] Verify system returns to normal
+
+2. **Debt Gating Test**:
+   - [ ] Unlock 2 story events without completing them (debt = 2)
+   - [ ] Complete enough normal puzzles to trigger Kethaneum
+   - [ ] Verify Kethaneum is blocked
+   - [ ] Verify only normal puzzles available
+   - [ ] Complete one story event (debt = 1)
+   - [ ] Verify Kethaneum still blocked
+   - [ ] Complete second story event (debt = 0)
+   - [ ] Verify Kethaneum immediately available
+
+3. **Save/Load Persistence**:
+   - [ ] Progress to debt = 1
+   - [ ] Save game
+   - [ ] Reload page
+   - [ ] Verify state restored correctly
+   - [ ] Continue gameplay
+   - [ ] Verify system works normally
+
+4. **Edge Cases**:
+   - [ ] Complete two story events back-to-back (debt 2→1→0)
+   - [ ] Verify system handles correctly
+   - [ ] Replay completed puzzle
+   - [ ] Verify counters don't increment incorrectly
+
+**STOP HERE - SYSTEM COMPLETE**
 
 ---
 
