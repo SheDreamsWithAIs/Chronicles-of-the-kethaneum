@@ -4,60 +4,30 @@
     {
       "segments": [
         {
-          "text": "Congratulations, "
-        },
-        {
-          "text": "Archivist",
-          "italic": true,
-          "color": "rgb(251, 191, 36)"
-        },
-        {
-          "text": "."
+          "text": "You have reached the end of the Alpha build.",
+          "bold": true
         }
       ]
     },
     {
       "segments": [
         {
-          "text": "You have proven yourself worthy of the "
-        },
-        {
-          "text": "Kethaneum's",
-          "color": "rgb(139, 92, 246)"
-        },
-        {
-          "text": " sacred trust. Through countless puzzles and ancient texts, you have demonstrated not just intellect, but patience, perseverance, and a genuine love for knowledge."
+          "text": "\n\nThank you for spending time within the Kethaneum, Archivist.\n\nWhat you have seen so far is only a fragment—a beginning. The systems you explored, the stories you uncovered, and the struggles you noticed are part of a larger whole still taking shape.\n\nYour presence matters.\n\nEvery puzzle completed, every story read (or skipped), every moment of attention contributes to this realm. Chronicles of the Kethaneum is being shaped with care and room for reflection. Because no story is just a story. Know that your presence here is also part of that process.\n\nIn time, more stories will reveal themselves.\nMore patterns will emerge.\nAnd not all answers will arrive at once.\n\nFor now, thank you for listening.\n\nWhat has happened so far will matter later. \n"
         }
       ]
     },
     {
       "segments": [
         {
-          "text": "Your "
-        },
-        {
-          "text": "Book of Passage",
-          "italic": true,
-          "color": "rgb(251, 191, 36)"
-        },
-        {
-          "text": " now brims with the chronicles of your journey—each chapter a testament to the challenges you've overcome and the wisdom you've gained. The cosmic librarians have taken notice, and your name is now inscribed among the honored few."
+          "text": "May you return and keep the witness...",
+          "italic": true
         }
       ]
     },
     {
       "segments": [
         {
-          "text": "But remember: in the Kethaneum, every ending is merely a new beginning. The infinite shelves hold mysteries yet undiscovered, stories yet untold, and knowledge that awaits your curious mind."
-        }
-      ]
-    },
-    {
-      "segments": [
-        {
-          "text": "Until we meet again among the stars and stories...",
-          "italic": true,
-          "color": "rgb(96, 165, 250)"
+          "text": "\n"
         }
       ]
     }
