@@ -20,32 +20,41 @@ export interface StoryEventUnlockRequirement {
 /**
  * Story event unlock requirements.
  * Events unlock ONE AT A TIME in sequential order when thresholds are met.
+ * Each unlock increments the debt counter.
  *
- * IMPORTANT: This does NOT include the first story event ("first-visit"),
- * which uses its existing trigger mechanism and is part of the tutorial flow.
- * This array starts with the SECOND story event overall.
+ * Alpha build target: 5 story events total
  */
 export const STORY_EVENT_UNLOCK_REQUIREMENTS: StoryEventUnlockRequirement[] = [
   {
-    eventId: "second-encounter",        // This is the 2nd story event overall
-    requiredKethaneumPuzzles: 1,        // After 1 Kethaneum puzzle
-    requiredNormalPuzzles: 7,           // After 7 normal puzzles
-    order: 1                            // Order 1 in orchestration (2nd event overall)
+    eventId: "first-visit",             // Tutorial event, appears early
+    requiredKethaneumPuzzles: 0,        // No Kethaneum required
+    requiredNormalPuzzles: 0,           // No normal puzzles required (unlocked immediately)
+    order: 1
   },
   {
-    eventId: "pattern-recognition",     // This is the 3rd story event overall
-    requiredKethaneumPuzzles: 2,        // After 2 Kethaneum puzzles
-    requiredNormalPuzzles: 15,          // After 15 normal puzzles
-    order: 2                            // Order 2 in orchestration (3rd event overall)
+    eventId: "second-encounter",
+    requiredKethaneumPuzzles: 1,        // After completing 1 Kethaneum puzzle
+    requiredNormalPuzzles: 7,           // After completing 7 normal puzzles
+    order: 2
+  },
+  {
+    eventId: "pattern-recognition",
+    requiredKethaneumPuzzles: 2,        // After completing 2 Kethaneum puzzles
+    requiredNormalPuzzles: 15,          // After completing 15 normal puzzles
+    order: 3
+  },
+  {
+    eventId: "midpoint-revelation",
+    requiredKethaneumPuzzles: 3,        // After completing 3 Kethaneum puzzles
+    requiredNormalPuzzles: 22,          // After completing 22 normal puzzles
+    order: 4
+  },
+  {
+    eventId: "climactic-understanding",
+    requiredKethaneumPuzzles: 4,        // After completing 4 Kethaneum puzzles
+    requiredNormalPuzzles: 30,          // After completing 30 normal puzzles
+    order: 5
   }
-  // Add more story events here as they are created
-  // Example:
-  // {
-  //   eventId: "midpoint-revelation",
-  //   requiredKethaneumPuzzles: 3,
-  //   requiredNormalPuzzles: 20,
-  //   order: 3
-  // }
 ];
 
 export interface NarrativeOrchestrationConfig {
@@ -62,11 +71,9 @@ export interface NarrativeOrchestrationConfig {
   enableMessaging: boolean;
   /** Message text for different debt levels */
   messageTypes: {
-    /** Message when a story event has just unlocked (debt just increased) */
-    debtZero: string;
-    /** Message when player has skipped one story event */
+    /** Message when debt = 1 (one uncompleted story event) */
     debtOne: string;
-    /** Message when debt threshold is reached (Kethaneum puzzles blocked) */
+    /** Message when debt >= 2 (threshold reached, Kethaneum puzzles blocked) */
     debtThreshold: string;
   };
 }
@@ -83,9 +90,8 @@ export const DEFAULT_NARRATIVE_CONFIG: NarrativeOrchestrationConfig = {
   storyEventDebtThreshold: 2,
   enableMessaging: true,
   messageTypes: {
-    debtZero: "Something important vies for your attention",
     debtOne: "Something is drawing you to seek out other information",
-    debtThreshold: "The energy of the Kethaneum feels urgent, yet you feel a stagnation. Perhaps you should look elsewhere for answers."
+    debtThreshold: "The energy of the Kethaneum feels urgent like it is drawing your attention elsewhere."
   }
 };
 

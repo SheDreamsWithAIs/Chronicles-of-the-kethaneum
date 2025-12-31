@@ -43,41 +43,37 @@ All three systems are currently called in `useGameModeHandlers.handleWin()` afte
 
 ## Tutorial Events vs. Orchestrated Events
 
-**IMPORTANT**: The orchestration system does NOT manage the first story event or first Book of Passage blurb. These are part of the diegetic tutorial and must remain unchanged.
+**IMPORTANT**: While the first story event appears early as part of the tutorial flow, it IS managed by the orchestration system and DOES create debt.
 
-### Tutorial Events (Outside Orchestration)
+### Early Tutorial Flow
 
-These events use their existing triggers and occur **before** the orchestration system activates:
+The game introduces narrative mechanics in this sequence:
 
-1. **First Story Event** - "first-visit" (Lumina's Warning)
-   - Keeps existing trigger (likely `player-enters-library-first-time`)
-   - Happens early in gameplay as tutorial/introduction
-   - NOT tracked in orchestration system
-   - NOT counted in debt counter
-
-2. **First Book of Passage Blurb** - "intro_001"
-   - Keeps `game_start` trigger
+1. **Story Mode Selection** → Backstory screen
+2. **Receiving Room Cutscene** → Receiving Room screen
+3. **First Book of Passage Blurb** ("intro_001") → Book of Passage screen (tutorial)
+   - Uses `game_start` trigger
    - Introduces the Book of Passage mechanic
-   - Part of initial game introduction
+   - NOT orchestrated
+4. **First Story Event** ("first-visit") → Available in Library screen
+   - Appears early as tutorial introduction to story events
+   - **IS orchestrated** - has unlock requirements (likely low thresholds)
+   - **DOES create debt** when unlocked
+   - Player can skip it, but debt will accumulate
+5. **First Normal Puzzle** → Complete first puzzle
+6. **First Kethaneum Puzzle** → Eventually presented (after 5-7 normal puzzles)
 
-### Orchestrated Events (Managed by System)
+### Why This Matters
 
-The orchestration system manages **from the second story event onward**:
+**Tutorial Introduction**: The first story event introduces players to the dialogue/story event mechanic early in the game.
 
-- **Second Story Event**: First event with puzzle completion thresholds
-  - This becomes "order: 1" in the orchestration configuration
-  - First event to increment debt counter
-  - First event that can block Kethaneum puzzles
+**Orchestration from the Start**: Even though it appears early, the first story event follows orchestration rules:
+- Has unlock requirements (probably minimal, like 0 Kethaneum + 0 normal puzzles)
+- Creates debt when unlocked (debt = 1)
+- Player can skip it, and debt will accumulate when more events unlock
+- Debt limit (2) applies from the start
 
-- **All Subsequent Story Events**: Follow the same orchestration rules
-
-### Why This Distinction Matters
-
-**Tutorial Flow Preservation**: The first story event and Book of Passage blurb serve as a tutorial, introducing key mechanics (dialogue, story events, Book of Passage) before the player encounters the complexity of the orchestration system.
-
-**Orchestration Kicks In Later**: Once the player understands the basics, the orchestration system provides structure and pacing for the rest of the narrative.
-
-**Configuration Impact**: The `STORY_EVENT_UNLOCK_REQUIREMENTS` array starts with the **second** story event overall (but labeled as `order: 1` in config), NOT the first.
+**Debt Accumulation**: If player skips the first event and meets requirements for the second, debt becomes 2 and Kethaneum puzzles are blocked until they complete story events.
 
 ---
 
@@ -139,11 +135,11 @@ interface GameState {
 }
 ```
 
-#### Story Event Configuration
+#### Story Event Unlock Configuration
 
 **Location**: `/lib/narrative/storyEventConfig.ts` (NEW FILE)
 
-**IMPORTANT**: This configuration does NOT include the first story event ("first-visit"), which uses its existing trigger mechanism.
+This configuration defines the unlock requirements for all orchestrated story events, including the first one.
 
 ```typescript
 export interface StoryEventUnlockRequirement {
@@ -155,23 +151,42 @@ export interface StoryEventUnlockRequirement {
 
 /**
  * Story event unlock requirements.
- * NOTE: This starts with the SECOND story event overall.
- * The first event ("first-visit") keeps its existing trigger.
+ * Events unlock ONE AT A TIME in sequential order when thresholds are met.
+ * Each unlock increments the debt counter.
+ *
+ * Alpha build target: 5 story events total
  */
 export const STORY_EVENT_UNLOCK_REQUIREMENTS: StoryEventUnlockRequirement[] = [
   {
-    eventId: "second-encounter",        // This is the 2nd story event overall
-    requiredKethaneumPuzzles: 1,        // After completing 1 Kethaneum puzzle
-    requiredNormalPuzzles: 7,           // After completing 7 normal puzzles
-    order: 1                            // Order 1 in orchestration (2nd event overall)
+    eventId: "first-visit",             // Tutorial event, appears early
+    requiredKethaneumPuzzles: 0,        // No Kethaneum required
+    requiredNormalPuzzles: 0,           // No normal puzzles required (unlocked immediately)
+    order: 1
   },
   {
-    eventId: "pattern-recognition",     // This is the 3rd story event overall
+    eventId: "second-encounter",
+    requiredKethaneumPuzzles: 1,        // After completing 1 Kethaneum puzzle
+    requiredNormalPuzzles: 7,           // After completing 7 normal puzzles
+    order: 2
+  },
+  {
+    eventId: "pattern-recognition",
     requiredKethaneumPuzzles: 2,        // After completing 2 Kethaneum puzzles
     requiredNormalPuzzles: 15,          // After completing 15 normal puzzles
-    order: 2                            // Order 2 in orchestration (3rd event overall)
+    order: 3
   },
-  // ... more events defined here
+  {
+    eventId: "midpoint-revelation",
+    requiredKethaneumPuzzles: 3,        // After completing 3 Kethaneum puzzles
+    requiredNormalPuzzles: 22,          // After completing 22 normal puzzles
+    order: 4
+  },
+  {
+    eventId: "climactic-understanding",
+    requiredKethaneumPuzzles: 4,        // After completing 4 Kethaneum puzzles
+    requiredNormalPuzzles: 30,          // After completing 30 normal puzzles
+    order: 5
+  }
 ];
 
 export interface NarrativeOrchestrationConfig {
@@ -182,9 +197,8 @@ export interface NarrativeOrchestrationConfig {
   storyEventDebtThreshold: number;    // Max uncompleted events before gating (2)
   enableMessaging: boolean;           // Show debt messages in win modal
   messageTypes: {
-    debtZero: string;                 // "Something important vies for your attention"
-    debtOne: string;                  // "Something is drawing you to seek..."
-    debtThreshold: string;            // "The energy of the Kethaneum feels urgent..."
+    debtOne: string;                  // Message when debt = 1 (one uncompleted event)
+    debtThreshold: string;            // Message when debt >= 2 (blocking Kethaneum)
   };
 }
 
@@ -196,9 +210,8 @@ export const DEFAULT_NARRATIVE_CONFIG: NarrativeOrchestrationConfig = {
   storyEventDebtThreshold: 2,
   enableMessaging: true,
   messageTypes: {
-    debtZero: "Something important vies for your attention",
     debtOne: "Something is drawing you to seek out other information",
-    debtThreshold: "The energy of the Kethaneum feels urgent, yet you feel a stagnation. Perhaps you should look elsewhere for answers."
+    debtThreshold: "The energy of the Kethaneum feels urgent like it is drawing your attention elsewhere."
   }
 };
 ```
@@ -373,7 +386,7 @@ export function getNarrativeMessage(state: GameState): NarrativeMessage | null {
     // No message needed - player is caught up
     return null;
   } else if (debt === 1) {
-    // Soft reminder
+    // Soft reminder - one uncompleted story event
     return {
       text: config.messageTypes.debtOne,
       debtLevel: 1,
@@ -381,7 +394,7 @@ export function getNarrativeMessage(state: GameState): NarrativeMessage | null {
       isBlocking: false
     };
   } else if (debt >= threshold) {
-    // Hard block
+    // Hard block - debt threshold reached, Kethaneum puzzles blocked
     return {
       text: config.messageTypes.debtThreshold,
       debtLevel: debt,
@@ -391,25 +404,6 @@ export function getNarrativeMessage(state: GameState): NarrativeMessage | null {
   }
 
   return null;
-}
-
-/**
- * Gets the message to show when a new story event has just been unlocked.
- */
-export function getNewStoryEventMessage(state: GameState): NarrativeMessage | null {
-  const { narrativeOrchestration } = state;
-  const config = DEFAULT_NARRATIVE_CONFIG;
-
-  if (!narrativeOrchestration.lastStoryEventUnlocked) {
-    return null;
-  }
-
-  return {
-    text: config.messageTypes.debtZero,
-    debtLevel: narrativeOrchestration.storyEventDebt,
-    shouldHighlightStoryEvents: true,
-    isBlocking: false
-  };
 }
 ```
 
@@ -672,7 +666,11 @@ if (state.narrativeOrchestration) {
 4. **Trigger Format**: Follow naming conventions:
    - `custom_story_event_{eventId}` for story events
    - `custom_kethaneum_milestone_{count}` for Kethaneum milestones
-5. **Testing**: Each trigger should be testable by completing the corresponding action
+5. **Selective Entries**: Not every story event or Kethaneum puzzle needs a Book of Passage entry
+   - Create entries based on narrative need
+   - Associate with specific story event IDs or Kethaneum puzzle milestones
+   - Focus on narratively significant moments
+6. **Testing**: Each trigger should be testable by completing the corresponding action
 
 ### Integration Points
 
@@ -910,26 +908,26 @@ console.log('Debt:', gameState.narrativeOrchestration.storyEventDebt);
 5. Add console logs to verify messaging logic
 
 **Testing Milestone**:
-- [ ] Debt = 0, just unlocked event → Verify "Something vies..." message shows
-- [ ] Debt = 1 → Verify "Something is drawing..." message shows
-- [ ] Debt = 2 → Verify "The energy feels urgent..." message shows
-- [ ] Debt = 0, no recent unlock → Verify no message shows
-- [ ] Each message has correct `isBlocking` state
-- [ ] Message text matches config
+- [ ] Debt = 0 → Verify no message shows (player caught up)
+- [ ] Debt = 1 → Verify "Something is drawing you to seek out other information" shows
+- [ ] Debt = 2 → Verify "The energy of the Kethaneum feels urgent like it is drawing your attention elsewhere." shows
+- [ ] Debt = 1 message has `isBlocking: false`
+- [ ] Debt = 2 message has `isBlocking: true`
+- [ ] Message text matches config exactly
 
 **How to Test**:
 ```typescript
-// Manually set debt levels and complete puzzle:
+// Test debt = 0 (no message)
 gameState.narrativeOrchestration.storyEventDebt = 0;
-gameState.narrativeOrchestration.lastStoryEventUnlocked = "test-event";
-// Complete puzzle, check win modal for message
+// Complete puzzle, verify no narrative message in win modal
 
+// Test debt = 1 (soft reminder)
 gameState.narrativeOrchestration.storyEventDebt = 1;
-gameState.narrativeOrchestration.lastStoryEventUnlocked = null;
-// Complete puzzle, check for different message
+// Complete puzzle, verify message shows with no blocking
 
+// Test debt = 2 (hard block)
 gameState.narrativeOrchestration.storyEventDebt = 2;
-// Complete puzzle, check for blocking message
+// Complete puzzle, verify blocking message shows
 ```
 
 **STOP HERE AND TEST BEFORE PROCEEDING**
