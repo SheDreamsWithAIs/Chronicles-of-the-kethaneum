@@ -147,7 +147,7 @@ export const baseState: Omit<GameState, 'discoveredBooks' | 'completedPuzzlesByG
   selectedGenre: '',
   nextKethaneumIndex: 0,
   puzzlesSinceLastKethaneum: 0,
-  nextKethaneumInterval: 6, // Will be randomized on first use (default from 5-7 range)
+  nextKethaneumInterval: 0, // Will be randomized by initializePuzzleSelection
   completedPuzzlesByGenre: {},
   kethaneumRevealed: false,
   genreExhausted: false,
