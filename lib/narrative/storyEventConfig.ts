@@ -20,26 +20,30 @@ export interface StoryEventUnlockRequirement {
 /**
  * Story event unlock requirements.
  * Events unlock ONE AT A TIME in sequential order when thresholds are met.
+ *
+ * IMPORTANT: This does NOT include the first story event ("first-visit"),
+ * which uses its existing trigger mechanism and is part of the tutorial flow.
+ * This array starts with the SECOND story event overall.
  */
 export const STORY_EVENT_UNLOCK_REQUIREMENTS: StoryEventUnlockRequirement[] = [
   {
-    eventId: "first-visit",
-    requiredKethaneumPuzzles: 1,
-    requiredNormalPuzzles: 7,
-    order: 1
+    eventId: "second-encounter",        // This is the 2nd story event overall
+    requiredKethaneumPuzzles: 1,        // After 1 Kethaneum puzzle
+    requiredNormalPuzzles: 7,           // After 7 normal puzzles
+    order: 1                            // Order 1 in orchestration (2nd event overall)
   },
   {
-    eventId: "first-kethaneum-puzzle",
-    requiredKethaneumPuzzles: 2,
-    requiredNormalPuzzles: 10,
-    order: 2
+    eventId: "pattern-recognition",     // This is the 3rd story event overall
+    requiredKethaneumPuzzles: 2,        // After 2 Kethaneum puzzles
+    requiredNormalPuzzles: 15,          // After 15 normal puzzles
+    order: 2                            // Order 2 in orchestration (3rd event overall)
   }
   // Add more story events here as they are created
   // Example:
   // {
   //   eventId: "midpoint-revelation",
   //   requiredKethaneumPuzzles: 3,
-  //   requiredNormalPuzzles: 15,
+  //   requiredNormalPuzzles: 20,
   //   order: 3
   // }
 ];

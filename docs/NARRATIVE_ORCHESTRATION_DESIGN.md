@@ -37,7 +37,47 @@ All three systems are currently called in `useGameModeHandlers.handleWin()` afte
 3. **Backpressure System**: Debt counter ensures story events are completed before advancing
 4. **Narrative Coherence**: Sequential story events maintain plot flow
 5. **Player Agency**: Flexible Book of Passage triggers allow narrative flexibility
-6. **Non-Breaking**: Preserve existing Kethaneum orchestration pattern
+6. **Non-Breaking**: Preserve existing Kethaneum orchestration pattern and tutorial flow
+
+---
+
+## Tutorial Events vs. Orchestrated Events
+
+**IMPORTANT**: The orchestration system does NOT manage the first story event or first Book of Passage blurb. These are part of the diegetic tutorial and must remain unchanged.
+
+### Tutorial Events (Outside Orchestration)
+
+These events use their existing triggers and occur **before** the orchestration system activates:
+
+1. **First Story Event** - "first-visit" (Lumina's Warning)
+   - Keeps existing trigger (likely `player-enters-library-first-time`)
+   - Happens early in gameplay as tutorial/introduction
+   - NOT tracked in orchestration system
+   - NOT counted in debt counter
+
+2. **First Book of Passage Blurb** - "intro_001"
+   - Keeps `game_start` trigger
+   - Introduces the Book of Passage mechanic
+   - Part of initial game introduction
+
+### Orchestrated Events (Managed by System)
+
+The orchestration system manages **from the second story event onward**:
+
+- **Second Story Event**: First event with puzzle completion thresholds
+  - This becomes "order: 1" in the orchestration configuration
+  - First event to increment debt counter
+  - First event that can block Kethaneum puzzles
+
+- **All Subsequent Story Events**: Follow the same orchestration rules
+
+### Why This Distinction Matters
+
+**Tutorial Flow Preservation**: The first story event and Book of Passage blurb serve as a tutorial, introducing key mechanics (dialogue, story events, Book of Passage) before the player encounters the complexity of the orchestration system.
+
+**Orchestration Kicks In Later**: Once the player understands the basics, the orchestration system provides structure and pacing for the rest of the narrative.
+
+**Configuration Impact**: The `STORY_EVENT_UNLOCK_REQUIREMENTS` array starts with the **second** story event overall (but labeled as `order: 1` in config), NOT the first.
 
 ---
 
@@ -103,6 +143,8 @@ interface GameState {
 
 **Location**: `/lib/narrative/storyEventConfig.ts` (NEW FILE)
 
+**IMPORTANT**: This configuration does NOT include the first story event ("first-visit"), which uses its existing trigger mechanism.
+
 ```typescript
 export interface StoryEventUnlockRequirement {
   eventId: string;                    // Matches story-events/*.json id
@@ -111,18 +153,23 @@ export interface StoryEventUnlockRequirement {
   order: number;                      // Sequential ordering (1, 2, 3...)
 }
 
+/**
+ * Story event unlock requirements.
+ * NOTE: This starts with the SECOND story event overall.
+ * The first event ("first-visit") keeps its existing trigger.
+ */
 export const STORY_EVENT_UNLOCK_REQUIREMENTS: StoryEventUnlockRequirement[] = [
   {
-    eventId: "first-visit",
-    requiredKethaneumPuzzles: 1,
-    requiredNormalPuzzles: 7,
-    order: 1
+    eventId: "second-encounter",        // This is the 2nd story event overall
+    requiredKethaneumPuzzles: 1,        // After completing 1 Kethaneum puzzle
+    requiredNormalPuzzles: 7,           // After completing 7 normal puzzles
+    order: 1                            // Order 1 in orchestration (2nd event overall)
   },
   {
-    eventId: "first-kethaneum-puzzle",
-    requiredKethaneumPuzzles: 2,
-    requiredNormalPuzzles: 10,
-    order: 2
+    eventId: "pattern-recognition",     // This is the 3rd story event overall
+    requiredKethaneumPuzzles: 2,        // After completing 2 Kethaneum puzzles
+    requiredNormalPuzzles: 15,          // After completing 15 normal puzzles
+    order: 2                            // Order 2 in orchestration (3rd event overall)
   },
   // ... more events defined here
 ];
@@ -558,6 +605,8 @@ if (state.narrativeOrchestration) {
 
 **Location**: `/public/data/story-progress.json`
 
+**Note**: The first blurb ("intro_001") keeps its existing trigger. Optional blurbs can still be triggered by "first-visit" completion, but the story event itself is not orchestrated.
+
 ```json
 {
   "version": 1,
@@ -572,7 +621,8 @@ if (state.narrativeOrchestration) {
       "trigger": "game_start",
       "title": "The Book of Passage",
       "text": "The crystalline cover of your Book of Passage...",
-      "order": 1
+      "order": 1,
+      "comment": "TUTORIAL BLURB - Keeps existing trigger"
     },
     {
       "id": "after_luminas_warning",
@@ -580,7 +630,8 @@ if (state.narrativeOrchestration) {
       "trigger": "custom_story_event_first-visit",
       "title": "A Warning Heeded",
       "text": "Lumina's words echo in your mind as you return to the puzzles. Her protective stance, the urgency in her voice... You feel the weight of her warning pressing against your thoughts.",
-      "order": 2
+      "order": 2,
+      "comment": "OPTIONAL - Can trigger from tutorial event completion"
     },
     {
       "id": "first_kethaneum_reflection",
@@ -588,7 +639,17 @@ if (state.narrativeOrchestration) {
       "trigger": "custom_kethaneum_milestone_1",
       "title": "The Kethaneum's Pull",
       "text": "Having completed your first Kethaneum puzzle, you feel something shift within you. The library's energy pulses differently now, as if acknowledging your progress.",
-      "order": 3
+      "order": 3,
+      "comment": "ORCHESTRATED - First Kethaneum milestone"
+    },
+    {
+      "id": "after_second_story_event",
+      "storyBeat": "hook",
+      "trigger": "custom_story_event_second-encounter",
+      "title": "New Insights",
+      "text": "The second encounter has given you new perspective on the puzzles...",
+      "order": 4,
+      "comment": "ORCHESTRATED - First orchestrated story event completion"
     },
     {
       "id": "third_kethaneum_insight",
@@ -596,15 +657,8 @@ if (state.narrativeOrchestration) {
       "trigger": "custom_kethaneum_milestone_3",
       "title": "Patterns Emerge",
       "text": "Three Kethaneum books completed. The patterns are becoming clearer, the connections between the puzzles revealing something larger...",
-      "order": 10
-    },
-    {
-      "id": "after_second_story_event",
-      "storyBeat": "first_plot_point",
-      "trigger": "custom_story_event_first-kethaneum-puzzle",
-      "title": "Understanding Deepens",
-      "text": "The revelations from your recent encounter settle into your understanding...",
-      "order": 11
+      "order": 10,
+      "comment": "ORCHESTRATED - Third Kethaneum milestone"
     }
   ]
 }
@@ -773,25 +827,26 @@ gameState.narrativeOrchestration.storyEventDebt = 2;
 4. Log unlock events for debugging
 
 **Testing Milestone**:
-- [ ] Complete 1 Kethaneum + 7 normal → Verify "first-visit" unlocks
-- [ ] Verify `unlockedStoryEvents` contains "first-visit"
-- [ ] Verify `storyEventDebt` = 1
-- [ ] Verify `lastStoryEventUnlocked` = "first-visit"
-- [ ] Complete more puzzles (don't complete event) → Verify event 2 doesn't unlock yet
-- [ ] Complete to 2 Kethaneum + 10 normal → Verify "first-kethaneum-puzzle" unlocks
+- [ ] NOTE: First story event ("first-visit") uses existing trigger, not orchestrated
+- [ ] Complete 1 Kethaneum + 7 normal → Verify "second-encounter" unlocks (first orchestrated event)
+- [ ] Verify `unlockedStoryEvents` contains "second-encounter"
+- [ ] Verify `storyEventDebt` = 1 (first debt increment)
+- [ ] Verify `lastStoryEventUnlocked` = "second-encounter"
+- [ ] Complete more puzzles (don't complete event) → Verify event 3 doesn't unlock yet
+- [ ] Complete to 2 Kethaneum + 15 normal → Verify "pattern-recognition" unlocks (second orchestrated event)
 - [ ] Verify `storyEventDebt` = 2
 - [ ] Verify only one event unlocked at a time (sequential)
 
 **How to Test**:
 ```typescript
-// Set up test scenario:
+// Set up test scenario (AFTER "first-visit" has already occurred via existing trigger):
 gameState.narrativeOrchestration.kethaneumPuzzlesCompleted = 0;
 gameState.completedPuzzles = 0;
 
 // Complete 1 Kethaneum + 7 normal (8 total)
 // Check:
 console.log('Unlocked events:', gameState.narrativeOrchestration.unlockedStoryEvents);
-// Should be: ["first-visit"]
+// Should be: ["second-encounter"]  ← This is the first ORCHESTRATED event
 console.log('Debt:', gameState.narrativeOrchestration.storyEventDebt);
 // Should be: 1
 ```
@@ -938,15 +993,18 @@ This phase tests the complete flow end-to-end.
 
 1. **Happy Path - Normal Progression**:
    - [ ] Start new game
+   - [ ] Verify first story event ("first-visit") triggers via existing mechanism (tutorial)
+   - [ ] Verify first Book of Passage blurb appears ("intro_001")
+   - [ ] Complete "first-visit" event (does NOT create debt - tutorial event)
    - [ ] Complete 1 Kethaneum + 7 normal puzzles
-   - [ ] Verify first story event unlocks (debt = 1)
-   - [ ] Verify messaging in win modal
-   - [ ] Complete story event
+   - [ ] Verify "second-encounter" unlocks (first orchestrated event, debt = 1)
+   - [ ] Verify messaging in win modal ("Something vies...")
+   - [ ] Complete "second-encounter" event
    - [ ] Verify debt decreases to 0
-   - [ ] Verify Book of Passage blurb unlocks
-   - [ ] Continue to 2 Kethaneum + 10 normal
-   - [ ] Verify second story event unlocks (debt = 1)
-   - [ ] Complete second story event
+   - [ ] Verify Book of Passage blurb unlocks (if configured)
+   - [ ] Continue to 2 Kethaneum + 15 normal
+   - [ ] Verify "pattern-recognition" unlocks (second orchestrated event, debt = 1)
+   - [ ] Complete "pattern-recognition" event
    - [ ] Verify system returns to normal
 
 2. **Debt Gating Test**:
