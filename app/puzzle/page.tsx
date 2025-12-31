@@ -97,7 +97,29 @@ export default function PuzzleScreen() {
   const storyTimer = useStoryTimer(state, setState);
   const puzzleOnlyTimer = usePuzzleOnlyTimer(state, setState, handleLose);
   const beatTheClockTimer = useBeatTheClockTimer(state, setState, handleLose, handleRunTimerExpired);
-  
+
+  // TEMPORARY: Phase 2 Testing - Debug Helper
+  // TODO: Remove after Phase 2 testing is complete
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).debugGameState = state;
+      (window as any).debugNarrative = () => {
+        console.log('=== Narrative Orchestration Debug ===');
+        console.log('Kethaneum Puzzles Completed:', state.narrativeOrchestration?.kethaneumPuzzlesCompleted ?? 'N/A');
+        console.log('Story Event Debt:', state.narrativeOrchestration?.storyEventDebt ?? 'N/A');
+        console.log('Story Events Completed:', state.narrativeOrchestration?.storyEventsCompleted ?? 'N/A');
+        console.log('Unlocked Events:', state.narrativeOrchestration?.unlockedStoryEvents ?? []);
+        console.log('Completed Events:', state.narrativeOrchestration?.completedStoryEvents ?? []);
+        console.log('---');
+        console.log('Puzzles Since Last Kethaneum:', state.puzzlesSinceLastKethaneum);
+        console.log('Next Kethaneum Interval:', state.nextKethaneumInterval);
+        console.log('Total Completed Puzzles:', state.completedPuzzles);
+        console.log('Current Genre:', state.currentGenre);
+      };
+      console.log('Debug helper loaded. Use debugNarrative() to inspect narrative state.');
+    }
+  }, [state]);
+
   // Select appropriate timer based on game mode (memoized to prevent recreation)
   const timer = useMemo(() => {
     return state.gameMode === 'story' 
