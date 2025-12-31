@@ -75,6 +75,8 @@ export function useGameState() {
       storyProgress: state.storyProgress,
       // Include dialogue state (completed story events) in save detection
       dialogue: dialogueState,
+      // Include narrative orchestration in save detection
+      narrativeOrchestration: state.narrativeOrchestration,
     });
 
     // Skip if nothing meaningful changed
