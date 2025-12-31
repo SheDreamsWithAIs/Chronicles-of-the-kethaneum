@@ -15,6 +15,7 @@ import {
   getRandomKethaneumInterval,
   type PuzzleSelectionConfig,
 } from './puzzleSelectionConfig';
+import { DEFAULT_NARRATIVE_CONFIG } from '../narrative/storyEventConfig';
 
 export interface PuzzleSelectionResult {
   puzzle: PuzzleData | null;
@@ -64,7 +65,13 @@ export function selectNextPuzzle(
     // Check if it's time for a Kethaneum puzzle
     const shouldInsertKethaneum = checkIfTimeForKethaneum(newState, config);
 
-    if (shouldInsertKethaneum) {
+    // NEW: Check if Kethaneum puzzles are blocked by story event debt
+    const narrativeOrchestration = newState.narrativeOrchestration;
+    const kethaneumBlocked = narrativeOrchestration
+      ? narrativeOrchestration.storyEventDebt >= DEFAULT_NARRATIVE_CONFIG.storyEventDebtThreshold
+      : false;
+
+    if (shouldInsertKethaneum && !kethaneumBlocked) {
       const kethaneumResult = selectKethaneumPuzzle(newState, config);
 
       if (kethaneumResult.puzzle) {
@@ -73,6 +80,10 @@ export function selectNextPuzzle(
       }
       // No more Kethaneum puzzles available, continue with regular genre
       // Fall through to select from chosen genre
+    } else if (shouldInsertKethaneum && kethaneumBlocked) {
+      // Kethaneum puzzle wanted but blocked by story event debt
+      // Select normal puzzle instead, counter keeps incrementing
+      // When debt clears, Kethaneum will immediately trigger
     }
 
     // Select from the player's chosen genre

@@ -4,9 +4,11 @@
  */
 
 import { StoryProgressState, DEFAULT_STORY_PROGRESS } from '../story/types';
+import { NarrativeOrchestrationState, DEFAULT_NARRATIVE_ORCHESTRATION } from '../narrative/types';
 
 // Re-export for convenience
 export type { StoryProgressState } from '../story/types';
+export type { NarrativeOrchestrationState } from '../narrative/types';
 
 export interface WordData {
   word: string;
@@ -84,6 +86,8 @@ export interface GameState {
   genreExhausted: boolean; // Whether current selected genre has no more new puzzles
   // Story progress tracking
   storyProgress: StoryProgressState; // Player's story journey progress
+  // Narrative orchestration (story event unlocking and debt tracking)
+  narrativeOrchestration: NarrativeOrchestrationState;
   // Dialogue state
   dialogue?: {
     completedStoryEvents: string[]; // Array of completed story event IDs
@@ -107,10 +111,11 @@ export interface PuzzleData {
 }
 
 // Define the base state with default values
-export const baseState: Omit<GameState, 'discoveredBooks' | 'completedPuzzlesByGenre' | 'storyProgress'> & {
+export const baseState: Omit<GameState, 'discoveredBooks' | 'completedPuzzlesByGenre' | 'storyProgress' | 'narrativeOrchestration'> & {
   discoveredBooks: Set<string>;
   completedPuzzlesByGenre: { [genre: string]: Set<string> };
   storyProgress: StoryProgressState;
+  narrativeOrchestration: NarrativeOrchestrationState;
 } = {
   currentScreen: 'title-screen',
   grid: [],
@@ -147,6 +152,7 @@ export const baseState: Omit<GameState, 'discoveredBooks' | 'completedPuzzlesByG
   kethaneumRevealed: false,
   genreExhausted: false,
   storyProgress: { ...DEFAULT_STORY_PROGRESS },
+  narrativeOrchestration: { ...DEFAULT_NARRATIVE_ORCHESTRATION },
 };
 
 /**
@@ -159,6 +165,7 @@ export function initializeGameState(): GameState {
     discoveredBooks: new Set(),
     completedPuzzlesByGenre: {},
     storyProgress: { ...DEFAULT_STORY_PROGRESS },
+    narrativeOrchestration: { ...DEFAULT_NARRATIVE_ORCHESTRATION },
   };
 
   return state;
@@ -242,6 +249,23 @@ export function restoreGameState(state: GameState, savedState: Partial<GameState
               : [],
             firedTriggers: Array.isArray(savedProgress.firedTriggers)
               ? savedProgress.firedTriggers
+              : [],
+          };
+        }
+      }
+      // Special handling for narrativeOrchestration
+      else if (key === 'narrativeOrchestration') {
+        const savedOrchestration = (savedState as any).narrativeOrchestration;
+        if (savedOrchestration && typeof savedOrchestration === 'object') {
+          restored.narrativeOrchestration = {
+            ...DEFAULT_NARRATIVE_ORCHESTRATION,
+            ...savedOrchestration,
+            // Ensure arrays are properly restored
+            unlockedStoryEvents: Array.isArray(savedOrchestration.unlockedStoryEvents)
+              ? savedOrchestration.unlockedStoryEvents
+              : [],
+            completedStoryEvents: Array.isArray(savedOrchestration.completedStoryEvents)
+              ? savedOrchestration.completedStoryEvents
               : [],
           };
         }

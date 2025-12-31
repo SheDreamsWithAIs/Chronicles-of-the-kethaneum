@@ -151,6 +151,17 @@ export function useGameModeHandlers({
                 puzzlesSinceLastKethaneum: 0,
                 nextKethaneumIndex: Math.max(updatedState.nextKethaneumIndex || 0, nextIndex),
               };
+
+              // NEW: Track Kethaneum puzzle completion for narrative orchestration
+              if (updatedState.narrativeOrchestration) {
+                updatedState = {
+                  ...updatedState,
+                  narrativeOrchestration: {
+                    ...updatedState.narrativeOrchestration,
+                    kethaneumPuzzlesCompleted: updatedState.narrativeOrchestration.kethaneumPuzzlesCompleted + 1,
+                  },
+                };
+              }
             }
           }
         }
