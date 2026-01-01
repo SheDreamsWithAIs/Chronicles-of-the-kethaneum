@@ -153,8 +153,16 @@ Parts are encoded as decimal numbers where each bit = part completion:
     "K001": 1
   },
   "g": {
-    "nature": ["N001-0", "N001-1", "N001-2", "N001-3", "N001-4", "N002-0", "N002-1"],
-    "kethaneum": ["K001-0"]
+    "nature": [
+      "Fruits of the Orchard - Part 1",
+      "Fruits of the Orchard - Part 2",
+      "Fruits of the Orchard - Part 3",
+      "Fruits of the Orchard - Part 4",
+      "Fruits of the Orchard - Part 5",
+      "Animals of the Savanna - Part 1",
+      "Animals of the Savanna - Part 2"
+    ],
+    "kethaneum": ["Luminos: The Price of 'Perfect Vision' - Part 1 The Foundation Day"]
   },
   "m": "s",
   "n": 8,
@@ -231,8 +239,16 @@ Parts are encoded as decimal numbers where each bit = part completion:
     "K001": 1
   },
   "g": {
-    "nature": ["N001-0", "N001-1", "N001-2", "N001-3", "N001-4", "N002-0", "N002-1"],
-    "kethaneum": ["K001-0"]
+    "nature": [
+      "Fruits of the Orchard - Part 1",
+      "Fruits of the Orchard - Part 2",
+      "Fruits of the Orchard - Part 3",
+      "Fruits of the Orchard - Part 4",
+      "Fruits of the Orchard - Part 5",
+      "Animals of the Savanna - Part 1",
+      "Animals of the Savanna - Part 2"
+    ],
+    "kethaneum": ["Luminos: The Price of 'Perfect Vision' - Part 1 The Foundation Day"]
   },
   "m": "s",
   "n": 8,
@@ -315,10 +331,23 @@ Parts are encoded as decimal numbers where each bit = part completion:
     "K001": 3
   },
   "g": {
-    "science": ["S001-0", "S002-0"],
-    "nature": ["N001-0", "N001-1", "N001-2", "N001-3", "N001-4", "N002-0", "N002-1", "N002-2", "N003-0"],
-    "fantasy": ["F001-0", "F002-0", "F003-0"],
-    "kethaneum": ["K001-0", "K001-1"]
+    "science": ["Solar System - Part 1", "Chemistry Basics - Part 1"],
+    "nature": [
+      "Fruits of the Orchard - Part 1",
+      "Fruits of the Orchard - Part 2",
+      "Fruits of the Orchard - Part 3",
+      "Fruits of the Orchard - Part 4",
+      "Fruits of the Orchard - Part 5",
+      "Animals of the Savanna - Part 1",
+      "Animals of the Savanna - Part 2",
+      "Animals of the Savanna - Part 3",
+      "Creatures of the Sea - Part 1"
+    ],
+    "fantasy": ["World of Magic - Part 1", "Kingdom of Legends - Part 1", "Mythical Creatures - Part 1"],
+    "kethaneum": [
+      "Luminos: The Price of 'Perfect Vision' - Part 1 The Foundation Day",
+      "Luminos: The Price of 'Perfect Vision' - Part 2 The First Fracture"
+    ]
   },
   "m": "s",
   "n": 16,
@@ -390,7 +419,17 @@ Parts are encoded as decimal numbers where each bit = part completion:
     "N003": 1
   },
   "g": {
-    "nature": ["N001-0", "N001-1", "N001-2", "N001-3", "N001-4", "N002-0", "N002-1", "N002-2", "N003-0"]
+    "nature": [
+      "Fruits of the Orchard - Part 1",
+      "Fruits of the Orchard - Part 2",
+      "Fruits of the Orchard - Part 3",
+      "Fruits of the Orchard - Part 4",
+      "Fruits of the Orchard - Part 5",
+      "Animals of the Savanna - Part 1",
+      "Animals of the Savanna - Part 2",
+      "Animals of the Savanna - Part 3",
+      "Creatures of the Sea - Part 1"
+    ]
   },
   "m": "s",
   "n": 9,
@@ -458,9 +497,16 @@ Parts are encoded as decimal numbers where each bit = part completion:
     "S001": 1
   },
   "g": {
-    "nature": ["N001-0", "N001-1", "N001-2", "N001-3", "N002-0", "N002-1"],
-    "fantasy": ["F001-0", "F002-0"],
-    "science": ["S001-0"]
+    "nature": [
+      "Fruits of the Orchard - Part 1",
+      "Fruits of the Orchard - Part 2",
+      "Fruits of the Orchard - Part 3",
+      "Fruits of the Orchard - Part 4",
+      "Animals of the Savanna - Part 1",
+      "Animals of the Savanna - Part 2"
+    ],
+    "fantasy": ["World of Magic - Part 1", "Kingdom of Legends - Part 1"],
+    "science": ["Solar System - Part 1"]
   },
   "m": "p",
   "n": 10,
