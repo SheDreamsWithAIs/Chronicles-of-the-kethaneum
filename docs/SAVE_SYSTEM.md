@@ -147,7 +147,7 @@ Tracks story event unlocking and the debt system. Only saved when genre selectio
 | `no.sc` | number | Story events completed count | `1` |
 | `no.u` | string[] | Unlocked story event IDs (not yet completed) | `["SE002"]` |
 | `no.c` | string[] | Completed story event IDs | `["SE001"]` |
-| `no.l` | string \| null | Last unlocked story event ID (for notifications) | `"SE002"` |
+| `no.l` | string \| null | Last unlocked story event ID (for notifications) | `"test-event-1"` |
 
 **Debt System**:
 - Debt increments when story events UNLOCK
