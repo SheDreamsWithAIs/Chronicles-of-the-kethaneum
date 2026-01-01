@@ -103,6 +103,23 @@ export default function BookOfPassageScreen() {
   useEffect(() => {
     if (!gameStateReady || state.gameMode !== 'story' || hasCheckedInitialUnlock.current) return;
 
+    // IMPORTANT: Don't run unlock check until save data has actually loaded
+    // Check if narrativeOrchestration has been initialized from save data
+    // If lastStoryEventUnlocked is null, this is fresh state (not loaded from save)
+    if (!state.narrativeOrchestration || state.narrativeOrchestration.lastStoryEventUnlocked === null) {
+      // This is fresh/uninitialized state - only run check if we have NO unlocked events
+      // (i.e., this is truly the first time, not a race condition where save hasn't loaded yet)
+      const hasUnlockedEvents = state.narrativeOrchestration?.unlockedStoryEvents.length ?? 0;
+      const hasCompletedPuzzles = state.completedPuzzles > 0;
+
+      if (hasUnlockedEvents > 0 || hasCompletedPuzzles > 0) {
+        // We have unlocked events or completed puzzles but lastStoryEventUnlocked is null
+        // This means save data hasn't loaded yet - skip this check
+        console.log('[BookOfPassage] Save data not loaded yet, skipping unlock check');
+        return;
+      }
+    }
+
     console.log('[BookOfPassage] Checking for initial story event unlock');
 
     // Mark that we've started the check to prevent multiple runs
