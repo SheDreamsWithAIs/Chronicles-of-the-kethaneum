@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { BookOfPassageButton } from '@/components/BookOfPassageButton';
 import { LibraryButton } from '@/components/LibraryButton';
+import notificationStyles from '@/styles/story-notification.module.css';
 import type { SessionStats, NarrativeOrchestrationState } from '@/lib/game/state';
 import { DEFAULT_NARRATIVE_CONFIG } from '@/lib/narrative/storyEventConfig';
 import styles from './GameStatsModal.module.css';
@@ -180,12 +181,14 @@ export function GameStatsModal({
               {onBackToBookOfPassage && (
                 <BookOfPassageButton
                   className={styles.secondaryButton}
+                  notificationClassName={notificationStyles.storyNotificationGlowSubtle}
                   onClick={onBackToBookOfPassage}
                 />
               )}
               {onBackToLibrary && (
                 <LibraryButton
                   className={styles.secondaryButton}
+                  notificationClassName={notificationStyles.storyNotificationGlowSubtle}
                   onClick={onBackToLibrary}
                 >
                   Return to Library

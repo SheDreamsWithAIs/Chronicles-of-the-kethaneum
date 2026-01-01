@@ -20,6 +20,7 @@ import { startBeatTheClockRun, endBeatTheClockRun } from '@/lib/game/logic';
 import { getConfig } from '@/lib/core/config';
 import type { Cell } from '@/lib/game/state';
 import styles from './puzzle.module.css';
+import notificationStyles from '@/styles/story-notification.module.css';
 
 export default function PuzzleScreen() {
   const router = useRouter();
@@ -984,12 +985,14 @@ export default function PuzzleScreen() {
 
               <BookOfPassageButton
                 className={styles.pauseBtn}
+                notificationClassName={notificationStyles.storyNotificationGlowSubtle}
                 onClick={handleBackToBookOfPassage}
                 data-testid="back-to-book-btn"
               />
 
               <LibraryButton
                 className={styles.pauseBtn}
+                notificationClassName={notificationStyles.storyNotificationGlowSubtle}
                 onClick={handleBackToLibrary}
                 data-testid="back-to-library-btn"
               >

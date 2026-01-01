@@ -13,6 +13,7 @@ import styles from '@/styles/story-notification.module.css';
 interface LibraryButtonProps {
   onClick: () => void;
   className?: string;
+  notificationClassName?: string;
   children?: React.ReactNode;
   'data-testid'?: string;
 }
@@ -20,13 +21,15 @@ interface LibraryButtonProps {
 export function LibraryButton({
   onClick,
   className = '',
+  notificationClassName,
   children = 'Enter the Library',
   'data-testid': dataTestId,
 }: LibraryButtonProps) {
   const { hasNewDialogue } = useStoryNotification();
 
+  const glowClassName = notificationClassName || styles.storyNotificationGlow;
   const buttonClassName = hasNewDialogue
-    ? `${className} ${styles.storyNotificationGlow}`
+    ? `${className} ${glowClassName}`
     : className;
 
   return (

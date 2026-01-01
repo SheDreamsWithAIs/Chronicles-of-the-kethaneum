@@ -9,7 +9,7 @@
  * - Integration between the two systems
  */
 
-import { useEffect, ReactNode } from 'react';
+import { useEffect, ReactNode, useRef } from 'react';
 import { useGameState } from '@/contexts/GameStateContext';
 import { useStorySystemIntegration } from '@/hooks/story/useStorySystemIntegration';
 import { useStoryNotification } from '@/contexts/StoryNotificationContext';
@@ -19,6 +19,8 @@ import { dialogueManager } from '@/lib/dialogue/DialogueManager';
 export function StorySystemProvider({ children }: { children: ReactNode }) {
   const { state } = useGameState();
   const { setNewStoryAvailable, setNewDialogueAvailable } = useStoryNotification();
+  const lastUnlockedBlurbCountRef = useRef(0);
+  const lastAvailableEventCountRef = useRef(0);
 
   // Initialize all story systems on mount
   useEffect(() => {
@@ -66,6 +68,30 @@ export function StorySystemProvider({ children }: { children: ReactNode }) {
       document.removeEventListener('dialogueManager:storyEventAvailable', handleStoryEventAvailable as EventListener);
     };
   }, [setNewDialogueAvailable]);
+
+  // Sync notifications from current state (set-only; no clearing)
+  useEffect(() => {
+    const unlockedBlurbs = state.storyProgress?.unlockedBlurbs || [];
+    const unlockedBlurbCount = unlockedBlurbs.length;
+    if (unlockedBlurbCount > lastUnlockedBlurbCountRef.current) {
+      setNewStoryAvailable();
+    }
+    lastUnlockedBlurbCountRef.current = unlockedBlurbCount;
+
+    const unlockedEvents = state.narrativeOrchestration?.unlockedStoryEvents || [];
+    const completedEvents = state.dialogue?.completedStoryEvents || [];
+    const availableEventCount = unlockedEvents.filter(eventId => !completedEvents.includes(eventId)).length;
+    if (availableEventCount > lastAvailableEventCountRef.current) {
+      setNewDialogueAvailable();
+    }
+    lastAvailableEventCountRef.current = availableEventCount;
+  }, [
+    state.storyProgress?.unlockedBlurbs,
+    state.narrativeOrchestration?.unlockedStoryEvents,
+    state.dialogue?.completedStoryEvents,
+    setNewStoryAvailable,
+    setNewDialogueAvailable,
+  ]);
 
   return <>{children}</>;
 }
