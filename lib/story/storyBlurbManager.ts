@@ -58,9 +58,9 @@ class StoryBlurbManagerClass {
 
   private async _doLoad(): Promise<void> {
     try {
-      const response = await fetch('/data/story-progress.json');
+      const response = await fetch('/data/book-of-passage-blurbs.json');
       if (!response.ok) {
-        throw new Error(`Failed to load story progress: ${response.status}`);
+        throw new Error(`Failed to load Book of Passage blurbs: ${response.status}`);
       }
 
       const data: StoryProgressData = await response.json();
