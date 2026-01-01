@@ -120,6 +120,32 @@ export default function PuzzleScreen() {
     }
   }, [state]);
 
+  // Check for story event unlocks on puzzle page mount (in case Book of Passage state didn't persist)
+  // This ensures unlocks happen even if user navigated away before save completed
+  useEffect(() => {
+    if (!isReady || state.gameMode !== 'story') return;
+
+    // Import and check for unlocks
+    import('@/lib/narrative/storyEventUnlockChecker').then(({ checkStoryEventUnlock, unlockStoryEvent }) => {
+      import('@/lib/dialogue/DialogueManager').then(({ dialogueManager }) => {
+        if (!dialogueManager.getInitialized()) return;
+
+        const unlockResult = checkStoryEventUnlock(state);
+        if (unlockResult) {
+          console.log('[PuzzlePage] Catching missed unlock:', unlockResult.eventId);
+
+          // Unlock the event and increment debt
+          const updatedState = unlockStoryEvent(state, unlockResult.eventId);
+          setState(updatedState);
+
+          // Trigger the orchestrated dialogue event
+          const currentBeat = updatedState.storyProgress?.currentStoryBeat;
+          dialogueManager.triggerOrchestratedEvent(unlockResult.eventId, currentBeat);
+        }
+      });
+    });
+  }, [isReady, state.gameMode]); // Check once when ready
+
   // Select appropriate timer based on game mode (memoized to prevent recreation)
   const timer = useMemo(() => {
     return state.gameMode === 'story' 

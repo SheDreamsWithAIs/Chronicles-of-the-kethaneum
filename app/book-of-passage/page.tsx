@@ -130,17 +130,14 @@ export default function BookOfPassageScreen() {
           console.log('[BookOfPassage] Updated debt:', updatedState.narrativeOrchestration?.storyEventDebt);
           setState(updatedState);
 
-          // Immediately save to ensure persistence before navigation
-          import('@/lib/save').then(({ saveProgress }) => {
-            saveProgress(updatedState).then(() => {
-              console.log('[BookOfPassage] State saved to localStorage');
-
-              // Now trigger the orchestrated dialogue event
-              const currentBeat = updatedState.storyProgress?.currentStoryBeat;
-              const triggered = dialogueManager.triggerOrchestratedEvent(unlockResult.eventId, currentBeat);
-              console.log('[BookOfPassage] Event triggered:', triggered);
-            });
-          });
+          // Wait for useGameState's auto-save to complete (100ms debounce + buffer)
+          // Then trigger the event so user sees notification after state is saved
+          setTimeout(() => {
+            console.log('[BookOfPassage] Triggering event after save delay');
+            const currentBeat = updatedState.storyProgress?.currentStoryBeat;
+            const triggered = dialogueManager.triggerOrchestratedEvent(unlockResult.eventId, currentBeat);
+            console.log('[BookOfPassage] Event triggered:', triggered);
+          }, 250);
         } else {
           console.log('[BookOfPassage] No event to unlock at this time');
         }
