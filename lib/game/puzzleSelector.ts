@@ -71,16 +71,6 @@ export function selectNextPuzzle(
       ? narrativeOrchestration.storyEventDebt >= DEFAULT_NARRATIVE_CONFIG.storyEventDebtThreshold
       : false;
 
-    // DEBUG: Log gating check
-    console.log('[PuzzleSelector] Kethaneum gating check:', {
-      shouldInsertKethaneum,
-      kethaneumBlocked,
-      storyEventDebt: narrativeOrchestration?.storyEventDebt ?? 'N/A',
-      debtThreshold: DEFAULT_NARRATIVE_CONFIG.storyEventDebtThreshold,
-      puzzlesSinceLastKethaneum: newState.puzzlesSinceLastKethaneum,
-      nextKethaneumInterval: newState.nextKethaneumInterval,
-    });
-
     if (shouldInsertKethaneum && !kethaneumBlocked) {
       const kethaneumResult = selectKethaneumPuzzle(newState, config);
 
