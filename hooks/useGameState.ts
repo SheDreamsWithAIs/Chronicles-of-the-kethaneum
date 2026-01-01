@@ -14,6 +14,7 @@ import {
   loadProgress,
   saveProgress,
   cleanupLegacyKeys,
+  clearProgress,
 } from '@/lib/save';
 import { debugLog } from '@/lib/debugLogger';
 
@@ -171,6 +172,20 @@ export function useGameState() {
     setState(prevState => ({ ...prevState, ...updates }));
   }, []);
 
+  const resetProgress = useCallback(async () => {
+    const freshState = initializeGameState();
+    try {
+      clearProgress();
+    } catch (error) {
+      console.error('[useGameState] Failed to clear progress:', error);
+    }
+
+    const freshHash = calculateStateHash(freshState);
+    lastSavedState.current = freshHash;
+    setState(freshState);
+    setIsReady(true);
+  }, [calculateStateHash]);
+
   // Initialize game (can be called to reload)
   const initialize = useCallback(async () => {
     const newState = initializeGameState();
@@ -199,6 +214,7 @@ export function useGameState() {
     setState,
     updateState,
     initialize,
+    resetProgress,
     isReady,
   };
 }

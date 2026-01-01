@@ -4,7 +4,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { SettingsMenu } from '@/components/SettingsMenu';
-import { loadProgress, clearProgress, cleanupLegacyKeys } from '@/lib/save';
+import { loadProgress, cleanupLegacyKeys } from '@/lib/save';
+import { useGameState } from '@/contexts/GameStateContext';
 import { getRoutePath } from '@/lib/utils/navigation';
 import styles from './title-screen.module.css';
 
@@ -14,6 +15,7 @@ export default function TitleScreen() {
   const [hasSavedGame, setHasSavedGame] = useState(false);
   const [savedGameMode, setSavedGameMode] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const { resetProgress } = useGameState();
 
   const particles = useMemo(() => {
     return Array.from({ length: 15 }, (_, i) => ({
@@ -52,7 +54,7 @@ export default function TitleScreen() {
 
   const handleNewGame = () => {
     try {
-      clearProgress();
+      resetProgress();
     } catch (e) {
       console.error('Failed to clear progress on New Game', e);
     }
