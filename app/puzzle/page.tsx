@@ -1022,6 +1022,7 @@ export default function PuzzleScreen() {
         mode={state.gameMode}
         isWin={statsModalIsWin}
         sessionStats={state.sessionStats}
+        narrativeOrchestration={state.narrativeOrchestration}
         onNextPuzzle={(state.gameMode === 'puzzle-only' || state.gameMode === 'story') ? handleNextPuzzle : undefined}
         onRestartPuzzle={handleRestartPuzzle}
         onStartFreshRun={state.gameMode === 'beat-the-clock' ? handleStartFreshRun : undefined}

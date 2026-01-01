@@ -137,6 +137,36 @@
   box-shadow: 0 4px 8px rgba(254, 243, 199, 0.3);
 }
 
+/* Narrative Debt Message */
+.narrativeMessage {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(109, 40, 217, 0.15) 100%);
+  border: 2px solid rgba(167, 139, 250, 0.4);
+  border-radius: 8px;
+  margin: 0.5rem 0;
+  box-shadow: 0 0 20px rgba(167, 139, 250, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.narrativeIcon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.5));
+}
+
+.narrativeText {
+  font-family: 'Crimson Text', serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  color: #e9d5ff;
+  margin: 0;
+  line-height: 1.5;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .panelContent {
@@ -154,6 +184,20 @@
 
   .statValue {
     font-size: 1.1rem;
+  }
+
+  .narrativeMessage {
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .narrativeText {
+    font-size: 1rem;
+  }
+
+  .narrativeIcon {
+    font-size: 1.5rem;
   }
 }
 
