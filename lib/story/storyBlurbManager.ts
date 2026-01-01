@@ -16,6 +16,8 @@ import {
 } from './types';
 
 // Import GameState type - we'll use a minimal interface to avoid circular deps
+import type { NarrativeOrchestrationState } from '@/lib/narrative/types';
+
 interface MinimalGameState {
   discoveredBooks: Set<string>;
   completedPuzzles: number;
@@ -23,6 +25,7 @@ interface MinimalGameState {
   kethaneumRevealed: boolean;
   currentGenre: string;
   storyProgress?: StoryProgressState;
+  narrativeOrchestration?: NarrativeOrchestrationState;
   books: { [bookTitle: string]: boolean[] | { complete?: boolean } };
 }
 
@@ -255,6 +258,38 @@ class StoryBlurbManagerClass {
     if (state.currentGenre === 'kethaneum' && previousState?.currentGenre !== 'kethaneum') {
       const result = checkTrigger('kethaneum_first_puzzle');
       if (result) return result;
+    }
+
+    // Check for story event completions (custom_story_event_{eventId})
+    if (state.narrativeOrchestration) {
+      const currentCompleted = state.narrativeOrchestration.completedStoryEvents || [];
+      const previousCompleted = previousState?.narrativeOrchestration?.completedStoryEvents || [];
+
+      if (currentCompleted.length > previousCompleted.length) {
+        // Find newly completed events
+        const newlyCompleted = currentCompleted.filter(
+          id => !previousCompleted.includes(id)
+        );
+
+        for (const eventId of newlyCompleted) {
+          const trigger = `custom_story_event_${eventId}` as StoryTrigger;
+          const result = checkTrigger(trigger);
+          if (result) return result;
+        }
+      }
+    }
+
+    // Check for Kethaneum puzzle milestones (custom_kethaneum_milestone_{count})
+    if (state.narrativeOrchestration) {
+      const currentCount = state.narrativeOrchestration.kethaneumPuzzlesCompleted || 0;
+      const previousCount = previousState?.narrativeOrchestration?.kethaneumPuzzlesCompleted || 0;
+
+      if (currentCount > previousCount) {
+        // Check for milestone trigger at current count
+        const trigger = `custom_kethaneum_milestone_${currentCount}` as StoryTrigger;
+        const result = checkTrigger(trigger);
+        if (result) return result;
+      }
     }
 
     // No trigger matched
