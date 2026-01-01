@@ -510,6 +510,30 @@ export default function LibraryScreen() {
                   // Update ref immediately for synchronous access
                   completedEventsRef.current = updatedCompletedEvents;
 
+                  // Update narrative orchestration: decrement debt, move event to completed
+                  const prevOrchestration = prevState.narrativeOrchestration || {
+                    kethaneumPuzzlesCompleted: 0,
+                    storyEventDebt: 0,
+                    storyEventsCompleted: 0,
+                    unlockedStoryEvents: [],
+                    completedStoryEvents: [],
+                    lastStoryEventUnlocked: null,
+                  };
+
+                  // Remove from unlocked, add to completed
+                  const updatedUnlockedEvents = prevOrchestration.unlockedStoryEvents.filter(
+                    id => id !== completedId
+                  );
+                  const updatedCompletedOrchestrationEvents = [
+                    ...prevOrchestration.completedStoryEvents,
+                    completedId,
+                  ];
+
+                  // Decrement debt (completed events reduce debt)
+                  const newDebt = Math.max(0, prevOrchestration.storyEventDebt - 1);
+
+                  console.log(`[Library] Story event '${completedId}' completed - debt: ${prevOrchestration.storyEventDebt} -> ${newDebt}`);
+
                   // Always return updated state to ensure persistence
                   // Initialize dialogue object if it doesn't exist
                   const newState = {
@@ -521,6 +545,13 @@ export default function LibraryScreen() {
                       hasVisitedLibrary: completedId === 'first-visit'
                         ? true
                         : prevDialogue.hasVisitedLibrary ?? false,
+                    },
+                    narrativeOrchestration: {
+                      ...prevOrchestration,
+                      storyEventDebt: newDebt,
+                      storyEventsCompleted: prevOrchestration.storyEventsCompleted + 1,
+                      unlockedStoryEvents: updatedUnlockedEvents,
+                      completedStoryEvents: updatedCompletedOrchestrationEvents,
                     },
                   };
 
