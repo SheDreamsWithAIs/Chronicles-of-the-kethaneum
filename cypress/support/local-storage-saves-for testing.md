@@ -99,43 +99,50 @@ Parts are encoded as decimal numbers where each bit = part completion:
 
 ---
 
-## Test Scenario 2: Pre-Second Kethaneum - Debt Threshold
+## Test Scenario 2: Debt Threshold - Both Events Unlocked
 
 **Use this to test:**
 - Story event debt=2 blocks Kethaneum puzzle
-- Second story event ready to unlock
+- Both first-visit and second-encounter unlocked
 - Kethaneum gating behavior
 
+**Requirements met:**
+- first-visit: 0 Kethaneum + 0 normal ✓
+- second-encounter: 1 Kethaneum + 7 normal ✓
+
 **State:**
-- Completed: 4 Nature puzzles (N001 parts 0-2, N002 part 0)
-- Next puzzle: Would be Kethaneum, but blocked by debt=2
-- Story events: first-visit unlocked but not completed, second-encounter ready to unlock
+- Completed: 7 Nature puzzles (N001: 5 parts, N002: 2 parts) + 1 Kethaneum (K001: 1 part)
+- Total: 8 puzzles
+- Next Kethaneum interval passed, but blocked by debt=2
+- Story events: first-visit and second-encounter both unlocked, neither completed
 
 ```json
 {
   "v": 2,
-  "d": "S001,N001,N002",
+  "d": "S001,N001,N002,K001",
   "p": {
-    "N001": 7,
-    "N002": 1
+    "N001": 31,
+    "N002": 3,
+    "K001": 1
   },
   "g": {
-    "nature": ["N001-0", "N001-1", "N001-2", "N002-0"]
+    "nature": ["N001-0", "N001-1", "N001-2", "N001-3", "N001-4", "N002-0", "N002-1"],
+    "Kethaneum": ["K001-0"]
   },
   "m": "s",
-  "n": 4,
+  "n": 8,
   "c": {
     "g": "nature",
     "b": "N002",
-    "p": 1,
+    "p": 2,
     "i": 1
   },
   "s": {
     "g": "nature",
-    "k": 0,
-    "p": 4,
-    "i": 5,
-    "r": false,
+    "k": 1,
+    "p": 7,
+    "i": 6,
+    "r": true,
     "e": false
   },
   "sp": {
@@ -148,7 +155,7 @@ Parts are encoded as decimal numbers where each bit = part completion:
   "dl": [],
   "dlv": true,
   "no": {
-    "kc": 0,
+    "kc": 1,
     "d": 2,
     "sc": 0,
     "u": ["first-visit", "second-encounter"],
@@ -160,44 +167,48 @@ Parts are encoded as decimal numbers where each bit = part completion:
 
 ---
 
-## Test Scenario 3: First Kethaneum Completed - Debt Cleared
+## Test Scenario 3: Story Events Completed - Debt Cleared
 
 **Use this to test:**
-- Debt decrement after Kethaneum puzzle completion
-- First Kethaneum puzzle experience
-- Story events completed, debt should be 0
+- Debt decrement after story event completion (via dialogue)
+- Kethaneum no longer blocked
+- Story event notification cleared
+
+**Requirements met:**
+- first-visit: 0 Kethaneum + 0 normal ✓
+- second-encounter: 1 Kethaneum + 7 normal ✓
 
 **State:**
-- Completed: 5 Nature puzzles + 1 Kethaneum
-- Kethaneum interval passed, first Kethaneum completed
-- Story events: first-visit and second-encounter both completed
-- Debt: 0 (was 2, completed 2 events, then completed 1 Kethaneum)
+- Completed: 7 Nature puzzles + 1 Kethaneum = 8 total
+- Story events: first-visit and second-encounter both unlocked AND completed via dialogue
+- Debt: 0 (2 events unlocked, then both completed through dialogue)
+- Kethaneum no longer blocked
 
 ```json
 {
   "v": 2,
   "d": "S001,N001,N002,K001",
   "p": {
-    "N001": 7,
+    "N001": 31,
     "N002": 3,
     "K001": 1
   },
   "g": {
-    "nature": ["N001-0", "N001-1", "N001-2", "N002-0", "N002-1"],
+    "nature": ["N001-0", "N001-1", "N001-2", "N001-3", "N001-4", "N002-0", "N002-1"],
     "Kethaneum": ["K001-0"]
   },
   "m": "s",
-  "n": 6,
+  "n": 8,
   "c": {
-    "g": "Kethaneum",
-    "b": "K001",
-    "p": 1,
-    "i": 0
+    "g": "nature",
+    "b": "N002",
+    "p": 2,
+    "i": 1
   },
   "s": {
     "g": "nature",
     "k": 1,
-    "p": 0,
+    "p": 7,
     "i": 6,
     "r": true,
     "e": false
@@ -224,22 +235,28 @@ Parts are encoded as decimal numbers where each bit = part completion:
 
 ---
 
-## Test Scenario 4: Multiple Events - Third Event Pending
+## Test Scenario 4: Many Puzzles Completed - No Events Unlocked Yet
 
 **Use this to test:**
-- Multiple story events unlocked
-- Third story event ready (requires more progress)
-- Mixed completion states
+- All first-visit completed (via dialogue)
+- second-encounter ready to unlock (has enough puzzles)
+- Debt cleared back to 0
+
+**Requirements met:**
+- first-visit: 0 Kethaneum + 0 normal ✓ (completed)
+- second-encounter: 1 Kethaneum + 7 normal ✓ (ready to unlock)
 
 **State:**
-- Completed: 12 puzzles across genres
-- Kethaneum: 2 completed
-- Story events: 4 unlocked, 2 completed, debt=2
+- Completed: 14 normal + 2 Kethaneum = 16 total puzzles
+- Normal: Nature(9) + Science(2) + Fantasy(3) = 14
+- Story events: first-visit completed via dialogue
+- Debt: 0 (first-visit unlocked then completed)
+- second-encounter not yet unlocked (will unlock on next puzzle completion)
 
 ```json
 {
   "v": 2,
-  "d": "S001,S002,N001,N002,N003,F001,K001",
+  "d": "S001,S002,N001,N002,N003,F001,F002,F003,K001",
   "p": {
     "S001": 1,
     "S002": 1,
@@ -247,27 +264,29 @@ Parts are encoded as decimal numbers where each bit = part completion:
     "N002": 7,
     "N003": 1,
     "F001": 1,
+    "F002": 1,
+    "F003": 1,
     "K001": 3
   },
   "g": {
     "science": ["S001-0", "S002-0"],
     "nature": ["N001-0", "N001-1", "N001-2", "N001-3", "N001-4", "N002-0", "N002-1", "N002-2", "N003-0"],
-    "fantasy": ["F001-0"],
+    "fantasy": ["F001-0", "F002-0", "F003-0"],
     "Kethaneum": ["K001-0", "K001-1"]
   },
   "m": "s",
-  "n": 12,
+  "n": 16,
   "c": {
-    "g": "Kethaneum",
-    "b": "K001",
-    "p": 2,
-    "i": 1
+    "g": "fantasy",
+    "b": "F003",
+    "p": 0,
+    "i": 2
   },
   "s": {
-    "g": "nature",
+    "g": "fantasy",
     "k": 2,
-    "p": 3,
-    "i": 5,
+    "p": 8,
+    "i": 6,
     "r": true,
     "e": false
   },
@@ -278,15 +297,15 @@ Parts are encoded as decimal numbers where each bit = part completion:
     "lastUpdated": 0,
     "firedTriggers": []
   },
-  "dl": ["first-visit", "second-encounter"],
+  "dl": ["first-visit"],
   "dlv": true,
   "no": {
     "kc": 2,
-    "d": 2,
-    "sc": 2,
-    "u": ["first-visit", "second-encounter", "third-milestone", "fourth-revelation"],
-    "c": ["first-visit", "second-encounter"],
-    "l": "fourth-revelation"
+    "d": 0,
+    "sc": 1,
+    "u": ["first-visit"],
+    "c": ["first-visit"],
+    "l": "first-visit"
   }
 }
 ```
