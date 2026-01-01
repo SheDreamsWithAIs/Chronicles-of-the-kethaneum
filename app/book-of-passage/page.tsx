@@ -130,10 +130,14 @@ export default function BookOfPassageScreen() {
           console.log('[BookOfPassage] Updated debt:', updatedState.narrativeOrchestration?.storyEventDebt);
           setState(updatedState);
 
-          // Trigger the orchestrated dialogue event
-          const currentBeat = updatedState.storyProgress?.currentStoryBeat;
-          const triggered = dialogueManager.triggerOrchestratedEvent(unlockResult.eventId, currentBeat);
-          console.log('[BookOfPassage] Event triggered:', triggered);
+          // Wait for save to complete before triggering event
+          // The save system has a 100ms debounce, so wait 150ms to be safe
+          setTimeout(() => {
+            // Trigger the orchestrated dialogue event
+            const currentBeat = updatedState.storyProgress?.currentStoryBeat;
+            const triggered = dialogueManager.triggerOrchestratedEvent(unlockResult.eventId, currentBeat);
+            console.log('[BookOfPassage] Event triggered:', triggered);
+          }, 150);
         } else {
           console.log('[BookOfPassage] No event to unlock at this time');
         }
