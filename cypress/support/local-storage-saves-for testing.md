@@ -103,18 +103,18 @@ Parts are encoded as decimal numbers where each bit = part completion:
 
 **Use this to test:**
 - Story event debt=2 blocks Kethaneum puzzle
-- Both first-visit and second-encounter unlocked
+- Both first-visit and test-event-1 unlocked
 - Kethaneum gating behavior
 
 **Requirements met:**
 - first-visit: 0 Kethaneum + 0 normal ✓
-- second-encounter: 1 Kethaneum + 7 normal ✓
+- test-event-1: 1 Kethaneum + 7 normal ✓
 
 **State:**
 - Completed: 7 Nature puzzles (N001: 5 parts, N002: 2 parts) + 1 Kethaneum (K001: 1 part)
 - Total: 8 puzzles
 - Next Kethaneum interval passed, but blocked by debt=2
-- Story events: first-visit and second-encounter both unlocked, neither completed
+- Story events: first-visit and test-event-1 both unlocked, neither completed
 
 ```json
 {
@@ -158,9 +158,9 @@ Parts are encoded as decimal numbers where each bit = part completion:
     "kc": 1,
     "d": 2,
     "sc": 0,
-    "u": ["first-visit", "second-encounter"],
+    "u": ["first-visit", "test-event-1"],
     "c": [],
-    "l": "second-encounter"
+    "l": "test-event-1"
   }
 }
 ```
@@ -176,11 +176,11 @@ Parts are encoded as decimal numbers where each bit = part completion:
 
 **Requirements met:**
 - first-visit: 0 Kethaneum + 0 normal ✓
-- second-encounter: 1 Kethaneum + 7 normal ✓
+- test-event-1: 1 Kethaneum + 7 normal ✓
 
 **State:**
 - Completed: 7 Nature puzzles + 1 Kethaneum = 8 total
-- Story events: first-visit and second-encounter both unlocked AND completed via dialogue
+- Story events: first-visit and test-event-1 both unlocked AND completed via dialogue
 - Debt: 0 (2 events unlocked, then both completed through dialogue)
 - Kethaneum no longer blocked
 
@@ -220,38 +220,38 @@ Parts are encoded as decimal numbers where each bit = part completion:
     "lastUpdated": 0,
     "firedTriggers": []
   },
-  "dl": ["first-visit", "second-encounter"],
+  "dl": ["first-visit", "test-event-1"],
   "dlv": true,
   "no": {
     "kc": 1,
     "d": 0,
     "sc": 2,
-    "u": ["first-visit", "second-encounter"],
-    "c": ["first-visit", "second-encounter"],
-    "l": "second-encounter"
+    "u": ["first-visit", "test-event-1"],
+    "c": ["first-visit", "test-event-1"],
+    "l": "test-event-1"
   }
 }
 ```
 
 ---
 
-## Test Scenario 4: Many Puzzles Completed - No Events Unlocked Yet
+## Test Scenario 4: Many Puzzles Completed - test-event-1 Ready
 
 **Use this to test:**
-- All first-visit completed (via dialogue)
-- second-encounter ready to unlock (has enough puzzles)
+- first-visit completed (via dialogue)
+- test-event-1 ready to unlock (has enough puzzles)
 - Debt cleared back to 0
 
 **Requirements met:**
 - first-visit: 0 Kethaneum + 0 normal ✓ (completed)
-- second-encounter: 1 Kethaneum + 7 normal ✓ (ready to unlock)
+- test-event-1: 1 Kethaneum + 7 normal ✓ (ready to unlock)
 
 **State:**
 - Completed: 14 normal + 2 Kethaneum = 16 total puzzles
 - Normal: Nature(9) + Science(2) + Fantasy(3) = 14
 - Story events: first-visit completed via dialogue
 - Debt: 0 (first-visit unlocked then completed)
-- second-encounter not yet unlocked (will unlock on next puzzle completion)
+- test-event-1 not yet unlocked (will unlock on next puzzle completion)
 
 ```json
 {
