@@ -71,7 +71,7 @@ Parts are encoded as decimal numbers where each bit = part completion:
   },
   "s": {
     "g": "science",
-    "k": 0,
+    "k": 6,
     "p": 0,
     "i": 6,
     "r": false,
@@ -89,7 +89,7 @@ Parts are encoded as decimal numbers where each bit = part completion:
   "no": {
     "kc": 0,
     "d": 1,
-    "sc": 0,
+    "sc": 1,
     "u": ["first-visit"],
     "c": [],
     "l": "first-visit"
@@ -111,8 +111,8 @@ Parts are encoded as decimal numbers where each bit = part completion:
 - test-event-1: 1 Kethaneum + 7 normal ✓
 
 **State:**
-- Completed: 7 Nature puzzles (N001: 5 parts, N002: 2 parts) + 1 Kethaneum (K001: 1 part)
-- Total: 8 puzzles
+- Completed: Nature puzzles (N001: 5 parts, N002: 2 parts) + 1 Kethaneum (K001: 1 part)
+- Total: 12 puzzles
 - Next Kethaneum interval passed, but blocked by debt=2
 - Story events: first-visit and test-event-1 both unlocked, neither completed
 
@@ -155,7 +155,7 @@ Parts are encoded as decimal numbers where each bit = part completion:
   "dl": [],
   "dlv": true,
   "no": {
-    "kc": 1,
+    "kc": 5,
     "d": 2,
     "sc": 0,
     "u": ["first-visit", "test-event-1"],
