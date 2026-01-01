@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useGameState } from '@/hooks/useGameState';
+import { useGameState } from '@/contexts/GameStateContext';
 import { useFontSize } from '@/hooks/useFontSize';
 import { useAudio } from '@/hooks/useAudio';
 import { saveProgress } from '@/lib/save';

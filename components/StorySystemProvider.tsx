@@ -10,7 +10,7 @@
  */
 
 import { useEffect, ReactNode } from 'react';
-import { useGameState } from '@/hooks/useGameState';
+import { useGameState } from '@/contexts/GameStateContext';
 import { useStorySystemIntegration } from '@/hooks/story/useStorySystemIntegration';
 import { useStoryNotification } from '@/contexts/StoryNotificationContext';
 import { storyBlurbManager, storyProgressionManager } from '@/lib/story';

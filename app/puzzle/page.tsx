@@ -9,7 +9,7 @@ import { GenreCompletionModal } from '@/components/GenreCompletionModal';
 import { BookOfPassageButton } from '@/components/BookOfPassageButton';
 import { LibraryButton } from '@/components/LibraryButton';
 import { SettingsMenu } from '@/components/SettingsMenu';
-import { useGameState } from '@/hooks/useGameState';
+import { useGameState } from '@/contexts/GameStateContext';
 import { usePuzzle } from '@/hooks/usePuzzle';
 import { usePageLoader } from '@/hooks/usePageLoader';
 import { useGameLogic } from '@/hooks/useGameLogic';

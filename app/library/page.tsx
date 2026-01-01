@@ -7,7 +7,7 @@ import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { PageLoader } from '@/components/shared/PageLoader';
 import { GenreSelectionModal } from '@/components/GenreSelectionModal';
 import { SettingsMenu } from '@/components/SettingsMenu';
-import { useGameState } from '@/hooks/useGameState';
+import { useGameState } from '@/contexts/GameStateContext';
 import { usePuzzle } from '@/hooks/usePuzzle';
 import { useStoryNotification } from '@/contexts/StoryNotificationContext';
 import { useDialogue } from '@/hooks/dialogue/useDialogue';

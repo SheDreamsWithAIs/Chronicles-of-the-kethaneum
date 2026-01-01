@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { PageLoader } from '@/components/shared/PageLoader';
 import { LibraryButton } from '@/components/LibraryButton';
-import { useGameState } from '@/hooks/useGameState';
+import { useGameState } from '@/contexts/GameStateContext';
 import { usePageLoader } from '@/hooks/usePageLoader';
 import { useStoryProgress, useInitializeStoryProgress } from '@/hooks/useStoryProgress';
 import { useStoryNotification } from '@/contexts/StoryNotificationContext';
