@@ -411,10 +411,10 @@ export function selectGenre(
   // Set the selected genre
   newState.selectedGenre = genre;
 
-  // Reset the pattern counter to ensure first puzzle is from chosen genre
-  // By setting puzzlesSinceLastKethaneum to 0, we ensure that the first puzzle
-  // will be from the selected genre (since we need to reach the interval before Kethaneum)
-  newState.puzzlesSinceLastKethaneum = 0;
+  // Preserve puzzlesSinceLastKethaneum so selection doesn't wipe test state
+  if (newState.puzzlesSinceLastKethaneum === undefined) {
+    newState.puzzlesSinceLastKethaneum = 0;
+  }
 
   // Set a new random interval if not already set
   if (newState.nextKethaneumInterval <= 0) {
