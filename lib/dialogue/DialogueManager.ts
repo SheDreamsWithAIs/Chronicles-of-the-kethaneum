@@ -548,14 +548,14 @@ export class DialogueManager {
 
   /**
    * Get all available story events for current conditions
-   * Uses StoryEventTriggerChecker to verify trigger conditions are satisfied
+   * Uses narrative orchestration system to get unlocked events
    * Filters out completed events if provided
    */
   getAvailableStoryEvents(currentState: GameState, completedEvents?: string[]): string[] {
     try {
-      // Use StoryEventTriggerChecker to get events that satisfy trigger conditions
-      const triggerCheckedEvents = StoryEventTriggerChecker.checkCurrentlyAvailableEvents(currentState);
-      
+      // NEW: Use narrative orchestration system instead of trigger checker
+      const unlockedEvents = currentState.narrativeOrchestration?.unlockedStoryEvents || [];
+
       // Validate completedEvents is an array if provided
       if (completedEvents !== undefined && !Array.isArray(completedEvents)) {
         console.error('[DialogueManager] completedEvents is not an array:', completedEvents);
@@ -564,10 +564,14 @@ export class DialogueManager {
 
       // Filter out completed events if provided
       const filteredEvents = completedEvents && completedEvents.length > 0
-        ? triggerCheckedEvents.filter((eventId) => !completedEvents!.includes(eventId))
-        : triggerCheckedEvents;
+        ? unlockedEvents.filter((eventId) => !completedEvents!.includes(eventId))
+        : unlockedEvents;
 
-      // Filtered events (after removing completed)
+      console.log('[DialogueManager] Available events:', {
+        unlocked: unlockedEvents,
+        completed: completedEvents,
+        available: filteredEvents
+      });
 
       return filteredEvents;
     } catch (error) {
