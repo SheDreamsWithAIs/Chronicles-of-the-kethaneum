@@ -100,24 +100,39 @@ export default function BookOfPassageScreen() {
   useEffect(() => {
     if (!gameStateReady || state.gameMode !== 'story') return;
 
+    console.log('[BookOfPassage] Checking for initial story event unlock');
+
     // Import and check for unlocks on mount
     import('@/lib/narrative/storyEventUnlockChecker').then(({ checkStoryEventUnlock, unlockStoryEvent }) => {
       import('@/lib/dialogue/DialogueManager').then(({ dialogueManager }) => {
-        if (!dialogueManager.getInitialized()) return;
+        console.log('[BookOfPassage] Dialogue manager initialized:', dialogueManager.getInitialized());
+
+        if (!dialogueManager.getInitialized()) {
+          console.warn('[BookOfPassage] Dialogue manager not initialized yet, skipping unlock check');
+          return;
+        }
 
         const unlockResult = checkStoryEventUnlock(state);
+        console.log('[BookOfPassage] Unlock check result:', unlockResult);
+
         if (unlockResult) {
+          console.log('[BookOfPassage] Unlocking event:', unlockResult.eventId);
+
           // Unlock the event and increment debt
           const updatedState = unlockStoryEvent(state, unlockResult.eventId);
+          console.log('[BookOfPassage] Updated debt:', updatedState.narrativeOrchestration?.storyEventDebt);
           setState(updatedState);
 
           // Trigger the orchestrated dialogue event
           const currentBeat = updatedState.storyProgress?.currentStoryBeat;
-          dialogueManager.triggerOrchestratedEvent(unlockResult.eventId, currentBeat);
+          const triggered = dialogueManager.triggerOrchestratedEvent(unlockResult.eventId, currentBeat);
+          console.log('[BookOfPassage] Event triggered:', triggered);
+        } else {
+          console.log('[BookOfPassage] No event to unlock at this time');
         }
       });
     });
-  }, [gameStateReady, state.gameMode]); // Only check once when ready
+  }, [gameStateReady, state.gameMode, state, setState]); // Check when state changes
 
   // Track loading conditions
   useEffect(() => {
