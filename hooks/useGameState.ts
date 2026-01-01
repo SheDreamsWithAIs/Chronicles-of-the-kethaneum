@@ -15,6 +15,7 @@ import {
   saveProgress,
   cleanupLegacyKeys,
 } from '@/lib/save';
+import { debugLog } from '@/lib/debugLogger';
 
 export function useGameState() {
   const [state, setState] = useState<GameState>(() => initializeGameState());
@@ -55,39 +56,52 @@ export function useGameState() {
   // Load saved progress on mount (async)
   useEffect(() => {
     async function loadSavedProgress() {
+      debugLog.log('=== LOAD EFFECT START ===');
       try {
         cleanupLegacyKeys();
         const result = await loadProgress();
 
         if (result.data) {
-          console.log('[useGameState] Loaded data from storage:', result.data);
+          debugLog.log('Loaded data from storage', result.data);
           const initialState = initializeGameState();
           const restoredState = restoreGameState(initialState, result.data as Partial<GameState>);
+
+          debugLog.log('Restored state details', {
+            completedPuzzles: restoredState.completedPuzzles,
+            debt: restoredState.narrativeOrchestration?.debt,
+            unlockedEvents: restoredState.narrativeOrchestration?.unlockedStoryEvents,
+            completedEvents: restoredState.dialogue?.completedStoryEvents,
+          });
 
           // Calculate hash of the loaded data BEFORE putting it in state
           // This ensures lastSavedState reflects the loaded data, not empty state
           const loadedHash = calculateStateHash(restoredState);
           lastSavedState.current = loadedHash;
-          console.log('[useGameState] Set baseline hash from loaded data, hash:', loadedHash.substring(0, 100));
+          debugLog.log('Set baseline hash from loaded data', {
+            hashPreview: loadedHash.substring(0, 100),
+            hashLength: loadedHash.length,
+          });
 
           // Now update state with loaded data
           setState(restoredState);
-          console.log('[useGameState] Called setState with restored state');
+          debugLog.log('Called setState with restored state');
 
           // Audio settings removed - audio system has been removed
           // Audio settings will be handled when audio system is rebuilt
         } else {
-          console.log('[useGameState] No saved data found, using fresh state');
+          debugLog.log('No saved data found, using fresh state');
         }
       } catch (error) {
+        debugLog.log('Failed to load game progress', { error: String(error) });
         console.error('Failed to load game progress:', error);
         // Continue with fresh state
       }
 
       // Mark initialization complete and ready
-      console.log('[useGameState] Marking initialization complete');
+      debugLog.log('Marking initialization complete');
       hasCompletedInitialLoad.current = true;
       setIsReady(true);
+      debugLog.log('=== LOAD EFFECT END ===');
     }
 
     loadSavedProgress();
@@ -95,45 +109,61 @@ export function useGameState() {
 
   // Save progress whenever state changes (debounced, after initial load)
   useEffect(() => {
-    console.log('[useGameState] Auto-save effect triggered, isReady:', isReady, 'hasCompletedInitialLoad:', hasCompletedInitialLoad.current);
+    debugLog.log('--- AUTO-SAVE EFFECT TRIGGERED ---', {
+      isReady,
+      isSaving: isSaving.current,
+      hasCompletedInitialLoad: hasCompletedInitialLoad.current,
+    });
 
-    if (!isReady || isSaving.current || !hasCompletedInitialLoad.current) return;
+    if (!isReady || isSaving.current || !hasCompletedInitialLoad.current) {
+      debugLog.log('Auto-save skipped (not ready)');
+      return;
+    }
 
     // Calculate hash of current state to detect actual changes
     const stateHash = calculateStateHash(state);
     const hashesMatch = stateHash === lastSavedState.current;
 
-    console.log('[useGameState] Checking for changes...');
-    console.log('  Current hash:', stateHash.substring(0, 100));
-    console.log('  Baseline hash:', lastSavedState.current.substring(0, 100));
-    console.log('  Hashes match:', hashesMatch);
-    console.log('  completedPuzzles:', state.completedPuzzles);
-    console.log('  debt:', state.narrativeOrchestration?.debt);
+    debugLog.log('Checking for changes', {
+      currentHashPreview: stateHash.substring(0, 100),
+      baselineHashPreview: lastSavedState.current.substring(0, 100),
+      hashesMatch,
+      currentState: {
+        completedPuzzles: state.completedPuzzles,
+        debt: state.narrativeOrchestration?.debt,
+        unlockedEvents: state.narrativeOrchestration?.unlockedStoryEvents,
+        completedEvents: state.dialogue?.completedStoryEvents,
+      }
+    });
 
     // Skip if nothing meaningful changed
     if (hashesMatch) {
-      console.log('[useGameState] No changes detected, skipping save');
+      debugLog.log('No changes detected, skipping save');
       return;
     }
 
-    console.log('[useGameState] Changes detected, saving in 100ms...');
+    debugLog.log('Changes detected! Scheduling save in 100ms...');
 
     // Debounce saves
     const saveTimeout = setTimeout(async () => {
-      console.log('[useGameState] Executing auto-save...');
+      debugLog.log('Executing auto-save NOW');
       isSaving.current = true;
       try {
         await saveProgress(state);
         lastSavedState.current = stateHash;
-        console.log('[useGameState] Auto-save completed');
+        debugLog.log('Auto-save completed successfully');
       } catch (error) {
+        debugLog.log('Auto-save FAILED', { error: String(error) });
         console.error('[useGameState] Failed to save progress:', error);
       } finally {
         isSaving.current = false;
       }
     }, 100); // Small debounce to batch rapid changes
 
-    return () => clearTimeout(saveTimeout);
+    return () => {
+      clearTimeout(saveTimeout);
+      debugLog.log('Auto-save timeout cleared (effect cleanup)');
+    };
   }, [state, isReady, calculateStateHash]);
 
   // Update state helper
