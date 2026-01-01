@@ -23,6 +23,8 @@ export function useGameState() {
   const isSaving = useRef(false);
   // Track the last saved state to avoid unnecessary saves
   const lastSavedState = useRef<string>('');
+  // Track if initial load has completed to prevent auto-save from overwriting loaded data
+  const hasCompletedInitialLoad = useRef(false);
 
   // Load saved progress on mount (async)
   useEffect(() => {
@@ -33,7 +35,7 @@ export function useGameState() {
 
         if (result.data) {
           setState(prevState => restoreGameState(prevState, result.data as Partial<GameState>));
-          
+
           // Audio settings removed - audio system has been removed
           // Audio settings will be handled when audio system is rebuilt
         }
@@ -42,6 +44,9 @@ export function useGameState() {
         // Continue with fresh state
       }
 
+      // Wait a tick to ensure setState has processed before allowing auto-save
+      await new Promise(resolve => setTimeout(resolve, 0));
+      hasCompletedInitialLoad.current = true;
       setIsReady(true);
     }
 
@@ -50,7 +55,7 @@ export function useGameState() {
 
   // Save progress whenever state changes (debounced, after initial load)
   useEffect(() => {
-    if (!isReady || isSaving.current) return;
+    if (!isReady || isSaving.current || !hasCompletedInitialLoad.current) return;
 
     // Create a simple hash of the state to detect actual changes
     const dialogueState = state.dialogue ? {
