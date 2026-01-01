@@ -166,12 +166,14 @@ export default function LibraryScreen() {
   }, [isInitialized, initialize]);
 
   // Load puzzles on mount if not already loaded
+  // IMPORTANT: Wait for gameStateReady to avoid overwriting loaded save data
   useEffect(() => {
+    if (!gameStateReady) return; // Wait for save data to load first!
+
     if (!state.puzzles || Object.keys(state.puzzles).length === 0) {
       loadAll();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
+  }, [gameStateReady, state.puzzles, loadAll]);
 
   const handleBrowseArchives = () => {
     setShowGenreModal(true);
