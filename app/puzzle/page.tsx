@@ -123,28 +123,42 @@ export default function PuzzleScreen() {
   // Check for story event unlocks on puzzle page mount (in case Book of Passage state didn't persist)
   // This ensures unlocks happen even if user navigated away before save completed
   useEffect(() => {
+    console.log('[PuzzlePage] Unlock check - isReady:', isReady, 'gameMode:', state.gameMode);
+
     if (!isReady || state.gameMode !== 'story') return;
+
+    console.log('[PuzzlePage] Starting unlock check');
 
     // Import and check for unlocks
     import('@/lib/narrative/storyEventUnlockChecker').then(({ checkStoryEventUnlock, unlockStoryEvent }) => {
       import('@/lib/dialogue/DialogueManager').then(({ dialogueManager }) => {
-        if (!dialogueManager.getInitialized()) return;
+        console.log('[PuzzlePage] Dialogue manager initialized:', dialogueManager.getInitialized());
+
+        if (!dialogueManager.getInitialized()) {
+          console.warn('[PuzzlePage] Dialogue manager not ready, skipping unlock check');
+          return;
+        }
 
         const unlockResult = checkStoryEventUnlock(state);
+        console.log('[PuzzlePage] Unlock result:', unlockResult);
+
         if (unlockResult) {
           console.log('[PuzzlePage] Catching missed unlock:', unlockResult.eventId);
 
           // Unlock the event and increment debt
           const updatedState = unlockStoryEvent(state, unlockResult.eventId);
+          console.log('[PuzzlePage] Updated debt:', updatedState.narrativeOrchestration?.storyEventDebt);
           setState(updatedState);
 
           // Trigger the orchestrated dialogue event
           const currentBeat = updatedState.storyProgress?.currentStoryBeat;
           dialogueManager.triggerOrchestratedEvent(unlockResult.eventId, currentBeat);
+        } else {
+          console.log('[PuzzlePage] No unlocks needed');
         }
       });
     });
-  }, [isReady, state.gameMode]); // Check once when ready
+  }, [isReady, state.gameMode, state, setState]); // Check when ready or state changes
 
   // Select appropriate timer based on game mode (memoized to prevent recreation)
   const timer = useMemo(() => {
