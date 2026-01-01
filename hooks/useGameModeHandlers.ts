@@ -9,7 +9,7 @@ import { recordPuzzleStats, incrementTotalWords } from '@/lib/game/stats';
 import { storyBlurbManager } from '@/lib/story';
 import { markPuzzleCompleted } from '@/lib/game/puzzleSelector';
 import { dialogueManager } from '@/lib/dialogue/DialogueManager';
-import { StoryEventTriggerChecker } from '@/lib/dialogue/StoryEventTriggerChecker';
+import { checkStoryEventUnlock, unlockStoryEvent } from '@/lib/narrative/storyEventUnlockChecker';
 import { defaultPuzzleSelectionConfig } from '@/lib/game/puzzleSelectionConfig';
 
 interface UseGameModeHandlersProps {
@@ -183,24 +183,18 @@ export function useGameModeHandlers({
           }
         }
 
-        // Check for story event dialogue triggers after puzzle completion
-        // Centralized check based on game state (not location-specific)
+        // Check for story event unlocking via narrative orchestration
+        // This replaces the old trigger-based system with sequential unlock requirements
         if (dialogueManager.getInitialized()) {
-          const triggeredEventIds = StoryEventTriggerChecker.checkAvailableEvents(
-            updatedState,
-            previousState
-          );
-          
-          // Trigger each available event
-          for (const eventId of triggeredEventIds) {
+          const unlockResult = checkStoryEventUnlock(updatedState);
+
+          if (unlockResult) {
+            // Unlock the event and increment debt
+            updatedState = unlockStoryEvent(updatedState, unlockResult.eventId);
+
+            // Trigger the orchestrated dialogue event
             const currentBeat = updatedState.storyProgress?.currentStoryBeat;
-            const eventData = dialogueManager.getStoryEvent(eventId);
-            if (eventData?.storyEvent?.triggerCondition) {
-              dialogueManager.checkForAvailableStoryEvent(
-                eventData.storyEvent.triggerCondition,
-                currentBeat
-              );
-            }
+            dialogueManager.triggerOrchestratedEvent(unlockResult.eventId, currentBeat);
           }
         }
 

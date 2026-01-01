@@ -515,6 +515,38 @@ export class DialogueManager {
   }
 
   /**
+   * Trigger an orchestrated story event by ID
+   * Used for narrative orchestration system (replaces trigger-based events)
+   * Emits notification for the event without checking trigger conditions
+   */
+  triggerOrchestratedEvent(eventId: string, currentBeat?: StoryBeat): boolean {
+    const eventData = this.storyEvents.get(eventId);
+
+    if (!eventData || !eventData.storyEvent) {
+      console.warn(`[DialogueManager] Orchestrated event not found: ${eventId}`);
+      return false;
+    }
+
+    const event = eventData.storyEvent;
+
+    // Check if story beat matches (if specified)
+    if (event.storyBeat && currentBeat && event.storyBeat !== currentBeat) {
+      console.warn(`[DialogueManager] Story beat mismatch for event ${eventId}: expected ${event.storyBeat}, got ${currentBeat}`);
+      return false;
+    }
+
+    // Event is available - emit notification
+    this.emit('storyEventAvailable', {
+      eventId,
+      title: event.title,
+      triggerCondition: null, // Orchestrated events don't have trigger conditions
+      storyBeat: event.storyBeat,
+    });
+
+    return true;
+  }
+
+  /**
    * Get all available story events for current conditions
    * Uses StoryEventTriggerChecker to verify trigger conditions are satisfied
    * Filters out completed events if provided
