@@ -6,7 +6,6 @@
 
 import { fetchAsset } from '@/lib/utils/assetPath';
 import type { GameState } from '@/lib/game/state';
-import { StoryEventTriggerChecker } from './StoryEventTriggerChecker';
 import type {
   StoryBeat,
   LoadingGroup,
@@ -300,16 +299,6 @@ export class DialogueManager {
         if (storyEvent && storyEvent.storyEvent?.id) {
           this.storyEvents.set(storyEvent.storyEvent.id, storyEvent);
         }
-      }
-
-
-      // Initialize story event trigger checker index for performance
-      // This indexes events by story beat so we only check relevant events
-      if (typeof window !== 'undefined') {
-        // Dynamic import to avoid circular dependency
-        import('./StoryEventTriggerChecker').then(({ StoryEventTriggerChecker }) => {
-          StoryEventTriggerChecker.initializeIndex();
-        });
       }
 
       // Emit event that story events are loaded
