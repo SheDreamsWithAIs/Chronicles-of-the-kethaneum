@@ -32,25 +32,25 @@ export const STORY_EVENT_UNLOCK_REQUIREMENTS: StoryEventUnlockRequirement[] = [
     order: 1
   },
   {
-    eventId: "second-encounter",
+    eventId: "test-event-1",
     requiredKethaneumPuzzles: 1,        // After completing 1 Kethaneum puzzle
     requiredNormalPuzzles: 7,           // After completing 7 normal puzzles
     order: 2
   },
   {
-    eventId: "pattern-recognition",
+    eventId: "test-event-2",
     requiredKethaneumPuzzles: 2,        // After completing 2 Kethaneum puzzles
     requiredNormalPuzzles: 15,          // After completing 15 normal puzzles
     order: 3
   },
   {
-    eventId: "midpoint-revelation",
+    eventId: "test-event-3",
     requiredKethaneumPuzzles: 3,        // After completing 3 Kethaneum puzzles
     requiredNormalPuzzles: 22,          // After completing 22 normal puzzles
     order: 4
   },
   {
-    eventId: "climactic-understanding",
+    eventId: "test-event-4",
     requiredKethaneumPuzzles: 4,        // After completing 4 Kethaneum puzzles
     requiredNormalPuzzles: 30,          // After completing 30 normal puzzles
     order: 5
