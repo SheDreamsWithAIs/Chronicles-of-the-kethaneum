@@ -130,7 +130,6 @@ export function GameStatsModal({
         {/* Narrative Debt Message - only shown in story mode on wins */}
         {narrativeMessage && (
           <div className={styles.narrativeMessage}>
-            <div className={styles.narrativeIcon}>📖</div>
             <p className={styles.narrativeText}>{narrativeMessage}</p>
           </div>
         )}
