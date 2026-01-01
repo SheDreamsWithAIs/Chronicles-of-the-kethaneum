@@ -317,18 +317,16 @@ export async function saveOptimizedProgress(state: GameState): Promise<void> {
     }
 
     // Add selection state
-    // Always save selection state if we have a currentGenre or selectedGenre
-    // This ensures we preserve genre information even if selectedGenre is empty
-    if (state.selectedGenre || state.currentGenre || state.nextKethaneumIndex > 0 || state.kethaneumRevealed) {
-      optimized.s = {
-        g: state.selectedGenre || state.currentGenre || '', // Fallback to currentGenre if selectedGenre is empty
-        k: state.nextKethaneumIndex || 0,
-        p: state.puzzlesSinceLastKethaneum || 0,
-        i: state.nextKethaneumInterval || 3,
-        r: state.kethaneumRevealed || false,
-        e: state.genreExhausted || false,
-      };
-    }
+    // Always save selection state, even with default values
+    // This ensures puzzlesSinceLastKethaneum and other counters are tracked from game start
+    optimized.s = {
+      g: state.selectedGenre || state.currentGenre || '', // Fallback to currentGenre if selectedGenre is empty
+      k: state.nextKethaneumIndex || 0,
+      p: state.puzzlesSinceLastKethaneum || 0,
+      i: state.nextKethaneumInterval || 3,
+      r: state.kethaneumRevealed || false,
+      e: state.genreExhausted || false,
+    };
 
     // Add story progress
     if (state.storyProgress) {
@@ -336,16 +334,16 @@ export async function saveOptimizedProgress(state: GameState): Promise<void> {
     }
 
     // Add narrative orchestration state
-    if (state.narrativeOrchestration) {
-      optimized.no = {
-        kc: state.narrativeOrchestration.kethaneumPuzzlesCompleted,
-        d: state.narrativeOrchestration.storyEventDebt,
-        sc: state.narrativeOrchestration.storyEventsCompleted,
-        u: state.narrativeOrchestration.unlockedStoryEvents,
-        c: state.narrativeOrchestration.completedStoryEvents,
-        l: state.narrativeOrchestration.lastStoryEventUnlocked,
-      };
-    }
+    // Always save orchestration state, even with default values
+    // This ensures story event debt and Kethaneum tracking work from the start
+    optimized.no = {
+      kc: state.narrativeOrchestration?.kethaneumPuzzlesCompleted || 0,
+      d: state.narrativeOrchestration?.storyEventDebt || 0,
+      sc: state.narrativeOrchestration?.storyEventsCompleted || 0,
+      u: state.narrativeOrchestration?.unlockedStoryEvents || [],
+      c: state.narrativeOrchestration?.completedStoryEvents || [],
+      l: state.narrativeOrchestration?.lastStoryEventUnlocked || null,
+    };
 
     // Add dialogue state (completed story events)
     if (state.dialogue?.completedStoryEvents && state.dialogue.completedStoryEvents.length > 0) {
