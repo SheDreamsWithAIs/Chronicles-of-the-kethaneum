@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, ReactElement } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, ReactElement } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { PageLoader } from '@/components/shared/PageLoader';
@@ -77,6 +77,9 @@ export default function BookOfPassageScreen() {
   const [availableGenres, setAvailableGenres] = useState<string[]>([]);
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
 
+  // Track if we've checked for initial story event unlock
+  const hasCheckedInitialUnlock = useRef(false);
+
   // Clear new story notification when visiting Book of Passage
   useEffect(() => {
     clearNewStory();
@@ -98,9 +101,12 @@ export default function BookOfPassageScreen() {
   // Check for initial story event unlocks (for first-visit event)
   // This runs once when the Book of Passage page loads in Story Mode
   useEffect(() => {
-    if (!gameStateReady || state.gameMode !== 'story') return;
+    if (!gameStateReady || state.gameMode !== 'story' || hasCheckedInitialUnlock.current) return;
 
     console.log('[BookOfPassage] Checking for initial story event unlock');
+
+    // Mark that we've started the check to prevent multiple runs
+    hasCheckedInitialUnlock.current = true;
 
     // Import and check for unlocks on mount
     import('@/lib/narrative/storyEventUnlockChecker').then(({ checkStoryEventUnlock, unlockStoryEvent }) => {
@@ -109,6 +115,7 @@ export default function BookOfPassageScreen() {
 
         if (!dialogueManager.getInitialized()) {
           console.warn('[BookOfPassage] Dialogue manager not initialized yet, skipping unlock check');
+          hasCheckedInitialUnlock.current = false; // Allow retry if dialogue manager wasn't ready
           return;
         }
 
@@ -132,7 +139,7 @@ export default function BookOfPassageScreen() {
         }
       });
     });
-  }, [gameStateReady, state.gameMode, state, setState]); // Check when state changes
+  }, [gameStateReady, state.gameMode]); // Only check when ready, not on every state change
 
   // Track loading conditions
   useEffect(() => {
