@@ -359,7 +359,7 @@ export default function LibraryScreen() {
       }
 
       // Get available event, filtering out completed ones
-      // Now uses StoryEventTriggerChecker internally to verify trigger conditions
+      // Uses narrative orchestration system to check unlocked events
       let availableEvent: any = null;
       try {
         // Defensive check: ensure completedEvents is valid before querying
