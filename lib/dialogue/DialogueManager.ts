@@ -6,6 +6,7 @@
 
 import { fetchAsset } from '@/lib/utils/assetPath';
 import type { GameState } from '@/lib/game/state';
+import { STORY_EVENT_UNLOCK_REQUIREMENTS } from '@/lib/narrative/storyEventConfig';
 import type {
   StoryBeat,
   LoadingGroup,
@@ -552,9 +553,17 @@ export class DialogueManager {
       }
 
       // Filter out completed events if provided
-      const filteredEvents = completedEvents && completedEvents.length > 0
+      let filteredEvents = completedEvents && completedEvents.length > 0
         ? unlockedEvents.filter((eventId) => !completedEvents!.includes(eventId))
         : unlockedEvents;
+
+      // Sort by story event order to ensure correct playback sequence
+      // Events should always be played in order: first-visit, test-event-1, test-event-2, etc.
+      filteredEvents = filteredEvents.sort((a, b) => {
+        const orderA = STORY_EVENT_UNLOCK_REQUIREMENTS.find(req => req.eventId === a)?.order ?? 999;
+        const orderB = STORY_EVENT_UNLOCK_REQUIREMENTS.find(req => req.eventId === b)?.order ?? 999;
+        return orderA - orderB;
+      });
 
       console.log('[DialogueManager] Available events:', {
         unlocked: unlockedEvents,

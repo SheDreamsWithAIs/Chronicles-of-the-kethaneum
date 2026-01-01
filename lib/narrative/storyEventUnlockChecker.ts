@@ -122,35 +122,45 @@ export function unlockStoryEvent(state: GameState, eventId: string): GameState {
  * @returns Updated game state with event completed
  */
 export function completeStoryEvent(state: GameState, eventId: string): GameState {
+  console.log(`[completeStoryEvent] Called with eventId: ${eventId}`);
+  console.log(`[completeStoryEvent] narrativeOrchestration:`, state.narrativeOrchestration);
+
   if (!state.narrativeOrchestration) {
-    console.error('Cannot complete story event: narrativeOrchestration not initialized');
+    console.error('[completeStoryEvent] Cannot complete story event: narrativeOrchestration not initialized');
     return state;
   }
 
   // Check if event is in unlocked list
-  if (!state.narrativeOrchestration.unlockedStoryEvents.includes(eventId)) {
-    console.warn(`Story event ${eventId} is not in unlocked list, cannot complete`);
+  const unlockedEvents = state.narrativeOrchestration.unlockedStoryEvents;
+  console.log(`[completeStoryEvent] unlockedEvents:`, unlockedEvents);
+  console.log(`[completeStoryEvent] Checking if '${eventId}' is in unlocked list:`, unlockedEvents.includes(eventId));
+
+  if (!unlockedEvents.includes(eventId)) {
+    console.warn(`[completeStoryEvent] Story event '${eventId}' is not in unlocked list [${unlockedEvents.join(', ')}], cannot complete`);
     return state;
   }
 
   // Check if already completed
-  if (state.narrativeOrchestration.completedStoryEvents.includes(eventId)) {
-    console.warn(`Story event ${eventId} is already completed`);
+  const completedEvents = state.narrativeOrchestration.completedStoryEvents;
+  console.log(`[completeStoryEvent] completedEvents:`, completedEvents);
+
+  if (completedEvents.includes(eventId)) {
+    console.warn(`[completeStoryEvent] Story event ${eventId} is already completed`);
     return state;
   }
 
-  return {
+  const oldDebt = state.narrativeOrchestration.storyEventDebt;
+  const newDebt = Math.max(0, oldDebt - 1);
+
+  console.log(`[completeStoryEvent] Updating state - debt: ${oldDebt} -> ${newDebt}`);
+
+  const newState = {
     ...state,
     narrativeOrchestration: {
       ...state.narrativeOrchestration,
-      storyEventDebt: Math.max(0, state.narrativeOrchestration.storyEventDebt - 1),
-      unlockedStoryEvents: state.narrativeOrchestration.unlockedStoryEvents.filter(
-        id => id !== eventId
-      ),
-      completedStoryEvents: [
-        ...state.narrativeOrchestration.completedStoryEvents,
-        eventId
-      ],
+      storyEventDebt: newDebt,
+      unlockedStoryEvents: unlockedEvents.filter(id => id !== eventId),
+      completedStoryEvents: [...completedEvents, eventId],
       storyEventsCompleted: state.narrativeOrchestration.storyEventsCompleted + 1
     },
     // Also add to dialogue.completedStoryEvents for backwards compatibility
@@ -162,6 +172,9 @@ export function completeStoryEvent(state: GameState, eventId: string): GameState
       ]
     }
   };
+
+  console.log(`[completeStoryEvent] New state narrativeOrchestration:`, newState.narrativeOrchestration);
+  return newState;
 }
 
 /**
