@@ -6,7 +6,8 @@ This file contains pre-configured save states for testing various game scenarios
 
 1. Copy the JSON object for the desired test scenario
 2. Open browser DevTools Console
-3. Run: `localStorage.setItem('kethaneumProgress', JSON.stringify({paste JSON here}))`
+3. Run: 
+`localStorage.setItem('kethaneumProgress', JSON.stringify({paste JSON here})) location.reload();`
 4. Refresh the page
 
 ## Save Format Reference
@@ -54,7 +55,7 @@ Parts are encoded as decimal numbers where each bit = part completion:
 
 ---
 
-## Test Scenario 1: Fresh Start - First Event Unlocked
+## Test Scenario 1: First Event Unlocked
 
 **Use this to test:**
 - First story event notification
@@ -62,53 +63,71 @@ Parts are encoded as decimal numbers where each bit = part completion:
 - Genre selection from library
 
 ### Key Drivers
-- **Total puzzles completed**: `n`: 0
-- **Puzzles since last Kethaneum**: `s.p`: 0
-- **Next Kethaneum interval**: `s.i`: 6 (will trigger when `s.p` >= 6)
+- **Total puzzles completed**: `n`: 6
+- **Puzzles since last Kethaneum**: `s.p`: 6
+- **Next Kethaneum interval**: `s.i`: 7 (will trigger when `s.p` >= 7)
 - **Next Kethaneum index**: `s.k`: 0 (will show K001 part 0)
 - **Story event debt**: `no.d`: 1 (first-visit unlocked but not completed)
 - **Unlocked events**: `no.u`: ["first-visit"]
 - **Completed events**: `no.c`: [] (none completed yet)
-- **Has visited library**: `dlv`: false
+- **Has visited library**: `dlv`: true
 
 ```json
 {
-  "v": 2,
-  "d": "S001",
-  "p": {
-    "S001": 0
-  },
-  "g": {},
-  "m": "s",
-  "n": 0,
-  "c": {
-    "g": "science",
-    "b": "S001",
-    "p": 0,
-    "i": 0
-  },
-  "s": {
-    "g": "science",
-    "k": 0,
-    "p": 0,
-    "i": 6,
-    "r": false,
-    "e": false
-  },
-  "sp": {
-    "unlockedBlurbs": [],
-    "firedTriggers": []
-  },
-  "dl": [],
-  "dlv": false,
-  "no": {
-    "kc": 0,
-    "d": 1,
-    "sc": 0,
-    "u": ["first-visit"],
-    "c": [],
-    "l": "first-visit"
-  }
+    "v": 2,
+    "d": "N002,N001,N003",
+    "p": {
+        "N002": 7,
+        "N001": 3,
+        "N003": 1
+    },
+    "g": {
+        "nature": [
+            "Animals of the Savanna - Part 1",
+            "Animals of the Savanna - Part 2",
+            "Animals of the Savanna - Part 3",
+            "Creatures of the Sea - Part 1",
+            "Fruits of the Orchard - Part 1",
+            "Fruits of the Orchard - Part 2"
+        ]
+    },
+    "m": "s",
+    "n": 6,
+    "c": {
+        "g": "nature",
+        "b": "N001",
+        "p": 1,
+        "i": 1
+    },
+    "s": {
+        "g": "nature",
+        "k": 0,
+        "p": 6,
+        "i": 7,
+        "r": false,
+        "e": false
+    },
+    "sp": {
+        "currentBlurbId": "intro_001",
+        "unlockedBlurbs": [
+            "intro_001"
+        ],
+        "currentStoryBeat": "hook",
+        "lastUpdated": 1767304096504,
+        "firedTriggers": [
+            "game_start"
+        ]
+    },
+    "no": {
+        "kc": 0,
+        "d": 1,
+        "sc": 0,
+        "u": [
+            "first-visit"
+        ],
+        "c": [],
+        "l": "first-visit"
+    }
 }
 ```
 
