@@ -17,6 +17,7 @@ import { DialogueQueue, DialogueQueueRef, DialogueEntry } from '@/components/dia
 import { DialogueControls } from '@/components/dialogue/DialogueControls';
 import { StoryEventPlayer } from '@/lib/dialogue/StoryEventPlayer';
 import { chunkText } from '@/lib/dialogue/chunkText';
+import { completeStoryEvent } from '@/lib/narrative/storyEventUnlockChecker';
 import styles from './library.module.css';
 import dialogueStyles from '@/components/dialogue/dialogue.module.css';
 import notificationStyles from '@/styles/story-notification.module.css';
@@ -449,48 +450,28 @@ export default function LibraryScreen() {
 
               setState((prevState) => {
                 try {
-                  // Ensure dialogue object exists
-                  const prevDialogue = prevState.dialogue || { completedStoryEvents: [] };
-                  const completedEvents = prevDialogue.completedStoryEvents || [];
+                  console.log(`[Library] Completing story event: ${completedId}`);
 
-                  // Validate completedEvents is an array
-                  if (!Array.isArray(completedEvents)) {
-                    const error = new Error(
-                      `prevState.dialogue.completedStoryEvents is not an array: ${typeof completedEvents}, value: ${JSON.stringify(completedEvents)}`
-                    );
-                    console.error('[Library] State validation error:', error);
-                    // Return previous state on error to prevent corruption
+                  // Use the centralized completeStoryEvent function
+                  // This handles: debt decrement, moving from unlocked to completed,
+                  // incrementing completed counter, and updating dialogue.completedStoryEvents
+                  const updatedState = completeStoryEvent(prevState, completedId);
+
+                  // Check if the state was actually updated (function returns original state if event not in unlocked list)
+                  if (updatedState === prevState) {
+                    console.warn(`[Library] completeStoryEvent returned unchanged state for: ${completedId}`);
                     return prevState;
                   }
 
-                  // Check if already completed (shouldn't happen, but defensive)
-                  const wasAlreadyCompleted = completedEvents.includes(completedId);
-                  if (wasAlreadyCompleted) {
-                    console.warn(`[Library] Event '${completedId}' was already marked as completed, skipping update`);
-                    return prevState;
-                  }
+                  // Update ref immediately for synchronous access
+                  completedEventsRef.current = updatedState.dialogue?.completedStoryEvents || [];
 
-                  // Calculate updated completed events list
-                  const updatedCompletedEvents = [...completedEvents, completedId];
-
-                  // Validate the updated array
-                  if (!Array.isArray(updatedCompletedEvents)) {
-                    throw new Error('Failed to create updated completed events array');
-                  }
-
-                  // Build updated state for checking remaining events
-                  // Use prevState from setState callback which has the latest state
-                  const updatedStateForCheck = {
-                    ...prevState,
-                    dialogue: {
-                      ...prevDialogue,
-                      completedStoryEvents: updatedCompletedEvents,
-                    },
-                  };
-
+                  // Check for remaining events to clear notification if needed
                   try {
-                    // Get remaining events (already filtered by completion and trigger conditions)
-                    const remainingEvents = dialogueManager.getAvailableStoryEvents(updatedStateForCheck, updatedCompletedEvents);
+                    const remainingEvents = dialogueManager.getAvailableStoryEvents(
+                      updatedState,
+                      updatedState.dialogue?.completedStoryEvents || []
+                    );
 
                     // Clear notification if all unlocked events are done
                     if (remainingEvents.length === 0) {
@@ -507,60 +488,18 @@ export default function LibraryScreen() {
                     // Don't throw - this is non-critical
                   }
 
-                  // Update ref immediately for synchronous access
-                  completedEventsRef.current = updatedCompletedEvents;
-
-                  // Update narrative orchestration: decrement debt, move event to completed
-                  const prevOrchestration = prevState.narrativeOrchestration || {
-                    kethaneumPuzzlesCompleted: 0,
-                    storyEventDebt: 0,
-                    storyEventsCompleted: 0,
-                    unlockedStoryEvents: [],
-                    completedStoryEvents: [],
-                    lastStoryEventUnlocked: null,
-                  };
-
-                  // Remove from unlocked, add to completed
-                  const updatedUnlockedEvents = prevOrchestration.unlockedStoryEvents.filter(
-                    id => id !== completedId
-                  );
-                  const updatedCompletedOrchestrationEvents = [
-                    ...prevOrchestration.completedStoryEvents,
-                    completedId,
-                  ];
-
-                  // Decrement debt (completed events reduce debt)
-                  const newDebt = Math.max(0, prevOrchestration.storyEventDebt - 1);
-
-                  console.log(`[Library] Story event '${completedId}' completed - debt: ${prevOrchestration.storyEventDebt} -> ${newDebt}`);
-
-                  // Always return updated state to ensure persistence
-                  // Initialize dialogue object if it doesn't exist
-                  const newState = {
-                    ...prevState,
-                    dialogue: {
-                      ...prevDialogue,
-                      completedStoryEvents: updatedCompletedEvents,
-                      // Mark library as visited when first-visit completes
-                      hasVisitedLibrary: completedId === 'first-visit'
-                        ? true
-                        : prevDialogue.hasVisitedLibrary ?? false,
-                    },
-                    narrativeOrchestration: {
-                      ...prevOrchestration,
-                      storyEventDebt: newDebt,
-                      storyEventsCompleted: prevOrchestration.storyEventsCompleted + 1,
-                      unlockedStoryEvents: updatedUnlockedEvents,
-                      completedStoryEvents: updatedCompletedOrchestrationEvents,
-                    },
-                  };
-
-                  // Validate new state structure
-                  if (!newState.dialogue || !Array.isArray(newState.dialogue.completedStoryEvents)) {
-                    throw new Error('Failed to create valid new state with dialogue');
+                  // Special handling for first-visit event
+                  if (completedId === 'first-visit') {
+                    return {
+                      ...updatedState,
+                      dialogue: {
+                        ...updatedState.dialogue,
+                        hasVisitedLibrary: true,
+                      },
+                    };
                   }
 
-                  return newState;
+                  return updatedState;
                 } catch (error) {
                   console.error('[Library] Error in setState callback:', error);
                   // Return previous state on error to prevent corruption
