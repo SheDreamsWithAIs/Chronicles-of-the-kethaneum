@@ -25,8 +25,32 @@ export function useGameState() {
   const lastSavedState = useRef<string>('');
   // Track if initial load has completed to prevent auto-save from overwriting loaded data
   const hasCompletedInitialLoad = useRef(false);
-  // Track if we've initialized from saved data (to trigger hash calculation)
-  const hasInitializedFromSave = useRef(false);
+
+  // Helper function to calculate state hash (used for change detection)
+  const calculateStateHash = useCallback((gameState: GameState) => {
+    const dialogueState = gameState.dialogue ? {
+      completedStoryEvents: gameState.dialogue.completedStoryEvents || [],
+      hasVisitedLibrary: gameState.dialogue.hasVisitedLibrary || false,
+    } : undefined;
+
+    return JSON.stringify({
+      books: gameState.books,
+      discoveredBooks: Array.from(gameState.discoveredBooks || []),
+      completedPuzzles: gameState.completedPuzzles,
+      currentBook: gameState.currentBook,
+      currentStoryPart: gameState.currentStoryPart,
+      gameMode: gameState.gameMode,
+      selectedGenre: gameState.selectedGenre,
+      completedPuzzlesByGenre: gameState.completedPuzzlesByGenre
+        ? Object.fromEntries(
+            Object.entries(gameState.completedPuzzlesByGenre).map(([k, v]) => [k, Array.from(v)])
+          )
+        : {},
+      storyProgress: gameState.storyProgress,
+      dialogue: dialogueState,
+      narrativeOrchestration: gameState.narrativeOrchestration,
+    });
+  }, []);
 
   // Load saved progress on mount (async)
   useEffect(() => {
@@ -36,8 +60,17 @@ export function useGameState() {
         const result = await loadProgress();
 
         if (result.data) {
-          setState(prevState => restoreGameState(prevState, result.data as Partial<GameState>));
-          hasInitializedFromSave.current = true;
+          const initialState = initializeGameState();
+          const restoredState = restoreGameState(initialState, result.data as Partial<GameState>);
+
+          // Calculate hash of the loaded data BEFORE putting it in state
+          // This ensures lastSavedState reflects the loaded data, not empty state
+          const loadedHash = calculateStateHash(restoredState);
+          lastSavedState.current = loadedHash;
+          console.log('[useGameState] Set baseline hash from loaded data');
+
+          // Now update state with loaded data
+          setState(restoredState);
 
           // Audio settings removed - audio system has been removed
           // Audio settings will be handled when audio system is rebuilt
@@ -47,76 +80,20 @@ export function useGameState() {
         // Continue with fresh state
       }
 
+      // Mark initialization complete and ready
+      hasCompletedInitialLoad.current = true;
       setIsReady(true);
     }
 
     loadSavedProgress();
-  }, []);
-
-  // After state has been restored from save, calculate its hash and allow auto-save
-  // This prevents auto-save from overwriting loaded data on page refresh
-  useEffect(() => {
-    if (!isReady || !hasInitializedFromSave.current || hasCompletedInitialLoad.current) return;
-
-    // State has been restored, calculate its hash to prevent auto-save from thinking it "changed"
-    const dialogueState = state.dialogue ? {
-      completedStoryEvents: state.dialogue.completedStoryEvents || [],
-      hasVisitedLibrary: state.dialogue.hasVisitedLibrary || false,
-    } : undefined;
-
-    const stateHash = JSON.stringify({
-      books: state.books,
-      discoveredBooks: Array.from(state.discoveredBooks || []),
-      completedPuzzles: state.completedPuzzles,
-      currentBook: state.currentBook,
-      currentStoryPart: state.currentStoryPart,
-      gameMode: state.gameMode,
-      selectedGenre: state.selectedGenre,
-      completedPuzzlesByGenre: state.completedPuzzlesByGenre
-        ? Object.fromEntries(
-            Object.entries(state.completedPuzzlesByGenre).map(([k, v]) => [k, Array.from(v)])
-          )
-        : {},
-      storyProgress: state.storyProgress,
-      dialogue: dialogueState,
-      narrativeOrchestration: state.narrativeOrchestration,
-    });
-
-    console.log('[useGameState] Initialized lastSavedState hash from loaded data');
-    lastSavedState.current = stateHash;
-    hasCompletedInitialLoad.current = true;
-  }, [isReady, state]);
+  }, [calculateStateHash]);
 
   // Save progress whenever state changes (debounced, after initial load)
   useEffect(() => {
     if (!isReady || isSaving.current || !hasCompletedInitialLoad.current) return;
 
-    // Create a simple hash of the state to detect actual changes
-    const dialogueState = state.dialogue ? {
-      completedStoryEvents: state.dialogue.completedStoryEvents || [],
-      hasVisitedLibrary: state.dialogue.hasVisitedLibrary || false,
-    } : undefined;
-
-    const stateHash = JSON.stringify({
-      books: state.books,
-      discoveredBooks: Array.from(state.discoveredBooks || []),
-      completedPuzzles: state.completedPuzzles,
-      currentBook: state.currentBook,
-      currentStoryPart: state.currentStoryPart,
-      gameMode: state.gameMode,
-      selectedGenre: state.selectedGenre,
-      completedPuzzlesByGenre: state.completedPuzzlesByGenre
-        ? Object.fromEntries(
-            Object.entries(state.completedPuzzlesByGenre).map(([k, v]) => [k, Array.from(v)])
-          )
-        : {},
-      // Include story progress in save detection
-      storyProgress: state.storyProgress,
-      // Include dialogue state (completed story events) in save detection
-      dialogue: dialogueState,
-      // Include narrative orchestration in save detection
-      narrativeOrchestration: state.narrativeOrchestration,
-    });
+    // Calculate hash of current state to detect actual changes
+    const stateHash = calculateStateHash(state);
 
     // Skip if nothing meaningful changed
     if (stateHash === lastSavedState.current) {
@@ -137,7 +114,7 @@ export function useGameState() {
     }, 100); // Small debounce to batch rapid changes
 
     return () => clearTimeout(saveTimeout);
-  }, [state, isReady, state.dialogue?.completedStoryEvents, state.dialogue?.hasVisitedLibrary]);
+  }, [state, isReady, calculateStateHash]);
 
   // Update state helper
   const updateState = useCallback((updates: Partial<GameState>) => {
