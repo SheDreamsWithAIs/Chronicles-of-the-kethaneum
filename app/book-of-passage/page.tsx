@@ -95,6 +95,30 @@ export default function BookOfPassageScreen() {
     }
   }, [storyReady, state, setState, initializeWithFirstBlurb]);
 
+  // Check for initial story event unlocks (for first-visit event)
+  // This runs once when the Book of Passage page loads in Story Mode
+  useEffect(() => {
+    if (!gameStateReady || state.gameMode !== 'story') return;
+
+    // Import and check for unlocks on mount
+    import('@/lib/narrative/storyEventUnlockChecker').then(({ checkStoryEventUnlock, unlockStoryEvent }) => {
+      import('@/lib/dialogue/DialogueManager').then(({ dialogueManager }) => {
+        if (!dialogueManager.getInitialized()) return;
+
+        const unlockResult = checkStoryEventUnlock(state);
+        if (unlockResult) {
+          // Unlock the event and increment debt
+          const updatedState = unlockStoryEvent(state, unlockResult.eventId);
+          setState(updatedState);
+
+          // Trigger the orchestrated dialogue event
+          const currentBeat = updatedState.storyProgress?.currentStoryBeat;
+          dialogueManager.triggerOrchestratedEvent(unlockResult.eventId, currentBeat);
+        }
+      });
+    });
+  }, [gameStateReady, state.gameMode]); // Only check once when ready
+
   // Track loading conditions
   useEffect(() => {
     setLoading('gameState', !gameStateReady);
