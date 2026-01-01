@@ -1018,7 +1018,7 @@ export default function PuzzleScreen() {
         isOpen={showGenreCompletionModal}
         currentGenre={state.currentGenre}
         availableGenres={Object.keys(state.puzzles || {}).filter(
-          genre => state.puzzles[genre] && state.puzzles[genre].length > 0
+          genre => genre !== 'Kethaneum' && state.puzzles[genre] && state.puzzles[genre].length > 0
         )}
         onContinueSameGenre={handleContinueSameGenre}
         onSelectNewGenre={handleSelectNewGenre}

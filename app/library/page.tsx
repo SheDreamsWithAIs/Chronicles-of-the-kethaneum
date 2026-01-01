@@ -13,7 +13,6 @@ import { useStoryNotification } from '@/contexts/StoryNotificationContext';
 import { useDialogue } from '@/hooks/dialogue/useDialogue';
 import { usePageLoader } from '@/hooks/usePageLoader';
 import { dialogueManager } from '@/lib/dialogue/DialogueManager';
-import { StoryEventTriggerChecker } from '@/lib/dialogue/StoryEventTriggerChecker';
 import { DialogueQueue, DialogueQueueRef, DialogueEntry } from '@/components/dialogue/DialogueQueue';
 import { DialogueControls } from '@/components/dialogue/DialogueControls';
 import { StoryEventPlayer } from '@/lib/dialogue/StoryEventPlayer';
@@ -122,21 +121,20 @@ export default function LibraryScreen() {
 
   // Check for available story events when library loads (including after refresh)
   // This restores the notification state after page refresh
-  // Uses StoryEventTriggerChecker to properly check if events are available based on game state
+  // Uses narrative orchestration system to check for unlocked but not-yet-completed events
   useEffect(() => {
     // Wait for game state to be ready before checking
     if (!state.storyProgress || !dialogueManager.getInitialized()) return;
 
-    // Use StoryEventTriggerChecker to check if any events are currently available
-    // This checks if trigger conditions are currently satisfied (not transitions)
-    const triggeredEventIds = StoryEventTriggerChecker.checkCurrentlyAvailableEvents(state);
+    // Get unlocked events from orchestration system
+    const unlockedEvents = state.narrativeOrchestration?.unlockedStoryEvents || [];
 
     // Filter out completed events
     const completedEvents = completedEventsRef.current.length > 0
       ? completedEventsRef.current
       : (state.dialogue?.completedStoryEvents || []);
 
-    const availableEventIds = triggeredEventIds.filter(
+    const availableEventIds = unlockedEvents.filter(
       eventId => !completedEvents.includes(eventId)
     );
 
@@ -146,7 +144,7 @@ export default function LibraryScreen() {
       // No available events - clear notification if it exists
       clearNewDialogue();
     }
-  }, [state.storyProgress?.currentStoryBeat, state.dialogue?.completedStoryEvents, state.completedPuzzlesByGenre, setNewDialogueAvailable, clearNewDialogue]);
+  }, [state.storyProgress?.currentStoryBeat, state.dialogue?.completedStoryEvents, state.narrativeOrchestration?.unlockedStoryEvents, setNewDialogueAvailable, clearNewDialogue]);
 
   // Note: We don't clear the notification when visiting the library anymore
   // The notification will persist until the player actually starts the conversation
@@ -281,9 +279,9 @@ export default function LibraryScreen() {
     setShowGenreModal(false);
   };
 
-  // Get available genres from loaded puzzles
+  // Get available genres from loaded puzzles (excluding Kethaneum)
   const availableGenres = Object.keys(state.puzzles || {}).filter(
-    genre => state.puzzles[genre] && state.puzzles[genre].length > 0
+    genre => genre !== 'Kethaneum' && state.puzzles[genre] && state.puzzles[genre].length > 0
   );
 
   const handleStartConversation = async () => {
@@ -780,7 +778,6 @@ export default function LibraryScreen() {
         onClose={handleCloseGenreModal}
         onSelectGenre={handleSelectGenre}
         availableGenres={availableGenres}
-        kethaneumRevealed={state.kethaneumRevealed}
       />
 
       {/* Always render DialogueQueue so ref is available, control visibility with isActive */}

@@ -20,11 +20,6 @@ interface GenreCompletionModalProps {
 
 function getGenreDisplayInfo(genre: string): GenreDisplayInfo {
   const genreInfo: { [key: string]: GenreDisplayInfo } = {
-    "Kethaneum": {
-      title: "Kethaneum Lore",
-      description: "Chronicles of the nexus between realms",
-      icon: "✦"
-    },
     "nature": {
       title: "Natural Wisdom",
       description: "Words of the living world",
