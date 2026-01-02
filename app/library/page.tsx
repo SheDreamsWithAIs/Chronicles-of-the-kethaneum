@@ -13,6 +13,7 @@ import { useStoryNotification } from '@/contexts/StoryNotificationContext';
 import { useDialogue } from '@/hooks/dialogue/useDialogue';
 import { usePageLoader } from '@/hooks/usePageLoader';
 import { dialogueManager } from '@/lib/dialogue/DialogueManager';
+import { storyBlurbManager } from '@/lib/story/storyBlurbManager';
 import { DialogueQueue, DialogueQueueRef, DialogueEntry } from '@/components/dialogue/DialogueQueue';
 import { DialogueControls } from '@/components/dialogue/DialogueControls';
 import { StoryEventPlayer } from '@/lib/dialogue/StoryEventPlayer';
@@ -509,18 +510,41 @@ export default function LibraryScreen() {
                     // Don't throw - this is non-critical
                   }
 
+                  // Check for Book of Passage blurb triggers after story event completion
+                  let finalState = updatedState;
+                  if (storyBlurbManager.isLoaded()) {
+                    try {
+                      const triggerResult = storyBlurbManager.checkTriggerConditions(updatedState, prevState);
+
+                      if (triggerResult.shouldTrigger && triggerResult.blurb) {
+                        console.log(`[Library] Story event completion triggered blurb: ${triggerResult.blurb.id}`);
+                        const updatedProgress = storyBlurbManager.unlockBlurb(
+                          triggerResult.blurb.id,
+                          updatedState.storyProgress
+                        );
+                        finalState = {
+                          ...updatedState,
+                          storyProgress: updatedProgress,
+                        };
+                      }
+                    } catch (error) {
+                      console.error('[Library] Error checking Book of Passage triggers:', error);
+                      // Don't throw - this is non-critical
+                    }
+                  }
+
                   // Special handling for first-visit event
                   if (completedId === 'first-visit') {
                     return {
-                      ...updatedState,
+                      ...finalState,
                       dialogue: {
-                        ...updatedState.dialogue,
+                        ...finalState.dialogue,
                         hasVisitedLibrary: true,
                       },
                     };
                   }
 
-                  return updatedState;
+                  return finalState;
                 } catch (error) {
                   console.error('[Library] Error in setState callback:', error);
                   // Return previous state on error to prevent corruption
