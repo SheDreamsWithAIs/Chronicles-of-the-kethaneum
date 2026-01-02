@@ -178,48 +178,6 @@ export default function PuzzleScreen() {
     });
   }, [isReady, state.gameMode, state, setState]); // Check when ready or state changes
 
-  // Check for Book of Passage blurb triggers on initialization
-  // This handles game_start and other initial triggers that should fire before puzzle play
-  useEffect(() => {
-    console.log('[PuzzlePage] Blurb trigger check - isReady:', isReady, 'gameMode:', state.gameMode);
-
-    if (!isReady || state.gameMode !== 'story') return;
-
-    // Only run this check once when the page first loads
-    // Check if we've already processed initial triggers by looking at fired triggers
-    const storyProgress = state.storyProgress;
-    if (!storyProgress) return;
-
-    // Import and check for blurb triggers
-    import('@/lib/story/storyBlurbManager').then(({ storyBlurbManager }) => {
-      if (!storyBlurbManager.isLoaded()) {
-        console.log('[PuzzlePage] Story blurb manager not loaded yet, skipping trigger check');
-        return;
-      }
-
-      console.log('[PuzzlePage] Checking for initial Book of Passage triggers');
-
-      // Check for game_start trigger specifically
-      // This should only fire once at the very beginning
-      if (!storyProgress.firedTriggers.includes('game_start')) {
-        console.log('[PuzzlePage] game_start trigger not yet fired, checking now');
-        const triggerResult = storyBlurbManager.checkTriggerConditions(state);
-
-        if (triggerResult.shouldTrigger && triggerResult.blurb) {
-          console.log('[PuzzlePage] Unlocking initial blurb:', triggerResult.blurb.id);
-          const updatedProgress = storyBlurbManager.unlockBlurb(
-            triggerResult.blurb.id,
-            storyProgress
-          );
-          setState({
-            ...state,
-            storyProgress: updatedProgress,
-          });
-        }
-      }
-    });
-  }, [isReady, state.gameMode]); // Only run when ready state or game mode changes
-
   // Select appropriate timer based on game mode (memoized to prevent recreation)
   const timer = useMemo(() => {
     return state.gameMode === 'story' 

@@ -166,16 +166,6 @@ export function useGameModeHandlers({
           }
         }
 
-        // NOTE: Book of Passage blurb trigger checking has been moved to puzzle/page.tsx
-        // to prevent interference with puzzle completion flow. Checking triggers here
-        // during puzzle completion was causing state updates that broke the next puzzle
-        // loading and triggered notifications inappropriately.
-        //
-        // Triggers are now checked:
-        // - game_start: On puzzle page initialization
-        // - custom_story_event_*: After story event completion in library/page.tsx
-        // - Other triggers: TBD - will be added back carefully to avoid flow disruption
-
         // Check for story event unlocking via narrative orchestration
         // This replaces the old trigger-based system with sequential unlock requirements
         if (dialogueManager.getInitialized()) {
