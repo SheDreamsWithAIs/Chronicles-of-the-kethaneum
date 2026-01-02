@@ -18,7 +18,7 @@ export type { StoryBeat } from '@/lib/dialogue/types';
 
 /**
  * Available trigger types for story blurbs.
- * These can be configured in the book-of-passage-blurbs.json file.
+ * These can be configured in the book-of-passage-blurb-config.json file.
  */
 export type StoryTrigger =
   // Game start triggers

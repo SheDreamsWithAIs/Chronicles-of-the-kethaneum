@@ -125,7 +125,7 @@ export default function StoryBlurbEditorPage() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/data/book-of-passage-blurbs.json');
+      const response = await fetch('/data/book-of-passage-blurb-config.json');
       if (!response.ok) throw new Error('Failed to load');
       const jsonData: StoryProgressData = await response.json();
       setData(jsonData);
@@ -162,7 +162,7 @@ export default function StoryBlurbEditorPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          path: 'book-of-passage-blurbs.json',
+          path: 'book-of-passage-blurb-config.json',
           content: JSON.stringify(data, null, 2),
         }),
       });
