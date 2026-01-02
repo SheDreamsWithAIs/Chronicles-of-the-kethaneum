@@ -17,6 +17,7 @@ import { useGameModeHandlers } from '@/hooks/useGameModeHandlers';
 import { usePuzzleLoading } from '@/hooks/usePuzzleLoading';
 import { useStoryTimer, usePuzzleOnlyTimer, useBeatTheClockTimer } from '@/hooks/useTimer';
 import { startBeatTheClockRun, endBeatTheClockRun } from '@/lib/game/logic';
+import { selectGenre } from '@/lib/game/puzzleSelector';
 import { getConfig } from '@/lib/core/config';
 import type { Cell } from '@/lib/game/state';
 import styles from './puzzle.module.css';
@@ -38,8 +39,11 @@ export default function PuzzleScreen() {
   const [showGenreCompletionModal, setShowGenreCompletionModal] = useState(false);
   const [puzzleStartTime, setPuzzleStartTime] = useState<number | null>(null);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [dialogueRetryTick, setDialogueRetryTick] = useState(0);
   // Track if we're transitioning between puzzles to prevent timer restart
   const isTransitioningRef = useRef(false);
+  const dialogueRetryAttemptsRef = useRef(0);
+  const dialogueRetryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Wrapper for loadBeatTheClock that sets transition flag
   const loadBeatTheClockWithTransition = useCallback(async () => {
@@ -55,6 +59,27 @@ export default function PuzzleScreen() {
       throw error;
     }
   }, [loadBeatTheClock]);
+
+  const scheduleDialogueRetry = useCallback(() => {
+    if (dialogueRetryAttemptsRef.current >= 10) {
+      return;
+    }
+    dialogueRetryAttemptsRef.current += 1;
+    if (dialogueRetryTimeoutRef.current) {
+      clearTimeout(dialogueRetryTimeoutRef.current);
+    }
+    dialogueRetryTimeoutRef.current = setTimeout(() => {
+      setDialogueRetryTick((tick) => tick + 1);
+    }, 250);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (dialogueRetryTimeoutRef.current) {
+        clearTimeout(dialogueRetryTimeoutRef.current);
+      }
+    };
+  }, []);
   
   // Use mode-specific handlers hook
   const { handleWin, handleLose, handleRunTimerExpired, updateStateRef } = useGameModeHandlers({
@@ -124,8 +149,6 @@ export default function PuzzleScreen() {
   // Check for story event unlocks on puzzle page mount (in case Book of Passage state didn't persist)
   // This ensures unlocks happen even if user navigated away before save completed
   useEffect(() => {
-    console.log('[PuzzlePage] Unlock check - isReady:', isReady, 'gameMode:', state.gameMode);
-
     if (!isReady || state.gameMode !== 'story') return;
 
     // IMPORTANT: Don't run unlock check until save data has actually loaded
@@ -140,43 +163,35 @@ export default function PuzzleScreen() {
       if (hasUnlockedEvents > 0 || hasCompletedPuzzles > 0) {
         // We have unlocked events or completed puzzles but lastStoryEventUnlocked is null
         // This means save data hasn't loaded yet - skip this check
-        console.log('[PuzzlePage] Save data not loaded yet, skipping unlock check');
         return;
       }
     }
 
-    console.log('[PuzzlePage] Starting unlock check');
-
     // Import and check for unlocks
     import('@/lib/narrative/storyEventUnlockChecker').then(({ checkStoryEventUnlock, unlockStoryEvent }) => {
       import('@/lib/dialogue/DialogueManager').then(({ dialogueManager }) => {
-        console.log('[PuzzlePage] Dialogue manager initialized:', dialogueManager.getInitialized());
-
         if (!dialogueManager.getInitialized()) {
           console.warn('[PuzzlePage] Dialogue manager not ready, skipping unlock check');
+          scheduleDialogueRetry();
           return;
         }
 
         const unlockResult = checkStoryEventUnlock(state);
-        console.log('[PuzzlePage] Unlock result:', unlockResult);
 
         if (unlockResult) {
-          console.log('[PuzzlePage] Catching missed unlock:', unlockResult.eventId);
-
+          console.log('[PuzzlePage] Unlocked story event:', unlockResult.eventId);
           // Unlock the event and increment debt
           const updatedState = unlockStoryEvent(state, unlockResult.eventId);
-          console.log('[PuzzlePage] Updated debt:', updatedState.narrativeOrchestration?.storyEventDebt);
           setState(updatedState);
 
           // Trigger the orchestrated dialogue event
           const currentBeat = updatedState.storyProgress?.currentStoryBeat;
           dialogueManager.triggerOrchestratedEvent(unlockResult.eventId, currentBeat);
         } else {
-          console.log('[PuzzlePage] No unlocks needed');
         }
       });
     });
-  }, [isReady, state.gameMode, state, setState]); // Check when ready or state changes
+  }, [isReady, state.gameMode, state, setState, dialogueRetryTick, scheduleDialogueRetry]); // Check when ready or state changes
 
   // Select appropriate timer based on game mode (memoized to prevent recreation)
   const timer = useMemo(() => {
@@ -209,6 +224,16 @@ export default function PuzzleScreen() {
       setLoading('puzzle', true);
     }
   }, [state, state?.grid, setLoading]);
+
+  // Safety net: if we return to a completed puzzle without the win modal open, re-open it
+  useEffect(() => {
+    if (!state.gameOver || showStatsModal) return;
+    if (!state.grid || state.grid.length === 0) return;
+
+    const allFound = state.wordList.length > 0 && state.wordList.every(word => word.found);
+    setStatsModalIsWin(allFound);
+    setShowStatsModal(true);
+  }, [state.gameOver, state.grid?.length, state.wordList, showStatsModal, setStatsModalIsWin, setShowStatsModal]);
 
   // Use refs to track selection during drag without causing re-renders
   const selectedCellsRef = useRef<Set<string>>(new Set());
@@ -732,7 +757,7 @@ export default function PuzzleScreen() {
 
     // Update state with new genre and clear book/puzzle index
     setState(prevState => ({
-      ...prevState,
+      ...selectGenre(prevState, newGenre),
       currentGenre: newGenre,
       currentBook: '',
       currentPuzzleIndex: -1,

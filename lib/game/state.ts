@@ -201,6 +201,25 @@ export function updateGameState(state: GameState, property: keyof GameState, val
 }
 
 /**
+ * Reset transient puzzle runtime fields while keeping progression intact.
+ * This is used when navigating back to the puzzle screen from other pages.
+ */
+export function resetPuzzleRuntimeState(state: GameState): GameState {
+  return {
+    ...state,
+    grid: [],
+    wordList: [],
+    selectedCells: [],
+    startCell: null,
+    currentCell: null,
+    timer: null,
+    timeRemaining: 0,
+    paused: false,
+    gameOver: false,
+  };
+}
+
+/**
  * Restore a saved game state
  */
 export function restoreGameState(state: GameState, savedState: Partial<GameState>): GameState {

@@ -35,7 +35,7 @@
     {
       "id": "after_test-event-2",
       "storyBeat": "hook",
-      "trigger": "custom_story_test-event-2",
+      "trigger": "custom_story_event_test-event-2",
       "title": "Patterns Emerge",
       "text": "Test after test story event 2",
       "order": 3,
@@ -46,7 +46,7 @@
     {
       "id": "test-after-event-1",
       "storyBeat": "hook",
-      "trigger": "test-event-1",
+      "trigger": "custom_story_event_test-event-1",
       "title": "Test after test story event 1",
       "text": "Test after test story event 1.",
       "order": 4,

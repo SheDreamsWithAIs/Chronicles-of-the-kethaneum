@@ -14,11 +14,13 @@ import { useDialogue } from '@/hooks/dialogue/useDialogue';
 import { usePageLoader } from '@/hooks/usePageLoader';
 import { dialogueManager } from '@/lib/dialogue/DialogueManager';
 import { storyBlurbManager } from '@/lib/story/storyBlurbManager';
+import type { StoryTrigger } from '@/lib/story/types';
 import { DialogueQueue, DialogueQueueRef, DialogueEntry } from '@/components/dialogue/DialogueQueue';
 import { DialogueControls } from '@/components/dialogue/DialogueControls';
 import { StoryEventPlayer } from '@/lib/dialogue/StoryEventPlayer';
 import { chunkText } from '@/lib/dialogue/chunkText';
 import { completeStoryEvent } from '@/lib/narrative/storyEventUnlockChecker';
+import { resetPuzzleRuntimeState } from '@/lib/game/state';
 import styles from './library.module.css';
 import dialogueStyles from '@/components/dialogue/dialogue.module.css';
 import notificationStyles from '@/styles/story-notification.module.css';
@@ -37,7 +39,7 @@ export default function LibraryScreen() {
   const [isNavigatingToPuzzle, setIsNavigatingToPuzzle] = useState(false);
   const { state, setState, isReady: gameStateReady } = useGameState();
   const { loadSequential, loadAll } = usePuzzle(state, setState);
-  const { hasNewDialogue, clearNewDialogue, setNewDialogueAvailable } = useStoryNotification();
+  const { hasNewDialogue, clearNewDialogue, setNewDialogueAvailable, setNewStoryAvailable } = useStoryNotification();
   const { isInitialized, initialize } = useDialogue();
   const dialogueQueueRef = useRef<DialogueQueueRef | null>(null);
   const eventPlayerRef = useRef<StoryEventPlayer | null>(null);
@@ -88,6 +90,7 @@ export default function LibraryScreen() {
       completedEventsRef.current = stateCompleted;
     }
   }, [state.dialogue?.completedStoryEvents]);
+
 
   // Validate state updates match ref - detect when state doesn't persist
   // This helps catch cases where state updates fail or are reset
@@ -292,7 +295,7 @@ export default function LibraryScreen() {
         }),
       };
 
-      return clearedState;
+      return resetPuzzleRuntimeState(clearedState);
     });
 
     // Wait for state update, then navigate
@@ -470,6 +473,7 @@ export default function LibraryScreen() {
                 throw new Error(`Invalid completedId: ${completedId}`);
               }
 
+              let didUnlockStoryBlurb = false;
               setState((prevState) => {
                 try {
                   console.log(`[Library] Completing story event: ${completedId}`);
@@ -514,14 +518,23 @@ export default function LibraryScreen() {
                   let finalState = updatedState;
                   if (storyBlurbManager.isLoaded()) {
                     try {
-                      const triggerResult = storyBlurbManager.checkTriggerConditions(updatedState, prevState);
+                      const progress = updatedState.storyProgress;
+                      const currentBeat = progress?.currentStoryBeat || 'hook';
+                      const firedTriggers = progress?.firedTriggers || [];
+                      const trigger = `custom_story_event_${completedId}` as StoryTrigger;
+                      const blurb = storyBlurbManager.getBlurbForTrigger(
+                        trigger,
+                        currentBeat,
+                        firedTriggers
+                      );
 
-                      if (triggerResult.shouldTrigger && triggerResult.blurb) {
-                        console.log(`[Library] Story event completion triggered blurb: ${triggerResult.blurb.id}`);
+                      if (blurb) {
+                        console.log(`[Library] Story event completion triggered blurb: ${blurb.id}`);
                         const updatedProgress = storyBlurbManager.unlockBlurb(
-                          triggerResult.blurb.id,
-                          updatedState.storyProgress
+                          blurb.id,
+                          progress
                         );
+                        didUnlockStoryBlurb = true;
                         finalState = {
                           ...updatedState,
                           storyProgress: updatedProgress,
@@ -551,6 +564,10 @@ export default function LibraryScreen() {
                   return prevState;
                 }
               });
+
+              if (didUnlockStoryBlurb) {
+                setNewStoryAvailable();
+              }
 
               // Wait for state to propagate and save
               await new Promise(resolve => setTimeout(resolve, 100));

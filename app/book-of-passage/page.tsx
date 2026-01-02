@@ -6,6 +6,7 @@ import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { PageLoader } from '@/components/shared/PageLoader';
 import { LibraryButton } from '@/components/LibraryButton';
 import { useGameState } from '@/contexts/GameStateContext';
+import { resetPuzzleRuntimeState } from '@/lib/game/state';
 import { usePageLoader } from '@/hooks/usePageLoader';
 import { useStoryProgress, useInitializeStoryProgress } from '@/hooks/useStoryProgress';
 import { useStoryNotification } from '@/contexts/StoryNotificationContext';
@@ -71,6 +72,7 @@ export default function BookOfPassageScreen() {
   const [filterGenre, setFilterGenre] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortOption>('title');
   const [currentPage, setCurrentPage] = useState(1);
+  const [dialogueRetryTick, setDialogueRetryTick] = useState(0);
 
   // Registry state
   const [registryLoaded, setRegistryLoaded] = useState(false);
@@ -79,11 +81,40 @@ export default function BookOfPassageScreen() {
 
   // Track if we've checked for initial story event unlock
   const hasCheckedInitialUnlock = useRef(false);
+  const dialogueRetryAttemptsRef = useRef(0);
+  const dialogueRetryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const scheduleDialogueRetry = useCallback(() => {
+    if (dialogueRetryAttemptsRef.current >= 10) {
+      return;
+    }
+    dialogueRetryAttemptsRef.current += 1;
+    if (dialogueRetryTimeoutRef.current) {
+      clearTimeout(dialogueRetryTimeoutRef.current);
+    }
+    dialogueRetryTimeoutRef.current = setTimeout(() => {
+      setDialogueRetryTick((tick) => tick + 1);
+    }, 250);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (dialogueRetryTimeoutRef.current) {
+        clearTimeout(dialogueRetryTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Clear new story notification when visiting Book of Passage
   useEffect(() => {
     clearNewStory();
   }, [clearNewStory]);
+
+  // Clear new story notification when blurbs update on this screen
+  useEffect(() => {
+    if (!storyReady) return;
+    clearNewStory();
+  }, [storyReady, state.storyProgress?.unlockedBlurbs, clearNewStory]);
 
   // Initialize story progress with first blurb if not already done
   useEffect(() => {
@@ -133,6 +164,7 @@ export default function BookOfPassageScreen() {
         if (!dialogueManager.getInitialized()) {
           console.warn('[BookOfPassage] Dialogue manager not initialized yet, skipping unlock check');
           hasCheckedInitialUnlock.current = false; // Allow retry if dialogue manager wasn't ready
+          scheduleDialogueRetry();
           return;
         }
 
@@ -160,7 +192,7 @@ export default function BookOfPassageScreen() {
         }
       });
     });
-  }, [gameStateReady, state.gameMode]); // Only check when ready, not on every state change
+  }, [gameStateReady, state.gameMode, dialogueRetryTick, scheduleDialogueRetry]); // Only check when ready, not on every state change
 
   // Track loading conditions
   useEffect(() => {
@@ -325,7 +357,7 @@ export default function BookOfPassageScreen() {
     router.push('/library');
   };
 
-  const handleStartCataloguing = () => {
+  const handleStartCataloguing = async () => {
     // Ensure selectedGenre is set before navigating
     // Use selectedGenre if available, otherwise fall back to currentGenre
     const activeGenre = (state.selectedGenre && state.selectedGenre.trim() !== '') 
@@ -341,6 +373,10 @@ export default function BookOfPassageScreen() {
       }));
     }
     
+    // Clear transient puzzle runtime state so puzzle screen loads a fresh puzzle
+    setState(prevState => resetPuzzleRuntimeState(prevState));
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     // Navigate directly to puzzle screen
     // The puzzle screen will use state.selectedGenre automatically
     router.push('/puzzle');

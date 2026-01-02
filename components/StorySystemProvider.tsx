@@ -71,9 +71,12 @@ export function StorySystemProvider({ children }: { children: ReactNode }) {
 
   // Sync notifications from current state (set-only; no clearing)
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const isOnBookOfPassage = window.location.pathname.includes('/book-of-passage');
+
     const unlockedBlurbs = state.storyProgress?.unlockedBlurbs || [];
     const unlockedBlurbCount = unlockedBlurbs.length;
-    if (unlockedBlurbCount > lastUnlockedBlurbCountRef.current) {
+    if (!isOnBookOfPassage && unlockedBlurbCount > lastUnlockedBlurbCountRef.current) {
       setNewStoryAvailable();
     }
     lastUnlockedBlurbCountRef.current = unlockedBlurbCount;

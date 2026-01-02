@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
+import { PageLoader } from '@/components/shared/PageLoader';
 import { SettingsMenu } from '@/components/SettingsMenu';
 import { loadProgress, cleanupLegacyKeys } from '@/lib/save';
 import { useGameState } from '@/contexts/GameStateContext';
@@ -52,9 +53,11 @@ export default function TitleScreen() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const handleNewGame = () => {
+  const handleNewGame = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
     try {
-      resetProgress();
+      await resetProgress();
     } catch (e) {
       console.error('Failed to clear progress on New Game', e);
     }
@@ -78,6 +81,11 @@ export default function TitleScreen() {
 
   return (
     <>
+      <PageLoader
+        isLoading={isLoading}
+        variant="title"
+        message="Preparing a new journey..."
+      />
       <div className={`${styles.titleContainer} ${isLoading ? styles.loading : ''}`} data-testid="title-screen">
         <CosmicBackground variant="title" starCount={100} particleCount={30} />
 
@@ -99,8 +107,9 @@ export default function TitleScreen() {
 
               <div className={styles.buttonContainer}>
                 <button
-                  className={`${styles.gameButton} ${styles.primary}`}
+                  className={`${styles.gameButton} ${styles.primary} ${isLoading ? styles.disabled : ''}`}
                   onClick={handleNewGame}
+                  disabled={isLoading}
                   data-testid="new-game-btn"
                 >
                   New Game
@@ -109,7 +118,7 @@ export default function TitleScreen() {
                 <button
                   className={`${styles.gameButton} ${styles.secondary} ${!hasSavedGame ? styles.disabled : ''}`}
                   onClick={handleContinue}
-                  disabled={!hasSavedGame}
+                  disabled={!hasSavedGame || isLoading}
                   data-testid="continue-btn"
                 >
                   Continue
@@ -118,6 +127,7 @@ export default function TitleScreen() {
                 <button
                   className={`${styles.gameButton} ${styles.secondary}`}
                   onClick={() => setShowSettings(true)}
+                  disabled={isLoading}
                   data-testid="settings-btn"
                 >
                   Settings
@@ -126,6 +136,7 @@ export default function TitleScreen() {
                 <button
                   className={`${styles.gameButton} ${styles.secondary}`}
                   onClick={() => router.push('/credits')}
+                  disabled={isLoading}
                   data-testid="credits-btn"
                 >
                   Credits
