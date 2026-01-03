@@ -807,7 +807,7 @@ graph TB
 ```mermaid
 graph TB
     subgraph "Data Files"
-        ConfigJSON[/data/dialogue-config.json<br/>System configuration]
+        ConfigJSON[/data/config/dialogue-config.json<br/>System configuration]
         CharManifest[/data/characters/character-manifest.json<br/>List of character files]
         EventManifest[/data/story-events/event-manifest.json<br/>List of event files]
         CharFiles[/data/characters/*.json<br/>Character definitions + banter]

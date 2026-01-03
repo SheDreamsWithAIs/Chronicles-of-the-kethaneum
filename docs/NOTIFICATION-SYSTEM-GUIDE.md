@@ -54,7 +54,7 @@ BookOfPassageButton glows         LibraryButton glows
 | **Content Type** | Story blurbs | Story events |
 | **Trigger** | Automatic (story beat advancement) | Manual check in game code |
 | **Trigger Stored In** | `StoryProgressionManager` config | Individual story event JSON files |
-| **Data Location** | `/public/data/story-blurbs.json` | `/public/data/story-events/*.json` |
+| **Data Location** | `/public/data/config/book-of-passage-blurb-config.json` | `/public/data/story-events/*.json` |
 | **Manager** | `StoryBlurbManager` | `DialogueManager` |
 | **Event Emitted** | `storyProgression:beatTrigger` | `dialogueManager:storyEventAvailable` |
 | **Notification Hook** | `setNewStoryAvailable()` | `setNewDialogueAvailable()` |

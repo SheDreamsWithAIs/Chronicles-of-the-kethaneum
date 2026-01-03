@@ -54,7 +54,7 @@ The background music playlist is configured via a JSON file, allowing you to upd
 
 ### Configuration File
 
-Edit `public/data/audio-config.json` to manage your background music playlist:
+Edit `public/data/config/audio-config.json` to manage your background music playlist:
 
 ```json
 {
@@ -261,7 +261,7 @@ const playing = audioManager.isPlaying();
 
 1. `AudioProvider` mounts in the app layout
 2. On mount, it loads saved settings from localStorage
-3. Initializes `AudioManager` singleton with config from `/data/audio-config.json`
+3. Initializes `AudioManager` singleton with config from `/data/config/audio-config.json`
 4. Applies saved volume and mute settings
 5. Starts playing if not muted
 
@@ -478,7 +478,7 @@ For issues or questions about the audio system, check:
 - Browser console for error messages
 - Network tab to verify audio files are loading
 - localStorage for saved audio settings
-- `public/data/audio-config.json` for configuration
+- `public/data/config/audio-config.json` for configuration
 
 ## License
 

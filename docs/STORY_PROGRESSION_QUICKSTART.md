@@ -45,7 +45,7 @@ function YourMainComponent() {
 
 ### Step 2: Configure Your Story Rules
 
-Edit `/public/data/story-progression-config.json`:
+Edit `/public/data/config/story-progression-config.json`:
 
 ```json
 {
