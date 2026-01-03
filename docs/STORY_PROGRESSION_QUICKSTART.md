@@ -1,5 +1,7 @@
 # Story Progression System - Quick Start Guide
 
+> **Note**: This guide focuses on story beat advancement (hook → first_plot_point → climax). For the narrative orchestration system that coordinates story events, Kethaneum puzzles, and Book of Passage blurbs, see **[Narrative Orchestration](./NARRATIVE_ORCHESTRATION.md)**.
+
 ## 🚀 Getting Started in 3 Steps
 
 ### Step 1: Initialize the Systems
