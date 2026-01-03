@@ -105,7 +105,7 @@ If conditions met:
 
 ### Files You'll Edit for Your Game
 
-1. **`/public/data/story-progression-config.json`** ⭐
+1. **`/public/data/config/story-progression-config.json`** ⭐
    - Story advancement rules
    - Music mappings
    - Event triggers
