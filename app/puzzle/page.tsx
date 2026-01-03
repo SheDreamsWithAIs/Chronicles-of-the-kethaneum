@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { flushSync } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { PageLoader } from '@/components/shared/PageLoader';
@@ -775,9 +776,12 @@ export default function PuzzleScreen() {
   }, [setState, loadSequential]);
 
   const handleCloseGenreCompletionModal = useCallback(() => {
-    setShowGenreCompletionModal(false);
+    flushSync(() => {
+      setLoading('navigatingToLibrary', true);
+      setShowGenreCompletionModal(false);
+    });
     router.push('/library');
-  }, [router]);
+  }, [router, setLoading]);
 
   // Handle Escape key to pause/resume
   useEffect(() => {
