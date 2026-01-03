@@ -16,6 +16,7 @@ import { dialogueManager } from '@/lib/dialogue/DialogueManager';
 import { storyBlurbManager } from '@/lib/story/storyBlurbManager';
 import type { StoryTrigger } from '@/lib/story/types';
 import { DialogueQueue, DialogueQueueRef, DialogueEntry } from '@/components/dialogue/DialogueQueue';
+import { BookOfPassageButton } from '@/components/BookOfPassageButton';
 import { DialogueControls } from '@/components/dialogue/DialogueControls';
 import { StoryEventPlayer } from '@/lib/dialogue/StoryEventPlayer';
 import { chunkText } from '@/lib/dialogue/chunkText';
@@ -867,9 +868,13 @@ export default function LibraryScreen() {
             Start a Conversation
           </button>
 
-          <button className={styles.libraryButton} onClick={handleBookOfPassage}>
+          <BookOfPassageButton
+            className={styles.libraryButton}
+            notificationClassName={notificationStyles.storyNotificationGlowExternal}
+            onClick={handleBookOfPassage}
+          >
             Look at your Book of Passage
-          </button>
+          </BookOfPassageButton>
 
           <button className={styles.libraryButton} onClick={handleReturnToMenu}>
             Return to Main Menu
