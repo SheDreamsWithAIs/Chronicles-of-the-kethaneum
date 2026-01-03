@@ -70,7 +70,7 @@ export class StoryProgressionManager {
    */
   private async loadConfiguration(): Promise<void> {
     try {
-      const response = await fetchAsset('/data/story-progression-config.json');
+      const response = await fetchAsset('/data/config/story-progression-config.json');
       if (!response.ok) {
         throw new Error(`Failed to load config: ${response.status}`);
       }

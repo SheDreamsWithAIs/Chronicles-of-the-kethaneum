@@ -34,7 +34,7 @@ export class AudioManager {
   /**
    * Initialize the audio manager with config
    */
-  public async initialize(configPath: string = '/data/audio-config.json'): Promise<void> {
+  public async initialize(configPath: string = '/data/config/audio-config.json'): Promise<void> {
     if (this.isInitialized) {
       return;
     }

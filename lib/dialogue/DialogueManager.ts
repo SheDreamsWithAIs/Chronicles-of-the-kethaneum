@@ -67,7 +67,7 @@ export class DialogueManager {
    */
   private async loadConfiguration(): Promise<void> {
     try {
-      const response = await fetchAsset('/data/dialogue-config.json');
+      const response = await fetchAsset('/data/config/dialogue-config.json');
       if (!response.ok) {
         throw new Error(`Failed to load config: ${response.status}`);
       }

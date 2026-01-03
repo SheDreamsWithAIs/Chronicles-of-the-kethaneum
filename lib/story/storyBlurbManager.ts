@@ -61,7 +61,7 @@ class StoryBlurbManagerClass {
 
   private async _doLoad(): Promise<void> {
     try {
-      const response = await fetch('/data/book-of-passage-blurb-config.json');
+      const response = await fetch('/data/config/book-of-passage-blurb-config.json');
       if (!response.ok) {
         throw new Error(`Failed to load Book of Passage blurb config: ${response.status}`);
       }
