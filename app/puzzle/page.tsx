@@ -180,7 +180,6 @@ export default function PuzzleScreen() {
         const unlockResult = checkStoryEventUnlock(state);
 
         if (unlockResult) {
-          console.log('[PuzzlePage] Unlocked story event:', unlockResult.eventId);
           // Unlock the event and increment debt
           const updatedState = unlockStoryEvent(state, unlockResult.eventId);
           setState(updatedState);
@@ -188,7 +187,6 @@ export default function PuzzleScreen() {
           // Trigger the orchestrated dialogue event
           const currentBeat = updatedState.storyProgress?.currentStoryBeat;
           dialogueManager.triggerOrchestratedEvent(unlockResult.eventId, currentBeat);
-        } else {
         }
       });
     });

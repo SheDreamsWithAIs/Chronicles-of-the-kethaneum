@@ -124,10 +124,6 @@ export function useGameModeHandlers({
     } else {
       // Story Mode: Show win modal to let player choose when to continue
       try {
-        console.log('[useGameModeHandlers.handleWin] Story mode win start', {
-          currentGenre: currentState.currentGenre,
-          currentPuzzleIndex: currentState.currentPuzzleIndex,
-        });
         // Start with current state
         let updatedState = currentState;
 
@@ -146,10 +142,6 @@ export function useGameModeHandlers({
                 ...updatedState,
                 puzzlesSinceLastKethaneum: (updatedState.puzzlesSinceLastKethaneum || 0) + 1,
               };
-              console.log('[useGameModeHandlers.handleWin] Incremented puzzlesSinceLastKethaneum', {
-                puzzleGenre,
-                puzzlesSinceLastKethaneum: updatedState.puzzlesSinceLastKethaneum,
-              });
             } else if (puzzleGenre === kethGenre) {
               // Advance the Kethaneum sequence only when the puzzle is completed
               const completedIndex = updatedState.currentPuzzleIndex ?? -1;
@@ -159,12 +151,8 @@ export function useGameModeHandlers({
                 puzzlesSinceLastKethaneum: 0,
                 nextKethaneumIndex: Math.max(updatedState.nextKethaneumIndex || 0, nextIndex),
               };
-              console.log('[useGameModeHandlers.handleWin] Completed Kethaneum puzzle', {
-                completedIndex,
-                nextKethaneumIndex: updatedState.nextKethaneumIndex,
-              });
 
-              // NEW: Track Kethaneum puzzle completion for narrative orchestration
+              // Track Kethaneum puzzle completion for narrative orchestration
               if (updatedState.narrativeOrchestration) {
                 updatedState = {
                   ...updatedState,
@@ -173,9 +161,6 @@ export function useGameModeHandlers({
                     kethaneumPuzzlesCompleted: updatedState.narrativeOrchestration.kethaneumPuzzlesCompleted + 1,
                   },
                 };
-                console.log('[useGameModeHandlers.handleWin] Incremented kethaneumPuzzlesCompleted', {
-                  kethaneumPuzzlesCompleted: updatedState.narrativeOrchestration.kethaneumPuzzlesCompleted,
-                });
               }
             }
           }
@@ -189,15 +174,10 @@ export function useGameModeHandlers({
           if (unlockResult) {
             // Unlock the event and increment debt
             updatedState = unlockStoryEvent(updatedState, unlockResult.eventId);
-            console.log('[useGameModeHandlers.handleWin] Story event unlocked', {
-              eventId: unlockResult.eventId,
-            });
 
             // Trigger the orchestrated dialogue event
             const currentBeat = updatedState.storyProgress?.currentStoryBeat;
             dialogueManager.triggerOrchestratedEvent(unlockResult.eventId, currentBeat);
-          } else {
-            console.log('[useGameModeHandlers.handleWin] No story event unlock');
           }
         }
 
@@ -214,13 +194,7 @@ export function useGameModeHandlers({
               ...updatedState,
               storyProgress: updatedProgress,
             };
-            console.log('[useGameModeHandlers.handleWin] Story blurb unlocked after puzzle', {
-              blurbId: triggerResult.blurb.id,
-              trigger: triggerResult.trigger,
-            });
           }
-        } else {
-          console.log('[useGameModeHandlers.handleWin] Story blurb manager not loaded');
         }
 
         // Apply all state updates in a single setState call
@@ -231,7 +205,6 @@ export function useGameModeHandlers({
         console.error('[useGameModeHandlers.handleWin] ERROR in Story Mode win handling:', error);
       }
 
-      console.log('[useGameModeHandlers.handleWin] Showing win modal');
       setStatsModalIsWin(true);
       setShowStatsModal(true);
     }

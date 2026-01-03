@@ -477,8 +477,6 @@ export default function LibraryScreen() {
               let didUnlockStoryBlurb = false;
               setState((prevState) => {
                 try {
-                  console.log(`[Library] Completing story event: ${completedId}`);
-
                   // Use the centralized completeStoryEvent function
                   // This handles: debt decrement, moving from unlocked to completed,
                   // incrementing completed counter, and updating dialogue.completedStoryEvents
@@ -530,7 +528,6 @@ export default function LibraryScreen() {
                       );
 
                       if (blurb) {
-                        console.log(`[Library] Story event completion triggered blurb: ${blurb.id}`);
                         const updatedProgress = storyBlurbManager.unlockBlurb(
                           blurb.id,
                           progress
