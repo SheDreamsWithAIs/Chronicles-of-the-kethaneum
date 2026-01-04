@@ -1,11 +1,13 @@
 # Notification System Quick Reference Guide
 
+> **See Also**: **[Narrative Orchestration](./NARRATIVE_ORCHESTRATION.md)** - How story events, Kethaneum puzzles, and Book of Passage blurbs coordinate through the debt system.
+
 ## Overview
 
 The game has TWO notification systems that work in parallel:
 
 1. **Book of Passage Notifications** - For story narrative moments
-2. **Library Notifications** - For dialogue event sequences
+2. **Library Notifications** - For dialogue event sequences (story events)
 
 Both use the same amber glow/pulse animation on their respective buttons.
 
@@ -54,7 +56,7 @@ BookOfPassageButton glows         LibraryButton glows
 | **Content Type** | Story blurbs | Story events |
 | **Trigger** | Automatic (story beat advancement) | Manual check in game code |
 | **Trigger Stored In** | `StoryProgressionManager` config | Individual story event JSON files |
-| **Data Location** | `/public/data/story-blurbs.json` | `/public/data/story-events/*.json` |
+| **Data Location** | `/public/data/config/book-of-passage-blurb-config.json` | `/public/data/story-events/*.json` |
 | **Manager** | `StoryBlurbManager` | `DialogueManager` |
 | **Event Emitted** | `storyProgression:beatTrigger` | `dialogueManager:storyEventAvailable` |
 | **Notification Hook** | `setNewStoryAvailable()` | `setNewDialogueAvailable()` |

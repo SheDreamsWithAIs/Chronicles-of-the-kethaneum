@@ -9,7 +9,7 @@ import { recordPuzzleStats, incrementTotalWords } from '@/lib/game/stats';
 import { storyBlurbManager } from '@/lib/story';
 import { markPuzzleCompleted } from '@/lib/game/puzzleSelector';
 import { dialogueManager } from '@/lib/dialogue/DialogueManager';
-import { StoryEventTriggerChecker } from '@/lib/dialogue/StoryEventTriggerChecker';
+import { checkStoryEventUnlock, unlockStoryEvent } from '@/lib/narrative/storyEventUnlockChecker';
 import { defaultPuzzleSelectionConfig } from '@/lib/game/puzzleSelectionConfig';
 
 interface UseGameModeHandlersProps {
@@ -151,12 +151,37 @@ export function useGameModeHandlers({
                 puzzlesSinceLastKethaneum: 0,
                 nextKethaneumIndex: Math.max(updatedState.nextKethaneumIndex || 0, nextIndex),
               };
+
+              // Track Kethaneum puzzle completion for narrative orchestration
+              if (updatedState.narrativeOrchestration) {
+                updatedState = {
+                  ...updatedState,
+                  narrativeOrchestration: {
+                    ...updatedState.narrativeOrchestration,
+                    kethaneumPuzzlesCompleted: updatedState.narrativeOrchestration.kethaneumPuzzlesCompleted + 1,
+                  },
+                };
+              }
             }
           }
         }
 
-        // Check for story progress triggers
-        // Pass previous state to detect transitions (e.g., 0 → 1 books discovered)
+        // Check for story event unlocking via narrative orchestration
+        // This replaces the old trigger-based system with sequential unlock requirements
+        if (dialogueManager.getInitialized()) {
+          const unlockResult = checkStoryEventUnlock(updatedState);
+
+          if (unlockResult) {
+            // Unlock the event and increment debt
+            updatedState = unlockStoryEvent(updatedState, unlockResult.eventId);
+
+            // Trigger the orchestrated dialogue event
+            const currentBeat = updatedState.storyProgress?.currentStoryBeat;
+            dialogueManager.triggerOrchestratedEvent(unlockResult.eventId, currentBeat);
+          }
+        }
+
+        // Check for Book of Passage blurb triggers after puzzle completion
         if (storyBlurbManager.isLoaded()) {
           const triggerResult = storyBlurbManager.checkTriggerConditions(updatedState, previousState);
 
@@ -169,27 +194,6 @@ export function useGameModeHandlers({
               ...updatedState,
               storyProgress: updatedProgress,
             };
-          }
-        }
-
-        // Check for story event dialogue triggers after puzzle completion
-        // Centralized check based on game state (not location-specific)
-        if (dialogueManager.getInitialized()) {
-          const triggeredEventIds = StoryEventTriggerChecker.checkAvailableEvents(
-            updatedState,
-            previousState
-          );
-          
-          // Trigger each available event
-          for (const eventId of triggeredEventIds) {
-            const currentBeat = updatedState.storyProgress?.currentStoryBeat;
-            const eventData = dialogueManager.getStoryEvent(eventId);
-            if (eventData?.storyEvent?.triggerCondition) {
-              dialogueManager.checkForAvailableStoryEvent(
-                eventData.storyEvent.triggerCondition,
-                currentBeat
-              );
-            }
           }
         }
 

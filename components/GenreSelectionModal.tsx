@@ -14,16 +14,10 @@ interface GenreSelectionModalProps {
   onClose: () => void;
   onSelectGenre: (genre: string) => void;
   availableGenres: string[];
-  kethaneumRevealed?: boolean; // Whether Kethaneum has been revealed to the player
 }
 
 function getGenreDisplayInfo(genre: string): GenreDisplayInfo {
   const genreInfo: { [key: string]: GenreDisplayInfo } = {
-    "Kethaneum": {
-      title: "Kethaneum Lore",
-      description: "Chronicles of the nexus between realms",
-      icon: "✦"
-    },
     "nature": {
       title: "Natural Wisdom",
       description: "Words of the living world",
@@ -43,22 +37,13 @@ export function GenreSelectionModal({
   onClose,
   onSelectGenre,
   availableGenres,
-  kethaneumRevealed = false
 }: GenreSelectionModalProps) {
   const genreCards = useMemo(() => {
-    // Filter out Kethaneum if it hasn't been revealed yet
-    const filteredGenres = availableGenres.filter(genre => {
-      if (genre === 'Kethaneum' && !kethaneumRevealed) {
-        return false; // Hide Kethaneum until first encounter
-      }
-      return true;
-    });
-
-    return filteredGenres.map(genre => ({
+    return availableGenres.map(genre => ({
       genre,
       ...getGenreDisplayInfo(genre)
     }));
-  }, [availableGenres, kethaneumRevealed]);
+  }, [availableGenres]);
 
   if (!isOpen) return null;
 

@@ -20,7 +20,7 @@ graph TB
 
     subgraph "Story Blurb System"
         SBM[storyBlurbManager<br/>Narrative Moments]
-        SBMData[story-progress.json<br/>Blurb Content]
+        SBMData[book-of-passage-blurb-config.json<br/>Blurb Content]
         BlurbTriggers[Trigger Conditions<br/>When to unlock blurbs]
     end
 
@@ -200,7 +200,7 @@ graph TB
     end
 
     subgraph "Blurb Data"
-        BlurbJSON[story-progress.json]
+        BlurbJSON[book-of-passage-blurb-config.json]
         BlurbDef[StoryBlurb<br/>id, title, text, trigger, storyBeat]
         TrigConfig[Trigger Config<br/>Milestones, behavior]
     end
@@ -642,8 +642,8 @@ graph TB
 ```mermaid
 graph TB
     subgraph "Data Files"
-        ProgConfig[/data/story-progression-config.json<br/>Story beat rules & transitions]
-        BlurbData[/data/story-progress.json<br/>Narrative blurbs & triggers]
+        ProgConfig[/data/config/story-progression-config.json<br/>Story beat rules & transitions]
+        BlurbData[/data/config/book-of-passage-blurb-config.json<br/>Narrative blurbs & triggers]
         CharFiles[/data/characters/*.json<br/>Character definitions]
         EventFiles[/data/story-events/*.json<br/>Story event dialogues]
     end
@@ -894,7 +894,7 @@ graph TB
     end
 
     subgraph "storyBlurbManager"
-        SBM_Load[Load story-progress.json]
+        SBM_Load[Load book-of-passage-blurb-config.json]
         SBM_Index[Index blurbs by trigger]
         SBM_Check[Check trigger conditions vs state]
         SBM_Unlock[Unlock matching blurbs]

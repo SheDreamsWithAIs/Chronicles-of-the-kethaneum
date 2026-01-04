@@ -20,11 +20,6 @@ interface GenreCompletionModalProps {
 
 function getGenreDisplayInfo(genre: string): GenreDisplayInfo {
   const genreInfo: { [key: string]: GenreDisplayInfo } = {
-    "Kethaneum": {
-      title: "Kethaneum Lore",
-      description: "Chronicles of the nexus between realms",
-      icon: "✦"
-    },
     "nature": {
       title: "Natural Wisdom",
       description: "Words of the living world",
@@ -104,10 +99,12 @@ export function GenreCompletionModal({
 
         <div className={styles.completionMessage}>
           <p className={styles.congratsText}>
-            Congratulations, Archivist! You have completed all available books in <strong>{currentGenreInfo.title}</strong>.
+            The final volume of <strong>{currentGenreInfo.title}</strong> has been cataloged and stabilized.
+            <br />
+            What you have read matters.
           </p>
           <p className={styles.promptText}>
-            How would you like to continue your journey through the archives?
+            How will you continue?
           </p>
         </div>
 
@@ -119,8 +116,8 @@ export function GenreCompletionModal({
             <div className={styles.cardGlow}></div>
             <div className={styles.cardContent}>
               <div className={styles.optionIcon}>↻</div>
-              <h3>Continue This Path</h3>
-              <p>Replay books from {currentGenreInfo.title} to deepen your mastery</p>
+              <h3>Strengthen These Books Further</h3>
+              <p>Return to the works of {currentGenreInfo.title} to catalog them again and help preserve their meaning.</p>
             </div>
           </div>
 
@@ -142,13 +139,13 @@ export function GenreCompletionModal({
             <div className={styles.cardGlow}></div>
             <div className={styles.cardContent}>
               <div className={styles.optionIcon}>✦</div>
-              <h3>Explore New Realms</h3>
+              <h3>Seek New Books</h3>
               <p>
                 {otherGenres.length === 0
                   ? 'No other genres available yet'
                   : otherGenres.length === 1
                     ? `Begin your journey through ${otherGenres[0].title}`
-                    : 'Choose a new knowledge category to explore'
+                    : 'Turn your attention to new knowledge categories within the archives.'
                 }
               </p>
             </div>

@@ -22,6 +22,29 @@
   z-index: -1;
 }
 
+/* Subtle internal glow variant (used for dense UI like pause menus) */
+.storyNotificationGlowSubtle {
+  position: relative;
+  animation: storyPulse 2s ease-in-out infinite;
+}
+
+.storyNotificationGlowSubtle::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(
+    45deg,
+    rgba(254, 243, 199, 0.45),
+    rgba(254, 243, 199, 0.6),
+    rgba(254, 243, 199, 0.45)
+  );
+  filter: blur(4px);
+  opacity: 0.5;
+  animation: storyGlow 2s ease-in-out infinite;
+  z-index: -1;
+}
+
 /* External glow variant - simplified to pulse and color change only */
 .storyNotificationGlowExternal {
   position: relative;

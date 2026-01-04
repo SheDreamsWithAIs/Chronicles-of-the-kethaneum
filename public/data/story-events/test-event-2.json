@@ -1,0 +1,40 @@
+{
+    "storyEvent": {
+      "id": "test-event-2",
+      "title": "test event 2",
+      "triggerCondition": "",
+      "storyBeat": "hook"
+    },
+    "dialogue": [
+      {
+        "sequence": 1,
+        "speaker": "archivist-lumina",
+        "text": "testing story event 3",
+        "emotion": ["impressed", "encouraging"],
+        "pauseAfter": true
+      },
+      {
+        "sequence": 2,
+        "speaker": "keeper-valdris",
+        "text": "Just the basics.",
+        "emotion": ["mystical", "wise"],
+        "pauseAfter": true
+      }
+    ],
+    "characters": [
+      {
+        "id": "archivist-lumina",
+        "portraitFile": "lumina-portrait.svg"
+      },
+      {
+        "id": "keeper-valdris",
+        "portraitFile": "valdris-portrait.svg"
+      }
+    ],
+    "metadata": {
+      "estimatedDuration": "short",
+      "storyImportance": "milestone",
+      "unlocks": [],
+      "lastUpdated": "2025-12-31"
+    }
+  }

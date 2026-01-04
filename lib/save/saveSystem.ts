@@ -55,6 +55,8 @@ export interface OptimizedProgress {
   dlv?: boolean;
   /** Audio settings (optional) */
   a?: OptimizedAudioSettings;
+  /** Narrative orchestration state (optional) */
+  no?: OptimizedNarrativeOrchestration;
 }
 
 /**
@@ -115,6 +117,24 @@ export interface OptimizedAudioSettings {
   vm: boolean;
 }
 
+/**
+ * Compact narrative orchestration state
+ */
+export interface OptimizedNarrativeOrchestration {
+  /** Kethaneum puzzles completed */
+  kc: number;
+  /** Story event debt */
+  d: number;
+  /** Story events completed count */
+  sc: number;
+  /** Unlocked story event IDs */
+  u: string[];
+  /** Completed story event IDs */
+  c: string[];
+  /** Last unlocked story event ID */
+  l: string | null;
+}
+
 // ============================================================================
 // Types - Decoded Progress (for application use)
 // ============================================================================
@@ -161,6 +181,14 @@ export interface DecodedProgress {
   };
   storyProgress?: StoryProgressState;
   audioSettings?: AudioSettings;
+  narrativeOrchestration?: {
+    kethaneumPuzzlesCompleted: number;
+    storyEventDebt: number;
+    storyEventsCompleted: number;
+    unlockedStoryEvents: string[];
+    completedStoryEvents: string[];
+    lastStoryEventUnlocked: string | null;
+  };
 }
 
 // ============================================================================
@@ -307,6 +335,18 @@ export async function saveOptimizedProgress(state: GameState): Promise<void> {
       optimized.sp = state.storyProgress;
     }
 
+    // Add narrative orchestration state
+    if (state.narrativeOrchestration) {
+      optimized.no = {
+        kc: state.narrativeOrchestration.kethaneumPuzzlesCompleted,
+        d: state.narrativeOrchestration.storyEventDebt,
+        sc: state.narrativeOrchestration.storyEventsCompleted,
+        u: state.narrativeOrchestration.unlockedStoryEvents,
+        c: state.narrativeOrchestration.completedStoryEvents,
+        l: state.narrativeOrchestration.lastStoryEventUnlocked,
+      };
+    }
+
     // Add dialogue state (completed story events)
     if (state.dialogue?.completedStoryEvents && state.dialogue.completedStoryEvents.length > 0) {
       optimized.dl = state.dialogue.completedStoryEvents;
@@ -433,6 +473,18 @@ export async function decodeOptimizedProgress(
     decoded.storyProgress = data.sp;
   }
 
+  // Decode narrative orchestration state
+  if (data.no) {
+    decoded.narrativeOrchestration = {
+      kethaneumPuzzlesCompleted: data.no.kc,
+      storyEventDebt: data.no.d,
+      storyEventsCompleted: data.no.sc,
+      unlockedStoryEvents: data.no.u,
+      completedStoryEvents: data.no.c,
+      lastStoryEventUnlocked: data.no.l,
+    };
+  }
+
   // Decode dialogue state (completed story events)
   if (data.dl && Array.isArray(data.dl)) {
     decoded.completedStoryEvents = data.dl;
@@ -497,6 +549,14 @@ export async function convertToGameStateFormat(
     hasVisitedLibrary?: boolean;
   };
   audioSettings?: AudioSettings;
+  narrativeOrchestration?: {
+    kethaneumPuzzlesCompleted: number;
+    storyEventDebt: number;
+    storyEventsCompleted: number;
+    unlockedStoryEvents: string[];
+    completedStoryEvents: string[];
+    lastStoryEventUnlocked: string | null;
+  };
 }> {
   const books: { [title: string]: boolean[] | { complete?: boolean } } = {};
   const discoveredBooks = new Set<string>();
@@ -573,6 +633,7 @@ export async function convertToGameStateFormat(
         }
       : undefined,
     audioSettings: decoded.audioSettings,
+    narrativeOrchestration: decoded.narrativeOrchestration,
   };
 }
 

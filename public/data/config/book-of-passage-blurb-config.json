@@ -20,6 +20,39 @@
       "metadata": {
         "tags": ["introduction", "opening"]
       }
+    },
+    {
+      "id": "first_kethaneum_reflection",
+      "storyBeat": "hook",
+      "trigger": "custom_kethaneum_milestone_1",
+      "title": "The Kethaneum's Pull",
+      "text": "Having completed your second Kethaneum puzzle, you feel something shift within you. The library's energy pulses differently now, as if acknowledging your progress.\n\nYour Book of Passage grows warm again, recording this milestone. The Kethaneum books are different from the others—deeper, more enigmatic. Each one feels like peeling back a layer of reality itself.\n\nYou sense there is much more to discover.",
+      "order": 2,
+      "metadata": {
+        "tags": ["kethaneum", "milestone"]
+      }
+    },
+    {
+      "id": "after_test-event-2",
+      "storyBeat": "hook",
+      "trigger": "custom_story_event_test-event-2",
+      "title": "Patterns Emerge",
+      "text": "Test after test story event 2",
+      "order": 3,
+      "metadata": {
+        "tags": ["story-event", "pattern-recognition", "test"]
+      }
+    },
+    {
+      "id": "test-after-event-1",
+      "storyBeat": "hook",
+      "trigger": "custom_story_event_test-event-1",
+      "title": "Test after test story event 1",
+      "text": "Test after test story event 1.",
+      "order": 4,
+      "metadata": {
+        "tags": ["story-event", "test"]
+      }
     }
   ]
 }

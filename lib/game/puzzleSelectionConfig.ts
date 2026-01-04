@@ -27,9 +27,9 @@ export interface PuzzleSelectionConfig {
  * are woven into the regular puzzle flow.
  */
 export const defaultPuzzleSelectionConfig: PuzzleSelectionConfig = {
-  // Insert a Kethaneum book every 2-5 regular puzzles
-  minPuzzlesBeforeKethaneum: 2,
-  maxPuzzlesBeforeKethaneum: 5,
+  // Insert a Kethaneum book every 5-7 regular puzzles
+  minPuzzlesBeforeKethaneum: 5,
+  maxPuzzlesBeforeKethaneum: 7,
 
   // The genre name for Kethaneum narrative books
   kethaneumGenreName: 'Kethaneum',

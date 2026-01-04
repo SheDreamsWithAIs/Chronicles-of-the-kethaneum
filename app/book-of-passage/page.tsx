@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, ReactElement } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, ReactElement } from 'react';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { PageLoader } from '@/components/shared/PageLoader';
 import { LibraryButton } from '@/components/LibraryButton';
-import { useGameState } from '@/hooks/useGameState';
+import { useGameState } from '@/contexts/GameStateContext';
+import { resetPuzzleRuntimeState } from '@/lib/game/state';
 import { usePageLoader } from '@/hooks/usePageLoader';
 import { useStoryProgress, useInitializeStoryProgress } from '@/hooks/useStoryProgress';
 import { useStoryNotification } from '@/contexts/StoryNotificationContext';
@@ -71,16 +72,49 @@ export default function BookOfPassageScreen() {
   const [filterGenre, setFilterGenre] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortOption>('title');
   const [currentPage, setCurrentPage] = useState(1);
+  const [dialogueRetryTick, setDialogueRetryTick] = useState(0);
 
   // Registry state
   const [registryLoaded, setRegistryLoaded] = useState(false);
   const [availableGenres, setAvailableGenres] = useState<string[]>([]);
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
 
+  // Track if we've checked for initial story event unlock
+  const hasCheckedInitialUnlock = useRef(false);
+  const dialogueRetryAttemptsRef = useRef(0);
+  const dialogueRetryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const scheduleDialogueRetry = useCallback(() => {
+    if (dialogueRetryAttemptsRef.current >= 10) {
+      return;
+    }
+    dialogueRetryAttemptsRef.current += 1;
+    if (dialogueRetryTimeoutRef.current) {
+      clearTimeout(dialogueRetryTimeoutRef.current);
+    }
+    dialogueRetryTimeoutRef.current = setTimeout(() => {
+      setDialogueRetryTick((tick) => tick + 1);
+    }, 250);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (dialogueRetryTimeoutRef.current) {
+        clearTimeout(dialogueRetryTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // Clear new story notification when visiting Book of Passage
   useEffect(() => {
     clearNewStory();
   }, [clearNewStory]);
+
+  // Clear new story notification when blurbs update on this screen
+  useEffect(() => {
+    if (!storyReady) return;
+    clearNewStory();
+  }, [storyReady, state.storyProgress?.unlockedBlurbs, clearNewStory]);
 
   // Initialize story progress with first blurb if not already done
   useEffect(() => {
@@ -94,6 +128,71 @@ export default function BookOfPassageScreen() {
       }
     }
   }, [storyReady, state, setState, initializeWithFirstBlurb]);
+
+  // Check for initial story event unlocks (for first-visit event)
+  // This runs once when the Book of Passage page loads in Story Mode
+  useEffect(() => {
+    if (!gameStateReady || state.gameMode !== 'story' || hasCheckedInitialUnlock.current) return;
+
+    // IMPORTANT: Don't run unlock check until save data has actually loaded
+    // Check if narrativeOrchestration has been initialized from save data
+    // If lastStoryEventUnlocked is null, this is fresh state (not loaded from save)
+    if (!state.narrativeOrchestration || state.narrativeOrchestration.lastStoryEventUnlocked === null) {
+      // This is fresh/uninitialized state - only run check if we have NO unlocked events
+      // (i.e., this is truly the first time, not a race condition where save hasn't loaded yet)
+      const hasUnlockedEvents = state.narrativeOrchestration?.unlockedStoryEvents.length ?? 0;
+      const hasCompletedPuzzles = state.completedPuzzles > 0;
+
+      if (hasUnlockedEvents > 0 || hasCompletedPuzzles > 0) {
+        // We have unlocked events or completed puzzles but lastStoryEventUnlocked is null
+        // This means save data hasn't loaded yet - skip this check
+        console.log('[BookOfPassage] Save data not loaded yet, skipping unlock check');
+        return;
+      }
+    }
+
+    console.log('[BookOfPassage] Checking for initial story event unlock');
+
+    // Mark that we've started the check to prevent multiple runs
+    hasCheckedInitialUnlock.current = true;
+
+    // Import and check for unlocks on mount
+    import('@/lib/narrative/storyEventUnlockChecker').then(({ checkStoryEventUnlock, unlockStoryEvent }) => {
+      import('@/lib/dialogue/DialogueManager').then(({ dialogueManager }) => {
+        console.log('[BookOfPassage] Dialogue manager initialized:', dialogueManager.getInitialized());
+
+        if (!dialogueManager.getInitialized()) {
+          console.warn('[BookOfPassage] Dialogue manager not initialized yet, skipping unlock check');
+          hasCheckedInitialUnlock.current = false; // Allow retry if dialogue manager wasn't ready
+          scheduleDialogueRetry();
+          return;
+        }
+
+        const unlockResult = checkStoryEventUnlock(state);
+        console.log('[BookOfPassage] Unlock check result:', unlockResult);
+
+        if (unlockResult) {
+          console.log('[BookOfPassage] Unlocking event:', unlockResult.eventId);
+
+          // Unlock the event and increment debt
+          const updatedState = unlockStoryEvent(state, unlockResult.eventId);
+          console.log('[BookOfPassage] Updated debt:', updatedState.narrativeOrchestration?.storyEventDebt);
+          setState(updatedState);
+
+          // Wait for useGameState's auto-save to complete (100ms debounce + buffer)
+          // Then trigger the event so user sees notification after state is saved
+          setTimeout(() => {
+            console.log('[BookOfPassage] Triggering event after save delay');
+            const currentBeat = updatedState.storyProgress?.currentStoryBeat;
+            const triggered = dialogueManager.triggerOrchestratedEvent(unlockResult.eventId, currentBeat);
+            console.log('[BookOfPassage] Event triggered:', triggered);
+          }, 250);
+        } else {
+          console.log('[BookOfPassage] No event to unlock at this time');
+        }
+      });
+    });
+  }, [gameStateReady, state.gameMode, dialogueRetryTick, scheduleDialogueRetry]); // Only check when ready, not on every state change
 
   // Track loading conditions
   useEffect(() => {
@@ -258,7 +357,7 @@ export default function BookOfPassageScreen() {
     router.push('/library');
   };
 
-  const handleStartCataloguing = () => {
+  const handleStartCataloguing = async () => {
     // Ensure selectedGenre is set before navigating
     // Use selectedGenre if available, otherwise fall back to currentGenre
     const activeGenre = (state.selectedGenre && state.selectedGenre.trim() !== '') 
@@ -274,6 +373,10 @@ export default function BookOfPassageScreen() {
       }));
     }
     
+    // Clear transient puzzle runtime state so puzzle screen loads a fresh puzzle
+    setState(prevState => resetPuzzleRuntimeState(prevState));
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     // Navigate directly to puzzle screen
     // The puzzle screen will use state.selectedGenre automatically
     router.push('/puzzle');

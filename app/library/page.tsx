@@ -7,17 +7,21 @@ import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { PageLoader } from '@/components/shared/PageLoader';
 import { GenreSelectionModal } from '@/components/GenreSelectionModal';
 import { SettingsMenu } from '@/components/SettingsMenu';
-import { useGameState } from '@/hooks/useGameState';
+import { useGameState } from '@/contexts/GameStateContext';
 import { usePuzzle } from '@/hooks/usePuzzle';
 import { useStoryNotification } from '@/contexts/StoryNotificationContext';
 import { useDialogue } from '@/hooks/dialogue/useDialogue';
 import { usePageLoader } from '@/hooks/usePageLoader';
 import { dialogueManager } from '@/lib/dialogue/DialogueManager';
-import { StoryEventTriggerChecker } from '@/lib/dialogue/StoryEventTriggerChecker';
+import { storyBlurbManager } from '@/lib/story/storyBlurbManager';
+import type { StoryTrigger } from '@/lib/story/types';
 import { DialogueQueue, DialogueQueueRef, DialogueEntry } from '@/components/dialogue/DialogueQueue';
+import { BookOfPassageButton } from '@/components/BookOfPassageButton';
 import { DialogueControls } from '@/components/dialogue/DialogueControls';
 import { StoryEventPlayer } from '@/lib/dialogue/StoryEventPlayer';
 import { chunkText } from '@/lib/dialogue/chunkText';
+import { completeStoryEvent } from '@/lib/narrative/storyEventUnlockChecker';
+import { resetPuzzleRuntimeState } from '@/lib/game/state';
 import styles from './library.module.css';
 import dialogueStyles from '@/components/dialogue/dialogue.module.css';
 import notificationStyles from '@/styles/story-notification.module.css';
@@ -36,7 +40,7 @@ export default function LibraryScreen() {
   const [isNavigatingToPuzzle, setIsNavigatingToPuzzle] = useState(false);
   const { state, setState, isReady: gameStateReady } = useGameState();
   const { loadSequential, loadAll } = usePuzzle(state, setState);
-  const { hasNewDialogue, clearNewDialogue, setNewDialogueAvailable } = useStoryNotification();
+  const { hasNewDialogue, clearNewDialogue, setNewDialogueAvailable, setNewStoryAvailable } = useStoryNotification();
   const { isInitialized, initialize } = useDialogue();
   const dialogueQueueRef = useRef<DialogueQueueRef | null>(null);
   const eventPlayerRef = useRef<StoryEventPlayer | null>(null);
@@ -88,6 +92,7 @@ export default function LibraryScreen() {
     }
   }, [state.dialogue?.completedStoryEvents]);
 
+
   // Validate state updates match ref - detect when state doesn't persist
   // This helps catch cases where state updates fail or are reset
   useEffect(() => {
@@ -122,21 +127,20 @@ export default function LibraryScreen() {
 
   // Check for available story events when library loads (including after refresh)
   // This restores the notification state after page refresh
-  // Uses StoryEventTriggerChecker to properly check if events are available based on game state
+  // Uses narrative orchestration system to check for unlocked but not-yet-completed events
   useEffect(() => {
     // Wait for game state to be ready before checking
     if (!state.storyProgress || !dialogueManager.getInitialized()) return;
 
-    // Use StoryEventTriggerChecker to check if any events are currently available
-    // This checks if trigger conditions are currently satisfied (not transitions)
-    const triggeredEventIds = StoryEventTriggerChecker.checkCurrentlyAvailableEvents(state);
+    // Get unlocked events from orchestration system
+    const unlockedEvents = state.narrativeOrchestration?.unlockedStoryEvents || [];
 
     // Filter out completed events
     const completedEvents = completedEventsRef.current.length > 0
       ? completedEventsRef.current
       : (state.dialogue?.completedStoryEvents || []);
 
-    const availableEventIds = triggeredEventIds.filter(
+    const availableEventIds = unlockedEvents.filter(
       eventId => !completedEvents.includes(eventId)
     );
 
@@ -146,7 +150,7 @@ export default function LibraryScreen() {
       // No available events - clear notification if it exists
       clearNewDialogue();
     }
-  }, [state.storyProgress?.currentStoryBeat, state.dialogue?.completedStoryEvents, state.completedPuzzlesByGenre, setNewDialogueAvailable, clearNewDialogue]);
+  }, [state.storyProgress?.currentStoryBeat, state.dialogue?.completedStoryEvents, state.narrativeOrchestration?.unlockedStoryEvents, setNewDialogueAvailable, clearNewDialogue]);
 
   // Note: We don't clear the notification when visiting the library anymore
   // The notification will persist until the player actually starts the conversation
@@ -167,13 +171,36 @@ export default function LibraryScreen() {
     }
   }, [isInitialized, initialize]);
 
-  // Load puzzles on mount if not already loaded
+  // TEMPORARY: Phase 2 Testing - Debug Helper
+  // TODO: Remove after Phase 2 testing is complete
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).debugNarrative = () => {
+        console.log('=== Narrative Orchestration Debug ===');
+        console.log('Kethaneum Puzzles Completed:', state.narrativeOrchestration?.kethaneumPuzzlesCompleted ?? 'N/A');
+        console.log('Story Event Debt:', state.narrativeOrchestration?.storyEventDebt ?? 'N/A');
+        console.log('Story Events Completed:', state.narrativeOrchestration?.storyEventsCompleted ?? 'N/A');
+        console.log('Unlocked Events:', state.narrativeOrchestration?.unlockedStoryEvents ?? []);
+        console.log('Completed Events:', state.narrativeOrchestration?.completedStoryEvents ?? []);
+        console.log('---');
+        console.log('Puzzles Since Last Kethaneum:', state.puzzlesSinceLastKethaneum);
+        console.log('Next Kethaneum Interval:', state.nextKethaneumInterval);
+        console.log('Total Completed Puzzles:', state.completedPuzzles);
+        console.log('Current Genre:', state.currentGenre);
+      };
+      console.log('Debug helper loaded. Use debugNarrative() to inspect narrative state.');
+    }
+  }, [state]);
+
+  // Load puzzles on mount if not already loaded
+  // IMPORTANT: Wait for gameStateReady to avoid overwriting loaded save data
+  useEffect(() => {
+    if (!gameStateReady) return; // Wait for save data to load first!
+
     if (!state.puzzles || Object.keys(state.puzzles).length === 0) {
       loadAll();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
+  }, [gameStateReady, state.puzzles, loadAll]);
 
   const handleBrowseArchives = () => {
     setShowGenreModal(true);
@@ -269,7 +296,7 @@ export default function LibraryScreen() {
         }),
       };
 
-      return clearedState;
+      return resetPuzzleRuntimeState(clearedState);
     });
 
     // Wait for state update, then navigate
@@ -281,9 +308,9 @@ export default function LibraryScreen() {
     setShowGenreModal(false);
   };
 
-  // Get available genres from loaded puzzles
+  // Get available genres from loaded puzzles (excluding Kethaneum)
   const availableGenres = Object.keys(state.puzzles || {}).filter(
-    genre => state.puzzles[genre] && state.puzzles[genre].length > 0
+    genre => genre !== 'Kethaneum' && state.puzzles[genre] && state.puzzles[genre].length > 0
   );
 
   const handleStartConversation = async () => {
@@ -359,7 +386,7 @@ export default function LibraryScreen() {
       }
 
       // Get available event, filtering out completed ones
-      // Now uses StoryEventTriggerChecker internally to verify trigger conditions
+      // Uses narrative orchestration system to check unlocked events
       let availableEvent: any = null;
       try {
         // Defensive check: ensure completedEvents is valid before querying
@@ -447,50 +474,29 @@ export default function LibraryScreen() {
                 throw new Error(`Invalid completedId: ${completedId}`);
               }
 
+              let didUnlockStoryBlurb = false;
               setState((prevState) => {
                 try {
-                  // Ensure dialogue object exists
-                  const prevDialogue = prevState.dialogue || { completedStoryEvents: [] };
-                  const completedEvents = prevDialogue.completedStoryEvents || [];
+                  // Use the centralized completeStoryEvent function
+                  // This handles: debt decrement, moving from unlocked to completed,
+                  // incrementing completed counter, and updating dialogue.completedStoryEvents
+                  const updatedState = completeStoryEvent(prevState, completedId);
 
-                  // Validate completedEvents is an array
-                  if (!Array.isArray(completedEvents)) {
-                    const error = new Error(
-                      `prevState.dialogue.completedStoryEvents is not an array: ${typeof completedEvents}, value: ${JSON.stringify(completedEvents)}`
-                    );
-                    console.error('[Library] State validation error:', error);
-                    // Return previous state on error to prevent corruption
+                  // Check if the state was actually updated (function returns original state if event not in unlocked list)
+                  if (updatedState === prevState) {
+                    console.warn(`[Library] completeStoryEvent returned unchanged state for: ${completedId}`);
                     return prevState;
                   }
 
-                  // Check if already completed (shouldn't happen, but defensive)
-                  const wasAlreadyCompleted = completedEvents.includes(completedId);
-                  if (wasAlreadyCompleted) {
-                    console.warn(`[Library] Event '${completedId}' was already marked as completed, skipping update`);
-                    return prevState;
-                  }
+                  // Update ref immediately for synchronous access
+                  completedEventsRef.current = updatedState.dialogue?.completedStoryEvents || [];
 
-                  // Calculate updated completed events list
-                  const updatedCompletedEvents = [...completedEvents, completedId];
-
-                  // Validate the updated array
-                  if (!Array.isArray(updatedCompletedEvents)) {
-                    throw new Error('Failed to create updated completed events array');
-                  }
-
-                  // Build updated state for checking remaining events
-                  // Use prevState from setState callback which has the latest state
-                  const updatedStateForCheck = {
-                    ...prevState,
-                    dialogue: {
-                      ...prevDialogue,
-                      completedStoryEvents: updatedCompletedEvents,
-                    },
-                  };
-
+                  // Check for remaining events to clear notification if needed
                   try {
-                    // Get remaining events (already filtered by completion and trigger conditions)
-                    const remainingEvents = dialogueManager.getAvailableStoryEvents(updatedStateForCheck, updatedCompletedEvents);
+                    const remainingEvents = dialogueManager.getAvailableStoryEvents(
+                      updatedState,
+                      updatedState.dialogue?.completedStoryEvents || []
+                    );
 
                     // Clear notification if all unlocked events are done
                     if (remainingEvents.length === 0) {
@@ -507,35 +513,59 @@ export default function LibraryScreen() {
                     // Don't throw - this is non-critical
                   }
 
-                  // Update ref immediately for synchronous access
-                  completedEventsRef.current = updatedCompletedEvents;
+                  // Check for Book of Passage blurb triggers after story event completion
+                  let finalState = updatedState;
+                  if (storyBlurbManager.isLoaded()) {
+                    try {
+                      const progress = updatedState.storyProgress;
+                      const currentBeat = progress?.currentStoryBeat || 'hook';
+                      const firedTriggers = progress?.firedTriggers || [];
+                      const trigger = `custom_story_event_${completedId}` as StoryTrigger;
+                      const blurb = storyBlurbManager.getBlurbForTrigger(
+                        trigger,
+                        currentBeat,
+                        firedTriggers
+                      );
 
-                  // Always return updated state to ensure persistence
-                  // Initialize dialogue object if it doesn't exist
-                  const newState = {
-                    ...prevState,
-                    dialogue: {
-                      ...prevDialogue,
-                      completedStoryEvents: updatedCompletedEvents,
-                      // Mark library as visited when first-visit completes
-                      hasVisitedLibrary: completedId === 'first-visit'
-                        ? true
-                        : prevDialogue.hasVisitedLibrary ?? false,
-                    },
-                  };
-
-                  // Validate new state structure
-                  if (!newState.dialogue || !Array.isArray(newState.dialogue.completedStoryEvents)) {
-                    throw new Error('Failed to create valid new state with dialogue');
+                      if (blurb) {
+                        const updatedProgress = storyBlurbManager.unlockBlurb(
+                          blurb.id,
+                          progress
+                        );
+                        didUnlockStoryBlurb = true;
+                        finalState = {
+                          ...updatedState,
+                          storyProgress: updatedProgress,
+                        };
+                      }
+                    } catch (error) {
+                      console.error('[Library] Error checking Book of Passage triggers:', error);
+                      // Don't throw - this is non-critical
+                    }
                   }
 
-                  return newState;
+                  // Special handling for first-visit event
+                  if (completedId === 'first-visit') {
+                    return {
+                      ...finalState,
+                      dialogue: {
+                        ...finalState.dialogue,
+                        hasVisitedLibrary: true,
+                      },
+                    };
+                  }
+
+                  return finalState;
                 } catch (error) {
                   console.error('[Library] Error in setState callback:', error);
                   // Return previous state on error to prevent corruption
                   return prevState;
                 }
               });
+
+              if (didUnlockStoryBlurb) {
+                setNewStoryAvailable();
+              }
 
               // Wait for state to propagate and save
               await new Promise(resolve => setTimeout(resolve, 100));
@@ -780,7 +810,6 @@ export default function LibraryScreen() {
         onClose={handleCloseGenreModal}
         onSelectGenre={handleSelectGenre}
         availableGenres={availableGenres}
-        kethaneumRevealed={state.kethaneumRevealed}
       />
 
       {/* Always render DialogueQueue so ref is available, control visibility with isActive */}
@@ -836,9 +865,13 @@ export default function LibraryScreen() {
             Start a Conversation
           </button>
 
-          <button className={styles.libraryButton} onClick={handleBookOfPassage}>
+          <BookOfPassageButton
+            className={styles.libraryButton}
+            notificationClassName={notificationStyles.storyNotificationGlowExternal}
+            onClick={handleBookOfPassage}
+          >
             Look at your Book of Passage
-          </button>
+          </BookOfPassageButton>
 
           <button className={styles.libraryButton} onClick={handleReturnToMenu}>
             Return to Main Menu

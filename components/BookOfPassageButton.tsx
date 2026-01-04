@@ -13,6 +13,7 @@ import styles from '@/styles/story-notification.module.css';
 interface BookOfPassageButtonProps {
   onClick: () => void;
   className?: string;
+  notificationClassName?: string;
   children?: React.ReactNode;
   'data-testid'?: string;
 }
@@ -20,13 +21,15 @@ interface BookOfPassageButtonProps {
 export function BookOfPassageButton({
   onClick,
   className = '',
+  notificationClassName,
   children = 'Back to Book of Passage',
   'data-testid': dataTestId,
 }: BookOfPassageButtonProps) {
   const { hasNewStory } = useStoryNotification();
 
+  const glowClassName = notificationClassName || styles.storyNotificationGlow;
   const buttonClassName = hasNewStory
-    ? `${className} ${styles.storyNotificationGlow}`
+    ? `${className} ${glowClassName}`
     : className;
 
   return (

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { GameModeModal, type GameMode } from '@/components/GameModeModal';
 import { FormattedBackstory } from '@/components/shared/FormattedBackstory';
-import { useGameState } from '@/hooks/useGameState';
+import { useGameState } from '@/contexts/GameStateContext';
 import { loadProgress, cleanupLegacyKeys } from '@/lib/save';
 import { loadBackstoryContent, type BackstoryContent } from '@/lib/utils/backstoryLoader';
 import styles from './backstory.module.css';

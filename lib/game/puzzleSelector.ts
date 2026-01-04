@@ -15,6 +15,7 @@ import {
   getRandomKethaneumInterval,
   type PuzzleSelectionConfig,
 } from './puzzleSelectionConfig';
+import { DEFAULT_NARRATIVE_CONFIG } from '../narrative/storyEventConfig';
 
 export interface PuzzleSelectionResult {
   puzzle: PuzzleData | null;
@@ -64,7 +65,13 @@ export function selectNextPuzzle(
     // Check if it's time for a Kethaneum puzzle
     const shouldInsertKethaneum = checkIfTimeForKethaneum(newState, config);
 
-    if (shouldInsertKethaneum) {
+    // NEW: Check if Kethaneum puzzles are blocked by story event debt
+    const narrativeOrchestration = newState.narrativeOrchestration;
+    const kethaneumBlocked = narrativeOrchestration
+      ? narrativeOrchestration.storyEventDebt >= DEFAULT_NARRATIVE_CONFIG.storyEventDebtThreshold
+      : false;
+
+    if (shouldInsertKethaneum && !kethaneumBlocked) {
       const kethaneumResult = selectKethaneumPuzzle(newState, config);
 
       if (kethaneumResult.puzzle) {
@@ -73,6 +80,10 @@ export function selectNextPuzzle(
       }
       // No more Kethaneum puzzles available, continue with regular genre
       // Fall through to select from chosen genre
+    } else if (shouldInsertKethaneum && kethaneumBlocked) {
+      // Kethaneum puzzle wanted but blocked by story event debt
+      // Select normal puzzle instead, counter keeps incrementing
+      // When debt clears, Kethaneum will immediately trigger
     }
 
     // Select from the player's chosen genre
@@ -400,10 +411,10 @@ export function selectGenre(
   // Set the selected genre
   newState.selectedGenre = genre;
 
-  // Reset the pattern counter to ensure first puzzle is from chosen genre
-  // By setting puzzlesSinceLastKethaneum to 0, we ensure that the first puzzle
-  // will be from the selected genre (since we need to reach the interval before Kethaneum)
-  newState.puzzlesSinceLastKethaneum = 0;
+  // Preserve puzzlesSinceLastKethaneum so selection doesn't wipe test state
+  if (newState.puzzlesSinceLastKethaneum === undefined) {
+    newState.puzzlesSinceLastKethaneum = 0;
+  }
 
   // Set a new random interval if not already set
   if (newState.nextKethaneumInterval <= 0) {

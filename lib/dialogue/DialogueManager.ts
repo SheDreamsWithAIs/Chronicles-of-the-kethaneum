@@ -6,7 +6,7 @@
 
 import { fetchAsset } from '@/lib/utils/assetPath';
 import type { GameState } from '@/lib/game/state';
-import { StoryEventTriggerChecker } from './StoryEventTriggerChecker';
+import { STORY_EVENT_UNLOCK_REQUIREMENTS } from '@/lib/narrative/storyEventConfig';
 import type {
   StoryBeat,
   LoadingGroup,
@@ -67,7 +67,7 @@ export class DialogueManager {
    */
   private async loadConfiguration(): Promise<void> {
     try {
-      const response = await fetchAsset('/data/dialogue-config.json');
+      const response = await fetchAsset('/data/config/dialogue-config.json');
       if (!response.ok) {
         throw new Error(`Failed to load config: ${response.status}`);
       }
@@ -302,16 +302,6 @@ export class DialogueManager {
         }
       }
 
-
-      // Initialize story event trigger checker index for performance
-      // This indexes events by story beat so we only check relevant events
-      if (typeof window !== 'undefined') {
-        // Dynamic import to avoid circular dependency
-        import('./StoryEventTriggerChecker').then(({ StoryEventTriggerChecker }) => {
-          StoryEventTriggerChecker.initializeIndex();
-        });
-      }
-
       // Emit event that story events are loaded
       this.emit('storyEventsLoaded', {
         count: this.storyEvents.size,
@@ -515,15 +505,47 @@ export class DialogueManager {
   }
 
   /**
+   * Trigger an orchestrated story event by ID
+   * Used for narrative orchestration system (replaces trigger-based events)
+   * Emits notification for the event without checking trigger conditions
+   */
+  triggerOrchestratedEvent(eventId: string, currentBeat?: StoryBeat): boolean {
+    const eventData = this.storyEvents.get(eventId);
+
+    if (!eventData || !eventData.storyEvent) {
+      console.warn(`[DialogueManager] Orchestrated event not found: ${eventId}`);
+      return false;
+    }
+
+    const event = eventData.storyEvent;
+
+    // Check if story beat matches (if specified)
+    if (event.storyBeat && currentBeat && event.storyBeat !== currentBeat) {
+      console.warn(`[DialogueManager] Story beat mismatch for event ${eventId}: expected ${event.storyBeat}, got ${currentBeat}`);
+      return false;
+    }
+
+    // Event is available - emit notification
+    this.emit('storyEventAvailable', {
+      eventId,
+      title: event.title,
+      triggerCondition: null, // Orchestrated events don't have trigger conditions
+      storyBeat: event.storyBeat,
+    });
+
+    return true;
+  }
+
+  /**
    * Get all available story events for current conditions
-   * Uses StoryEventTriggerChecker to verify trigger conditions are satisfied
+   * Uses narrative orchestration system to get unlocked events
    * Filters out completed events if provided
    */
   getAvailableStoryEvents(currentState: GameState, completedEvents?: string[]): string[] {
     try {
-      // Use StoryEventTriggerChecker to get events that satisfy trigger conditions
-      const triggerCheckedEvents = StoryEventTriggerChecker.checkCurrentlyAvailableEvents(currentState);
-      
+      // NEW: Use narrative orchestration system instead of trigger checker
+      const unlockedEvents = currentState.narrativeOrchestration?.unlockedStoryEvents || [];
+
       // Validate completedEvents is an array if provided
       if (completedEvents !== undefined && !Array.isArray(completedEvents)) {
         console.error('[DialogueManager] completedEvents is not an array:', completedEvents);
@@ -531,11 +553,23 @@ export class DialogueManager {
       }
 
       // Filter out completed events if provided
-      const filteredEvents = completedEvents && completedEvents.length > 0
-        ? triggerCheckedEvents.filter((eventId) => !completedEvents!.includes(eventId))
-        : triggerCheckedEvents;
+      let filteredEvents = completedEvents && completedEvents.length > 0
+        ? unlockedEvents.filter((eventId) => !completedEvents!.includes(eventId))
+        : unlockedEvents;
 
-      // Filtered events (after removing completed)
+      // Sort by story event order to ensure correct playback sequence
+      // Events should always be played in order: first-visit, test-event-1, test-event-2, etc.
+      filteredEvents = filteredEvents.sort((a, b) => {
+        const orderA = STORY_EVENT_UNLOCK_REQUIREMENTS.find(req => req.eventId === a)?.order ?? 999;
+        const orderB = STORY_EVENT_UNLOCK_REQUIREMENTS.find(req => req.eventId === b)?.order ?? 999;
+        return orderA - orderB;
+      });
+
+      console.log('[DialogueManager] Available events:', {
+        unlocked: unlockedEvents,
+        completed: completedEvents,
+        available: filteredEvents
+      });
 
       return filteredEvents;
     } catch (error) {

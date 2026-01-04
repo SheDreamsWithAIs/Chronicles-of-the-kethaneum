@@ -22,7 +22,7 @@ graph TB
 
     subgraph "Story Blurb System"
         BlurbMgr[storyBlurbManager<br/>Blurb orchestrator]
-        BlurbData[story-progress.json<br/>Blurb definitions]
+        BlurbData[book-of-passage-blurb-config.json<br/>Blurb definitions]
         TriggerCheck[checkTriggerConditions<br/>Milestone detection]
     end
 
@@ -267,7 +267,7 @@ graph TB
 
 ```mermaid
 graph TB
-    subgraph "story-progress.json"
+    subgraph "book-of-passage-blurb-config.json"
         ConfigFile[Configuration]
         Version[version: 1]
         TrigConfig[triggerConfig]
@@ -419,7 +419,7 @@ stateDiagram-v2
     note right of Loading
         Dependencies tracked separately:
         - gameState: load from localStorage
-        - storyProgress: load story-progress.json
+        - storyProgress: load book-of-passage-blurb-config.json
         - registry: load bookRegistry.json
     end note
 ```

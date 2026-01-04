@@ -90,7 +90,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
         const settings = saved ? JSON.parse(saved) : { volume: 70, isMuted: false };
 
         // Initialize the audio manager (only happens once due to isInitialized flag)
-        await audioManager.initialize('/data/audio-config.json');
+        await audioManager.initialize('/data/config/audio-config.json');
 
         if (!mounted) return;
 

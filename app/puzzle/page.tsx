@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { flushSync } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { CosmicBackground } from '@/components/shared/CosmicBackground';
 import { PageLoader } from '@/components/shared/PageLoader';
@@ -9,7 +10,7 @@ import { GenreCompletionModal } from '@/components/GenreCompletionModal';
 import { BookOfPassageButton } from '@/components/BookOfPassageButton';
 import { LibraryButton } from '@/components/LibraryButton';
 import { SettingsMenu } from '@/components/SettingsMenu';
-import { useGameState } from '@/hooks/useGameState';
+import { useGameState } from '@/contexts/GameStateContext';
 import { usePuzzle } from '@/hooks/usePuzzle';
 import { usePageLoader } from '@/hooks/usePageLoader';
 import { useGameLogic } from '@/hooks/useGameLogic';
@@ -17,9 +18,11 @@ import { useGameModeHandlers } from '@/hooks/useGameModeHandlers';
 import { usePuzzleLoading } from '@/hooks/usePuzzleLoading';
 import { useStoryTimer, usePuzzleOnlyTimer, useBeatTheClockTimer } from '@/hooks/useTimer';
 import { startBeatTheClockRun, endBeatTheClockRun } from '@/lib/game/logic';
+import { selectGenre } from '@/lib/game/puzzleSelector';
 import { getConfig } from '@/lib/core/config';
 import type { Cell } from '@/lib/game/state';
 import styles from './puzzle.module.css';
+import notificationStyles from '@/styles/story-notification.module.css';
 
 export default function PuzzleScreen() {
   const router = useRouter();
@@ -37,8 +40,11 @@ export default function PuzzleScreen() {
   const [showGenreCompletionModal, setShowGenreCompletionModal] = useState(false);
   const [puzzleStartTime, setPuzzleStartTime] = useState<number | null>(null);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [dialogueRetryTick, setDialogueRetryTick] = useState(0);
   // Track if we're transitioning between puzzles to prevent timer restart
   const isTransitioningRef = useRef(false);
+  const dialogueRetryAttemptsRef = useRef(0);
+  const dialogueRetryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Wrapper for loadBeatTheClock that sets transition flag
   const loadBeatTheClockWithTransition = useCallback(async () => {
@@ -54,6 +60,27 @@ export default function PuzzleScreen() {
       throw error;
     }
   }, [loadBeatTheClock]);
+
+  const scheduleDialogueRetry = useCallback(() => {
+    if (dialogueRetryAttemptsRef.current >= 10) {
+      return;
+    }
+    dialogueRetryAttemptsRef.current += 1;
+    if (dialogueRetryTimeoutRef.current) {
+      clearTimeout(dialogueRetryTimeoutRef.current);
+    }
+    dialogueRetryTimeoutRef.current = setTimeout(() => {
+      setDialogueRetryTick((tick) => tick + 1);
+    }, 250);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (dialogueRetryTimeoutRef.current) {
+        clearTimeout(dialogueRetryTimeoutRef.current);
+      }
+    };
+  }, []);
   
   // Use mode-specific handlers hook
   const { handleWin, handleLose, handleRunTimerExpired, updateStateRef } = useGameModeHandlers({
@@ -97,7 +124,74 @@ export default function PuzzleScreen() {
   const storyTimer = useStoryTimer(state, setState);
   const puzzleOnlyTimer = usePuzzleOnlyTimer(state, setState, handleLose);
   const beatTheClockTimer = useBeatTheClockTimer(state, setState, handleLose, handleRunTimerExpired);
-  
+
+  // TEMPORARY: Phase 2 Testing - Debug Helper
+  // TODO: Remove after Phase 2 testing is complete
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).debugGameState = state;
+      (window as any).debugNarrative = () => {
+        console.log('=== Narrative Orchestration Debug ===');
+        console.log('Kethaneum Puzzles Completed:', state.narrativeOrchestration?.kethaneumPuzzlesCompleted ?? 'N/A');
+        console.log('Story Event Debt:', state.narrativeOrchestration?.storyEventDebt ?? 'N/A');
+        console.log('Story Events Completed:', state.narrativeOrchestration?.storyEventsCompleted ?? 'N/A');
+        console.log('Unlocked Events:', state.narrativeOrchestration?.unlockedStoryEvents ?? []);
+        console.log('Completed Events:', state.narrativeOrchestration?.completedStoryEvents ?? []);
+        console.log('---');
+        console.log('Puzzles Since Last Kethaneum:', state.puzzlesSinceLastKethaneum);
+        console.log('Next Kethaneum Interval:', state.nextKethaneumInterval);
+        console.log('Total Completed Puzzles:', state.completedPuzzles);
+        console.log('Current Genre:', state.currentGenre);
+      };
+      console.log('Debug helper loaded. Use debugNarrative() to inspect narrative state.');
+    }
+  }, [state]);
+
+  // Check for story event unlocks on puzzle page mount (in case Book of Passage state didn't persist)
+  // This ensures unlocks happen even if user navigated away before save completed
+  useEffect(() => {
+    if (!isReady || state.gameMode !== 'story') return;
+
+    // IMPORTANT: Don't run unlock check until save data has actually loaded
+    // Check if narrativeOrchestration has been initialized from save data
+    // If lastStoryEventUnlocked is null, this is fresh state (not loaded from save)
+    if (!state.narrativeOrchestration || state.narrativeOrchestration.lastStoryEventUnlocked === null) {
+      // This is fresh/uninitialized state - only run check if we have NO unlocked events
+      // (i.e., this is truly the first time, not a race condition where save hasn't loaded yet)
+      const hasUnlockedEvents = state.narrativeOrchestration?.unlockedStoryEvents.length ?? 0;
+      const hasCompletedPuzzles = state.completedPuzzles > 0;
+
+      if (hasUnlockedEvents > 0 || hasCompletedPuzzles > 0) {
+        // We have unlocked events or completed puzzles but lastStoryEventUnlocked is null
+        // This means save data hasn't loaded yet - skip this check
+        return;
+      }
+    }
+
+    // Import and check for unlocks
+    import('@/lib/narrative/storyEventUnlockChecker').then(({ checkStoryEventUnlock, unlockStoryEvent }) => {
+      import('@/lib/dialogue/DialogueManager').then(({ dialogueManager }) => {
+        if (!dialogueManager.getInitialized()) {
+          console.warn('[PuzzlePage] Dialogue manager not ready, skipping unlock check');
+          scheduleDialogueRetry();
+          return;
+        }
+
+        const unlockResult = checkStoryEventUnlock(state);
+
+        if (unlockResult) {
+          // Unlock the event and increment debt
+          const updatedState = unlockStoryEvent(state, unlockResult.eventId);
+          setState(updatedState);
+
+          // Trigger the orchestrated dialogue event
+          const currentBeat = updatedState.storyProgress?.currentStoryBeat;
+          dialogueManager.triggerOrchestratedEvent(unlockResult.eventId, currentBeat);
+        }
+      });
+    });
+  }, [isReady, state.gameMode, state, setState, dialogueRetryTick, scheduleDialogueRetry]); // Check when ready or state changes
+
   // Select appropriate timer based on game mode (memoized to prevent recreation)
   const timer = useMemo(() => {
     return state.gameMode === 'story' 
@@ -129,6 +223,16 @@ export default function PuzzleScreen() {
       setLoading('puzzle', true);
     }
   }, [state, state?.grid, setLoading]);
+
+  // Safety net: if we return to a completed puzzle without the win modal open, re-open it
+  useEffect(() => {
+    if (!state.gameOver || showStatsModal) return;
+    if (!state.grid || state.grid.length === 0) return;
+
+    const allFound = state.wordList.length > 0 && state.wordList.every(word => word.found);
+    setStatsModalIsWin(allFound);
+    setShowStatsModal(true);
+  }, [state.gameOver, state.grid?.length, state.wordList, showStatsModal, setStatsModalIsWin, setShowStatsModal]);
 
   // Use refs to track selection during drag without causing re-renders
   const selectedCellsRef = useRef<Set<string>>(new Set());
@@ -652,7 +756,7 @@ export default function PuzzleScreen() {
 
     // Update state with new genre and clear book/puzzle index
     setState(prevState => ({
-      ...prevState,
+      ...selectGenre(prevState, newGenre),
       currentGenre: newGenre,
       currentBook: '',
       currentPuzzleIndex: -1,
@@ -670,9 +774,12 @@ export default function PuzzleScreen() {
   }, [setState, loadSequential]);
 
   const handleCloseGenreCompletionModal = useCallback(() => {
-    setShowGenreCompletionModal(false);
+    flushSync(() => {
+      setLoading('navigatingToLibrary', true);
+      setShowGenreCompletionModal(false);
+    });
     router.push('/library');
-  }, [router]);
+  }, [router, setLoading]);
 
   // Handle Escape key to pause/resume
   useEffect(() => {
@@ -905,12 +1012,14 @@ export default function PuzzleScreen() {
 
               <BookOfPassageButton
                 className={styles.pauseBtn}
+                notificationClassName={notificationStyles.storyNotificationGlowSubtle}
                 onClick={handleBackToBookOfPassage}
                 data-testid="back-to-book-btn"
               />
 
               <LibraryButton
                 className={styles.pauseBtn}
+                notificationClassName={notificationStyles.storyNotificationGlowSubtle}
                 onClick={handleBackToLibrary}
                 data-testid="back-to-library-btn"
               >
@@ -943,6 +1052,7 @@ export default function PuzzleScreen() {
         mode={state.gameMode}
         isWin={statsModalIsWin}
         sessionStats={state.sessionStats}
+        narrativeOrchestration={state.narrativeOrchestration}
         onNextPuzzle={(state.gameMode === 'puzzle-only' || state.gameMode === 'story') ? handleNextPuzzle : undefined}
         onRestartPuzzle={handleRestartPuzzle}
         onStartFreshRun={state.gameMode === 'beat-the-clock' ? handleStartFreshRun : undefined}
@@ -956,7 +1066,7 @@ export default function PuzzleScreen() {
         isOpen={showGenreCompletionModal}
         currentGenre={state.currentGenre}
         availableGenres={Object.keys(state.puzzles || {}).filter(
-          genre => state.puzzles[genre] && state.puzzles[genre].length > 0
+          genre => genre !== 'Kethaneum' && state.puzzles[genre] && state.puzzles[genre].length > 0
         )}
         onContinueSameGenre={handleContinueSameGenre}
         onSelectNewGenre={handleSelectNewGenre}

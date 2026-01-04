@@ -1,5 +1,7 @@
 # Story Progression System - Quick Start Guide
 
+> **Note**: This guide focuses on story beat advancement (hook → first_plot_point → climax). For the narrative orchestration system that coordinates story events, Kethaneum puzzles, and Book of Passage blurbs, see **[Narrative Orchestration](./NARRATIVE_ORCHESTRATION.md)**.
+
 ## 🚀 Getting Started in 3 Steps
 
 ### Step 1: Initialize the Systems
@@ -45,7 +47,7 @@ function YourMainComponent() {
 
 ### Step 2: Configure Your Story Rules
 
-Edit `/public/data/story-progression-config.json`:
+Edit `/public/data/config/story-progression-config.json`:
 
 ```json
 {
@@ -105,7 +107,7 @@ If conditions met:
 
 ### Files You'll Edit for Your Game
 
-1. **`/public/data/story-progression-config.json`** ⭐
+1. **`/public/data/config/story-progression-config.json`** ⭐
    - Story advancement rules
    - Music mappings
    - Event triggers

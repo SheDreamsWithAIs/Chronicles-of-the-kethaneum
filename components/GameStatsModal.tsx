@@ -3,7 +3,9 @@
 import { useRouter } from 'next/navigation';
 import { BookOfPassageButton } from '@/components/BookOfPassageButton';
 import { LibraryButton } from '@/components/LibraryButton';
-import type { SessionStats } from '@/lib/game/state';
+import notificationStyles from '@/styles/story-notification.module.css';
+import type { SessionStats, NarrativeOrchestrationState } from '@/lib/game/state';
+import { DEFAULT_NARRATIVE_CONFIG } from '@/lib/narrative/storyEventConfig';
 import styles from './GameStatsModal.module.css';
 
 export type GameMode = 'story' | 'puzzle-only' | 'beat-the-clock';
@@ -13,6 +15,7 @@ interface GameStatsModalProps {
   mode: GameMode;
   isWin: boolean;
   sessionStats: SessionStats | null;
+  narrativeOrchestration?: NarrativeOrchestrationState;
   onNextPuzzle?: () => void;
   onRestartPuzzle?: () => void;
   onStartFreshRun?: () => void;
@@ -32,6 +35,7 @@ export function GameStatsModal({
   mode,
   isWin,
   sessionStats,
+  narrativeOrchestration,
   onNextPuzzle,
   onRestartPuzzle,
   onStartFreshRun,
@@ -42,6 +46,25 @@ export function GameStatsModal({
   const router = useRouter();
 
   if (!isOpen) return null;
+
+  // Determine narrative message based on debt level (only for story mode wins)
+  const narrativeMessage = mode === 'story' && isWin && narrativeOrchestration
+    ? (() => {
+        const debt = narrativeOrchestration.storyEventDebt;
+        const config = DEFAULT_NARRATIVE_CONFIG;
+
+        if (!config.enableMessaging) return null;
+
+        if (debt >= config.storyEventDebtThreshold) {
+          // Debt threshold reached (Kethaneum blocked)
+          return config.messageTypes.debtThreshold;
+        } else if (debt === 1) {
+          // One uncompleted story event
+          return config.messageTypes.debtOne;
+        }
+        return null;
+      })()
+    : null;
 
   const handleMainMenu = () => {
     if (onMainMenu) {
@@ -105,6 +128,13 @@ export function GameStatsModal({
           </div>
         )}
 
+        {/* Narrative Debt Message - only shown in story mode on wins */}
+        {narrativeMessage && (
+          <div className={styles.narrativeMessage}>
+            <p className={styles.narrativeText}>{narrativeMessage}</p>
+          </div>
+        )}
+
         <div className={styles.buttonContainer}>
           {mode === 'puzzle-only' && (
             <>
@@ -151,12 +181,14 @@ export function GameStatsModal({
               {onBackToBookOfPassage && (
                 <BookOfPassageButton
                   className={styles.secondaryButton}
+                  notificationClassName={notificationStyles.storyNotificationGlowSubtle}
                   onClick={onBackToBookOfPassage}
                 />
               )}
               {onBackToLibrary && (
                 <LibraryButton
                   className={styles.secondaryButton}
+                  notificationClassName={notificationStyles.storyNotificationGlowSubtle}
                   onClick={onBackToLibrary}
                 >
                   Return to Library
